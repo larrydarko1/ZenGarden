@@ -1,0 +1,42 @@
+// Local-only storage API
+// Re-export all storage functions
+export {
+    // Auth
+    register,
+    login,
+    getCurrentUser,
+    updateUsername,
+    updatePassword,
+    deleteAccount,
+
+    // Settings
+    updateTheme,
+    updateLanguage,
+
+    // Meditations
+    createMeditation,
+    getMeditations,
+
+    // Emotions
+    saveEmotionLog,
+    getEmotionLogs,
+    getEmotionAnalytics,
+
+    // Gratitude
+    saveGratitudeEntry,
+    getGratitudeEntries,
+
+    // Eightfold Path
+    saveEightfoldPathLog,
+    getEightfoldPathLogs,
+    getEightfoldPathAnalytics,
+
+    // Storage mode management
+    getStorageMode,
+    switchStorageMode,
+    checkStorageAvailability,
+
+    // Data export/import
+    exportData,
+    importData
+} from './store';

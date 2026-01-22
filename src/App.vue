@@ -1,0 +1,69 @@
+<template>
+	<div id="app" :class="currentTheme">
+		<NetworkStatus />
+		<Home @meditation-active="onMeditationActive" @theme-changed="setThemeFromLogin" @language-changed="setLanguageFromLogin" @user-changed="onUserChanged" @open-settings="showSettings = true" />
+		<SettingsPopup v-if="showSettings" @close="showSettings = false" @theme-change="setTheme" @language-change="setLanguage" />
+	</div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Home from './components/Home.vue';
+import SettingsPopup from './components/SettingsPopup.vue';
+import NetworkStatus from './components/NetworkStatus.vue';
+import { updateTheme, updateLanguage } from './store';
+
+const { locale } = useI18n();
+
+// Theme starts as dark, will be set from user data after login
+const currentTheme = ref('dark');
+const meditationActive = ref(false); // controlled by Home.vue
+const showSettings = ref(false);
+const isAuthenticated = ref(false);
+
+function onMeditationActive(val: boolean) {
+	meditationActive.value = val;
+}
+
+function onUserChanged(user: any) {
+	isAuthenticated.value = !!user;
+}
+
+function setThemeFromLogin(theme: string) {
+	const themes = ['blue', 'white', 'dark'];
+	if (themes.includes(theme)) {
+		currentTheme.value = theme;
+	}
+}
+
+function setLanguageFromLogin(language: string) {
+	const languages = ['en', 'es', 'it', 'fr', 'de', 'pt', 'zh', 'ja'];
+	if (languages.includes(language)) {
+		locale.value = language;
+	}
+}
+
+async function setTheme(theme: string) {
+	const validTheme = theme as 'blue' | 'white' | 'dark';
+	currentTheme.value = validTheme;
+	try {
+		await updateTheme(validTheme);
+	} catch (err) {
+		console.error('Failed to update theme:', err);
+	}
+}
+
+async function setLanguage(language: string) {
+	const validLanguage = language as 'en' | 'es' | 'it' | 'fr' | 'de' | 'pt' | 'zh' | 'ja';
+	locale.value = validLanguage;
+	try {
+		await updateLanguage(validLanguage);
+	} catch (err) {
+		console.error('Failed to update language:', err);
+	}
+}
+</script>
+
+<style>
+</style>

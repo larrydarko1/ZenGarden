@@ -1,0 +1,564 @@
+{
+    "settings": {
+        "title": "設定",
+        "theme": "テーマ",
+        "language": "言語",
+        "themes": {
+            "blue": "ブルー",
+            "white": "ホワイト",
+            "dark": "ダーク"
+        },
+        "languages": {
+            "en": "English",
+            "es": "Español",
+            "it": "Italiano",
+            "fr": "Français",
+            "de": "Deutsch",
+            "pt": "Português",
+            "zh": "中文",
+            "ja": "日本語"
+        }
+    },
+    "header": {
+        "greeting": "こんにちは",
+        "breathe": "呼吸",
+        "emotions": "感情",
+        "eightfoldPath": "八正道",
+        "calendar": "カレンダー",
+        "gratitude": "感謝",
+        "philosophy": "哲学",
+        "logout": "ログアウト"
+    },
+    "meditation": {
+        "begin": "開始",
+        "stop": "停止",
+        "audio": {
+            "title": "オーディオ設定",
+            "track": "瞑想トラック",
+            "trackLabel": "トラック",
+            "silent": "無音",
+            "ambient": "環境音",
+            "none": "なし",
+            "rain": "雨",
+            "forest": "森",
+            "ocean": "海",
+            "whitenoise": "ホワイトノイズ",
+            "volume": "マスター音量"
+        },
+        "bell": {
+            "settings": "ベルの設定"
+        }
+    },
+    "philosophy": {
+        "title": "なぜ目標や連続記録がないのか？",
+        "subtitle": "禪の修行の考え方を理解する",
+        "practice": {
+            "title": "修行が道である",
+            "body": "禪において、瑁想は目的への手段ではありません—それ自体が目的です。修行の一瞬一瞬が完全で全体です。行くべき場所はなく、達成すべきことはありません。座るとき、あなたはすでにそこにいるのです。"
+        },
+        "noGoals": {
+            "title": "目標はエゴを強化する",
+            "body": "「X回瑁想する」や「Y分間達成する」などの目標を設定することは、何かを達成しなければならない分離した自己の幻想を強めます。これは目標が達成されないときに苦（ドゥッカ）を生み、達成されると執着を生みます。"
+        },
+        "noStreaks": {
+            "title": "連続記録は不安を生む",
+            "body": "100日間の連続記録はモチベーションになるように思えますが、ストレスの原因になります。1日逃すと失敗のように感じます。これは、手放すことであり、達成に執着することではない修行の精神に矛盾します。"
+        },
+        "observation": {
+            "title": "自己観察を支援します",
+            "body": "ここで見る洞察—感情の相関、法の省察—は、得点ではなく理解のためのツールです。判断なしにパターンを観察することを助け、達成ではなく気づきをサポートします。"
+        },
+        "quote": {
+            "text": "悟りの前も後も、薪を割り水を汲む。",
+            "author": "— 禪の論語"
+        }
+    },
+    "auth": {
+        "welcome": "ZenGardenへようこそ",
+        "username": "ユーザー名",
+        "password": "パスワード",
+        "login": "ログイン",
+        "register": "登録",
+        "switchToRegister": "アカウントをお持ちでない？登録",
+        "switchToLogin": "すでにアカウントをお持ちですか？ログイン",
+        "forgotPassword": "パスワードをお忘れですか？",
+        "recoverPassword": "パスワードを回復",
+        "recoveryInfo": "ユーザー名とリカバリコードのいずれかを入力してパスワードをリセットしてください。",
+        "recoveryCode": "リカバリコード",
+        "newPassword": "新しいパスワード",
+        "confirmNewPassword": "新しいパスワードを確認",
+        "resetPassword": "パスワードをリセット",
+        "backToLogin": "ログインに戻る",
+        "passwordResetSuccess": "パスワードリセット完了！",
+        "passwordResetMessage": "パスワードが正常にリセットされました。新しいパスワードでログインできます。",
+        "goToLogin": "ログインへ"
+    },
+    "account": {
+        "title": "アカウント設定",
+        "changeUsername": "ユーザー名を変更",
+        "newUsernamePlaceholder": "新しいユーザー名",
+        "updateUsername": "ユーザー名を更新",
+        "usernameUpdated": "ユーザー名が正常に更新されました",
+        "usernameUpdateFailed": "ユーザー名の更新に失敗しました",
+        "changePassword": "パスワードを変更",
+        "currentPasswordPlaceholder": "現在のパスワード",
+        "newPasswordPlaceholder": "新しいパスワード",
+        "confirmPasswordPlaceholder": "新しいパスワードを確認",
+        "updatePassword": "パスワードを更新",
+        "passwordUpdated": "パスワードが正常に更新されました",
+        "passwordUpdateFailed": "パスワードの更新に失敗しました",
+        "passwordsDoNotMatch": "パスワードが一致しません",
+        "passwordTooShort": "パスワードは少なくとも6文字必要です",
+        "recoveryCodes": "リカバリコード",
+        "recoveryCodesDescription": "リカバリコードを使用すると、パスワードを忘れた場合にリセットできます。12個の一度だけ使用できるコードを生成し、安全な場所に保管してください。",
+        "totalCodes": "総コード数",
+        "usedCodes": "使用済みコード",
+        "remainingCodes": "残りコード",
+        "generateCodes": "リカバリコードを生成",
+        "regenerateCodes": "リカバリコードを再生成",
+        "generateCodesWarning": "警告：新しいコードを生成すると、以前のすべてのコードが無効になります。",
+        "confirmPasswordToGenerate": "コードを生成するにはパスワードを入力してください",
+        "confirm": "確認",
+        "recoveryCodesFailed": "リカバリコードの生成に失敗しました",
+        "saveCodesWarning": "重要：今すぐこれらのコードを保存してください！",
+        "saveCodesDescription": "これらのコードを再度表示することはできません。パスワードマネージャーなどの安全な場所に保管してください。",
+        "copyAll": "すべてコピー",
+        "copied": "コピーしました！",
+        "iHaveSavedCodes": "コードを保存しました",
+        "deleteAccount": "アカウントを削除",
+        "deleteWarning": "この操作は永久的であり、元に戻すことはできません。瞳想や感情ログを含むすべてのデータが削除されます。",
+        "deleteAccountButton": "アカウントを削除する",
+        "confirmPasswordToDelete": "確認のためパスワードを入力してください",
+        "confirmDelete": "はい、アカウントを削除します",
+        "cancel": "キャンセル",
+        "deleteFailed": "アカウントの削除に失敗しました",
+        "exportData": "データのエクスポート",
+        "exportDescription": "すべての瞑想、感情、感謝のデータをダウンロードします。",
+        "exportJSON": "JSONとしてエクスポート",
+        "exportCSV": "CSVとしてエクスポート",
+        "exportSuccess": "データが正常にエクスポートされました",
+        "exportFailed": "データのエクスポートに失敗しました"
+    },
+    "notes": {
+        "title": "セッション完了",
+        "subtitle": "瞑想はいかがでしたか？",
+        "placeholder": "考えを書いてください...",
+        "save": "保存",
+        "skip": "スキップ"
+    },
+    "breathing": {
+        "title": "呼吸エクササイズ",
+        "box": "ボックス呼吸",
+        "deep": "深呼吸",
+        "calm": "穏やかな呼吸",
+        "fourSevenEight": "4-7-8呼吸",
+        "energizing": "活力呼吸",
+        "start": "開始",
+        "stop": "停止",
+        "close": "閉じる",
+        "cycle": "サイクル",
+        "breatheIn": "吸う",
+        "hold": "止める",
+        "breatheOut": "吐く",
+        "descriptions": {
+            "box": "均等な部分：吸う、止める、吐く、止める (4-4-4-4)",
+            "fourSevenEight": "落ち着きの技法：吸う4、止める7、吐く8",
+            "deep": "長くゆっくりとした呼吸：吸う6、吐く6",
+            "energizing": "速い吸気、長い呼気：2入り4出"
+        }
+    },
+    "calendar": {
+        "title": "瞑想カレンダー",
+        "minutes": "分",
+        "close": "閉じる",
+        "notes": "メモ",
+        "months": [
+            "1月",
+            "2月",
+            "3月",
+            "4月",
+            "5月",
+            "6月",
+            "7月",
+            "8月",
+            "9月",
+            "10月",
+            "11月",
+            "12月"
+        ],
+        "weekdays": [
+            "日",
+            "月",
+            "火",
+            "水",
+            "木",
+            "金",
+            "土"
+        ]
+    },
+    "emotions": {
+        "title": "毎日の感情トラッカー",
+        "positive": "ポジティブ",
+        "negative": "ネガティブ",
+        "pnRatio": "P/N比率",
+        "positiveTab": "ポジティブ感情",
+        "negativeTab": "ネガティブ感情",
+        "analytics": "分析",
+        "saving": "保存中...",
+        "saved": "保存済み ✓",
+        "loading": "読み込み中...",
+        "loadingAnalytics": "分析を読み込み中",
+        "totalDaysTracked": "追跡日数",
+        "avgPNRatio": "平均P/N比率",
+        "emotionDiversity": "ユニーク感情",
+        "daysSummary": "感情のバランス",
+        "positiveDays": "ポジティブな日 (P/N ≥ 0.5)",
+        "negativeDays": "ネガティブな日 (P/N < 0.5)",
+        "topEmotions": "最も頻繁な感情",
+        "trendChart": "P/N比率のトレンド",
+        "past30Days": "過去30日",
+        "past90Days": "過去90日",
+        "list": {
+            "Joy": {
+                "name": "喜び",
+                "description": "純粋な幸せと喜び"
+            },
+            "Happiness": {
+                "name": "幸福",
+                "description": "全般的な幸福の状態"
+            },
+            "Contentment": {
+                "name": "満足",
+                "description": "人生への平和な満足感"
+            },
+            "Satisfaction": {
+                "name": "充足",
+                "description": "達成からの充実感"
+            },
+            "Pride": {
+                "name": "誇り",
+                "description": "自分の成果への肯定的な認識"
+            },
+            "Gratitude": {
+                "name": "感謝",
+                "description": "持っているものへの感謝"
+            },
+            "Love": {
+                "name": "愛",
+                "description": "他者への深い愛情とケア"
+            },
+            "Affection": {
+                "name": "愛情",
+                "description": "誰かへの温かさと優しさ"
+            },
+            "Compassion": {
+                "name": "思いやり",
+                "description": "共感と他者を助けたい気持ち"
+            },
+            "Excitement": {
+                "name": "興奮",
+                "description": "活気づいた期待感"
+            },
+            "Enthusiasm": {
+                "name": "熱意",
+                "description": "何かへの情熱的な関与"
+            },
+            "Optimism": {
+                "name": "楽観",
+                "description": "未来への希望に満ちた見通し"
+            },
+            "Hope": {
+                "name": "希望",
+                "description": "良いことが起こるという信念"
+            },
+            "Relief": {
+                "name": "安堵",
+                "description": "緊張や心配からの解放"
+            },
+            "Amusement": {
+                "name": "愉快",
+                "description": "面白いまたは楽しいと思うこと"
+            },
+            "Delight": {
+                "name": "歓喜",
+                "description": "突然の喜びや楽しさ"
+            },
+            "Inspiration": {
+                "name": "インスピレーション",
+                "description": "創造や行動への動機づけ"
+            },
+            "Confidence": {
+                "name": "自信",
+                "description": "自分の能力への信念"
+            },
+            "Calm": {
+                "name": "穏やか",
+                "description": "平和でリラックスした状態"
+            },
+            "Serenity": {
+                "name": "静寂",
+                "description": "深い内なる平和"
+            },
+            "Peaceful": {
+                "name": "平和",
+                "description": "対立や乱れの不在"
+            },
+            "Accomplished": {
+                "name": "達成感",
+                "description": "完了または成功の感覚"
+            },
+            "Validated": {
+                "name": "認められた",
+                "description": "認識され肯定されていると感じる"
+            },
+            "Accepted": {
+                "name": "受け入れられた",
+                "description": "歓迎され所属していると感じる"
+            },
+            "Belonging": {
+                "name": "所属",
+                "description": "グループやコミュニティとのつながり"
+            },
+            "Curiosity": {
+                "name": "好奇心",
+                "description": "学習や探求への興味"
+            },
+            "Wonder": {
+                "name": "不思議",
+                "description": "注目すべきものへの驚嘆"
+            },
+            "Awe": {
+                "name": "畏敬",
+                "description": "圧倒的な驚きの感覚"
+            },
+            "Sadness": {
+                "name": "悲しみ",
+                "description": "深い悲しみや不幸"
+            },
+            "Grief": {
+                "name": "悲嘆",
+                "description": "喪失からの激しい痛み"
+            },
+            "Despair": {
+                "name": "絶望",
+                "description": "希望と動機の喪失"
+            },
+            "Loneliness": {
+                "name": "孤独",
+                "description": "孤立の痛みを伴う感情"
+            },
+            "Anger": {
+                "name": "怒り",
+                "description": "強い不快感や敵意"
+            },
+            "Rage": {
+                "name": "激怒",
+                "description": "激しく制御不能な怒り"
+            },
+            "Frustration": {
+                "name": "欲求不満",
+                "description": "目標が阻まれることへのいらだち"
+            },
+            "Irritation": {
+                "name": "いらだち",
+                "description": "軽度の迷惑や焦り"
+            },
+            "Fear": {
+                "name": "恐怖",
+                "description": "危険や害への恐れ"
+            },
+            "Anxiety": {
+                "name": "不安",
+                "description": "不確実な結果への心配"
+            },
+            "Dread": {
+                "name": "恐れ",
+                "description": "特定のものへの激しい恐怖"
+            },
+            "Panic": {
+                "name": "パニック",
+                "description": "突然の圧倒的な恐怖"
+            },
+            "Shame": {
+                "name": "恥",
+                "description": "自分自身への深い恥ずかしさ"
+            },
+            "Guilt": {
+                "name": "罪悪感",
+                "description": "間違ったことをしたことへの後悔"
+            },
+            "Embarrassment": {
+                "name": "恥ずかしさ",
+                "description": "社交場面での自意識"
+            },
+            "Humiliation": {
+                "name": "屈辱",
+                "description": "公に貶められたと感じる"
+            },
+            "Disgust": {
+                "name": "嫌悪",
+                "description": "嫌悪や強い不承認"
+            },
+            "Contempt": {
+                "name": "軽蔑",
+                "description": "誰かが自分より下だと感じる"
+            },
+            "Jealousy": {
+                "name": "嫉妬",
+                "description": "大切なものを失う恐れ"
+            },
+            "Envy": {
+                "name": "羨望",
+                "description": "他人が持っているものへの欲望"
+            },
+            "Resentment": {
+                "name": "憤り",
+                "description": "不公平な扱いへの苦い怒り"
+            },
+            "Bitterness": {
+                "name": "苦々しさ",
+                "description": "持続的な怒りと失望"
+            },
+            "Regret": {
+                "name": "後悔",
+                "description": "違うことをしていればと願う"
+            },
+            "Disappointment": {
+                "name": "失望",
+                "description": "期待が満たされないことからの落胆"
+            },
+            "Discouragement": {
+                "name": "落胆",
+                "description": "動機や自信の喪失"
+            },
+            "Helplessness": {
+                "name": "無力感",
+                "description": "状況を変えられないと感じる"
+            },
+            "Hopelessness": {
+                "name": "絶望感",
+                "description": "物事が改善しないという信念"
+            },
+            "Inadequacy": {
+                "name": "不十分",
+                "description": "十分でないと感じる"
+            },
+            "Insecurity": {
+                "name": "不安定",
+                "description": "自分の価値や能力への疑念"
+            },
+            "Vulnerability": {
+                "name": "脆弱性",
+                "description": "露出されているか危険にさらされていると感じる"
+            },
+            "Stress": {
+                "name": "ストレス",
+                "description": "圧力や要求からの緊張"
+            },
+            "Tension": {
+                "name": "緊張",
+                "description": "身体的または精神的な緊張"
+            },
+            "Worry": {
+                "name": "心配",
+                "description": "何かについての不安な懸念"
+            },
+            "Doubt": {
+                "name": "疑念",
+                "description": "自分自身や決定についての不確実性"
+            },
+            "Confusion": {
+                "name": "混乱",
+                "description": "精神的な混乱や不確実性"
+            },
+            "Overwhelm": {
+                "name": "圧倒",
+                "description": "多すぎるものに押しつぶされる感覚"
+            },
+            "Betrayal": {
+                "name": "裏切り",
+                "description": "信頼が破られたことからの痛み"
+            },
+            "Hurt": {
+                "name": "傷つき",
+                "description": "他人の行動からの感情的な痛み"
+            },
+            "Rejection": {
+                "name": "拒絶",
+                "description": "排除されたり望まれていないことからの痛み"
+            }
+        }
+    },
+    "eightfold": {
+        "title": "八正道",
+        "completed": "完了",
+        "progress": "進捗",
+        "loading": "読み込み中",
+        "saving": "保存中...",
+        "saved": "保存済み ✓",
+        "notesPlaceholder": "今日この道をどのように歩んだかメモを追加...",
+        "paths": {
+            "rightView": {
+                "name": "正見",
+                "description": "四諦を理解し、現実をありのままに見る",
+                "questions": "今日、状況を明確に見ましたか？苦しみとその原因を認識しましたか？"
+            },
+            "rightIntention": {
+                "name": "正思惟",
+                "description": "慈悲、善意、無害の思考を育む",
+                "questions": "今日、私の意図は純粋でしたか？他者と自分に幸福を願いましたか？"
+            },
+            "rightSpeech": {
+                "name": "正語",
+                "description": "真実、親切、マインドフルに話し、陰口や厳しい言葉を避ける",
+                "questions": "真実を話しましたか？陰口、嘘、人を傷つける言葉を避けましたか？"
+            },
+            "rightAction": {
+                "name": "正業",
+                "description": "倫理的に行動し、すべての生き物に害を与えないようにする",
+                "questions": "誠実に行動しましたか？盗み、害、信頼を裏切ることを避けましたか？"
+            },
+            "rightLivelihood": {
+                "name": "正命",
+                "description": "他人や自分を傷つけない方法で生計を立てる",
+                "questions": "私の仕事は肯定的に貢献していますか？誠実に、倫理的に稼いでいますか？"
+            },
+            "rightEffort": {
+                "name": "正精進",
+                "description": "ポジティブな心の状態を育み、不健全なものを防ぐ",
+                "questions": "否定的な思考を手放しましたか？肯定的な資質を育てましたか？"
+            },
+            "rightMindfulness": {
+                "name": "正念",
+                "description": "身体、感情、心、現象の現在の瞬間の気づきを維持する",
+                "questions": "今日、現在にいましたか？自分の思考、感情、行動に気づきましたか？"
+            },
+            "rightConcentration": {
+                "name": "正定",
+                "description": "瞑想の実践を通じて深い集中を養う",
+                "questions": "瞑想または深い集中を練習しましたか？内なる平和を育てましたか？"
+            }
+        }
+    },
+    "gratitude": {
+        "title": "感謝の日記",
+        "prompt": "今日は何に感謝していますか？",
+        "placeholder": "感謝していることを書いてください...",
+        "save": "エントリを保存",
+        "saving": "保存中...",
+        "saved": "保存されました！",
+        "recentEntries": "最近のエントリ"
+    },
+    "phrases": [
+        "平和を吸い込み、緊張を吐き出す。",
+        "今この瞬間が私たちが本当に持っているすべてです。",
+        "静けさは明晰さへの鍵です。",
+        "思考を空の雲のように通り過ぎさせましょう。",
+        "静かになるほど、より多くを聞くことができます。",
+        "水のように流れ、着実で澄んでいます。",
+        "静けさの中で、世界は変容します。",
+        "手放して、ただ存在しましょう。",
+        "バランスは見つけるものではなく、創り出すものです。",
+        "平和は内から来ます。"
+    ]
+}

@@ -1,0 +1,564 @@
+{
+    "settings": {
+        "title": "设置",
+        "theme": "主题",
+        "language": "语言",
+        "themes": {
+            "blue": "蓝色",
+            "white": "白色",
+            "dark": "深色"
+        },
+        "languages": {
+            "en": "English",
+            "es": "Español",
+            "it": "Italiano",
+            "fr": "Français",
+            "de": "Deutsch",
+            "pt": "Português",
+            "zh": "中文",
+            "ja": "日本語"
+        }
+    },
+    "header": {
+        "greeting": "你好",
+        "breathe": "呼吸",
+        "emotions": "情绪",
+        "eightfoldPath": "八正道",
+        "calendar": "日历",
+        "gratitude": "感恩",
+        "philosophy": "哲学",
+        "logout": "登出"
+    },
+    "meditation": {
+        "begin": "开始",
+        "stop": "停止",
+        "audio": {
+            "title": "音频设置",
+            "track": "冥想音轨",
+            "trackLabel": "音轨",
+            "silent": "静音",
+            "ambient": "环境音",
+            "none": "无",
+            "rain": "雨声",
+            "forest": "森林",
+            "ocean": "海洋",
+            "whitenoise": "白噪音",
+            "volume": "主音量"
+        },
+        "bell": {
+            "settings": "钟声设置"
+        }
+    },
+    "philosophy": {
+        "title": "为什么没有目标或连续记录？",
+        "subtitle": "理解禅宗修行的方法",
+        "practice": {
+            "title": "修行即是道路",
+            "body": "在禅宗中，禅修不是达到目的的手段—它本身就是目的。每一个修行的片刻都是完整的。没有要去的地方，没有要实现的目标。当你坐下时，你已经在那里了。"
+        },
+        "noGoals": {
+            "title": "目标强化我执",
+            "body": "设定“禅俪X次”或“达到Y分钟”等目标会强化必须完成事情的分离自我的幻觉。这在未达成目标时产生苦（dukkha），在达成时产生执着。"
+        },
+        "noStreaks": {
+            "title": "连续记录产生焦虑",
+            "body": "100天的连续记录似乎很激励人，但它变成了压力来源。错过一天感觉像失败。这与修行的精神相矛盾，修行是关于放下，而不是执着于成就。"
+        },
+        "observation": {
+            "title": "我们支持自我观察",
+            "body": "你在这里看到的洞察—情绪相关性、佛法反思—是用于理解的工具，而不是计分。它们帮助你在没有判断的情况下观察模式，支持觉知而不是成就。"
+        },
+        "quote": {
+            "text": "悟道前，砌柴挑水。悟道后，砌柴挑水。",
+            "author": "— 禅宗谚语"
+        }
+    },
+    "auth": {
+        "welcome": "欢迎来到ZenGarden",
+        "username": "用户名",
+        "password": "密码",
+        "login": "登录",
+        "register": "注册",
+        "switchToRegister": "没有账户？注册",
+        "switchToLogin": "已有账户？登录",
+        "forgotPassword": "忘记密码？",
+        "recoverPassword": "恢复密码",
+        "recoveryInfo": "输入您的用户名和一个恢复代码来重置密码。",
+        "recoveryCode": "恢复代码",
+        "newPassword": "新密码",
+        "confirmNewPassword": "确认新密码",
+        "resetPassword": "重置密码",
+        "backToLogin": "返回登录",
+        "passwordResetSuccess": "密码重置成功！",
+        "passwordResetMessage": "您的密码已成功重置。现在您可以使用新密码登录。",
+        "goToLogin": "去登录"
+    },
+    "account": {
+        "title": "账户设置",
+        "changeUsername": "更改用户名",
+        "newUsernamePlaceholder": "新用户名",
+        "updateUsername": "更新用户名",
+        "usernameUpdated": "用户名更新成功",
+        "usernameUpdateFailed": "用户名更新失败",
+        "changePassword": "更改密码",
+        "currentPasswordPlaceholder": "当前密码",
+        "newPasswordPlaceholder": "新密码",
+        "confirmPasswordPlaceholder": "确认新密码",
+        "updatePassword": "更新密码",
+        "passwordUpdated": "密码更新成功",
+        "passwordUpdateFailed": "密码更新失败",
+        "passwordsDoNotMatch": "密码不匹配",
+        "passwordTooShort": "密码必须至少为6个字符",
+        "recoveryCodes": "恢复代码",
+        "recoveryCodesDescription": "恢复代码允许您在忘记密码时重置密码。生成12个一次性使用的代码并将其存储在安全的地方。",
+        "totalCodes": "总代码数",
+        "usedCodes": "已使用代码",
+        "remainingCodes": "剩余代码",
+        "generateCodes": "生成恢复代码",
+        "regenerateCodes": "重新生成恢复代码",
+        "generateCodesWarning": "警告：生成新代码将使所有以前的代码无效。",
+        "confirmPasswordToGenerate": "输入您的密码以生成代码",
+        "confirm": "确认",
+        "recoveryCodesFailed": "生成恢复代码失败",
+        "saveCodesWarning": "重要：现在保存这些代码！",
+        "saveCodesDescription": "您将无法再次查看这些代码。请将它们存储在安全的地方，如密码管理器。",
+        "copyAll": "全部复制",
+        "copied": "已复制！",
+        "iHaveSavedCodes": "我已保存我的代码",
+        "deleteAccount": "删除账户",
+        "deleteWarning": "此操作是永久性的，无法撤销。您的所有数据（包括冥想和情绪记录）将被删除。",
+        "deleteAccountButton": "删除我的账户",
+        "confirmPasswordToDelete": "输入您的密码以确认",
+        "confirmDelete": "是的，删除我的账户",
+        "cancel": "取消",
+        "deleteFailed": "删除账户失败",
+        "exportData": "导出数据",
+        "exportDescription": "下载您的所有冥想、情绪和感恩数据。",
+        "exportJSON": "导出为JSON",
+        "exportCSV": "导出为CSV",
+        "exportSuccess": "数据导出成功",
+        "exportFailed": "数据导出失败"
+    },
+    "notes": {
+        "title": "会话完成",
+        "subtitle": "你的冥想如何？",
+        "placeholder": "写下你的想法...",
+        "save": "保存",
+        "skip": "跳过"
+    },
+    "breathing": {
+        "title": "呼吸练习",
+        "box": "方框呼吸",
+        "deep": "深呼吸",
+        "calm": "平静呼吸",
+        "fourSevenEight": "4-7-8呼吸",
+        "energizing": "活力呼吸",
+        "start": "开始",
+        "stop": "停止",
+        "close": "关闭",
+        "cycle": "循环",
+        "breatheIn": "吸气",
+        "hold": "屏住",
+        "breatheOut": "呼气",
+        "descriptions": {
+            "box": "均等部分：吸气、屏住、呼气、屏住 (4-4-4-4)",
+            "fourSevenEight": "平静技巧：吸气4、屏住7、呼气8",
+            "deep": "长而缓慢的呼吸：吸气6、呼气6",
+            "energizing": "快速吸气，较长呼气：2进4出"
+        }
+    },
+    "calendar": {
+        "title": "冥想日历",
+        "minutes": "分钟",
+        "close": "关闭",
+        "notes": "笔记",
+        "months": [
+            "一月",
+            "二月",
+            "三月",
+            "四月",
+            "五月",
+            "六月",
+            "七月",
+            "八月",
+            "九月",
+            "十月",
+            "十一月",
+            "十二月"
+        ],
+        "weekdays": [
+            "日",
+            "一",
+            "二",
+            "三",
+            "四",
+            "五",
+            "六"
+        ]
+    },
+    "emotions": {
+        "title": "每日情绪跟踪器",
+        "positive": "积极",
+        "negative": "消极",
+        "pnRatio": "P/N 比率",
+        "positiveTab": "积极情绪",
+        "negativeTab": "消极情绪",
+        "analytics": "分析",
+        "saving": "保存中...",
+        "saved": "已保存 ✓",
+        "loading": "加载中...",
+        "loadingAnalytics": "加载分析",
+        "totalDaysTracked": "跟踪天数",
+        "avgPNRatio": "平均 P/N 比率",
+        "emotionDiversity": "独特情绪",
+        "daysSummary": "情绪平衡",
+        "positiveDays": "积极天 (P/N ≥ 0.5)",
+        "negativeDays": "消极天 (P/N < 0.5)",
+        "topEmotions": "最常见情绪",
+        "trendChart": "P/N 比率趋势",
+        "past30Days": "过去30天",
+        "past90Days": "过去90天",
+        "list": {
+            "Joy": {
+                "name": "喜悦",
+                "description": "纯粹的快乐和愉悦"
+            },
+            "Happiness": {
+                "name": "幸福",
+                "description": "整体的幸福状态"
+            },
+            "Contentment": {
+                "name": "满足",
+                "description": "对生活的平静满足"
+            },
+            "Satisfaction": {
+                "name": "满意",
+                "description": "成就带来的满足感"
+            },
+            "Pride": {
+                "name": "自豪",
+                "description": "对成就的积极认可"
+            },
+            "Gratitude": {
+                "name": "感激",
+                "description": "对所拥有的感恩"
+            },
+            "Love": {
+                "name": "爱",
+                "description": "对他人的深厚感情和关怀"
+            },
+            "Affection": {
+                "name": "爱慕",
+                "description": "对某人的温暖和柔情"
+            },
+            "Compassion": {
+                "name": "同情",
+                "description": "同理心和帮助他人的愿望"
+            },
+            "Excitement": {
+                "name": "兴奋",
+                "description": "充满活力的期待"
+            },
+            "Enthusiasm": {
+                "name": "热情",
+                "description": "对某事的激情投入"
+            },
+            "Optimism": {
+                "name": "乐观",
+                "description": "对未来充满希望的展望"
+            },
+            "Hope": {
+                "name": "希望",
+                "description": "相信好事会发生"
+            },
+            "Relief": {
+                "name": "放松",
+                "description": "从紧张或担忧中释放"
+            },
+            "Amusement": {
+                "name": "愉快",
+                "description": "发现有趣或娱乐的东西"
+            },
+            "Delight": {
+                "name": "欢喜",
+                "description": "突然的喜悦或快乐"
+            },
+            "Inspiration": {
+                "name": "灵感",
+                "description": "创造或行动的动力"
+            },
+            "Confidence": {
+                "name": "自信",
+                "description": "相信自己的能力"
+            },
+            "Calm": {
+                "name": "平静",
+                "description": "平和放松的状态"
+            },
+            "Serenity": {
+                "name": "宁静",
+                "description": "深层的内心平和"
+            },
+            "Peaceful": {
+                "name": "和平",
+                "description": "没有冲突或干扰"
+            },
+            "Accomplished": {
+                "name": "成就",
+                "description": "完成或成功的感觉"
+            },
+            "Validated": {
+                "name": "被认可",
+                "description": "感到被认可和肯定"
+            },
+            "Accepted": {
+                "name": "被接纳",
+                "description": "感到被欢迎和归属"
+            },
+            "Belonging": {
+                "name": "归属感",
+                "description": "与群体或社区的联系"
+            },
+            "Curiosity": {
+                "name": "好奇",
+                "description": "对学习或探索的兴趣"
+            },
+            "Wonder": {
+                "name": "惊奇",
+                "description": "对非凡事物的敬畏"
+            },
+            "Awe": {
+                "name": "敬畏",
+                "description": "压倒性的惊叹感"
+            },
+            "Sadness": {
+                "name": "悲伤",
+                "description": "深深的悲痛或不快"
+            },
+            "Grief": {
+                "name": "悲痛",
+                "description": "失去带来的强烈痛苦"
+            },
+            "Despair": {
+                "name": "绝望",
+                "description": "失去希望和动力"
+            },
+            "Loneliness": {
+                "name": "孤独",
+                "description": "痛苦的孤立感"
+            },
+            "Anger": {
+                "name": "愤怒",
+                "description": "强烈的不满或敌意"
+            },
+            "Rage": {
+                "name": "暴怒",
+                "description": "强烈、无法控制的愤怒"
+            },
+            "Frustration": {
+                "name": "挫折",
+                "description": "目标受阻的烦恼"
+            },
+            "Irritation": {
+                "name": "烦躁",
+                "description": "轻微的烦恼或不耐烦"
+            },
+            "Fear": {
+                "name": "恐惧",
+                "description": "对危险或伤害的恐惧"
+            },
+            "Anxiety": {
+                "name": "焦虑",
+                "description": "对不确定结果的担忧"
+            },
+            "Dread": {
+                "name": "恐惧",
+                "description": "对特定事物的强烈恐惧"
+            },
+            "Panic": {
+                "name": "恐慌",
+                "description": "突然压倒性的恐惧"
+            },
+            "Shame": {
+                "name": "羞耻",
+                "description": "对自己的深深尴尬"
+            },
+            "Guilt": {
+                "name": "内疚",
+                "description": "对做错事的悔恨"
+            },
+            "Embarrassment": {
+                "name": "尴尬",
+                "description": "在社交场合的自我意识"
+            },
+            "Humiliation": {
+                "name": "羞辱",
+                "description": "感到公开被贬低"
+            },
+            "Disgust": {
+                "name": "厌恶",
+                "description": "反感或强烈不满"
+            },
+            "Contempt": {
+                "name": "轻蔑",
+                "description": "感觉某人低于你"
+            },
+            "Jealousy": {
+                "name": "嫉妒",
+                "description": "害怕失去珍贵的东西"
+            },
+            "Envy": {
+                "name": "羡慕",
+                "description": "渴望别人拥有的东西"
+            },
+            "Resentment": {
+                "name": "怨恨",
+                "description": "对不公平待遇的苦涩愤怒"
+            },
+            "Bitterness": {
+                "name": "苦涩",
+                "description": "持续的愤怒和失望"
+            },
+            "Regret": {
+                "name": "后悔",
+                "description": "希望做了不同的事"
+            },
+            "Disappointment": {
+                "name": "失望",
+                "description": "期望未满足的失落"
+            },
+            "Discouragement": {
+                "name": "沮丧",
+                "description": "失去动力或信心"
+            },
+            "Helplessness": {
+                "name": "无助",
+                "description": "感到无法改变情况"
+            },
+            "Hopelessness": {
+                "name": "绝望",
+                "description": "相信事情不会好转"
+            },
+            "Inadequacy": {
+                "name": "不足",
+                "description": "感觉不够好"
+            },
+            "Insecurity": {
+                "name": "不安全",
+                "description": "对自己的价值或能力的怀疑"
+            },
+            "Vulnerability": {
+                "name": "脆弱",
+                "description": "感到暴露或处于危险"
+            },
+            "Stress": {
+                "name": "压力",
+                "description": "来自压力或需求的紧张"
+            },
+            "Tension": {
+                "name": "紧张",
+                "description": "身体或精神的紧张"
+            },
+            "Worry": {
+                "name": "担忧",
+                "description": "对某事的焦虑关注"
+            },
+            "Doubt": {
+                "name": "怀疑",
+                "description": "对自己或决定的不确定"
+            },
+            "Confusion": {
+                "name": "困惑",
+                "description": "精神迷失或不确定"
+            },
+            "Overwhelm": {
+                "name": "不知所措",
+                "description": "感到被太多事情淹没"
+            },
+            "Betrayal": {
+                "name": "背叛",
+                "description": "信任破裂的痛苦"
+            },
+            "Hurt": {
+                "name": "受伤",
+                "description": "他人行为造成的情感痛苦"
+            },
+            "Rejection": {
+                "name": "拒绝",
+                "description": "被排除或不受欢迎的痛苦"
+            }
+        }
+    },
+    "eightfold": {
+        "title": "八正道",
+        "completed": "已完成",
+        "progress": "进度",
+        "loading": "加载中",
+        "saving": "保存中...",
+        "saved": "已保存 ✓",
+        "notesPlaceholder": "添加关于您今天如何遵循此道路的笔记...",
+        "paths": {
+            "rightView": {
+                "name": "正见",
+                "description": "理解四圣谛，如实见到真实",
+                "questions": "今天我是否清楚地看待情况？我是否认识到了苦难及其原因？"
+            },
+            "rightIntention": {
+                "name": "正思维",
+                "description": "培养慈悲、善意和无害的思想",
+                "questions": "今天我的意图是否纯正？我是否为他人和自己祈愿？"
+            },
+            "rightSpeech": {
+                "name": "正语",
+                "description": "说真话、说善语、说正念话，不说闲话或恶语",
+                "questions": "我是否说了真话？我是否避免了闲话、谎言或伤人的话？"
+            },
+            "rightAction": {
+                "name": "正业",
+                "description": "以道德行事，避免伤害一切众生",
+                "questions": "我是否诚实地行事？我是否避免了偷盗、伤害或背信弃义？"
+            },
+            "rightLivelihood": {
+                "name": "正命",
+                "description": "以不伤害他人或自己的方式谋生",
+                "questions": "我的工作是否积极贡献？我是否诚实合乎道德地谋生？"
+            },
+            "rightEffort": {
+                "name": "正精进",
+                "description": "培养积极的心态，防止不健康的心态",
+                "questions": "我是否放下了消极思想？我是否培养了积极的品质？"
+            },
+            "rightMindfulness": {
+                "name": "正念",
+                "description": "保持对身体、感觉、心念和现象的当下觉知",
+                "questions": "今天我是否保持了当下？我是否注意到了我的思想、感受和行为？"
+            },
+            "rightConcentration": {
+                "name": "正定",
+                "description": "通过禅修培养深度专注",
+                "questions": "我是否禅修或练习了深度专注？我是否培养了内心的宁静？"
+            }
+        }
+    },
+    "gratitude": {
+        "title": "感恩日记",
+        "prompt": "今天你感激什么？",
+        "placeholder": "写下你感激的事情...",
+        "save": "保存条目",
+        "saving": "保存中...",
+        "saved": "已保存！",
+        "recentEntries": "最近条目"
+    },
+    "phrases": [
+        "吸入平静，呼出紧张。",
+        "当下是我们真正拥有的一切。",
+        "宁静是清晰的关键。",
+        "让思绪像天空中的云朵一样飘过。",
+        "你变得越安静，就能听到越多。",
+        "像水一样流动，稳定而清澈。",
+        "在宁静中，世界被改变。",
+        "放下，只是存在。",
+        "平衡不是你找到的东西，而是你创造的东西。",
+        "平静来自内心。"
+    ]
+}
