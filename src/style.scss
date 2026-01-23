@@ -25,6 +25,23 @@ body,
   overscroll-behavior-y: none;
 }
 
+/* Electron window dragging support */
+#app {
+  /* Make the entire app draggable on Electron */
+  -webkit-app-region: drag;
+}
+
+/* Make interactive elements clickable */
+button,
+input,
+textarea,
+select,
+a,
+[role="button"],
+.clickable {
+  -webkit-app-region: no-drag;
+}
+
 /* Better font scaling on mobile */
 @media (max-width: 768px) {
   html {

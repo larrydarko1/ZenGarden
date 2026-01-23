@@ -6,11 +6,17 @@ const { setupStorageHandlers } = require('./storage.cjs');
 let mainWindow = null;
 
 function createWindow() {
+    // Set app icon based on platform
+    const iconPath = process.platform === 'darwin'
+        ? path.join(__dirname, '../build/icon.icns')
+        : path.join(__dirname, '../build/icon.icns');
+
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
         minWidth: 800,
         minHeight: 600,
+        icon: iconPath,
         webPreferences: {
             preload: path.join(__dirname, 'preload.cjs'),
             nodeIntegration: false, // Security: don't expose Node to renderer

@@ -33,7 +33,6 @@ export {
 
     // Storage mode management
     getStorageMode,
-    switchStorageMode,
     checkStorageAvailability,
 
     // Data export/import
