@@ -208,6 +208,8 @@
         "saved": "保存済み ✓",
         "loading": "読み込み中...",
         "loadingAnalytics": "分析を読み込み中",
+        "noDataYet": "データがまだありません",
+        "trackEmotionsFirst": "分析を表示するには、まず感情を記録してください",
         "totalDaysTracked": "追跡日数",
         "avgPNRatio": "平均P/N比率",
         "emotionDiversity": "ユニーク感情",

@@ -69,7 +69,7 @@
 
         <div v-if="activeTab === 'analytics'" class="analytics-view">
           <div v-if="loading" class="loading">{{ t('emotions.loadingAnalytics') }}...</div>
-          <div v-else-if="analytics" class="analytics-content">
+          <div v-else-if="analytics && analytics.totalDays > 0" class="analytics-content">
             <div class="analytics-summary">
               <div class="analytics-card">
                 <div class="analytics-label">{{ t('emotions.totalDaysTracked') }}</div>
@@ -140,15 +140,22 @@
                   v-for="(day, idx) in analytics.trends.slice(0, 90).reverse()"
                   :key="idx"
                   class="trend-bar"
-                  :style="{ height: `${day.pnRatio * 100}%` }"
-                  :class="{ positive: day.pnRatio >= 0.5, negative: day.pnRatio < 0.5 }"
-                  :title="`${formatDate(day.date)}: ${Math.round(day.pnRatio * 100)}%`"
+                  :style="{ height: `${Math.min(day.pnRatio / (analytics.trends.reduce((max: number, d: any) => Math.max(max, d.pnRatio), 0) || 1) * 100, 100)}%` }"
+                  :class="{ positive: day.pnRatio >= 1, negative: day.pnRatio < 1 }"
+                  :title="`${formatDate(day.date)}: P/N Ratio ${day.pnRatio.toFixed(2)}`"
                 ></div>
               </div>
               <div class="trend-labels">
                 <span>{{ t('emotions.past90Days') }}</span>
               </div>
             </div>
+          </div>
+          <div v-else class="empty-analytics">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 13h2l2-4 4 8 4-12 2 4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <p>{{ t('emotions.noDataYet') }}</p>
+            <span>{{ t('emotions.trackEmotionsFirst') }}</span>
           </div>
         </div>
       </div>
@@ -314,9 +321,11 @@ async function loadAnalytics() {
   loading.value = true;
   try {
     const response = await getEmotionAnalytics(90);
+    console.log('Analytics response:', response);
     analytics.value = response;
   } catch (err) {
     console.error('Failed to load analytics:', err);
+    analytics.value = null;
   } finally {
     loading.value = false;
   }
@@ -348,9 +357,13 @@ watch(selectedDate, () => {
   loadEmotions();
 });
 
-watch(activeTab, (newTab) => {
-  if (newTab === 'analytics' && !analytics.value) {
-    loadAnalytics();
+watch(activeTab, async (newTab) => {
+  if (newTab === 'analytics') {
+    try {
+      await loadAnalytics();
+    } catch (err) {
+      console.error('Error in analytics tab:', err);
+    }
   }
 });
 
@@ -623,6 +636,33 @@ onMounted(() => {
   padding: 2rem;
   color: var(--text2);
   font-size: 1rem;
+}
+
+.empty-analytics {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--text2);
+  
+  svg {
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  
+  p {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text1);
+  }
+  
+  span {
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
 }
 
 .analytics-content {

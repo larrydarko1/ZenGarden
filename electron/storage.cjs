@@ -433,28 +433,88 @@ const storageHandlers = {
             .filter(log =>
                 log.username === currentSession.username &&
                 log.date >= cutoffStr
-            );
+            )
+            .sort((a, b) => a.date.localeCompare(b.date));
 
         if (logs.length === 0) {
             return {
                 totalDays: 0,
                 averagePositiveCount: 0,
                 averageNegativeCount: 0,
-                averagePNRatio: 0
+                averagePNRatio: 0,
+                emotionDiversity: 0,
+                positiveDays: 0,
+                negativeDays: 0,
+                topEmotions: [],
+                trends: []
             };
         }
 
+        // Calculate basic totals
         const totals = logs.reduce((acc, log) => ({
             positive: acc.positive + log.positiveCount,
             negative: acc.negative + log.negativeCount,
             ratio: acc.ratio + log.pnRatio
         }), { positive: 0, negative: 0, ratio: 0 });
 
+        // Count positive/negative days (P/N ratio >= 0.5 is positive day)
+        let positiveDays = 0;
+        let negativeDays = 0;
+        logs.forEach(log => {
+            if (log.pnRatio >= 0.5) {
+                positiveDays++;
+            } else {
+                negativeDays++;
+            }
+        });
+
+        // Calculate emotion diversity (unique emotions tracked)
+        const uniqueEmotions = new Set();
+        logs.forEach(log => {
+            if (log.emotions && Array.isArray(log.emotions)) {
+                log.emotions.forEach(emotion => {
+                    uniqueEmotions.add(emotion.name);
+                });
+            }
+        });
+
+        // Count emotion frequencies for top emotions
+        const emotionCounts = {};
+        logs.forEach(log => {
+            if (log.emotions && Array.isArray(log.emotions)) {
+                log.emotions.forEach(emotion => {
+                    if (!emotionCounts[emotion.name]) {
+                        emotionCounts[emotion.name] = {
+                            name: emotion.name,
+                            type: emotion.type,
+                            count: 0
+                        };
+                    }
+                    emotionCounts[emotion.name].count++;
+                });
+            }
+        });
+
+        // Sort emotions by count and get top ones
+        const topEmotions = Object.values(emotionCounts)
+            .sort((a, b) => b.count - a.count);
+
+        // Build trends array (P/N ratio per day)
+        const trends = logs.map(log => ({
+            date: log.date,
+            pnRatio: log.pnRatio
+        }));
+
         return {
             totalDays: logs.length,
             averagePositiveCount: totals.positive / logs.length,
             averageNegativeCount: totals.negative / logs.length,
-            averagePNRatio: totals.ratio / logs.length
+            averagePNRatio: totals.ratio / logs.length,
+            emotionDiversity: uniqueEmotions.size,
+            positiveDays,
+            negativeDays,
+            topEmotions,
+            trends
         };
     },
 

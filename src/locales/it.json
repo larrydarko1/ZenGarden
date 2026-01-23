@@ -208,6 +208,8 @@
         "saved": "Salvato ✓",
         "loading": "Caricamento...",
         "loadingAnalytics": "Caricamento analisi",
+        "noDataYet": "Nessun dato ancora",
+        "trackEmotionsFirst": "Traccia prima alcune emozioni per vedere le tue analisi",
         "totalDaysTracked": "Giorni Tracciati",
         "avgPNRatio": "Rapporto P/N Medio",
         "emotionDiversity": "Emozioni Uniche",

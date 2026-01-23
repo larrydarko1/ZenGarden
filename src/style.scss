@@ -42,6 +42,20 @@ a,
   -webkit-app-region: no-drag;
 }
 
+/* Allow scrolling on content containers - target by common class patterns */
+[class*="content"],
+[class*="list"],
+[class*="body"],
+[class*="container"],
+[class*="wrapper"],
+[class*="entries"],
+[class*="items"],
+.modal,
+.popup,
+.dropdown-menu {
+  -webkit-app-region: no-drag;
+}
+
 /* Better font scaling on mobile */
 @media (max-width: 768px) {
   html {

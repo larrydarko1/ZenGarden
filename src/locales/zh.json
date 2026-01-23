@@ -208,6 +208,8 @@
         "saved": "已保存 ✓",
         "loading": "加载中...",
         "loadingAnalytics": "加载分析",
+        "noDataYet": "暂无数据",
+        "trackEmotionsFirst": "先跟踪一些情绪以查看您的分析",
         "totalDaysTracked": "跟踪天数",
         "avgPNRatio": "平均 P/N 比率",
         "emotionDiversity": "独特情绪",

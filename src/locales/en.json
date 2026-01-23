@@ -215,6 +215,8 @@
         "saved": "Saved ✓",
         "loading": "Loading",
         "loadingAnalytics": "Loading analytics",
+        "noDataYet": "No data yet",
+        "trackEmotionsFirst": "Track some emotions first to see your analytics",
         "totalDaysTracked": "Days Tracked",
         "avgPNRatio": "Avg P/N Ratio",
         "emotionDiversity": "Unique Emotions",
