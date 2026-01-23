@@ -4,10 +4,6 @@ const path = require('path');
 const crypto = require('crypto');
 const fs = require('fs');
 
-// Data will be stored in user's app data folder as JSON files
-// macOS: ~/Library/Application Support/zen-garden/data/*.json
-// Windows: %APPDATA%/zen-garden/data/*.json
-// Linux: ~/.config/zen-garden/data/*.json
 const userDataPath = app.getPath('userData');
 const dataPath = path.join(userDataPath, 'data');
 
@@ -50,11 +46,55 @@ Object.entries(dbFiles).forEach(([key, filePath]) => {
     }
 });
 
+// Helper: Normalize MongoDB date format to ISO string
+function normalizeMongoDate(dateValue) {
+    if (!dateValue) return null;
+    // MongoDB format: { "$date": "2026-01-08T23:00:00.000Z" }
+    if (typeof dateValue === 'object' && dateValue.$date) {
+        return dateValue.$date;
+    }
+    // Already a string
+    return dateValue;
+}
+
+// Helper: Normalize MongoDB document (convert dates and IDs)
+function normalizeMongoDoc(doc) {
+    if (!doc) return doc;
+
+    const normalized = { ...doc };
+
+    // Convert _id object to string if needed
+    if (normalized._id && typeof normalized._id === 'object' && normalized._id.$oid) {
+        normalized._id = normalized._id.$oid;
+    }
+
+    // Convert all date fields (including capitalized ones like Date)
+    Object.keys(normalized).forEach(key => {
+        const value = normalized[key];
+        if (typeof value === 'object' && value?.$date) {
+            normalized[key] = value.$date;
+        }
+    });
+
+    // Normalize field names: add lowercase aliases for capitalized fields
+    // This allows meditations with "Date" and "Username" to work with lowercase expectations
+    if (normalized.Date && !normalized.date) {
+        normalized.date = normalized.Date;
+    }
+    if (normalized.Username && !normalized.username) {
+        normalized.username = normalized.Username;
+    }
+
+    return normalized;
+}
+
 // Helper: Read collection (like MongoDB find())
 function readCollection(collection) {
     try {
         const data = fs.readFileSync(dbFiles[collection], 'utf8');
-        return JSON.parse(data);
+        const docs = JSON.parse(data);
+        // Normalize all MongoDB documents
+        return docs.map(doc => normalizeMongoDoc(doc));
     } catch (error) {
         console.error(`Error reading ${collection}:`, error);
         return [];
@@ -101,17 +141,47 @@ function saveSession() {
     }
 }
 
-// Helper: Hash password with salt
+// Helper: Hash password with Argon2 (MongoDB format) or PBKDF2 fallback
+async function hashPasswordArgon2(password) {
+    try {
+        const argon2 = require('argon2');
+        return await argon2.hash(password);
+    } catch (err) {
+        console.error('Argon2 not available, using PBKDF2');
+        // Fallback to PBKDF2
+        const salt = crypto.randomBytes(16).toString('hex');
+        const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha256').toString('hex');
+        return { hash, salt };
+    }
+}
+
+// Helper: Hash password with salt (PBKDF2 for compatibility)
 function hashPassword(password, salt = null) {
     const useSalt = salt || crypto.randomBytes(16).toString('hex');
     const hash = crypto.pbkdf2Sync(password, useSalt, 100000, 64, 'sha256').toString('hex');
     return { hash, salt: useSalt };
 }
 
-// Helper: Verify password
-function verifyPassword(password, storedHash, storedSalt) {
-    const { hash } = hashPassword(password, storedSalt);
-    return hash === storedHash;
+// Helper: Verify password - supports both Argon2 (MongoDB) and PBKDF2 (local)
+async function verifyPassword(password, user) {
+    // MongoDB format: user has 'password' field with Argon2 hash
+    if (user.password && user.password.startsWith('$argon2')) {
+        try {
+            const argon2 = require('argon2');
+            return await argon2.verify(user.password, password);
+        } catch (err) {
+            console.error('Argon2 verification failed:', err);
+            return false;
+        }
+    }
+
+    // Local format: user has 'passwordHash' and 'salt' fields with PBKDF2
+    if (user.passwordHash && user.salt) {
+        const { hash } = hashPassword(password, user.salt);
+        return hash === user.passwordHash;
+    }
+
+    return false;
 }
 
 // Helper: Generate session token
@@ -135,16 +205,28 @@ const storageHandlers = {
                 throw new Error('Username already exists');
             }
 
-            const { hash, salt } = hashPassword(password);
+            // Use MongoDB-compatible format with Argon2
+            const passwordHash = await hashPasswordArgon2(password);
 
             const newUser = {
+                _id: { $oid: generateId() },
                 username: trimmed,
-                passwordHash: hash,
-                salt,
+                password: typeof passwordHash === 'string' ? passwordHash : undefined,
+                passwordHash: typeof passwordHash === 'object' ? passwordHash.hash : undefined,
+                salt: typeof passwordHash === 'object' ? passwordHash.salt : undefined,
                 theme,
                 language,
+                stats: {
+                    totalSessions: 0,
+                    totalMinutes: 0,
+                    currentStreak: 0,
+                    longestStreak: 0
+                },
                 createdAt: new Date().toISOString()
             };
+
+            // Clean up undefined fields
+            Object.keys(newUser).forEach(key => newUser[key] === undefined && delete newUser[key]);
 
             users.push(newUser);
             writeCollection('users', users);
@@ -168,7 +250,23 @@ const storageHandlers = {
             const users = readCollection('users');
             const user = users.find(u => u.username === username.trim());
 
-            if (!user || !verifyPassword(password, user.passwordHash, user.salt)) {
+            if (!user) {
+                console.log('User not found:', username.trim());
+                throw new Error('Invalid username or password');
+            }
+
+            console.log('User found:', user.username);
+            console.log('User has password field:', !!user.password);
+            console.log('User has passwordHash field:', !!user.passwordHash);
+            if (user.password) {
+                console.log('Password field starts with:', user.password.substring(0, 20));
+            }
+
+            // Verify password using the new function that supports both formats
+            const isValid = await verifyPassword(password, user);
+            console.log('Password verification result:', isValid);
+
+            if (!isValid) {
                 throw new Error('Invalid username or password');
             }
 
@@ -180,12 +278,13 @@ const storageHandlers = {
                 message: 'Login successful',
                 user: {
                     username: user.username,
-                    theme: user.theme,
-                    language: user.language
+                    theme: user.theme || 'blue',
+                    language: user.language || 'en'
                 },
                 token
             };
         } catch (error) {
+            console.error('Login error:', error);
             throw new Error(error.message);
         }
     },

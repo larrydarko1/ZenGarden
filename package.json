@@ -15,6 +15,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "argon2": "^0.44.0",
     "vue": "^3.5.17",
     "vue-i18n": "^9.14.5"
   },

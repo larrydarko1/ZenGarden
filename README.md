@@ -55,16 +55,14 @@ Zen Garden is a **local-first, desktop meditation app** built with **Electron**,
 ## Data Storage Location
 
 Your data is stored in JSON files at:
-- **macOS:** `~/Library/Application Support/zen-garden/`
-- **Windows:** `%APPDATA%/zen-garden/`
-- **Linux:** `~/.config/zen-garden/`
-
-Files stored:
-- `users.json` - User accounts and preferences
+- **macOS:** `~/Library/Application Support/zen-garden-light/data/`
+- **Windows:** `%APPDATA%/zen-garden-light/data/`
+- **Linux:** `~/.config/zen-garden-light/data/`
 - `meditations.json` - Meditation sessions
 - `emotion_logs.json` - Emotion tracking data
 - `gratitude_entries.json` - Gratitude journal entries
 - `eightfold_path_logs.json` - Buddhist path progress
+- `session.json` - Current session data
 
 ## Getting Started
 
