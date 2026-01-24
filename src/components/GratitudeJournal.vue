@@ -337,6 +337,7 @@ onMounted(() => {
 
 .gratitude-textarea {
   width: border-box;
+  min-height: 150px;
   padding: 1rem;
   background: var(--input-bg);
   border: 1px solid var(--input-border);

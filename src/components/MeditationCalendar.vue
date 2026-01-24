@@ -259,7 +259,7 @@ function getDaysInMonth(year: number, month: number) {
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.25rem;
+  gap: 0.6rem;
   color: var(--text2);
   font-size: 0.7rem;
   text-transform: uppercase;
