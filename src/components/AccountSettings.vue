@@ -148,36 +148,6 @@
       </div>
     </div>
 
-    <!-- Export Data Section -->
-    <div class="settings-section">
-      <h3 class="section-title">{{ t('account.exportData') }}</h3>
-      <p class="info-text">{{ t('account.exportDescription') }}</p>
-      <div class="button-row">
-        <button @click="exportUserData('json')" :disabled="isExporting" class="zen-btn">
-          <span v-if="!isExporting">{{ t('account.exportJSON') }}</span>
-          <span v-else class="zen-loader">
-            <svg width="20" height="20" viewBox="0 0 32 32">
-              <rect x="10" y="15" width="12" height="2" rx="1">
-                <animateTransform attributeName="transform" type="rotate" from="0 16 16" to="360 16 16" dur="2.5s" repeatCount="indefinite"/>
-              </rect>
-            </svg>
-          </span>
-        </button>
-        <button @click="exportUserData('csv')" :disabled="isExporting" class="zen-btn">
-          <span v-if="!isExporting">{{ t('account.exportCSV') }}</span>
-          <span v-else class="zen-loader">
-            <svg width="20" height="20" viewBox="0 0 32 32">
-              <rect x="10" y="15" width="12" height="2" rx="1">
-                <animateTransform attributeName="transform" type="rotate" from="0 16 16" to="360 16 16" dur="2.5s" repeatCount="indefinite"/>
-              </rect>
-            </svg>
-          </span>
-        </button>
-      </div>
-      <div v-if="exportSuccess" class="success-message">{{ exportSuccess }}</div>
-      <div v-if="exportError" class="error-message">{{ exportError }}</div>
-    </div>
-
     <!-- Delete Account Section -->
     <div class="settings-section danger-section">
       <h3 class="section-title danger-title">{{ t('account.deleteAccount') }}</h3>
@@ -223,8 +193,7 @@ import { useI18n } from 'vue-i18n'
 import { 
   updateUsername as updateUsernameStorage, 
   updatePassword as updatePasswordStorage, 
-  deleteAccount as deleteAccountStorage, 
-  exportData as exportDataStorage 
+  deleteAccount as deleteAccountStorage
 } from '../store'
 
 const { t } = useI18n()
@@ -260,11 +229,6 @@ const showDeleteConfirm = ref(false)
 const deletePassword = ref('')
 const isDeletingAccount = ref(false)
 const deleteError = ref('')
-
-// Export Data
-const isExporting = ref(false)
-const exportSuccess = ref('')
-const exportError = ref('')
 
 onMounted(async () => {
   // Recovery codes not supported in local-only mode
@@ -389,39 +353,6 @@ function cancelDelete() {
   showDeleteConfirm.value = false
   deletePassword.value = ''
   deleteError.value = ''
-}
-
-async function exportUserData(format: 'json' | 'csv') {
-  exportError.value = ''
-  exportSuccess.value = ''
-  isExporting.value = true
-
-  try {
-    const response = await exportDataStorage()
-    
-    // Create blob and download
-    const blob = format === 'json' 
-      ? new Blob([JSON.stringify(response, null, 2)], { type: 'application/json' })
-      : new Blob([typeof response === 'string' ? response : JSON.stringify(response)], { type: 'text/csv' })
-    
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `zengarden-data-${new Date().toISOString().split('T')[0]}.${format}`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-    
-    exportSuccess.value = t('account.exportSuccess')
-    setTimeout(() => {
-      exportSuccess.value = ''
-    }, 3000)
-  } catch (error: any) {
-    exportError.value = error.message || t('account.exportFailed')
-  } finally {
-    isExporting.value = false
-  }
 }
 </script>
 

@@ -77,7 +77,7 @@
               </div>
               <div class="analytics-card">
                 <div class="analytics-label">{{ t('emotions.avgPNRatio') }}</div>
-                <div class="analytics-value">{{ analytics.averagePNRatio }}</div>
+                <div class="analytics-value">{{ typeof analytics.averagePNRatio === 'number' ? analytics.averagePNRatio.toFixed(2) : analytics.averagePNRatio }}</div>
               </div>
               <div class="analytics-card">
                 <div class="analytics-label">{{ t('emotions.emotionDiversity') }}</div>
@@ -137,12 +137,12 @@
               <h3>{{ t('emotions.trendChart') }}</h3>
               <div class="trend-chart">
                 <div 
-                  v-for="(day, idx) in analytics.trends.slice(0, 90).reverse()"
+                  v-for="(day, idx) in analytics.trends.slice(0, 90)"
                   :key="idx"
                   class="trend-bar"
                   :style="{ height: `${Math.min(day.pnRatio / (analytics.trends.reduce((max: number, d: any) => Math.max(max, d.pnRatio), 0) || 1) * 100, 100)}%` }"
-                  :class="{ positive: day.pnRatio >= 1, negative: day.pnRatio < 1 }"
-                  :title="`${formatDate(day.date)}: P/N Ratio ${day.pnRatio.toFixed(2)}`"
+                  :class="{ positive: Number(day.pnRatio) >= 0.5, negative: Number(day.pnRatio) < 0.5 }"
+                  :title="`${formatDate(day.date)}: P/N Ratio ${Number(day.pnRatio).toFixed(2)}`"
                 ></div>
               </div>
               <div class="trend-labels">

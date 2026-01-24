@@ -598,7 +598,7 @@ async function fetchUserData() {
 
 function playAlert() {
   if (!alertAudio.value) {
-    alertAudio.value = new Audio('/alert.mp3')
+    alertAudio.value = new Audio('./alert.mp3')
   }
   alertAudio.value.currentTime = 0
   alertAudio.value.play()
@@ -610,7 +610,7 @@ function playBellSound() {
     bellAudioInstance.currentTime = 0
   }
   
-  bellAudioInstance = new Audio(`/bell${bellSound.value}.mp3`)
+  bellAudioInstance = new Audio(`./bell${bellSound.value}.mp3`)
   bellAudioInstance.volume = 0.5
   bellAudioInstance.play().catch(err => {
     console.log('Bell sound playback failed:', err)
@@ -639,7 +639,7 @@ function playTrack() {
       trackAudio.pause()
       trackAudio.currentTime = 0
     }
-    trackAudio = new Audio(`/${selectedTrack.value}.mp3`)
+    trackAudio = new Audio(`./${selectedTrack.value}.mp3`)
     trackAudio.loop = true
     trackAudio.volume = isMuted.value ? 0 : masterVolume.value
     trackAudio.play().catch(err => console.error('Track playback failed:', err))
@@ -653,7 +653,7 @@ function playAmbient() {
       ambientAudio.pause()
       ambientAudio.currentTime = 0
     }
-    ambientAudio = new Audio(`/${selectedAmbient.value}.mp3`)
+    ambientAudio = new Audio(`./${selectedAmbient.value}.mp3`)
     ambientAudio.loop = true
     ambientAudio.volume = isMuted.value ? 0 : masterVolume.value * 0.6 // Slightly lower ambient volume
     ambientAudio.play().catch(err => console.error('Ambient playback failed:', err))
@@ -693,7 +693,7 @@ function previewTrack(track: string) {
     previewTrackAudio.pause()
     previewTrackAudio.currentTime = 0
   }
-  previewTrackAudio = new Audio(`/${track}.mp3`)
+  previewTrackAudio = new Audio(`./${track}.mp3`)
   previewTrackAudio.volume = masterVolume.value
   previewTrackAudio.play().catch(err => console.log('Track preview failed:', err))
   
@@ -711,7 +711,7 @@ function previewAmbient(ambient: string) {
     previewAmbientAudio.pause()
     previewAmbientAudio.currentTime = 0
   }
-  previewAmbientAudio = new Audio(`/${ambient}.mp3`)
+  previewAmbientAudio = new Audio(`./${ambient}.mp3`)
   previewAmbientAudio.volume = masterVolume.value * 0.6
   previewAmbientAudio.play().catch(err => console.log('Ambient preview failed:', err))
   

@@ -470,7 +470,8 @@ const storageHandlers = {
 
         const positiveCount = emotions.filter(e => e.type === 'positive').length;
         const negativeCount = emotions.filter(e => e.type === 'negative').length;
-        const pnRatio = negativeCount > 0 ? positiveCount / negativeCount : positiveCount;
+        const total = positiveCount + negativeCount;
+        const pnRatio = total > 0 ? positiveCount / total : 0;
 
         const emotionLogs = readCollection('emotionLogs');
         const existingIndex = emotionLogs.findIndex(
