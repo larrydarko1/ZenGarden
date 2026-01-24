@@ -255,13 +255,14 @@ body {
   background: var(--input-bg);
   border: 1px solid var(--input-border);
   border-radius: 6px;
-  padding: 1.5rem;
+  padding: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
   min-width: 280px;
-  max-width: 350px;
-  width: 100%;
+  max-width: 400px;
+  width: 90%;
+  margin: 1.5rem;
   align-items: stretch;
 }
 
@@ -310,16 +311,17 @@ body {
 
 
 input {
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
   border: 1px solid var(--input-border);
   background: var(--input-bg);
   color: var(--text1);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   width: 100%;
   box-sizing: border-box;
   outline: none;
   transition: border 0.15s, background 0.15s;
+  min-height: 42px;
 }
 
 input:focus {
@@ -336,16 +338,17 @@ button {
   background: var(--button-bg);
   color: var(--text1);
   border: 1px solid var(--border-subtle);
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
   cursor: pointer;
   font-weight: 400;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
   transition: all 0.15s;
   outline: none;
+  min-height: 44px;
 }
 
 button:hover, button:focus {
@@ -412,7 +415,7 @@ button:disabled {
 
 .auth-btn {
   width: 100%;
-  min-height: 36px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -428,10 +431,55 @@ button:disabled {
   fill: var(--base1);
 }
 
- @media (max-width: 420px) {
+ @media (max-width: 768px) {
   .zen-form {
-    padding: 0.5rem;
-    min-width: 200px;
+    padding: 1.5rem;
+    gap: 1rem;
+    max-width: 95%;
+    margin: 1rem;
+  }
+
+  input {
+    font-size: 1rem;
+    padding: 0.875rem 1rem;
+    min-height: 48px;
+  }
+
+  button {
+    font-size: 0.85rem;
+    padding: 0.875rem 1rem;
+    min-height: 48px;
+  }
+
+  .auth-btn {
+    min-height: 48px;
+  }
+
+  .logo-row svg {
+    height: 80px;
+  }
+
+  .zen-title {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .zen-form {
+    padding: 1rem;
+    min-width: 280px;
+    max-width: 100%;
+    margin: 0.75rem;
+    gap: 0.875rem;
+  }
+
+  input {
+    font-size: 1rem;
+  }
+
+  .zen-link-row {
+    font-size: 0.8rem;
   }
 }
 </style>

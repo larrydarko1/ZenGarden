@@ -2479,20 +2479,19 @@ watch(showCalendar, (val) => { if (val && user.value) fetchMeditations() })
 
   .bell-dropdown-menu {
     position: fixed;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100vw;
-    min-width: 100vw;
-    border-radius: 16px 16px 0 0;
+    top: 4.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 280px;
+    min-width: 200px;
+    border-radius: 12px;
     padding: 1rem 0.75rem;
-    padding-bottom: 1.5rem;
-    max-height: 50vh;
+    max-height: 60vh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     z-index: 1003;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   }
 
   .bell-dropdown-menu button {
@@ -2509,39 +2508,57 @@ watch(showCalendar, (val) => { if (val && user.value) fetchMeditations() })
 
   /* Make bell settings toolbar more mobile-friendly */
   .bell-settings-toolbar {
-    top: 0.75rem;
+    top: 0.5rem;
     left: 0.5rem;
     right: 0.5rem;
     width: calc(100% - 1rem);
     max-width: calc(100% - 1rem);
-    padding: 0.5rem;
+    padding: 0.35rem 0.5rem;
     transform: none;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    border-radius: 6px;
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+    border-radius: 8px;
     box-sizing: border-box;
+    backdrop-filter: blur(12px);
+    justify-content: center;
   }
 
   .volume-toggle-btn,
   .bell-toggle-btn {
-    min-width: 40px;
-    min-height: 40px;
-    padding: 0.5rem;
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0.4rem;
     box-sizing: border-box;
+  }
+
+  .volume-toggle-btn svg,
+  .bell-toggle-btn svg {
+    width: 14px;
+    height: 14px;
   }
 
   .volume-slider-toggle,
   .bell-dropdown-btn {
-    min-height: 40px;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
+    min-height: 36px;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75rem;
     box-sizing: border-box;
+    min-width: 48px;
   }
 
   .bell-settings {
-    gap: 0.5rem;
-    flex-wrap: wrap;
+    gap: 0.35rem;
+    flex-wrap: nowrap;
     box-sizing: border-box;
+    display: flex;
+  }
+
+  .bell-dropdown {
+    flex-shrink: 1;
+  }
+
+  .toolbar-divider {
+    height: 20px;
   }
 
   .volume-slider-popup {
@@ -2603,12 +2620,43 @@ watch(showCalendar, (val) => { if (val && user.value) fetchMeditations() })
   }
 
   .bell-settings-toolbar {
-    padding: 0.4rem;
-    gap: 0.4rem;
-    left: 0.25rem;
-    right: 0.25rem;
-    width: calc(100% - 0.5rem);
-    max-width: calc(100% - 0.5rem);
+    padding: 0.3rem 0.4rem;
+    gap: 0.3rem;
+    left: 0.4rem;
+    right: 0.4rem;
+    top: 0.4rem;
+    width: calc(100% - 0.8rem);
+    max-width: calc(100% - 0.8rem);
+    border-radius: 6px;
+  }
+
+  .volume-toggle-btn,
+  .bell-toggle-btn {
+    min-width: 32px;
+    min-height: 32px;
+    padding: 0.3rem;
+  }
+
+  .volume-toggle-btn svg,
+  .bell-toggle-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .volume-slider-toggle,
+  .bell-dropdown-btn {
+    min-height: 32px;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.7rem;
+    min-width: 44px;
+  }
+
+  .bell-settings {
+    gap: 0.3rem;
+  }
+
+  .toolbar-divider {
+    height: 18px;
   }
 
   .volume-toggle-btn,

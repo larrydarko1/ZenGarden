@@ -28,3 +28,14 @@ dist-electron
 .env
 .env.local
 .env.*.local
+
+# Capacitor
+ios/App/Pods
+ios/App/public
+ios/App/Podfile.lock
+android/app/src/main/assets/public
+android/.idea
+android/.gradle
+android/build
+android/app/build
+android/local.properties

@@ -12,9 +12,21 @@
     "build:mac": "npm run build && electron-builder --mac",
     "build:win": "npm run build && electron-builder --win",
     "build:linux": "npm run build && electron-builder --linux",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:mobile": "npm run build && npx cap sync",
+    "cap:sync": "npx cap sync",
+    "cap:open:ios": "npx cap open ios",
+    "cap:open:android": "npx cap open android",
+    "cap:run:ios": "npm run build:mobile && npx cap run ios",
+    "cap:run:android": "npm run build:mobile && npx cap run android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.0.1",
+    "@capacitor/cli": "^8.0.1",
+    "@capacitor/core": "^8.0.1",
+    "@capacitor/filesystem": "^8.1.0",
+    "@capacitor/ios": "^8.0.1",
+    "@capacitor/preferences": "^8.0.0",
     "argon2": "^0.44.0",
     "vue": "^3.5.17",
     "vue-i18n": "^9.14.5"

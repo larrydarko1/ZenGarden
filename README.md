@@ -1,13 +1,13 @@
-# Zen Garden - Desktop Edition
+# Zen Garden - Local Version
 
 ![License](https://img.shields.io/github/license/larrydarko1/zen-garden)
 ![Issues](https://img.shields.io/github/issues/larrydarko1/zen-garden)
 ![Pull Requests](https://img.shields.io/github/issues-pr/larrydarko1/zen-garden)
 ![Contributors](https://img.shields.io/github/contributors/larrydarko1/zen-garden)
 
-Zen Garden is a **local-first, desktop meditation app** built with **Electron**, **Vue 3**, and TypeScript. All your data stays permanently on your computer in JSON files - no server, no cloud, completely private. Features guided meditations, a meditation calendar, and relaxing animations.
+Zen Garden is a **local-first, cross-platform meditation app** built with **Electron** (desktop), **Capacitor** (mobile), **Vue 3**, and TypeScript. All your data stays on your device in MongoDB-compatible JSON files - no server, no cloud, completely private. Features guided meditations, a meditation calendar, and relaxing animations.
 
-> **IMPORTANT:** This is the **DESKTOP EDITION** - it runs as a native desktop application with permanent local storage. All data is stored in JSON files on your computer.
+> **IMPORTANT:** This app runs natively on **Desktop** (macOS, Windows, Linux) and **Mobile** (iOS, Android). All data is stored in JSON files on your device and never leaves it.
 
 ## Demo
 
@@ -15,9 +15,10 @@ Zen Garden is a **local-first, desktop meditation app** built with **Electron**,
 
 ## Tech Stack
 - **Desktop:** Electron (Native macOS, Windows, Linux app)
+- **Mobile:** Capacitor (Native iOS and Android app)
 - **Frontend:** Vue 3, TypeScript, Vite, SCSS
 - **Storage:** JSON files (MongoDB-compatible document structure)
-- **Build Tool:** Vite + Electron Builder
+- **Build Tools:** Vite + Electron Builder + Capacitor CLI
 
 ## Features
 
@@ -43,26 +44,37 @@ Zen Garden is a **local-first, desktop meditation app** built with **Electron**,
 - **8 languages** - English, Spanish, Italian, French, German, Portuguese, Chinese, Japanese
 
 ### Technical Features
-- **Native Desktop App** - runs like any other application on your computer
+- **Cross-Platform** - Native apps for macOS, Windows, Linux, iOS, and Android
 - **100% Offline** - works completely without internet connection
-- **Permanent Storage** - JSON files on your hard drive (won't be cleared)
+- **User-Accessible Storage** - JSON files you can view, backup, and control
 - **Privacy-first** - no server, no tracking, no data collection, no telemetry
 - **Secure** - password hashing with PBKDF2 cryptography
 - **MongoDB-compatible** - data structure matches MEVN stack for easy migration
 
-> **Privacy Note:** This app runs entirely on your computer. Your meditation data, emotions, and journal entries are stored in JSON files on your local file system and never leave your device.
+> **Privacy Note:** This app runs entirely on your device. Your meditation data, emotions, and journal entries are stored in JSON files on your local file system and never leave your device.
 
 ## Data Storage Location
 
-Your data is stored in JSON files at:
+Your data is stored in MongoDB-compatible JSON files:
+
+### Desktop
 - **macOS:** `~/Library/Application Support/zen-garden-light/data/`
 - **Windows:** `%APPDATA%/zen-garden-light/data/`
 - **Linux:** `~/.config/zen-garden-light/data/`
+
+### Mobile
+- **iOS:** Files app → On My iPhone → ZenGarden → `data/`
+- **Android:** File Manager → Documents → ZenGarden → `data/`
+
+### Files
+- `users.json` - User accounts (hashed passwords)
 - `meditations.json` - Meditation sessions
 - `emotion_logs.json` - Emotion tracking data
 - `gratitude_entries.json` - Gratitude journal entries
 - `eightfold_path_logs.json` - Buddhist path progress
 - `session.json` - Current session data
+
+> **Note:** On mobile, files are accessible through your device's file manager. You can view, copy, backup, or delete them anytime. Data survives app uninstall.
 
 ## Getting Started
 
@@ -87,6 +99,7 @@ npm install
 
 ### Development
 
+#### Desktop Development
 ```sh
 # Start the Electron app in development mode
 npm run dev:electron
@@ -96,6 +109,24 @@ This will:
 - Start Vite dev server on http://localhost:3000
 - Launch the Electron desktop app
 - Enable hot reload for development
+
+#### Mobile Development
+
+See [MOBILE.md](MOBILE.md) for complete mobile development guide.
+
+**Quick Start:**
+```sh
+# Build and sync to mobile platforms
+npm run build:mobile
+
+# Open in native IDEs
+npm run cap:open:ios      # Requires macOS + Xcode
+npm run cap:open:android  # Requires Android Studio
+
+# Run on device/emulator
+npm run cap:run:ios
+npm run cap:run:android
+```
 
 ### Building Desktop Apps
 
@@ -136,12 +167,14 @@ To share the app with others:
 
 ## What Changed from Previous Versions?
 
-This **Desktop Edition** transformed from a browser-based PWA to a native desktop application:
+This version is a **complete cross-platform rewrite**:
 
 ### Now Includes:
-- ✅ Native Electron desktop app
+- ✅ Native desktop apps (Electron) - macOS, Windows, Linux
+- ✅ Native mobile apps (Capacitor) - iOS, Android
 - ✅ JSON file storage (MongoDB-compatible)
-- ✅ Permanent local storage (never cleared)
+- ✅ User-accessible data files (view, backup, control)
+- ✅ Data survives app uninstall (mobile)
 - ✅ Cross-platform installers
 - ✅ Native OS integration
 - ✅ No browser dependencies
@@ -149,6 +182,7 @@ This **Desktop Edition** transformed from a browser-based PWA to a native deskto
 
 ## Architecture
 
+### Desktop (Electron)
 ```
 Desktop App
 ├── Electron (Native shell)
@@ -157,8 +191,28 @@ Desktop App
 │   └── Renderer Process (Chromium)
 │       └── Vue 3 App (Your UI)
 └── Data Storage
-    └── JSON Files (~/Library/Application Support/zen-garden/)
+    └── JSON Files (~/Library/Application Support/zen-garden-light/data/)
 ```
+
+### Mobile (Capacitor)
+```
+Mobile App
+├── Capacitor (Native shell)
+│   ├── Native iOS/Android Runtime
+│   ├── WebView (renders Vue app)
+│   └── Native Plugins
+│       ├── Filesystem API (JSON operations)
+│       └── Preferences API (session storage)
+└── Data Storage
+    ├── iOS: Documents/ZenGarden/data/
+    └── Android: Documents/ZenGarden/data/
+```
+
+### Storage Adapter Pattern
+The app automatically detects the platform and uses the appropriate storage adapter:
+- **Electron**: Direct file system access (Node.js)
+- **Capacitor**: Filesystem API (native mobile storage)
+- **Same JSON structure**: Both use MongoDB-compatible documents
 
 ## Data Format
 
@@ -184,15 +238,20 @@ This makes it easy to:
 ## Backup & Migration
 
 ### Backing Up Your Data
-Simply copy the entire data folder:
-- **macOS:** `~/Library/Application Support/zen-garden/`
-- **Windows:** `%APPDATA%/zen-garden/`
-- **Linux:** `~/.config/zen-garden/`
+
+**Desktop:** Simply copy the entire data folder:
+- **macOS:** `~/Library/Application Support/zen-garden-light/data/`
+- **Windows:** `%APPDATA%/zen-garden-light/data/`
+- **Linux:** `~/.config/zen-garden-light/data/`
+
+**Mobile:** Access files through your device:
+- **iOS:** Files app → On My iPhone → ZenGarden → Copy to iCloud/other location
+- **Android:** File Manager → Documents → ZenGarden → Copy to Drive/SD card
 
 ### Restoring Data
-1. Quit the app
+1. Quit the app (or uninstall on mobile)
 2. Replace the data folder with your backup
-3. Restart the app
+3. Restart the app (or reinstall on mobile)
 
 ### Migrating to MongoDB (Future)
 Since data is already in MongoDB format:
