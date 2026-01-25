@@ -1,4 +1,4 @@
-# Zen Garden - Local Version
+# ZenGarden 
 
 ![License](https://img.shields.io/github/license/larrydarko1/zen-garden)
 ![Issues](https://img.shields.io/github/issues/larrydarko1/zen-garden)
@@ -38,7 +38,7 @@ Zen Garden is a **local-first, cross-platform meditation app** built with **Elec
 - **Duration impact analysis** - see how meditation length affects your wellbeing
 
 ### Design & Experience
-- **Animated Zen backgrounds** - Wind, Waves, and Idle animations
+- **Animated Zen backgrounds** - Wind, Waves, and other animations
 - **Three themes** - Blue, White, and Dark modes
 - **Fully responsive** - optimized for different screen sizes
 - **8 languages** - English, Spanish, Italian, French, German, Portuguese, Chinese, Japanese
@@ -191,7 +191,7 @@ Desktop App
 │   └── Renderer Process (Chromium)
 │       └── Vue 3 App (Your UI)
 └── Data Storage
-    └── JSON Files (~/Library/Application Support/zen-garden-light/data/)
+    └── JSON Files (~/Library/Application Support/zen-garden/data/)
 ```
 
 ### Mobile (Capacitor)
@@ -240,9 +240,9 @@ This makes it easy to:
 ### Backing Up Your Data
 
 **Desktop:** Simply copy the entire data folder:
-- **macOS:** `~/Library/Application Support/zen-garden-light/data/`
-- **Windows:** `%APPDATA%/zen-garden-light/data/`
-- **Linux:** `~/.config/zen-garden-light/data/`
+- **macOS:** `~/Library/Application Support/zen-garden/data/`
+- **Windows:** `%APPDATA%/zen-garden/data/`
+- **Linux:** `~/.config/zen-garden/data/`
 
 **Mobile:** Access files through your device:
 - **iOS:** Files app → On My iPhone → ZenGarden → Copy to iCloud/other location

@@ -1,6 +1,5 @@
 <template>
 	<div id="app" :class="currentTheme">
-		<NetworkStatus />
 		<Home @meditation-active="onMeditationActive" @theme-changed="setThemeFromLogin" @language-changed="setLanguageFromLogin" @user-changed="onUserChanged" @open-settings="showSettings = true" />
 		<SettingsPopup v-if="showSettings" @close="showSettings = false" @theme-change="setTheme" @language-change="setLanguage" />
 	</div>
@@ -11,7 +10,6 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Home from './components/Home.vue';
 import SettingsPopup from './components/SettingsPopup.vue';
-import NetworkStatus from './components/NetworkStatus.vue';
 import { updateTheme, updateLanguage } from './store';
 
 const { locale } = useI18n();

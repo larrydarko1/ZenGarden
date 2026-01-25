@@ -445,6 +445,9 @@ import ZenPhilosophy from './ZenPhilosophy.vue'
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import ZenWindAnimation from './ZenWindAnimation.vue'
 import ZenWavesAnimation from './ZenWavesAnimation.vue'
+import ZenBreatheAnimation from './ZenBreatheAnimation.vue'
+import ZenParticlesAnimation from './ZenParticlesAnimation.vue'
+import ZenLavaAnimation from './ZenLavaAnimation.vue'
 import MonkAuth from './MonkAuth.vue'
 import { getMeditations, createMeditation, getCurrentUser, logout } from '../store'
 import { useI18n } from 'vue-i18n'
@@ -778,7 +781,7 @@ async function skipSessionNotes() {
   }
 }
 
-const ANIMATIONS = [ZenWindAnimation, ZenWavesAnimation]
+const ANIMATIONS = [ZenWindAnimation, ZenWavesAnimation, ZenBreatheAnimation, ZenParticlesAnimation, ZenLavaAnimation]
 const meditationAnimationIdx = ref(0)
 
 async function startMeditation() {
