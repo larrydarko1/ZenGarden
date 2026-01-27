@@ -58,9 +58,9 @@ Zen Garden is a **local-first, cross-platform meditation app** built with **Elec
 Your data is stored in MongoDB-compatible JSON files:
 
 ### Desktop
-- **macOS:** `~/Library/Application Support/zen-garden-light/data/`
-- **Windows:** `%APPDATA%/zen-garden-light/data/`
-- **Linux:** `~/.config/zen-garden-light/data/`
+- **macOS:** `~/Library/Application Support/zen-garden/data/`
+- **Windows:** `%APPDATA%/zen-garden/data/`
+- **Linux:** `~/.config/zen-garden/data/`
 
 ### Mobile
 - **iOS:** Files app → On My iPhone → ZenGarden → `data/`
