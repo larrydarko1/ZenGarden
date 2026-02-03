@@ -1,9 +1,9 @@
 # ZenGarden 
 
-![License](https://img.shields.io/github/license/larrydarko1/zen-garden)
-![Issues](https://img.shields.io/github/issues/larrydarko1/zen-garden)
-![Pull Requests](https://img.shields.io/github/issues-pr/larrydarko1/zen-garden)
-![Contributors](https://img.shields.io/github/contributors/larrydarko1/zen-garden)
+![License](https://img.shields.io/github/license/larrydarko1/ZenGarden)
+![Issues](https://img.shields.io/github/issues/larrydarko1/ZenGarden)
+![Pull Requests](https://img.shields.io/github/issues-pr/larrydarko1/ZenGarden)
+![Contributors](https://img.shields.io/github/contributors/larrydarko1/ZenGarden)
 
 Zen Garden is a **local-first, cross-platform meditation app** built with **Electron** (desktop), **Capacitor** (mobile), **Vue 3**, and TypeScript. All your data stays on your device in MongoDB-compatible JSON files - no server, no cloud, completely private. Features guided meditations, a meditation calendar, and relaxing animations.
 
@@ -86,8 +86,8 @@ Your data is stored in MongoDB-compatible JSON files:
 
 1. **Clone the repository**
 ```sh
-git clone https://github.com/larrydarko1/zen-garden.git
-cd zen-garden
+git clone https://github.com/larrydarko1/ZenGarden.git
+cd ZenGarden
 ```
 
 2. **Install dependencies**
