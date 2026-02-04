@@ -27,7 +27,8 @@ function createWindow() {
             cache: false // Disable HTTP cache
         },
         backgroundColor: '#1a1a1a',
-        titleBarStyle: 'hiddenInset', // macOS style
+        titleBarStyle: 'hidden', // Cross-platform hidden titlebar
+        frame: false, // Frameless window for custom controls
         show: false // Don't show until ready
     });
 

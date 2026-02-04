@@ -1099,7 +1099,7 @@ watch(showCalendar, (val) => { if (val && user.value) fetchMeditations() })
 
 .zen-header {
   position: absolute;
-  top: 1.2rem;
+  top: 3rem;
   left: 0;
   width: 100vw;
   display: flex;

@@ -1,16 +1,19 @@
 <template>
-	<div id="app" :class="currentTheme">
+	<div id="app" :class="[currentTheme, { 'has-desktop-header': isDesktopApp }]">
+		<DesktopHeader v-if="isDesktopApp" />
 		<Home @meditation-active="onMeditationActive" @theme-changed="setThemeFromLogin" @language-changed="setLanguageFromLogin" @user-changed="onUserChanged" @open-settings="showSettings = true" />
 		<SettingsPopup v-if="showSettings" @close="showSettings = false" @theme-change="setTheme" @language-change="setLanguage" />
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Home from './components/Home.vue';
 import SettingsPopup from './components/SettingsPopup.vue';
+import DesktopHeader from './components/DesktopHeader.vue';
 import { updateTheme, updateLanguage } from './store';
+import { isDesktop } from './utils/platform';
 
 const { locale } = useI18n();
 
@@ -19,6 +22,12 @@ const currentTheme = ref('dark');
 const meditationActive = ref(false); // controlled by Home.vue
 const showSettings = ref(false);
 const isAuthenticated = ref(false);
+const isDesktopApp = ref(false);
+
+// Check if running on desktop
+onMounted(() => {
+	isDesktopApp.value = isDesktop();
+});
 
 function onMeditationActive(val: boolean) {
 	meditationActive.value = val;
