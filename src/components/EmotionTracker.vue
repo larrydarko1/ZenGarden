@@ -140,6 +140,54 @@
             </div>
 
             <div class="analytics-section">
+              <h3>{{ t('emotions.topPositiveEmotions') }}</h3>
+              <div class="top-emotions-list">
+                <div 
+                  v-for="(emotion, idx) in topPositiveEmotions"
+                  :key="emotion.name"
+                  class="top-emotion-item"
+                >
+                  <span class="emotion-rank">{{ Number(idx) + 1 }}</span>
+                  <span class="emotion-name">{{ getTranslatedEmotionName(emotion.name) }}</span>
+                  <span class="emotion-bar-container">
+                    <span 
+                      class="emotion-bar positive"
+                      :style="{ width: `${topPositiveEmotions.length > 0 ? (emotion.count / topPositiveEmotions[0].count * 100) : 0}%` }"
+                    ></span>
+                  </span>
+                  <span class="emotion-count">{{ emotion.count }}</span>
+                </div>
+                <div v-if="topPositiveEmotions.length === 0" class="no-data-message">
+                  {{ t('emotions.noPositiveEmotionsYet') }}
+                </div>
+              </div>
+            </div>
+
+            <div class="analytics-section">
+              <h3>{{ t('emotions.topNegativeEmotions') }}</h3>
+              <div class="top-emotions-list">
+                <div 
+                  v-for="(emotion, idx) in topNegativeEmotions"
+                  :key="emotion.name"
+                  class="top-emotion-item"
+                >
+                  <span class="emotion-rank">{{ Number(idx) + 1 }}</span>
+                  <span class="emotion-name">{{ getTranslatedEmotionName(emotion.name) }}</span>
+                  <span class="emotion-bar-container">
+                    <span 
+                      class="emotion-bar negative"
+                      :style="{ width: `${topNegativeEmotions.length > 0 ? (emotion.count / topNegativeEmotions[0].count * 100) : 0}%` }"
+                    ></span>
+                  </span>
+                  <span class="emotion-count">{{ emotion.count }}</span>
+                </div>
+                <div v-if="topNegativeEmotions.length === 0" class="no-data-message">
+                  {{ t('emotions.noNegativeEmotionsYet') }}
+                </div>
+              </div>
+            </div>
+
+            <div class="analytics-section">
               <h3>{{ t('emotions.trendChart') }}</h3>
               <div class="trend-chart">
                 <div 
@@ -388,6 +436,20 @@ function changeDate(delta: number) {
     selectedDate.value = newDate;
   }
 }
+
+const topPositiveEmotions = computed(() => {
+  if (!analytics.value?.topEmotions) return [];
+  return analytics.value.topEmotions
+    .filter((e: any) => e.type === 'positive')
+    .slice(0, 10);
+});
+
+const topNegativeEmotions = computed(() => {
+  if (!analytics.value?.topEmotions) return [];
+  return analytics.value.topEmotions
+    .filter((e: any) => e.type === 'negative')
+    .slice(0, 10);
+});
 
 function getTranslatedEmotionName(englishName: string): string {
   // Find the emotion in our lists to get the translated name
@@ -960,6 +1022,14 @@ onMounted(() => {
 .trend-bar:hover {
   opacity: 0.8;
   transform: scaleY(1.05);
+}
+
+.no-data-message {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--text2);
+  font-size: 0.9rem;
+  opacity: 0.7;
 }
 
 .trend-labels {
