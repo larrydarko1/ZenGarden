@@ -25,7 +25,6 @@
         "emotions": "Emotionen",
         "eightfoldPath": "Achtfacher Pfad",
         "calendar": "Kalender",
-        "gratitude": "Dankbarkeit",
         "philosophy": "Philosophie",
         "logout": "Abmelden"
     },
@@ -133,7 +132,7 @@
         "cancel": "Abbrechen",
         "deleteFailed": "Fehler beim Löschen des Kontos",
         "exportData": "Daten Exportieren",
-        "exportDescription": "Laden Sie alle Ihre Meditations-, Emotions- und Dankbarkeitsdaten herunter.",
+        "exportDescription": "Laden Sie alle Ihre Meditations- und Emotionsdaten herunter.",
         "exportJSON": "Als JSON Exportieren",
         "exportCSV": "Als CSV Exportieren",
         "exportSuccess": "Daten erfolgreich exportiert",
@@ -220,6 +219,8 @@
         "trendChart": "P/N-Verhältnis-Trend",
         "past30Days": "Letzte 30 Tage",
         "past90Days": "Letzte 90 Tage",
+        "dailyNote": "Tägliche Notiz",
+        "notePlaceholder": "Wie fühlst du dich heute? Schreibe deine Gedanken hier...",
         "list": {
             "Joy": {
                 "name": "Freude",
@@ -541,15 +542,6 @@
                 "questions": "Habe ich meditiert oder tiefe Konzentration geübt? Habe ich inneren Frieden kultiviert?"
             }
         }
-    },
-    "gratitude": {
-        "title": "Dankbarkeitstagebuch",
-        "prompt": "Wofür bist du heute dankbar?",
-        "placeholder": "Schreibe, wofür du dankbar bist...",
-        "save": "Eintrag Speichern",
-        "saving": "Speichern...",
-        "saved": "Gespeichert!",
-        "recentEntries": "Letzte Einträge"
     },
     "phrases": [
         "Atme Frieden ein, atme Spannung aus.",

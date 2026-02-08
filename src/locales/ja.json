@@ -25,7 +25,6 @@
         "emotions": "感情",
         "eightfoldPath": "八正道",
         "calendar": "カレンダー",
-        "gratitude": "感謝",
         "philosophy": "哲学",
         "logout": "ログアウト"
     },
@@ -133,7 +132,7 @@
         "cancel": "キャンセル",
         "deleteFailed": "アカウントの削除に失敗しました",
         "exportData": "データのエクスポート",
-        "exportDescription": "すべての瞑想、感情、感謝のデータをダウンロードします。",
+        "exportDescription": "すべての瞑想と感情のデータをダウンロードします。",
         "exportJSON": "JSONとしてエクスポート",
         "exportCSV": "CSVとしてエクスポート",
         "exportSuccess": "データが正常にエクスポートされました",
@@ -220,6 +219,8 @@
         "trendChart": "P/N比率のトレンド",
         "past30Days": "過去30日",
         "past90Days": "過去90日",
+        "dailyNote": "今日のメモ",
+        "notePlaceholder": "今日の気分はどうですか？ここに考えを書いてください...",
         "list": {
             "Joy": {
                 "name": "喜び",
@@ -541,15 +542,6 @@
                 "questions": "瞑想または深い集中を練習しましたか？内なる平和を育てましたか？"
             }
         }
-    },
-    "gratitude": {
-        "title": "感謝の日記",
-        "prompt": "今日は何に感謝していますか？",
-        "placeholder": "感謝していることを書いてください...",
-        "save": "エントリを保存",
-        "saving": "保存中...",
-        "saved": "保存されました！",
-        "recentEntries": "最近のエントリ"
     },
     "phrases": [
         "平和を吸い込み、緊張を吐き出す。",

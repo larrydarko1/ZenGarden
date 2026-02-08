@@ -46,6 +46,12 @@
         >
           {{ t('emotions.analytics') }}
         </button>
+        <button 
+          :class="['tab', { active: activeTab === 'notes' }]"
+          @click="activeTab = 'notes'"
+        >
+          {{ t('emotions.dailyNote') }}
+        </button>
       </div>
 
       <div class="emotion-content">
@@ -158,6 +164,32 @@
             <span>{{ t('emotions.trackEmotionsFirst') }}</span>
           </div>
         </div>
+
+        <div v-if="activeTab === 'notes'" class="notes-view">
+          <div class="notes-content">
+            <div class="notes-header">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <polyline points="10 9 9 9 8 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <h3>{{ t('emotions.dailyNote') }}</h3>
+            </div>
+            <p class="notes-date-label">{{ formatDate(selectedDate) }}</p>
+            <textarea
+              v-model="dailyNote"
+              class="emotion-note-textarea"
+              :placeholder="t('emotions.notePlaceholder')"
+              @input="handleNoteInput"
+              maxlength="2000"
+            ></textarea>
+            <div class="note-footer">
+              <span class="character-count">{{ dailyNote.length }} / 2000</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div v-if="saveStatus" class="save-status" :class="saveStatus">
@@ -185,6 +217,7 @@ const saveStatus = ref<'saving' | 'saved' | null>(null);
 const loading = ref(false);
 const loadingEmotions = ref(false);
 const analytics = ref<any>(null);
+const dailyNote = ref('');
 
 // Emotion definitions - using English names as keys for backend compatibility
 const positiveEmotionKeys = [
@@ -261,12 +294,20 @@ function toggleEmotion(emotion: { name: string; type: string; description: strin
   saveEmotions();
 }
 
+function handleNoteInput() {
+  clearTimeout((window as any).emotionNoteTimeout);
+  (window as any).emotionNoteTimeout = setTimeout(() => {
+    saveEmotions();
+  }, 1500);
+}
+
 async function saveEmotions() {
   saveStatus.value = 'saving';
   try {
     await saveEmotionLog(
       selectedDate.value.toISOString(),
-      selectedEmotions.value.map(e => ({ name: e.name, type: e.type as 'positive' | 'negative' }))
+      selectedEmotions.value.map(e => ({ name: e.name, type: e.type as 'positive' | 'negative' })),
+      dailyNote.value || undefined
     );
     saveStatus.value = 'saved';
     // Refresh analytics if tab is active
@@ -306,8 +347,10 @@ async function loadEmotions() {
         );
         return fullEmotion || e;
       });
+      dailyNote.value = response.emotionLogs[0].note || '';
     } else {
       selectedEmotions.value = [];
+      dailyNote.value = '';
     }
   } catch (err) {
     console.error('Failed to load emotions:', err);
@@ -624,6 +667,79 @@ onMounted(() => {
 .save-status.saved {
   background: rgba(76, 175, 80, 0.1);
   color: #4CAF50;
+}
+
+/* Notes tab styles */
+.notes-view {
+  min-height: 300px;
+}
+
+.notes-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.notes-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--text1);
+}
+
+.notes-header svg {
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.notes-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.notes-date-label {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text2);
+}
+
+.emotion-note-textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 1rem;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  color: var(--text1);
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  resize: vertical;
+  transition: border-color 0.2s, background 0.2s;
+  box-sizing: border-box;
+}
+
+.emotion-note-textarea:focus {
+  outline: none;
+  border-color: var(--input-border-focus);
+  background: var(--input-bg-focus);
+}
+
+.emotion-note-textarea::placeholder {
+  color: var(--text2);
+  opacity: 0.6;
+}
+
+.note-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.note-footer .character-count {
+  font-size: 0.8rem;
+  color: var(--text2);
+  opacity: 0.7;
 }
 
 /* Analytics styles */
@@ -1133,6 +1249,15 @@ onMounted(() => {
     bottom: 0;
     background: var(--base1);
     border-top: 1px solid var(--border-subtle);
+  }
+
+  .notes-view {
+    min-height: auto;
+  }
+
+  .emotion-note-textarea {
+    min-height: 180px;
+    font-size: 1rem;
   }
 }
 

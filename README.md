@@ -28,8 +28,7 @@ Zen Garden is a **local-first, cross-platform meditation app** built with **Elec
 
 ### Breathing & Wellness
 - **Breathing exercises** - Box, 4-7-8, Deep, and Energizing techniques
-- **Emotion tracker** - log and monitor your daily emotional state
-- **Gratitude journal** - cultivate gratitude with daily entries
+- **Emotion tracker** - log and monitor your daily emotional state with daily notes
 
 ### Insights & Progress
 - **Correlation insights** - discover the impact of meditation on your emotions
@@ -51,7 +50,7 @@ Zen Garden is a **local-first, cross-platform meditation app** built with **Elec
 - **Secure** - password hashing with PBKDF2 cryptography
 - **MongoDB-compatible** - data structure matches MEVN stack for easy migration
 
-> **Privacy Note:** This app runs entirely on your device. Your meditation data, emotions, and journal entries are stored in JSON files on your local file system and never leave your device.
+> **Privacy Note:** This app runs entirely on your device. Your meditation data, emotions, and notes are stored in JSON files on your local file system and never leave your device.
 
 ## Data Storage Location
 
@@ -70,7 +69,6 @@ Your data is stored in MongoDB-compatible JSON files:
 - `users.json` - User accounts (hashed passwords)
 - `meditations.json` - Meditation sessions
 - `emotion_logs.json` - Emotion tracking data
-- `gratitude_entries.json` - Gratitude journal entries
 - `eightfold_path_logs.json` - Buddhist path progress
 - `session.json` - Current session data
 

@@ -32,7 +32,6 @@ const dbFiles = {
     users: path.join(dataPath, 'users.json'),
     meditations: path.join(dataPath, 'meditations.json'),
     emotionLogs: path.join(dataPath, 'emotion_logs.json'),
-    gratitudeEntries: path.join(dataPath, 'gratitude_entries.json'),
     eightfoldPathLogs: path.join(dataPath, 'eightfold_path_logs.json'),
     session: path.join(dataPath, 'session.json')
 };
@@ -325,7 +324,7 @@ const storageHandlers = {
             writeCollection('users', users);
 
             // Update username in all collections
-            ['meditations', 'emotionLogs', 'gratitudeEntries', 'eightfoldPathLogs'].forEach(collection => {
+            ['meditations', 'emotionLogs', 'eightfoldPathLogs'].forEach(collection => {
                 const items = readCollection(collection);
                 items.forEach(item => {
                     if (item.username === oldUsername || item.Username === oldUsername) {
@@ -417,7 +416,7 @@ const storageHandlers = {
 
             // Remove all user's data
             const username = currentSession.username;
-            ['meditations', 'emotionLogs', 'gratitudeEntries', 'eightfoldPathLogs'].forEach(collection => {
+            ['meditations', 'emotionLogs', 'eightfoldPathLogs'].forEach(collection => {
                 const items = readCollection(collection);
                 const filtered = items.filter(item =>
                     (item.username !== username && item.Username !== username)
@@ -465,7 +464,7 @@ const storageHandlers = {
     },
 
     // EMOTION OPERATIONS
-    'storage:saveEmotionLog': async (event, date, emotions) => {
+    'storage:saveEmotionLog': async (event, date, emotions, note) => {
         if (!currentSession) throw new Error('Not authenticated');
 
         const positiveCount = emotions.filter(e => e.type === 'positive').length;
@@ -486,6 +485,7 @@ const storageHandlers = {
             positiveCount,
             negativeCount,
             pnRatio,
+            note: note || undefined,
             updatedAt: new Date().toISOString()
         };
 
@@ -616,56 +616,6 @@ const storageHandlers = {
             topEmotions,
             trends
         };
-    },
-
-    // GRATITUDE OPERATIONS
-    'storage:saveGratitudeEntry': async (event, date, text) => {
-        if (!currentSession) throw new Error('Not authenticated');
-
-        const gratitudeEntries = readCollection('gratitudeEntries');
-        const existingIndex = gratitudeEntries.findIndex(
-            entry => entry.username === currentSession.username && entry.date === date
-        );
-
-        const gratitudeEntry = {
-            _id: existingIndex >= 0 ? gratitudeEntries[existingIndex]._id : generateId(),
-            username: currentSession.username,
-            date,
-            text,
-            updatedAt: new Date().toISOString()
-        };
-
-        if (existingIndex >= 0) {
-            gratitudeEntries[existingIndex] = gratitudeEntry;
-        } else {
-            gratitudeEntries.push(gratitudeEntry);
-        }
-
-        writeCollection('gratitudeEntries', gratitudeEntries);
-
-        return gratitudeEntry;
-    },
-
-    'storage:getGratitudeEntries': async (event, query = {}) => {
-        if (!currentSession) throw new Error('Not authenticated');
-
-        let entries = readCollection('gratitudeEntries')
-            .filter(entry => entry.username === currentSession.username);
-
-        if (query.startDate) {
-            entries = entries.filter(entry => entry.date >= query.startDate);
-        }
-        if (query.endDate) {
-            entries = entries.filter(entry => entry.date <= query.endDate);
-        }
-
-        entries.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        if (query.limit) {
-            entries = entries.slice(0, query.limit);
-        }
-
-        return entries;
     },
 
     // EIGHTFOLD PATH OPERATIONS

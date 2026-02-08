@@ -8,8 +8,6 @@ import type {
     MeditationInput,
     EmotionLog,
     EmotionLogInput,
-    GratitudeEntry,
-    GratitudeInput,
     EightfoldPathLog,
     EightfoldPathInput,
     EmotionAnalytics,
@@ -30,11 +28,9 @@ interface ElectronAPI {
     updateLanguage: (language: string) => Promise<{ message: string }>;
     createMeditation: (date: string, duration: number, notes: string) => Promise<Meditation>;
     getMeditations: () => Promise<Meditation[]>;
-    saveEmotionLog: (date: string, emotions: any[]) => Promise<EmotionLog>;
+    saveEmotionLog: (date: string, emotions: any[], note?: string) => Promise<EmotionLog>;
     getEmotionLogs: (query?: any) => Promise<EmotionLog[]>;
     getEmotionAnalytics: (days?: number) => Promise<EmotionAnalytics>;
-    saveGratitudeEntry: (date: string, text: string) => Promise<GratitudeEntry>;
-    getGratitudeEntries: (query?: any) => Promise<GratitudeEntry[]>;
     saveEightfoldPathLog: (date: string, paths: any[]) => Promise<EightfoldPathLog>;
     getEightfoldPathLogs: (query?: any) => Promise<EightfoldPathLog[]>;
     getEightfoldPathAnalytics: (days?: number) => Promise<EightfoldPathAnalytics>;
@@ -125,7 +121,7 @@ export class ElectronStorageAdapter implements IStorageAdapter {
 
     // EMOTION OPERATIONS
     async saveEmotionLog(input: EmotionLogInput): Promise<{ message: string; emotionLog: EmotionLog }> {
-        const emotionLog = await this.api.saveEmotionLog(input.date, input.emotions);
+        const emotionLog = await this.api.saveEmotionLog(input.date, input.emotions, input.note);
         return { message: 'Emotion log saved successfully', emotionLog };
     }
 
@@ -136,17 +132,6 @@ export class ElectronStorageAdapter implements IStorageAdapter {
 
     async getEmotionAnalytics(days?: number): Promise<EmotionAnalytics> {
         return this.api.getEmotionAnalytics(days);
-    }
-
-    // GRATITUDE OPERATIONS
-    async saveGratitudeEntry(input: GratitudeInput): Promise<{ message: string; entry: GratitudeEntry }> {
-        const entry = await this.api.saveGratitudeEntry(input.date, input.text);
-        return { message: 'Gratitude entry saved successfully', entry };
-    }
-
-    async getGratitudeEntries(query?: DateRangeQuery): Promise<{ entries: GratitudeEntry[] }> {
-        const entries = await this.api.getGratitudeEntries(query);
-        return { entries };
     }
 
     // EIGHTFOLD PATH OPERATIONS

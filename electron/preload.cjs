@@ -33,18 +33,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
         ipcRenderer.invoke('storage:getMeditations'),
 
     // Emotion operations
-    saveEmotionLog: (date, emotions) =>
-        ipcRenderer.invoke('storage:saveEmotionLog', date, emotions),
+    saveEmotionLog: (date, emotions, note) =>
+        ipcRenderer.invoke('storage:saveEmotionLog', date, emotions, note),
     getEmotionLogs: (query) =>
         ipcRenderer.invoke('storage:getEmotionLogs', query),
     getEmotionAnalytics: (days) =>
         ipcRenderer.invoke('storage:getEmotionAnalytics', days),
-
-    // Gratitude operations
-    saveGratitudeEntry: (date, text) =>
-        ipcRenderer.invoke('storage:saveGratitudeEntry', date, text),
-    getGratitudeEntries: (query) =>
-        ipcRenderer.invoke('storage:getGratitudeEntries', query),
 
     // Eightfold Path operations
     saveEightfoldPathLog: (date, paths) =>

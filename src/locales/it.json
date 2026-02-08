@@ -25,7 +25,6 @@
         "emotions": "Emozioni",
         "eightfoldPath": "Nobile Ottuplice",
         "calendar": "Calendario",
-        "gratitude": "Gratitudine",
         "philosophy": "Filosofia",
         "logout": "Esci"
     },
@@ -133,7 +132,7 @@
         "cancel": "Annulla",
         "deleteFailed": "Impossibile eliminare l'account",
         "exportData": "Esporta Dati",
-        "exportDescription": "Scarica tutti i tuoi dati di meditazione, emozioni e gratitudine.",
+        "exportDescription": "Scarica tutti i tuoi dati di meditazione ed emozioni.",
         "exportJSON": "Esporta come JSON",
         "exportCSV": "Esporta come CSV",
         "exportSuccess": "Dati esportati con successo",
@@ -220,6 +219,8 @@
         "trendChart": "Tendenza Rapporto P/N",
         "past30Days": "Ultimi 30 Giorni",
         "past90Days": "Ultimi 90 Giorni",
+        "dailyNote": "Nota giornaliera",
+        "notePlaceholder": "Come ti senti oggi? Scrivi qui i tuoi pensieri...",
         "list": {
             "Joy": {
                 "name": "Gioia",
@@ -541,15 +542,6 @@
                 "questions": "Ho meditato o praticato una concentrazione profonda? Ho coltivato la pace interiore?"
             }
         }
-    },
-    "gratitude": {
-        "title": "Diario della Gratitudine",
-        "prompt": "Per cosa sei grato oggi?",
-        "placeholder": "Scrivi ciò per cui sei grato...",
-        "save": "Salva Voce",
-        "saving": "Salvataggio...",
-        "saved": "Salvato!",
-        "recentEntries": "Voci Recenti"
     },
     "phrases": [
         "Inspira pace, espira tensione.",

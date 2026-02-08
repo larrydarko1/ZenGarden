@@ -25,7 +25,6 @@
         "emotions": "情绪",
         "eightfoldPath": "八正道",
         "calendar": "日历",
-        "gratitude": "感恩",
         "philosophy": "哲学",
         "logout": "登出"
     },
@@ -133,7 +132,7 @@
         "cancel": "取消",
         "deleteFailed": "删除账户失败",
         "exportData": "导出数据",
-        "exportDescription": "下载您的所有冥想、情绪和感恩数据。",
+        "exportDescription": "下载您的所有冥想和情绪数据。",
         "exportJSON": "导出为JSON",
         "exportCSV": "导出为CSV",
         "exportSuccess": "数据导出成功",
@@ -220,6 +219,8 @@
         "trendChart": "P/N 比率趋势",
         "past30Days": "过去30天",
         "past90Days": "过去90天",
+        "dailyNote": "每日笔记",
+        "notePlaceholder": "你今天感觉如何？在这里写下你的想法...",
         "list": {
             "Joy": {
                 "name": "喜悦",
@@ -541,15 +542,6 @@
                 "questions": "我是否禅修或练习了深度专注？我是否培养了内心的宁静？"
             }
         }
-    },
-    "gratitude": {
-        "title": "感恩日记",
-        "prompt": "今天你感激什么？",
-        "placeholder": "写下你感激的事情...",
-        "save": "保存条目",
-        "saving": "保存中...",
-        "saved": "已保存！",
-        "recentEntries": "最近条目"
     },
     "phrases": [
         "吸入平静，呼出紧张。",

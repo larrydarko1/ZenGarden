@@ -78,9 +78,9 @@ export async function getMeditations() {
 }
 
 // Emotion operations
-export async function saveEmotionLog(date: string, emotions: Array<{ name: string; type: 'positive' | 'negative' }>) {
+export async function saveEmotionLog(date: string, emotions: Array<{ name: string; type: 'positive' | 'negative' }>, note?: string) {
     const adapter = await getStorageAdapter();
-    return adapter.saveEmotionLog({ date, emotions });
+    return adapter.saveEmotionLog({ date, emotions, note });
 }
 
 export async function getEmotionLogs(query?: { startDate?: string; endDate?: string; limit?: number }) {
@@ -91,17 +91,6 @@ export async function getEmotionLogs(query?: { startDate?: string; endDate?: str
 export async function getEmotionAnalytics(days?: number) {
     const adapter = await getStorageAdapter();
     return adapter.getEmotionAnalytics(days);
-}
-
-// Gratitude operations
-export async function saveGratitudeEntry(date: string, text: string) {
-    const adapter = await getStorageAdapter();
-    return adapter.saveGratitudeEntry({ date, text });
-}
-
-export async function getGratitudeEntries(query?: { startDate?: string; endDate?: string; limit?: number }) {
-    const adapter = await getStorageAdapter();
-    return adapter.getGratitudeEntries(query);
 }
 
 // Eightfold Path operations

@@ -31,7 +31,6 @@
         "emotions": "Emotions",
         "eightfoldPath": "Eightfold Path",
         "calendar": "Calendar",
-        "gratitude": "Gratitude",
         "philosophy": "Philosophy",
         "settings": "Settings",
         "logout": "Logout"
@@ -140,7 +139,7 @@
         "cancel": "Cancel",
         "deleteFailed": "Failed to delete account",
         "exportData": "Export Data",
-        "exportDescription": "Download all your meditation, emotion, and gratitude data.",
+        "exportDescription": "Download all your meditation and emotion data.",
         "exportJSON": "Export as JSON",
         "exportCSV": "Export as CSV",
         "exportSuccess": "Data exported successfully",
@@ -227,6 +226,8 @@
         "trendChart": "P/N Ratio Trend",
         "past30Days": "Last 30 Days",
         "past90Days": "Last 90 Days",
+        "dailyNote": "Daily Note",
+        "notePlaceholder": "How are you feeling today? Write your thoughts here...",
         "list": {
             "Joy": {
                 "name": "Joy",
@@ -548,15 +549,6 @@
                 "questions": "Did I meditate or practice deep focus? Did I cultivate inner peace?"
             }
         }
-    },
-    "gratitude": {
-        "title": "Gratitude Journal",
-        "prompt": "What are you grateful for today?",
-        "placeholder": "Write what you're grateful for...",
-        "save": "Save Entry",
-        "saving": "Saving...",
-        "saved": "Saved!",
-        "recentEntries": "Recent Entries"
     },
     "phrases": [
         "Breathe in peace, breathe out tension.",

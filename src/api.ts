@@ -22,10 +22,6 @@ export {
     getEmotionLogs,
     getEmotionAnalytics,
 
-    // Gratitude
-    saveGratitudeEntry,
-    getGratitudeEntries,
-
     // Eightfold Path
     saveEightfoldPathLog,
     getEightfoldPathLogs,

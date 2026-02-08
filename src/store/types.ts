@@ -49,26 +49,14 @@ export interface EmotionLog {
     positiveCount: number;
     negativeCount: number;
     pnRatio: number;
+    note?: string;
     updatedAt: Date | string;
 }
 
 export interface EmotionLogInput {
     date: string;
     emotions: Emotion[];
-}
-
-// Gratitude Types
-export interface GratitudeEntry {
-    _id?: string;
-    username: string;
-    date: Date | string;
-    text: string;
-    updatedAt: Date | string;
-}
-
-export interface GratitudeInput {
-    date: string;
-    text: string;
+    note?: string;
 }
 
 // Eightfold Path Types
@@ -146,10 +134,6 @@ export interface IStorageAdapter {
     saveEmotionLog(log: EmotionLogInput): Promise<{ message: string; emotionLog: EmotionLog }>;
     getEmotionLogs(query?: DateRangeQuery): Promise<{ emotionLogs: EmotionLog[] }>;
     getEmotionAnalytics(days?: number): Promise<EmotionAnalytics>;
-
-    // Gratitude
-    saveGratitudeEntry(entry: GratitudeInput): Promise<{ message: string; entry: GratitudeEntry }>;
-    getGratitudeEntries(query?: DateRangeQuery): Promise<{ entries: GratitudeEntry[] }>;
 
     // Eightfold Path
     saveEightfoldPathLog(log: EightfoldPathInput): Promise<{ message: string; pathLog: EightfoldPathLog }>;

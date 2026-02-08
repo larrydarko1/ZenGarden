@@ -10,8 +10,6 @@ import type {
     MeditationInput,
     EmotionLog,
     EmotionLogInput,
-    GratitudeEntry,
-    GratitudeInput,
     EightfoldPathLog,
     EightfoldPathInput,
     EmotionAnalytics,
@@ -30,7 +28,6 @@ const DB_FILES = {
     users: 'users.json',
     meditations: 'meditations.json',
     emotionLogs: 'emotion_logs.json',
-    gratitudeEntries: 'gratitude_entries.json',
     eightfoldPathLogs: 'eightfold_path_logs.json',
     session: 'session.json'
 };
@@ -429,6 +426,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
             positiveCount,
             negativeCount,
             pnRatio,
+            note: input.note,
             updatedAt: new Date().toISOString()
         };
 
@@ -516,60 +514,6 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
             mostFrequentEmotions,
             trends
         };
-    }
-
-    // GRATITUDE OPERATIONS
-    async saveGratitudeEntry(input: GratitudeInput): Promise<{ message: string; entry: GratitudeEntry }> {
-        await this.ensureInitialized();
-
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
-
-        const entries = await readCollection<GratitudeEntry>(DB_FILES.gratitudeEntries);
-
-        const existingIndex = entries.findIndex(
-            e => e.username === session.currentUser && e.date === input.date
-        );
-
-        const entry: GratitudeEntry = {
-            _id: existingIndex >= 0 ? entries[existingIndex]._id : generateObjectId(),
-            username: session.currentUser,
-            date: input.date,
-            text: input.text,
-            updatedAt: new Date().toISOString()
-        };
-
-        if (existingIndex >= 0) {
-            entries[existingIndex] = entry;
-        } else {
-            entries.push(entry);
-        }
-
-        await writeCollection(DB_FILES.gratitudeEntries, entries);
-
-        return { message: 'Gratitude entry saved successfully', entry };
-    }
-
-    async getGratitudeEntries(query?: DateRangeQuery): Promise<{ entries: GratitudeEntry[] }> {
-        await this.ensureInitialized();
-
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
-
-        let entries = await readCollection<GratitudeEntry>(DB_FILES.gratitudeEntries);
-        entries = entries.filter(e => e.username === session.currentUser);
-
-        if (query?.startDate) {
-            entries = entries.filter(e => e.date >= query.startDate!);
-        }
-        if (query?.endDate) {
-            entries = entries.filter(e => e.date <= query.endDate!);
-        }
-        if (query?.limit) {
-            entries = entries.slice(-query.limit);
-        }
-
-        return { entries };
     }
 
     // EIGHTFOLD PATH OPERATIONS
@@ -687,17 +631,15 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         const session = await readSession();
         if (!session.currentUser) throw new Error('Not authenticated');
 
-        const [meditations, emotionLogs, gratitudeEntries, eightfoldPathLogs] = await Promise.all([
+        const [meditations, emotionLogs, eightfoldPathLogs] = await Promise.all([
             readCollection<Meditation>(DB_FILES.meditations),
             readCollection<EmotionLog>(DB_FILES.emotionLogs),
-            readCollection<GratitudeEntry>(DB_FILES.gratitudeEntries),
             readCollection<EightfoldPathLog>(DB_FILES.eightfoldPathLogs)
         ]);
 
         const data = {
             meditations: meditations.filter(m => m.Username === session.currentUser),
             emotionLogs: emotionLogs.filter(e => e.username === session.currentUser),
-            gratitudeEntries: gratitudeEntries.filter(g => g.username === session.currentUser),
             eightfoldPathLogs: eightfoldPathLogs.filter(e => e.username === session.currentUser),
             exportDate: new Date().toISOString(),
             version: '1.0'
@@ -706,7 +648,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         return JSON.stringify(data, null, 2);
     }
 
-    async importData(jsonData: string): Promise<{ message: string; imported: { meditations: number; emotionLogs: number; gratitudeEntries: number; eightfoldPathLogs: number } }> {
+    async importData(jsonData: string): Promise<{ message: string; imported: { meditations: number; emotionLogs: number; eightfoldPathLogs: number } }> {
         await this.ensureInitialized();
 
         const session = await readSession();
@@ -715,14 +657,13 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         const importData = JSON.parse(jsonData);
 
         // Read existing data
-        const [meditations, emotionLogs, gratitudeEntries, eightfoldPathLogs] = await Promise.all([
+        const [meditations, emotionLogs, eightfoldPathLogs] = await Promise.all([
             readCollection<Meditation>(DB_FILES.meditations),
             readCollection<EmotionLog>(DB_FILES.emotionLogs),
-            readCollection<GratitudeEntry>(DB_FILES.gratitudeEntries),
             readCollection<EightfoldPathLog>(DB_FILES.eightfoldPathLogs)
         ]);
 
-        let counts = { meditations: 0, emotionLogs: 0, gratitudeEntries: 0, eightfoldPathLogs: 0 };
+        let counts = { meditations: 0, emotionLogs: 0, eightfoldPathLogs: 0 };
 
         // Import meditations
         if (importData.meditations) {
@@ -744,17 +685,6 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
                 counts.emotionLogs++;
             });
             await writeCollection(DB_FILES.emotionLogs, emotionLogs);
-        }
-
-        // Import gratitude entries
-        if (importData.gratitudeEntries) {
-            importData.gratitudeEntries.forEach((g: GratitudeEntry) => {
-                g.username = session.currentUser;
-                g._id = generateObjectId();
-                gratitudeEntries.push(g);
-                counts.gratitudeEntries++;
-            });
-            await writeCollection(DB_FILES.gratitudeEntries, gratitudeEntries);
         }
 
         // Import eightfold path logs
