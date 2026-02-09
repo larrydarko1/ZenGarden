@@ -134,7 +134,7 @@
         </div>
       </div>
       <MeditationCalendar v-if="showCalendar && !meditationActive" :meditations="meditations" @close="showCalendar = false" />
-      <SessionNotes v-if="showNotes" :duration="completedMeditationDuration" @save="saveSessionNotes" @skip="skipSessionNotes" @close="showNotes = false" />
+      <SessionNotes v-if="showNotes" :duration="completedMeditationDuration" @save="saveSessionNotes" @skip="skipSessionNotes" @close="skipSessionNotes" />
       <BreathingExercise v-if="showBreathing" @close="showBreathing = false" />
       <EmotionTracker v-if="showEmotions" @close="showEmotions = false" />
       <ZenPhilosophy v-if="showPhilosophy" @close="showPhilosophy = false" />
