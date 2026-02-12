@@ -7,7 +7,7 @@ Thank you for considering contributing to Zen Garden! This is a desktop applicat
 1. **Fork the repository**
 2. **Clone your fork**
    ```sh
-   git clone https://github.com/YOUR_USERNAME/zen-garden.git
+   git clone https://github.com/larrydarko1/ZenGarden.git
    cd zen-garden
    ```
 3. **Install dependencies**
