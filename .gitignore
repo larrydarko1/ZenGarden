@@ -30,9 +30,6 @@ dist-electron
 .env.*.local
 
 # Capacitor
-ios/App/Pods
-ios/App/public
-ios/App/Podfile.lock
 android/app/src/main/assets/public
 android/.idea
 android/.gradle

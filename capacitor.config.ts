@@ -13,7 +13,6 @@ const config: CapacitorConfig = {
             backgroundColor: '#181a20',
             showSpinner: false,
             androidSpinnerStyle: 'small',
-            iosSpinnerStyle: 'small',
             splashFullScreen: true,
             splashImmersive: true
         }
