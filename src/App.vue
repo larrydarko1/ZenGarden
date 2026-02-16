@@ -1,8 +1,7 @@
 <template>
 	<div id="app" :class="[currentTheme, { 'has-desktop-header': isDesktopApp }]">
 		<DesktopHeader v-if="isDesktopApp" />
-		<Home @meditation-active="onMeditationActive" @theme-changed="setThemeFromLogin" @language-changed="setLanguageFromLogin" @user-changed="onUserChanged" @open-settings="showSettings = true" />
-		<SettingsPopup v-if="showSettings" @close="showSettings = false" @theme-change="setTheme" @language-change="setLanguage" />
+		<Home @meditation-active="onMeditationActive" @theme-changed="setThemeFromLogin" @language-changed="setLanguageFromLogin" @user-changed="onUserChanged" @theme-change="setTheme" @language-change="setLanguage" />
 	</div>
 </template>
 
@@ -10,7 +9,6 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Home from './components/Home.vue';
-import SettingsPopup from './components/SettingsPopup.vue';
 import DesktopHeader from './components/DesktopHeader.vue';
 import { updateTheme, updateLanguage } from './store';
 import { isDesktop } from './utils/platform';
@@ -20,7 +18,6 @@ const { locale } = useI18n();
 // Theme starts as dark, will be set from user data after login
 const currentTheme = ref('dark');
 const meditationActive = ref(false); // controlled by Home.vue
-const showSettings = ref(false);
 const isAuthenticated = ref(false);
 const isDesktopApp = ref(false);
 

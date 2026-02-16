@@ -19,8 +19,8 @@
           <span>{{ t('header.emotions') }}</span>
         </button>
         <button
-          class="nav-item"
-          @click="showCalendar = true"
+          :class="['nav-item', { 'nav-active': calendarMode }]"
+          @click="toggleCalendarMode"
           aria-label="View meditation history"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -30,19 +30,18 @@
           <span>{{ t('header.calendar') }}</span>
         </button>
         <button
-          class="nav-item"
-          @click="showPhilosophy = true"
+          :class="['nav-item', { 'nav-active': philosophyMode }]"
+          @click="togglePhilosophyMode"
           aria-label="About our philosophy"
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <svg width="22" height="22" viewBox="0 0 96 96" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M44 9.553c-1.925.812-4.86 3.056-6.523 4.988-2.862 3.327-3.196 3.453-6.299 2.371-7.117-2.481-16.58 2.241-20.581 10.27-4.402 8.833-2.61 17.282 4.996 23.559 4.854 4.006 5.66 4.812 9.666 9.666 5.493 6.656 13.034 8.936 20.741 6.269 2.85-.986 4.266-.939 7.623.253 5.57 1.978 11.336.245 16.708-5.021C72.524 59.759 74.906 58 75.624 58c2.279 0 8.621-6.331 10.511-10.491C91.4 35.919 83.178 22.041 70 20.273c-2.2-.295-4-.926-4-1.402 0-2.12-7.482-8.911-10.848-9.846-4.829-1.341-6.956-1.24-11.152.528m.838 7.973c-1.621.88-3.336 3.21-4.386 5.96-2.008 5.258-1.53 5.046-5.678 2.518-10.81-6.591-23.486 5.211-17.138 15.956 1.765 2.989 6.195 6.04 8.768 6.04A1.6 1.6 0 0 1 28 49.596c0 7.743 11.474 13.045 18.381 8.492 2.83-1.866 2.935-1.866 6 .002 5.341 3.258 11.783 1.708 14.573-3.505C67.715 53.163 68.98 52 69.765 52 74.454 52 80 45.498 80 40c0-7.684-6.192-12.605-14.615-11.615-5.226.614-5.385.56-5.385-1.829 0-8.107-8.042-12.897-15.162-9.03M26 74c-3.585 3.585-1.019 10 4 10 2.576 0 6-3.424 6-6 0-1.1-.9-2.9-2-4s-2.9-2-4-2-2.9.9-4 2m-12.96 7.452c-2.657 3.201 1.245 8.118 4.71 5.936C21.212 85.207 19.979 80 16 80c-.965 0-2.297.653-2.96 1.452" fill-rule="evenodd"/>
           </svg>
           <span>{{ t('header.philosophy') }}</span>
         </button>
         <button
-          class="nav-item"
-          @click="$emit('open-settings')"
+          :class="['nav-item', { 'nav-active': settingsMode }]"
+          @click="toggleSettingsMode"
           aria-label="Open settings"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -62,7 +61,7 @@
           <span>{{ t('header.logout') }}</span>
         </button>
       </nav>
-      <MeditationCalendar v-if="showCalendar && !meditationActive" :meditations="meditations" @close="showCalendar = false" />
+
       <SessionNotes v-if="showNotes" :duration="completedMeditationDuration" @save="saveSessionNotes" @skip="skipSessionNotes" @close="skipSessionNotes" />
       <!-- Breathing Exercise Picker (pre-meditation) -->
       <div v-if="showBreathingPicker && !meditationActive" class="breathing-picker-backdrop" @click="showBreathingPicker = false"></div>
@@ -94,17 +93,37 @@
         </div>
       </div>
 
-      <ZenPhilosophy v-if="showPhilosophy" @close="showPhilosophy = false" />
 
-      <div v-if="!meditationActive" :class="['zen-main', { 'journal-active': journalMode }]">
+      <div v-if="!meditationActive" :class="['zen-main', { 'journal-active': journalMode || calendarMode || philosophyMode || settingsMode }]">
         <!-- Journal inline view -->
         <transition name="journal-fade">
-          <div v-if="journalMode" class="journal-inline-container">
+          <div v-if="journalMode" :class="['journal-inline-container', { 'has-header': desktopApp }]">
             <EmotionTracker @close="journalMode = false" />
           </div>
         </transition>
 
-        <div class="zen-center" v-show="!journalMode">
+        <!-- Calendar inline view -->
+        <transition name="journal-fade">
+          <div v-if="calendarMode" :class="['journal-inline-container', { 'has-header': desktopApp }]">
+            <MeditationCalendar :meditations="meditations" @close="calendarMode = false" />
+          </div>
+        </transition>
+
+        <!-- Philosophy inline view -->
+        <transition name="journal-fade">
+          <div v-if="philosophyMode" :class="['journal-inline-container', { 'has-header': desktopApp }]">
+            <ZenPhilosophy @close="philosophyMode = false" />
+          </div>
+        </transition>
+
+        <!-- Settings inline view -->
+        <transition name="journal-fade">
+          <div v-if="settingsMode" :class="['journal-inline-container', { 'has-header': desktopApp }]">
+            <SettingsPopup @close="settingsMode = false" @theme-change="handleSettingsThemeChange" @language-change="handleSettingsLanguageChange" />
+          </div>
+        </transition>
+
+        <div class="zen-center" v-show="!journalMode && !calendarMode && !philosophyMode && !settingsMode">
         <span :class="['zen-phrase', { dimmed: showAudioConfig || showBellConfig }]">{{ currentPhrase }}</span>
         <span :class="['zen-loader', { dimmed: showAudioConfig || showBellConfig }]">
           <svg width="32" height="32" viewBox="0 0 32 32">
@@ -115,7 +134,7 @@
         </span>
         <div v-if="!meditationActive" class="meditation-control-bar">
           <button
-            v-for="duration in [1, 5, 10, 15, 20, 30]"
+            v-for="duration in [5, 10, 15, 30]"
             :key="duration"
             :class="['duration-btn', { active: selectedDuration === duration && !isCustomDuration }]"
             @click="selectPresetDuration(duration)"
@@ -430,15 +449,17 @@ import MeditationCalendar from './MeditationCalendar.vue'
 import SessionNotes from './SessionNotes.vue'
 import EmotionTracker from './EmotionTracker.vue'
 import ZenPhilosophy from './ZenPhilosophy.vue'
+import SettingsPopup from './SettingsPopup.vue'
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
-import ZenWindAnimation from './ZenWindAnimation.vue'
-import ZenWavesAnimation from './ZenWavesAnimation.vue'
-import ZenBreatheAnimation from './ZenBreatheAnimation.vue'
-import ZenParticlesAnimation from './ZenParticlesAnimation.vue'
-import ZenLavaAnimation from './ZenLavaAnimation.vue'
+import ZenWindAnimation from './animations/ZenWindAnimation.vue'
+import ZenWavesAnimation from './animations/ZenWavesAnimation.vue'
+import ZenBreatheAnimation from './animations/ZenBreatheAnimation.vue'
+import ZenParticlesAnimation from './animations/ZenParticlesAnimation.vue'
+import ZenLavaAnimation from './animations/ZenLavaAnimation.vue'
 import MonkAuth from './MonkAuth.vue'
 import { getMeditations, createMeditation, getCurrentUser, logout } from '../store'
 import { useI18n } from 'vue-i18n'
+import { isDesktop } from '../utils/platform'
 
 const { t, tm } = useI18n()
 // Zen phrases
@@ -446,7 +467,9 @@ const phrases = computed(() => tm('phrases') as string[])
 const currentPhrase = ref(phrases.value[Math.floor(Math.random() * phrases.value.length)])
 let phraseIntervalId: number | undefined
 
-const emit = defineEmits(['meditation-active', 'theme-changed', 'language-changed', 'user-changed', 'open-settings'])
+const emit = defineEmits(['meditation-active', 'theme-changed', 'language-changed', 'user-changed', 'theme-change', 'language-change'])
+const desktopApp = ref(false)
+onMounted(() => { desktopApp.value = isDesktop() })
 const meditationActive = ref(false)
 
 // Watch meditationActive and emit event on change
@@ -584,19 +607,68 @@ let ambientAudio: HTMLAudioElement | null = null
 let previewTrackAudio: HTMLAudioElement | null = null
 let previewAmbientAudio: HTMLAudioElement | null = null
 
-const showCalendar = ref(false)
 const showNotes = ref(false)
-const showPhilosophy = ref(false)
 const journalMode = ref(false)
+const calendarMode = ref(false)
+const philosophyMode = ref(false)
+const settingsMode = ref(false)
 
 function toggleJournalMode() {
   journalMode.value = !journalMode.value
   // Close other panels when entering journal mode
   if (journalMode.value) {
+    calendarMode.value = false
+    philosophyMode.value = false
+    settingsMode.value = false
     showAudioConfig.value = false
     showBellConfig.value = false
     showBreathingPicker.value = false
   }
+}
+
+function toggleCalendarMode() {
+  calendarMode.value = !calendarMode.value
+  if (calendarMode.value) {
+    journalMode.value = false
+    philosophyMode.value = false
+    settingsMode.value = false
+    showAudioConfig.value = false
+    showBellConfig.value = false
+    showBreathingPicker.value = false
+    if (user.value) fetchMeditations()
+  }
+}
+
+function togglePhilosophyMode() {
+  philosophyMode.value = !philosophyMode.value
+  if (philosophyMode.value) {
+    journalMode.value = false
+    calendarMode.value = false
+    settingsMode.value = false
+    showAudioConfig.value = false
+    showBellConfig.value = false
+    showBreathingPicker.value = false
+  }
+}
+
+function toggleSettingsMode() {
+  settingsMode.value = !settingsMode.value
+  if (settingsMode.value) {
+    journalMode.value = false
+    calendarMode.value = false
+    philosophyMode.value = false
+    showAudioConfig.value = false
+    showBellConfig.value = false
+    showBreathingPicker.value = false
+  }
+}
+
+function handleSettingsThemeChange(theme: string) {
+  emit('theme-change', theme)
+}
+
+function handleSettingsLanguageChange(language: string) {
+  emit('language-change', language)
 }
 
 const meditations = ref<Array<{ Date: string | { $date: string }, Username?: string, duration?: number, notes?: string }>>([])  
@@ -955,8 +1027,7 @@ async function handleLogout() {
   }
 }
 
-// Optionally, fetch meditations when calendar is opened
-watch(showCalendar, (val) => { if (val && user.value) fetchMeditations() })
+
 </script>
 
 <style scoped>
@@ -1293,6 +1364,10 @@ watch(showCalendar, (val) => { if (val && user.value) fetchMeditations() })
   box-sizing: border-box;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.journal-inline-container.has-header {
+  padding-top: calc(40px + 1.5rem);
 }
 
 /* Journal transition */
@@ -2026,8 +2101,12 @@ watch(showCalendar, (val) => { if (val && user.value) fetchMeditations() })
 
   .journal-inline-container {
     padding: 1rem;
-    padding-top: 1rem;
+    padding-top: env(safe-area-inset-top, 1rem);
     padding-bottom: 6rem;
+  }
+
+  .journal-inline-container.has-header {
+    padding-top: calc(40px + 1rem);
   }
 
   .meditation-control-bar {

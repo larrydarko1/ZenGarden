@@ -1,47 +1,45 @@
 <template>
-  <div class="calendar-modal-bg" @click.self="$emit('close')" aria-label="Calendar modal background, click to close">
-    <div class="calendar-modal calendar-modal-focused" role="dialog" aria-labelledby="calendar-title" aria-modal="true">
-      <div class="calendar-header">
-        <button class="calendar-arrow" @click="prevMonth" :disabled="visibleMonth === 0" aria-label="Previous month">&#8592;</button>
-        <span class="calendar-title" id="calendar-title">{{ monthNames[visibleMonth] }} {{ year }}</span>
-        <button class="calendar-arrow" @click="nextMonth" :disabled="visibleMonth === 11" aria-label="Next month">&#8594;</button>
-        <button class="calendar-close" @click="$emit('close')" aria-label="Close calendar">×</button>
-      </div>
-      <div class="calendar-content">
-        <div class="calendar-month calendar-month-focused">
-          <div class="calendar-month-title">{{ monthNames[visibleMonth] }}</div>
-          <div class="calendar-weekdays" role="row">
-            <span v-for="d in weekdays" :key="d" role="columnheader">{{ d }}</span>
-          </div>
-          <div class="calendar-days" role="grid">
-            <span
-              v-for="(day, idx) in getDaysInMonth(year, visibleMonth)"
-              :key="idx"
-              :class="['calendar-day',
-                day.date && day.isToday ? 'today' : '',
-                day.date && day.complete === true ? 'complete' : '',
-                day.date && day.complete === false ? 'incomplete' : '',
-                selectedDay && day.date && getLocalDateKey(day.date) === getLocalDateKey(selectedDay) ? 'selected' : '']"
-              role="gridcell"
-              :aria-label="day.date ? `${day.date.getDate()} ${monthNames[visibleMonth]} ${year}${day.isToday ? ', today' : ''}${day.complete === true ? ', meditation completed' : day.complete === false ? ', meditation incomplete' : ', no meditation recorded'}` : ''"
-              @click="day.date && day.complete ? selectedDay = day.date : null"
-              :style="{ cursor: day.date && day.complete ? 'pointer' : 'default' }"
-            >
-              <span style="position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                <span>{{ day.date ? day.date.getDate() : '' }}</span>
-              </span>
-            </span>
-          </div>
+  <div class="calendar-inline">
+    <div class="calendar-header">
+      <button class="calendar-arrow" @click="prevMonth" :disabled="visibleMonth === 0" aria-label="Previous month">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="calendar-title">{{ monthNames[visibleMonth] }} {{ year }}</span>
+      <button class="calendar-arrow" @click="nextMonth" :disabled="visibleMonth === 11" aria-label="Next month">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="calendar-body">
+      <div class="calendar-grid-section">
+        <div class="calendar-weekdays">
+          <span v-for="d in weekdays" :key="d">{{ d }}</span>
         </div>
-        <div v-if="selectedDay && selectedDayMeditations.length > 0" class="meditation-details">
-          <h3>{{ monthNames[selectedDay.getMonth()] }} {{ selectedDay.getDate() }}</h3>
-          <div v-for="(med, idx) in selectedDayMeditations" :key="idx" class="meditation-entry">
-            <div class="meditation-info">
-              <span class="meditation-duration">⏱ {{ med.duration || 0 }} {{ t('calendar.minutes') }}</span>
-            </div>
-            <div v-if="med.notes" class="meditation-notes">
-              <strong>{{ t('calendar.notes') }}:</strong> {{ med.notes }}
-            </div>
+        <div class="calendar-days">
+          <span
+            v-for="(day, idx) in getDaysInMonth(year, visibleMonth)"
+            :key="idx"
+            :class="['calendar-day',
+              day.date && day.isToday ? 'today' : '',
+              day.date && day.complete === true ? 'complete' : '',
+              day.date && day.complete === false ? 'incomplete' : '',
+              selectedDay && day.date && getLocalDateKey(day.date) === getLocalDateKey(selectedDay) ? 'selected' : '']"
+            @click="day.date && day.complete ? selectedDay = day.date : null"
+            :style="{ cursor: day.date && day.complete ? 'pointer' : 'default' }"
+          >
+            {{ day.date ? day.date.getDate() : '' }}
+          </span>
+        </div>
+      </div>
+
+      <div v-if="selectedDay && selectedDayMeditations.length > 0" class="meditation-details">
+        <h3>{{ monthNames[selectedDay.getMonth()] }} {{ selectedDay.getDate() }}</h3>
+        <div v-for="(med, idx) in selectedDayMeditations" :key="idx" class="meditation-entry">
+          <div class="meditation-info">
+            <span class="meditation-duration">⏱ {{ med.duration || 0 }} {{ t('calendar.minutes') }}</span>
+          </div>
+          <div v-if="med.notes" class="meditation-notes">
+            <strong>{{ t('calendar.notes') }}:</strong> {{ med.notes }}
           </div>
         </div>
       </div>
@@ -140,503 +138,256 @@ function getDaysInMonth(year: number, month: number) {
 </script>
 
 <style scoped>
-.calendar-modal-bg {
-  position: fixed;
-  inset: 0;
-  background: var(--blur2);
-  display: flex;
-  align-items: stretch;
-  justify-content: stretch;
-  z-index: 100;
-  padding: 0;
-}
-.calendar-modal {
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  border-radius: 6px;
-  padding: 1rem;
-  max-width: 800px;
-  max-height: 90vh;
+.calendar-inline {
   width: 100%;
-  height: auto;
-  margin: auto;
-  position: relative;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  box-sizing: border-box;
+  gap: 1.25rem;
 }
-.calendar-modal-focused {
-  border-radius: 6px;
-  max-width: 800px;
-  max-height: 90vh;
-  width: 100%;
-  height: auto;
-  margin: auto;
-}
-.calendar-content {
+
+.calendar-header {
   display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-  overflow-y: auto;
-}
-.calendar-month-focused {
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  border-radius: 6px;
-  padding: 0.75rem;
-  width: 100%;
-  min-width: 0;
-  height: 380px;
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  box-sizing: border-box;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0.5rem 0;
 }
+
+.calendar-title {
+  color: var(--text1);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  min-width: 140px;
+  text-align: center;
+}
+
 .calendar-arrow {
   background: transparent;
-  border: none;
+  border: 1px solid var(--input-border);
   color: var(--text2);
-  font-size: 1rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
   cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
 }
+
 .calendar-arrow:hover {
   color: var(--text1);
+  border-color: var(--text2);
+  background: var(--input-bg);
 }
+
 .calendar-arrow:disabled {
   opacity: 0.3;
   cursor: not-allowed;
 }
+
 .calendar-arrow:disabled:hover {
   color: var(--text2);
+  border-color: var(--input-border);
+  background: transparent;
 }
-.calendar-month-title {
-  color: var(--text2);
-  font-size: 0.75rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.5rem;
-}
-.calendar-header {
+
+.calendar-body {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-  padding: 0.35rem 0.5rem;
+  gap: 1.5rem;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.calendar-grid-section {
+  flex: 1;
+  min-width: 0;
   background: var(--input-bg);
   border: 1px solid var(--input-border);
-  border-radius: 6px;
-  cursor: default;
+  border-radius: 8px;
+  padding: 1.25rem;
 }
-.calendar-title {
-  color: var(--text1);
-  font-size: 0.875rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  cursor: default;
-}
-.calendar-close {
-  background: transparent;
-  border: none;
-  color: var(--text2);
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  transition: color 0.15s;
-}
-.calendar-close:hover {
-  color: var(--text1);
-}
-.calendar-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
+
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.6rem;
+  gap: 0.25rem;
   color: var(--text2);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   margin-bottom: 0.5rem;
-  cursor: default;
+  text-align: center;
 }
+
 .calendar-weekdays span {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2em;
-  height: 2em;
+  height: 2.2em;
 }
+
 .calendar-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0.25rem;
 }
+
 .calendar-day {
-  width: 2em;
-  height: 2em;
+  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: 6px;
   color: var(--text1);
-  opacity: 0.6;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.15s;
+  opacity: 0.45;
+  font-size: 0.78rem;
+  cursor: default;
+  transition: all 0.15s ease;
 }
+
 .calendar-day.today {
   border: 1px solid var(--border-subtle);
   opacity: 1;
+  font-weight: 500;
 }
-.calendar-day.complete, .calendar-day.complete:hover {
+
+.calendar-day.complete {
   background: var(--border-subtle);
   color: var(--text1);
   opacity: 1;
+  cursor: pointer;
 }
+
+.calendar-day.complete:hover {
+  background: color-mix(in srgb, var(--border-subtle) 80%, var(--text1) 20%);
+}
+
 .calendar-day.selected {
   outline: 2px solid var(--input-border-focus);
   outline-offset: -2px;
 }
+
+.calendar-day.incomplete {
+  opacity: 0.45;
+}
+
+.calendar-day:hover {
+  opacity: 0.8;
+}
+
+/* Meditation Details Panel */
 .meditation-details {
-  flex: 1;
-  min-width: 220px;
-  height: 380px;
-  padding: 0.75rem;
+  flex: 0 0 280px;
   background: var(--input-bg);
   border: 1px solid var(--input-border);
-  border-radius: 6px;
-  align-self: stretch;
+  border-radius: 8px;
+  padding: 1.25rem;
+  max-height: 380px;
   overflow-y: auto;
-  box-sizing: border-box;
 }
+
 .meditation-details h3 {
-  margin: 0 0 0.75rem 0;
-  font-size: 0.75rem;
+  margin: 0 0 1rem 0;
+  font-size: 0.7rem;
   color: var(--text2);
   font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
+
 .meditation-entry {
-  padding: 0.5rem 0;
+  padding: 0.75rem 0;
   border-bottom: 1px solid var(--input-border);
 }
+
 .meditation-entry:last-child {
   border-bottom: none;
 }
+
 .meditation-info {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
+
 .meditation-duration {
   font-size: 0.75rem;
   color: var(--text1);
   font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
 }
+
 .meditation-notes {
   font-size: 0.7rem;
   color: var(--text2);
-  line-height: 1.4;
-  padding: 0.5rem;
-  background: var(--input-bg);
+  line-height: 1.5;
+  padding: 0.75rem;
+  background: color-mix(in srgb, var(--input-bg) 50%, var(--base1) 50%);
   border: 1px solid var(--input-border);
-  border-radius: 4px;
+  border-radius: 6px;
 }
+
 .meditation-notes strong {
   color: var(--text1);
   display: block;
-  margin-bottom: 0.25rem;
-  font-size: 0.7rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-.calendar-day.incomplete {
-  color: var(--text1);
-  opacity: 0.6;
-}
-.calendar-day:hover {
-  opacity: 1;
-  background: var(--input-bg-focus);
-}
 
-/* Mobile Responsive Design */
+/* Responsive */
 @media (max-width: 768px) {
-  .calendar-modal-bg {
-    padding: 0;
-    align-items: stretch;
-  }
-
-  .calendar-modal {
-    max-width: 100%;
-    max-height: 100vh;
-    border-radius: 0;
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    padding: 1.25rem;
-    animation: slideInFromBottom 0.3s ease-out;
-  }
-
-  @keyframes slideInFromBottom {
-    from {
-      transform: translateY(100%);
-    }
-    to {
-      transform: translateY(0);
-    }
-  }
-
-  .calendar-modal-focused {
-    max-width: 100%;
-    max-height: 100vh;
-    border-radius: 0;
-  }
-
-  .calendar-header {
-    padding: 0.75rem 0.5rem;
-    margin-bottom: 1.25rem;
-    min-height: 56px;
-  }
-
-  .calendar-title {
-    font-size: 1rem;
-    flex: 1;
-    text-align: center;
-  }
-
-  .calendar-arrow,
-  .calendar-close {
-    font-size: 1.4rem;
-    padding: 0.5rem;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    touch-action: manipulation;
-  }
-
-  .calendar-content {
+  .calendar-body {
     flex-direction: column;
-    gap: 1.5rem;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    gap: 1rem;
   }
 
-  .calendar-month-focused {
-    height: auto;
-    min-height: 360px;
-    width: 100%;
-    padding: 1.25rem;
-  }
-
-  .calendar-month-title {
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
+  .calendar-grid-section {
+    padding: 1rem;
   }
 
   .calendar-weekdays {
-    font-size: 0.8rem;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .calendar-weekdays span {
-    width: 2.75em;
-    height: 2.75em;
-  }
-
-  .calendar-days {
-    gap: 0.5rem;
+    font-size: 0.7rem;
   }
 
   .calendar-day {
-    width: 2.75em;
-    height: 2.75em;
-    font-size: 0.9rem;
-    touch-action: manipulation;
+    font-size: 0.82rem;
   }
 
   .meditation-details {
-    height: auto;
-    min-height: 200px;
-    max-height: 350px;
-    min-width: 100%;
-    padding: 1.25rem;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    flex: none;
+    width: 100%;
+    max-height: 260px;
   }
 
-  .meditation-details h3 {
-    font-size: 1rem;
-    margin-bottom: 1.25rem;
+  .calendar-arrow {
+    width: 40px;
+    height: 40px;
+    touch-action: manipulation;
   }
 
-  .meditation-entry {
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--input-border);
-  }
-
-  .meditation-entry:last-child {
-    border-bottom: none;
-  }
-
-  .meditation-info {
-    margin-bottom: 0.75rem;
-  }
-
-  .meditation-duration {
-    font-size: 0.9rem;
-  }
-
-  .meditation-notes {
+  .calendar-title {
     font-size: 0.85rem;
-    padding: 0.875rem;
-    line-height: 1.5;
-  }
-
-  .meditation-notes strong {
-    font-size: 0.85rem;
-    margin-bottom: 0.5rem;
-    display: block;
   }
 }
 
 @media (max-width: 480px) {
-  .calendar-modal {
-    padding: 1rem;
-  }
-
-  .calendar-header {
-    padding: 0.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .calendar-title {
-    font-size: 0.9rem;
-  }
-
-  .calendar-arrow,
-  .calendar-close {
-    font-size: 1.3rem;
-    width: 40px;
-    height: 40px;
-  }
-
-  .calendar-month-focused {
-    padding: 1rem;
-    min-height: 320px;
-  }
-
-  .calendar-month-title {
-    font-size: 0.8rem;
-  }
-
-  .calendar-weekdays {
-    font-size: 0.75rem;
-    gap: 0.35rem;
-  }
-
-  .calendar-weekdays span {
-    width: 2.4em;
-    height: 2.4em;
-  }
-
-  .calendar-days {
-    gap: 0.35rem;
+  .calendar-grid-section {
+    padding: 0.75rem;
   }
 
   .calendar-day {
-    width: 2.4em;
-    height: 2.4em;
-    font-size: 0.85rem;
+    font-size: 0.78rem;
   }
 
   .meditation-details {
     padding: 1rem;
-    max-height: 280px;
-  }
-
-  .meditation-details h3 {
-    font-size: 0.95rem;
-  }
-
-  .meditation-duration {
-    font-size: 0.85rem;
-  }
-
-  .meditation-notes {
-    font-size: 0.8rem;
-    padding: 0.75rem;
-  }
-
-  .meditation-notes strong {
-    font-size: 0.8rem;
-  }
-}
-
-/* Very small screens */
-@media (max-width: 360px) {
-  .calendar-modal {
-    padding: 0.75rem;
-  }
-
-  .calendar-weekdays span {
-    width: 2.2em;
-    height: 2.2em;
-  }
-
-  .calendar-day {
-    width: 2.2em;
-    height: 2.2em;
-    font-size: 0.8rem;
-  }
-}
-
-/* Landscape orientation on mobile */
-@media (max-height: 500px) and (max-width: 900px) {
-  .calendar-modal {
-    padding: 0.75rem;
-  }
-
-  .calendar-content {
-    flex-direction: row;
-    gap: 1rem;
-  }
-
-  .calendar-month-focused {
-    min-height: auto;
-    height: auto;
-    flex: 1;
-    padding: 1rem;
-  }
-
-  .calendar-weekdays span {
-    width: 2.2em;
-    height: 2.2em;
-  }
-
-  .calendar-day {
-    width: 2.2em;
-    height: 2.2em;
-  }
-
-  .meditation-details {
-    flex: 1;
-    max-height: none;
-    height: auto;
+    max-height: 220px;
   }
 }
 </style>

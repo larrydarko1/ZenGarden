@@ -2,7 +2,6 @@
   <div class="emotion-inline">
     <div class="inline-header">
       <div class="inline-title-row">
-        <h2 class="inline-title">{{ t('emotions.title') }}</h2>
         <div class="inline-date-selector">
           <button class="inline-date-btn" @click="changeDate(-1)" aria-label="Previous day">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1137,7 +1136,6 @@ onMounted(() => {
 
 .emotion-inline {
   width: 100%;
-  max-width: 680px;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -1335,7 +1333,7 @@ onMounted(() => {
 /* Inline mode responsive */
 @media (max-width: 768px) {
   .emotion-inline {
-    max-width: 100%;
+    width: 100%;
   }
 
   .inline-header {

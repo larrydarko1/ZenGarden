@@ -1,53 +1,40 @@
 <template>
-	<div class="settings-overlay" @click.self="$emit('close')">
-		<div class="settings-popup">
-			<div class="settings-header">
-				<h2 class="settings-title">{{ t('settings.title') }}</h2>
-				<button class="close-btn" @click="$emit('close')" aria-label="Close settings">
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<path d="M18 6L6 18M6 6l12 12"/>
-					</svg>
+	<div class="settings-inline">
+		<div class="settings-section">
+			<h3 class="section-label">{{ t('settings.theme') }}</h3>
+			<div class="theme-options">
+				<button
+					v-for="theme in themes"
+					:key="theme"
+					:class="['theme-option', theme, { active: currentTheme === theme }]"
+					@click="selectTheme(theme)"
+				>
+					<div class="theme-preview" :class="theme"></div>
+					<span class="theme-name">{{ t(`settings.themes.${theme}`) }}</span>
 				</button>
 			</div>
+		</div>
 
-			<div class="settings-content">
-				<div class="settings-section">
-					<h3 class="section-label">{{ t('settings.theme') }}</h3>
-					<div class="theme-options">
-						<button
-							v-for="theme in themes"
-							:key="theme"
-							:class="['theme-option', theme, { active: currentTheme === theme }]"
-							@click="selectTheme(theme)"
-						>
-							<div class="theme-preview" :class="theme"></div>
-							<span class="theme-name">{{ t(`settings.themes.${theme}`) }}</span>
-						</button>
-					</div>
-				</div>
-
-				<div class="settings-section">
-					<h3 class="section-label">{{ t('settings.language') }}</h3>
-					<div class="language-options">
-						<button
-							v-for="(langName, langCode) in languages"
-							:key="langCode"
-							:class="['language-option', { active: currentLanguage === langCode }]"
-							@click="selectLanguage(langCode)"
-						>
-							{{ langName }}
-						</button>
-					</div>
-				</div>
-
-				<div class="settings-divider"></div>
-
-				<AccountSettings 
-					@usernameChanged="handleUsernameChange"
-					@accountDeleted="handleAccountDeletion"
-				/>
+		<div class="settings-section">
+			<h3 class="section-label">{{ t('settings.language') }}</h3>
+			<div class="language-options">
+				<button
+					v-for="(langName, langCode) in languages"
+					:key="langCode"
+					:class="['language-option', { active: currentLanguage === langCode }]"
+					@click="selectLanguage(langCode)"
+				>
+					{{ langName }}
+				</button>
 			</div>
 		</div>
+
+		<div class="settings-divider"></div>
+
+		<AccountSettings 
+			@usernameChanged="handleUsernameChange"
+			@accountDeleted="handleAccountDeletion"
+		/>
 	</div>
 </template>
 
@@ -104,77 +91,15 @@ function handleAccountDeletion() {
 </script>
 
 <style scoped>
-.settings-overlay {
-	position: fixed;
-	inset: 0;
-	background: var(--blur2);
-	backdrop-filter: blur(8px);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 2000;
-	animation: fadeIn 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-	from { opacity: 0; }
-	to { opacity: 1; }
-}
-
-.settings-popup {
-	background: var(--input-bg);
-	border: 1px solid var(--input-border);
-	border-radius: 6px;
-	width: 90%;
-	max-width: 600px;
-	max-height: 85vh;
-	position: relative;
-	animation: slideUp 0.3s ease-out;
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+.settings-inline {
+	width: 100%;
 	display: flex;
 	flex-direction: column;
-	overflow: hidden;
-}
-
-@keyframes slideUp {
-	from {
-		transform: translateY(20px);
-		opacity: 0;
-	}
-	to {
-		transform: translateY(0);
-		opacity: 1;
-	}
-}
-
-.settings-header {
-	padding: 0.75rem;
-	border-bottom: 1px solid var(--input-border);
-	flex-shrink: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	position: relative;
-}
-
-.settings-title {
-	color: var(--text1);
-	font-size: 0.875rem;
-	font-weight: 400;
-	margin: 0;
-	text-align: center;
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
-}
-
-.settings-content {
-	padding: 0.75rem;
-	overflow-y: auto;
-	flex: 1;
+	gap: 0;
 }
 
 .settings-section {
-	margin-bottom: 1rem;
+	margin-bottom: 1.25rem;
 }
 
 .settings-section:last-of-type {
@@ -186,28 +111,27 @@ function handleAccountDeletion() {
 	font-size: 0.7rem;
 	font-weight: 400;
 	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	margin: 0 0 0.5rem 0;
+	letter-spacing: 0.06em;
+	margin: 0 0 0.6rem 0;
 }
 
 .settings-divider {
 	height: 1px;
 	background: var(--input-border);
-	margin: 1.5rem 0;
+	margin: 0.5rem 0 1.25rem;
 	opacity: 0.5;
 }
 
 .theme-options {
 	display: flex;
-	gap: 0.5rem;
-	justify-content: space-between;
+	gap: 0.75rem;
 }
 
 .theme-option {
 	background: var(--input-bg);
 	border: 1px solid var(--input-border);
-	border-radius: 4px;
-	padding: 0.5rem;
+	border-radius: 8px;
+	padding: 0.75rem;
 	cursor: pointer;
 	transition: all 0.15s;
 	display: flex;
@@ -230,7 +154,7 @@ function handleAccountDeletion() {
 .theme-preview {
 	width: 40px;
 	height: 40px;
-	border-radius: 4px;
+	border-radius: 6px;
 	border: 1px solid var(--input-border);
 	transition: transform 0.15s;
 }
@@ -262,7 +186,7 @@ function handleAccountDeletion() {
 .language-option {
 	background: var(--input-bg);
 	border: 1px solid var(--input-border);
-	border-radius: 4px;
+	border-radius: 6px;
 	padding: 0.5rem 0.35rem;
 	color: var(--text2);
 	font-size: 0.75rem;
@@ -285,144 +209,42 @@ function handleAccountDeletion() {
 	font-weight: 400;
 }
 
-.close-btn {
-	position: absolute;
-	top: 50%;
-	right: 0.5rem;
-	transform: translateY(-50%);
-	background: transparent;
-	border: none;
-	color: var(--text2);
-	cursor: pointer;
-	padding: 0.25rem;
-	border-radius: 3px;
-	transition: all 0.15s;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.close-btn:hover {
-	background: var(--input-bg-focus);
-	color: var(--text1);
-}
-
-.close-btn svg {
-	width: 16px;
-	height: 16px;
-}
-
-/* Mobile optimizations */
+/* Responsive */
 @media (max-width: 768px) {
-	.settings-overlay {
-		align-items: stretch;
-		padding: 0;
-	}
-
-	.settings-popup {
-		width: 100vw;
-		max-width: 100vw;
-		height: 100vh;
-		max-height: 100vh;
-		border-radius: 0;
-		display: flex;
-		flex-direction: column;
-	}
-
-	.settings-header {
-		padding: 1rem 1.25rem;
-		border-bottom: 1px solid var(--input-border);
-		min-height: 56px;
-		display: flex;
-		align-items: center;
-	}
-
-	.settings-title {
-		font-size: 1.25rem;
-	}
-
-	.close-btn {
-		right: 1rem;
-		width: 44px;
-		height: 44px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		touch-action: manipulation;
-	}
-
-	.close-btn svg {
-		width: 20px;
-		height: 20px;
-	}
-
-	.settings-content {
-		padding: 1.5rem 1.25rem;
-		overflow-y: auto;
-		flex: 1;
-		-webkit-overflow-scrolling: touch;
-	}
-
 	.settings-section {
-		margin-bottom: 2rem;
+		margin-bottom: 1.5rem;
 	}
 
 	.section-label {
-		font-size: 1rem;
-		margin-bottom: 1rem;
-	}
-
-	.theme-options {
-		gap: 0.75rem;
+		font-size: 0.75rem;
+		margin-bottom: 0.75rem;
 	}
 
 	.theme-option {
-		padding: 1rem;
-		min-height: 72px;
+		padding: 0.875rem;
+		min-height: 64px;
 		touch-action: manipulation;
-	}
-
-	.theme-preview {
-		width: 36px;
-		height: 36px;
-	}
-
-	.theme-name {
-		font-size: 0.85rem;
-		margin-top: 0.5rem;
 	}
 
 	.language-options {
 		grid-template-columns: repeat(2, 1fr);
-		gap: 0.75rem;
+		gap: 0.6rem;
 	}
 
 	.language-option {
-		padding: 0.875rem 0.75rem;
-		font-size: 0.85rem;
-		min-height: 52px;
+		padding: 0.75rem;
+		font-size: 0.8rem;
+		min-height: 44px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		touch-action: manipulation;
 	}
-
-	.settings-divider {
-		margin: 1.5rem 0;
-	}
 }
 
 @media (max-width: 480px) {
-	.settings-header {
-		padding: 0.875rem 1rem;
-	}
-
-	.settings-content {
-		padding: 1.25rem 1rem;
-	}
-
 	.language-options {
-		grid-template-columns: 1fr;
+		grid-template-columns: 1fr 1fr;
 	}
 }
 </style>
