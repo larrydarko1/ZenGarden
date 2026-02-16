@@ -4,8 +4,7 @@
         "theme": "Tema",
         "language": "Idioma",
         "themes": {
-            "blue": "Azul",
-            "white": "Blanco",
+            "light": "Claro",
             "dark": "Oscuro"
         },
         "languages": {
@@ -22,7 +21,7 @@
     "header": {
         "greeting": "Hola",
         "breathe": "Respirar",
-        "emotions": "Emociones",
+        "emotions": "Diario",
         "eightfoldPath": "Óctuple Sendero",
         "calendar": "Calendario",
         "philosophy": "Filosofía",
@@ -196,7 +195,7 @@
         ]
     },
     "emotions": {
-        "title": "Rastreador de Emociones Diarias",
+        "title": "Diario",
         "positive": "Positivas",
         "negative": "Negativas",
         "pnRatio": "Ratio P/N",

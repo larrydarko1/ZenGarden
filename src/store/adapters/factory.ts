@@ -18,19 +18,27 @@ export class StorageFactory {
         }
 
         // Try Electron first (desktop app)
-        const electronAdapter = new ElectronStorageAdapter();
-        if (await electronAdapter.isAvailable()) {
-            this.instance = electronAdapter;
-            console.log('🖥️  Desktop mode: JSON storage via Electron');
-            return electronAdapter;
+        try {
+            const electronAdapter = new ElectronStorageAdapter();
+            if (await electronAdapter.isAvailable()) {
+                this.instance = electronAdapter;
+                console.log('🖥️  Desktop mode: JSON storage via Electron');
+                return electronAdapter;
+            }
+        } catch {
+            // Electron not available (e.g., running on mobile)
         }
 
         // Fall back to Capacitor (mobile app)
-        const capacitorAdapter = new CapacitorStorageAdapter();
-        if (await capacitorAdapter.isAvailable()) {
-            this.instance = capacitorAdapter;
-            console.log('📱 Mobile mode: JSON storage via Capacitor');
-            return capacitorAdapter;
+        try {
+            const capacitorAdapter = new CapacitorStorageAdapter();
+            if (await capacitorAdapter.isAvailable()) {
+                this.instance = capacitorAdapter;
+                console.log('📱 Mobile mode: JSON storage via Capacitor');
+                return capacitorAdapter;
+            }
+        } catch {
+            // Capacitor not available
         }
 
         throw new Error('No storage adapter available. This app requires Electron (desktop) or Capacitor (mobile).');
@@ -57,8 +65,19 @@ export class StorageFactory {
      * Check availability (always returns local: true, server: false)
      */
     static async checkAvailability(): Promise<{ server: boolean; local: boolean }> {
-        const electronAdapter = new ElectronStorageAdapter();
-        const local = await electronAdapter.isAvailable();
+        let local = false;
+        try {
+            const electronAdapter = new ElectronStorageAdapter();
+            local = await electronAdapter.isAvailable();
+        } catch {
+            // Electron not available, try Capacitor
+            try {
+                const capacitorAdapter = new CapacitorStorageAdapter();
+                local = await capacitorAdapter.isAvailable();
+            } catch {
+                // Neither available
+            }
+        }
 
         return { server: false, local };
     }

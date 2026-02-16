@@ -191,7 +191,7 @@ function generateToken() {
 // Storage handlers
 const storageHandlers = {
     // AUTH OPERATIONS
-    'storage:register': async (event, username, password, theme = 'blue', language = 'en') => {
+    'storage:register': async (event, username, password, theme = 'dark', language = 'en') => {
         try {
             const trimmed = username.trim();
             if (!/^[a-zA-Z0-9]+$/.test(trimmed) || trimmed.length < 3 || trimmed.length > 32) {
@@ -277,7 +277,7 @@ const storageHandlers = {
                 message: 'Login successful',
                 user: {
                     username: user.username,
-                    theme: user.theme || 'blue',
+                    theme: user.theme || 'dark',
                     language: user.language || 'en'
                 },
                 token

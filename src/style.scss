@@ -73,34 +73,9 @@ a,
 
 // THEMES for app proper
 //# Theme variables scoped to #app for Vue compatibility
-#app.blue {
-  --text1: #F0F8FF;
-  --text2: #BFD7ED;
-  --base1: #1F305E;
-  --base2: #35456e;
-  --blur1: #f0f8ff14;
-  --blur2: #1f305ed9;
-  --blur3: #ffffff0a;
-  --blur4: #bfd7edb1;
-  --error: #e74c3c;
-  --error2: #f5c6cb;
 
-  /* Reusable component variables */
-  --input-bg: rgba(240, 248, 255, 0.02);
-  --input-bg-focus: rgba(240, 248, 255, 0.04);
-  --input-border: rgba(240, 248, 255, 0.08);
-  --input-border-focus: rgba(240, 248, 255, 0.2);
-  --button-bg: rgba(240, 248, 255, 0.1);
-  --button-bg-hover: rgba(240, 248, 255, 0.15);
-  --button-border-hover: rgba(240, 248, 255, 0.25);
-  --border-subtle: rgba(240, 248, 255, 0.15);
-  --error-bg: rgba(255, 107, 107, 0.1);
-  --error-border: rgba(255, 107, 107, 0.2);
-  --error-text: #ff6b6b;
-}
-
-// White theme
-#app.white {
+// Light theme
+#app.light {
   --text1: #222831;
   --text2: #393e46;
   --base1: #F2F3F4;

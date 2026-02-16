@@ -5,7 +5,7 @@ export type StorageMode = 'local' | 'server';
 // User Types
 export interface User {
     username: string;
-    theme: 'blue' | 'white' | 'dark';
+    theme: 'light' | 'dark';
     language: 'en' | 'es' | 'it' | 'fr' | 'de' | 'pt' | 'zh' | 'ja';
 }
 

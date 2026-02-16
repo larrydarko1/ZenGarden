@@ -167,7 +167,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     // AUTH OPERATIONS
     async register(
         credentials: UserCredentials,
-        theme?: 'blue' | 'white' | 'dark',
+        theme?: 'light' | 'dark',
         language?: 'en' | 'es' | 'it' | 'fr' | 'de' | 'pt' | 'zh' | 'ja'
     ): Promise<AuthResponse> {
         await this.ensureInitialized();
@@ -185,7 +185,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
             _id: generateObjectId(),
             username: credentials.username,
             password: hashedPassword,
-            theme: theme || 'blue',
+            theme: theme || 'dark',
             language: language || 'en'
         };
 
@@ -331,7 +331,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     }
 
     // SETTINGS OPERATIONS
-    async updateTheme(theme: 'blue' | 'white' | 'dark'): Promise<{ message: string; theme: 'blue' | 'white' | 'dark' }> {
+    async updateTheme(theme: 'light' | 'dark'): Promise<{ message: string; theme: 'light' | 'dark' }> {
         await this.ensureInitialized();
 
         const session = await readSession();

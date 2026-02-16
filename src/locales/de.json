@@ -4,8 +4,7 @@
         "theme": "Thema",
         "language": "Sprache",
         "themes": {
-            "blue": "Blau",
-            "white": "Weiß",
+            "light": "Hell",
             "dark": "Dunkel"
         },
         "languages": {
@@ -22,7 +21,7 @@
     "header": {
         "greeting": "Hallo",
         "breathe": "Atmen",
-        "emotions": "Emotionen",
+        "emotions": "Tagebuch",
         "eightfoldPath": "Achtfacher Pfad",
         "calendar": "Kalender",
         "philosophy": "Philosophie",
@@ -196,7 +195,7 @@
         ]
     },
     "emotions": {
-        "title": "Täglicher Emotions-Tracker",
+        "title": "Tagebuch",
         "positive": "Positiv",
         "negative": "Negativ",
         "pnRatio": "P/N-Verhältnis",

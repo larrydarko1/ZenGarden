@@ -38,7 +38,7 @@ function onUserChanged(user: any) {
 }
 
 function setThemeFromLogin(theme: string) {
-	const themes = ['blue', 'white', 'dark'];
+	const themes = ['light', 'dark'];
 	if (themes.includes(theme)) {
 		currentTheme.value = theme;
 	}
@@ -52,7 +52,7 @@ function setLanguageFromLogin(language: string) {
 }
 
 async function setTheme(theme: string) {
-	const validTheme = theme as 'blue' | 'white' | 'dark';
+	const validTheme = theme as 'light' | 'dark';
 	currentTheme.value = validTheme;
 	try {
 		await updateTheme(validTheme);

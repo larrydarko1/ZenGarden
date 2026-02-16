@@ -64,7 +64,7 @@ export class ElectronStorageAdapter implements IStorageAdapter {
     // AUTH OPERATIONS
     async register(
         credentials: UserCredentials,
-        theme?: 'blue' | 'white' | 'dark',
+        theme?: 'light' | 'dark',
         language?: 'en' | 'es' | 'it' | 'fr' | 'de' | 'pt' | 'zh' | 'ja'
     ): Promise<AuthResponse> {
         return this.api.register(credentials.username, credentials.password, theme, language);
@@ -98,7 +98,7 @@ export class ElectronStorageAdapter implements IStorageAdapter {
     }
 
     // SETTINGS OPERATIONS
-    async updateTheme(theme: 'blue' | 'white' | 'dark'): Promise<{ message: string; theme: 'blue' | 'white' | 'dark' }> {
+    async updateTheme(theme: 'light' | 'dark'): Promise<{ message: string; theme: 'light' | 'dark' }> {
         const result = await this.api.updateTheme(theme);
         return { ...result, theme };
     }

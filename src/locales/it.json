@@ -4,8 +4,7 @@
         "theme": "Tema",
         "language": "Lingua",
         "themes": {
-            "blue": "Blu",
-            "white": "Bianco",
+            "light": "Chiaro",
             "dark": "Scuro"
         },
         "languages": {
@@ -22,7 +21,7 @@
     "header": {
         "greeting": "Ciao",
         "breathe": "Respira",
-        "emotions": "Emozioni",
+        "emotions": "Diario",
         "eightfoldPath": "Nobile Ottuplice",
         "calendar": "Calendario",
         "philosophy": "Filosofia",
@@ -196,7 +195,7 @@
         ]
     },
     "emotions": {
-        "title": "Tracker delle Emozioni Quotidiane",
+        "title": "Diario",
         "positive": "Positive",
         "negative": "Negative",
         "pnRatio": "Rapporto P/N",

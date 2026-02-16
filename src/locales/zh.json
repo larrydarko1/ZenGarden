@@ -4,8 +4,7 @@
         "theme": "主题",
         "language": "语言",
         "themes": {
-            "blue": "蓝色",
-            "white": "白色",
+            "light": "浅色",
             "dark": "深色"
         },
         "languages": {
@@ -22,7 +21,7 @@
     "header": {
         "greeting": "你好",
         "breathe": "呼吸",
-        "emotions": "情绪",
+        "emotions": "日记",
         "eightfoldPath": "八正道",
         "calendar": "日历",
         "philosophy": "哲学",
@@ -196,7 +195,7 @@
         ]
     },
     "emotions": {
-        "title": "每日情绪跟踪器",
+        "title": "日记",
         "positive": "积极",
         "negative": "消极",
         "pnRatio": "P/N 比率",

@@ -56,7 +56,7 @@ export async function deleteAccount(password: string) {
 }
 
 // Settings operations
-export async function updateTheme(theme: 'blue' | 'white' | 'dark') {
+export async function updateTheme(theme: 'light' | 'dark') {
     const adapter = await getStorageAdapter();
     return adapter.updateTheme(theme);
 }

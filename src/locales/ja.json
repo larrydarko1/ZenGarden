@@ -4,8 +4,7 @@
         "theme": "テーマ",
         "language": "言語",
         "themes": {
-            "blue": "ブルー",
-            "white": "ホワイト",
+            "light": "ライト",
             "dark": "ダーク"
         },
         "languages": {
@@ -22,7 +21,7 @@
     "header": {
         "greeting": "こんにちは",
         "breathe": "呼吸",
-        "emotions": "感情",
+        "emotions": "日記",
         "eightfoldPath": "八正道",
         "calendar": "カレンダー",
         "philosophy": "哲学",
@@ -196,7 +195,7 @@
         ]
     },
     "emotions": {
-        "title": "毎日の感情トラッカー",
+        "title": "日記",
         "positive": "ポジティブ",
         "negative": "ネガティブ",
         "pnRatio": "P/N比率",

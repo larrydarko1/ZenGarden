@@ -1,248 +1,207 @@
 <template>
-  <div class="emotion-overlay" @click.self="$emit('close')">
-    <div class="emotion-modal" @click.stop>
-      <button class="emotion-close" @click="$emit('close')" aria-label="Close emotion tracker">×</button>
-      
-      <div class="emotion-header">
-        <h2>{{ t('emotions.title') }}</h2>
-        <div class="emotion-date-selector">
-          <button @click="changeDate(-1)" aria-label="Previous day">‹</button>
-          <span>{{ formatDate(selectedDate) }}</span>
-          <button @click="changeDate(1)" :disabled="isToday" aria-label="Next day">›</button>
+  <div class="emotion-inline">
+    <div class="inline-header">
+      <div class="inline-title-row">
+        <h2 class="inline-title">{{ t('emotions.title') }}</h2>
+        <div class="inline-date-selector">
+          <button class="inline-date-btn" @click="changeDate(-1)" aria-label="Previous day">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <span class="inline-date-text">{{ formatDate(selectedDate) }}</span>
+          <button class="inline-date-btn" @click="changeDate(1)" :disabled="isToday" aria-label="Next day">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
         </div>
       </div>
 
-      <div class="emotion-stats">
-        <div class="stat-box positive">
-          <div class="stat-label">{{ t('emotions.positive') }}</div>
-          <div class="stat-value">{{ positiveCount }}</div>
+      <div class="inline-stats">
+        <div class="inline-stat positive">
+          <span class="inline-stat-value">{{ positiveCount }}</span>
+          <span class="inline-stat-label">{{ t('emotions.positive') }}</span>
         </div>
-        <div class="stat-box ratio">
-          <div class="stat-label">{{ t('emotions.pnRatio') }}</div>
-          <div class="stat-value">{{ pnRatio }}</div>
+        <div class="inline-stat-divider"></div>
+        <div class="inline-stat ratio">
+          <span class="inline-stat-value">{{ pnRatio }}</span>
+          <span class="inline-stat-label">{{ t('emotions.pnRatio') }}</span>
         </div>
-        <div class="stat-box negative">
-          <div class="stat-label">{{ t('emotions.negative') }}</div>
-          <div class="stat-value">{{ negativeCount }}</div>
+        <div class="inline-stat-divider"></div>
+        <div class="inline-stat negative">
+          <span class="inline-stat-value">{{ negativeCount }}</span>
+          <span class="inline-stat-label">{{ t('emotions.negative') }}</span>
         </div>
       </div>
+    </div>
 
-      <div class="emotion-tabs">
-        <button 
-          :class="['tab', { active: activeTab === 'positive' }]"
-          @click="activeTab = 'positive'"
+    <div class="inline-tabs">
+      <button 
+        v-for="tab in [
+          { key: 'positive', label: `${t('emotions.positiveTab')} (${positiveEmotions.length})` },
+          { key: 'negative', label: `${t('emotions.negativeTab')} (${negativeEmotions.length})` },
+          { key: 'analytics', label: t('emotions.analytics') },
+          { key: 'eightfold', label: t('eightfold.title') },
+          { key: 'notes', label: t('emotions.dailyNote') }
+        ]"
+        :key="tab.key"
+        :class="['inline-tab', { active: activeTab === tab.key }]"
+        @click="activeTab = tab.key"
+      >
+        {{ tab.label }}
+      </button>
+    </div>
+
+    <div class="inline-content">
+      <div v-if="activeTab === 'positive' || activeTab === 'negative'" class="emotion-list" :key="`${selectedDate.getTime()}-${selectedEmotions.length}`">
+        <div v-if="loadingEmotions" class="loading">{{ t('emotions.loading') || 'Loading' }}...</div>
+        <label 
+          v-else
+          v-for="emotion in (activeTab === 'positive' ? positiveEmotions : negativeEmotions)"
+          :key="emotion.name"
+          class="inline-emotion-item"
         >
-          {{ t('emotions.positiveTab') }} ({{ positiveEmotions.length }})
-        </button>
-        <button 
-          :class="['tab', { active: activeTab === 'negative' }]"
-          @click="activeTab = 'negative'"
-        >
-          {{ t('emotions.negativeTab') }} ({{ negativeEmotions.length }})
-        </button>
-        <button 
-          :class="['tab', { active: activeTab === 'analytics' }]"
-          @click="activeTab = 'analytics'"
-        >
-          {{ t('emotions.analytics') }}
-        </button>
-        <button 
-          :class="['tab', { active: activeTab === 'notes' }]"
-          @click="activeTab = 'notes'"
-        >
-          {{ t('emotions.dailyNote') }}
-        </button>
+          <input 
+            type="checkbox" 
+            :checked="isEmotionSelected(emotion.name)"
+            @change="toggleEmotion(emotion)"
+          />
+          <span class="inline-emotion-name">{{ emotion.displayName }}</span>
+          <span class="inline-emotion-desc">{{ emotion.description }}</span>
+        </label>
       </div>
 
-      <div class="emotion-content">
-        <div v-if="activeTab === 'positive' || activeTab === 'negative'" class="emotion-list" :key="`${selectedDate.getTime()}-${selectedEmotions.length}`">
-          <div v-if="loadingEmotions" class="loading">{{ t('emotions.loading') || 'Loading' }}...</div>
-          <label 
-            v-else
-            v-for="emotion in (activeTab === 'positive' ? positiveEmotions : negativeEmotions)"
-            :key="emotion.name"
-            class="emotion-item"
-          >
-            <input 
-              type="checkbox" 
-              :checked="isEmotionSelected(emotion.name)"
-              @change="toggleEmotion(emotion)"
-            />
-            <span class="emotion-name">{{ emotion.displayName }}</span>
-            <span class="emotion-description">{{ emotion.description }}</span>
-          </label>
-        </div>
-
-        <div v-if="activeTab === 'analytics'" class="analytics-view">
-          <div v-if="loading" class="loading">{{ t('emotions.loadingAnalytics') }}...</div>
-          <div v-else-if="analytics && analytics.totalDays > 0" class="analytics-content">
-            <div class="analytics-summary">
-              <div class="analytics-card">
-                <div class="analytics-label">{{ t('emotions.totalDaysTracked') }}</div>
-                <div class="analytics-value">{{ analytics.totalDays }}</div>
-              </div>
-              <div class="analytics-card">
-                <div class="analytics-label">{{ t('emotions.avgPNRatio') }}</div>
-                <div class="analytics-value">{{ typeof analytics.averagePNRatio === 'number' ? analytics.averagePNRatio.toFixed(2) : analytics.averagePNRatio }}</div>
-              </div>
-              <div class="analytics-card">
-                <div class="analytics-label">{{ t('emotions.emotionDiversity') }}</div>
-                <div class="analytics-value">{{ analytics.emotionDiversity }}</div>
-              </div>
+      <div v-if="activeTab === 'analytics'" class="analytics-view">
+        <div v-if="loading" class="loading">{{ t('emotions.loadingAnalytics') }}...</div>
+        <div v-else-if="analytics && analytics.totalDays > 0" class="analytics-content">
+          <div class="analytics-summary">
+            <div class="analytics-card">
+              <div class="analytics-label">{{ t('emotions.totalDaysTracked') }}</div>
+              <div class="analytics-value">{{ analytics.totalDays }}</div>
             </div>
-
-            <div class="analytics-section">
-              <h3>{{ t('emotions.daysSummary') }}</h3>
-              <div class="days-bar">
-                <div 
-                  class="days-bar-segment positive" 
-                  :style="{ width: `${(analytics.positiveDays / analytics.totalDays * 100)}%` }"
-                >
-                  {{ analytics.positiveDays }}
-                </div>
-                <div 
-                  class="days-bar-segment negative" 
-                  :style="{ width: `${(analytics.negativeDays / analytics.totalDays * 100)}%` }"
-                >
-                  {{ analytics.negativeDays }}
-                </div>
-              </div>
-              <div class="days-legend">
-                <span class="legend-item">
-                  <span class="legend-dot positive"></span> {{ t('emotions.positiveDays') }}
-                </span>
-                <span class="legend-item">
-                  <span class="legend-dot negative"></span> {{ t('emotions.negativeDays') }}
-                </span>
-              </div>
+            <div class="analytics-card">
+              <div class="analytics-label">{{ t('emotions.avgPNRatio') }}</div>
+              <div class="analytics-value">{{ typeof analytics.averagePNRatio === 'number' ? analytics.averagePNRatio.toFixed(2) : analytics.averagePNRatio }}</div>
             </div>
-
-            <div class="analytics-section">
-              <h3>{{ t('emotions.topEmotions') }}</h3>
-              <div class="top-emotions-list">
-                <div 
-                  v-for="(emotion, idx) in analytics.topEmotions.slice(0, 10)"
-                  :key="emotion.name"
-                  class="top-emotion-item"
-                >
-                  <span class="emotion-rank">{{ Number(idx) + 1 }}</span>
-                  <span class="emotion-name">{{ getTranslatedEmotionName(emotion.name) }}</span>
-                  <span class="emotion-bar-container">
-                    <span 
-                      class="emotion-bar" 
-                      :class="emotion.type"
-                      :style="{ width: `${(emotion.count / analytics.topEmotions[0].count * 100)}%` }"
-                    ></span>
-                  </span>
-                  <span class="emotion-count">{{ emotion.count }}</span>
-                </div>
-              </div>
+            <div class="analytics-card">
+              <div class="analytics-label">{{ t('emotions.emotionDiversity') }}</div>
+              <div class="analytics-value">{{ analytics.emotionDiversity }}</div>
             </div>
-
-            <div class="analytics-section">
-              <h3>{{ t('emotions.topPositiveEmotions') }}</h3>
-              <div class="top-emotions-list">
-                <div 
-                  v-for="(emotion, idx) in topPositiveEmotions"
-                  :key="emotion.name"
-                  class="top-emotion-item"
-                >
-                  <span class="emotion-rank">{{ Number(idx) + 1 }}</span>
-                  <span class="emotion-name">{{ getTranslatedEmotionName(emotion.name) }}</span>
-                  <span class="emotion-bar-container">
-                    <span 
-                      class="emotion-bar positive"
-                      :style="{ width: `${topPositiveEmotions.length > 0 ? (emotion.count / topPositiveEmotions[0].count * 100) : 0}%` }"
-                    ></span>
-                  </span>
-                  <span class="emotion-count">{{ emotion.count }}</span>
-                </div>
-                <div v-if="topPositiveEmotions.length === 0" class="no-data-message">
-                  {{ t('emotions.noPositiveEmotionsYet') }}
-                </div>
-              </div>
+          </div>
+          <div class="analytics-section">
+            <h3>{{ t('emotions.daysSummary') }}</h3>
+            <div class="days-bar">
+              <div class="days-bar-segment positive" :style="{ width: `${(analytics.positiveDays / analytics.totalDays * 100)}%` }">{{ analytics.positiveDays }}</div>
+              <div class="days-bar-segment negative" :style="{ width: `${(analytics.negativeDays / analytics.totalDays * 100)}%` }">{{ analytics.negativeDays }}</div>
             </div>
-
-            <div class="analytics-section">
-              <h3>{{ t('emotions.topNegativeEmotions') }}</h3>
-              <div class="top-emotions-list">
-                <div 
-                  v-for="(emotion, idx) in topNegativeEmotions"
-                  :key="emotion.name"
-                  class="top-emotion-item"
-                >
-                  <span class="emotion-rank">{{ Number(idx) + 1 }}</span>
-                  <span class="emotion-name">{{ getTranslatedEmotionName(emotion.name) }}</span>
-                  <span class="emotion-bar-container">
-                    <span 
-                      class="emotion-bar negative"
-                      :style="{ width: `${topNegativeEmotions.length > 0 ? (emotion.count / topNegativeEmotions[0].count * 100) : 0}%` }"
-                    ></span>
-                  </span>
-                  <span class="emotion-count">{{ emotion.count }}</span>
-                </div>
-                <div v-if="topNegativeEmotions.length === 0" class="no-data-message">
-                  {{ t('emotions.noNegativeEmotionsYet') }}
-                </div>
-              </div>
+            <div class="days-legend">
+              <span class="legend-item"><span class="legend-dot positive"></span> {{ t('emotions.positiveDays') }}</span>
+              <span class="legend-item"><span class="legend-dot negative"></span> {{ t('emotions.negativeDays') }}</span>
             </div>
-
-            <div class="analytics-section">
-              <h3>{{ t('emotions.trendChart') }}</h3>
-              <div class="trend-chart">
-                <div 
-                  v-for="(day, idx) in analytics.trends.slice(0, 90)"
-                  :key="idx"
-                  class="trend-bar"
-                  :style="{ height: `${Math.min(day.pnRatio / (analytics.trends.reduce((max: number, d: any) => Math.max(max, d.pnRatio), 0) || 1) * 100, 100)}%` }"
-                  :class="{ positive: Number(day.pnRatio) >= 0.5, negative: Number(day.pnRatio) < 0.5 }"
-                  :title="`${formatDate(day.date)}: P/N Ratio ${Number(day.pnRatio).toFixed(2)}`"
-                ></div>
-              </div>
-              <div class="trend-labels">
-                <span>{{ t('emotions.past90Days') }}</span>
+          </div>
+          <div class="analytics-section">
+            <h3>{{ t('emotions.topEmotions') }}</h3>
+            <div class="top-emotions-list">
+              <div v-for="(emotion, idx) in analytics.topEmotions.slice(0, 10)" :key="emotion.name" class="top-emotion-item">
+                <span class="emotion-rank">{{ Number(idx) + 1 }}</span>
+                <span class="emotion-name">{{ getTranslatedEmotionName(emotion.name) }}</span>
+                <span class="emotion-bar-container"><span class="emotion-bar" :class="emotion.type" :style="{ width: `${(emotion.count / analytics.topEmotions[0].count * 100)}%` }"></span></span>
+                <span class="emotion-count">{{ emotion.count }}</span>
               </div>
             </div>
           </div>
-          <div v-else class="empty-analytics">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 13h2l2-4 4 8 4-12 2 4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <div class="analytics-section">
+            <h3>{{ t('emotions.topPositiveEmotions') }}</h3>
+            <div class="top-emotions-list">
+              <div v-for="(emotion, idx) in topPositiveEmotions" :key="emotion.name" class="top-emotion-item">
+                <span class="emotion-rank">{{ Number(idx) + 1 }}</span>
+                <span class="emotion-name">{{ getTranslatedEmotionName(emotion.name) }}</span>
+                <span class="emotion-bar-container"><span class="emotion-bar positive" :style="{ width: `${topPositiveEmotions.length > 0 ? (emotion.count / topPositiveEmotions[0].count * 100) : 0}%` }"></span></span>
+                <span class="emotion-count">{{ emotion.count }}</span>
+              </div>
+              <div v-if="topPositiveEmotions.length === 0" class="no-data-message">{{ t('emotions.noPositiveEmotionsYet') }}</div>
+            </div>
+          </div>
+          <div class="analytics-section">
+            <h3>{{ t('emotions.topNegativeEmotions') }}</h3>
+            <div class="top-emotions-list">
+              <div v-for="(emotion, idx) in topNegativeEmotions" :key="emotion.name" class="top-emotion-item">
+                <span class="emotion-rank">{{ Number(idx) + 1 }}</span>
+                <span class="emotion-name">{{ getTranslatedEmotionName(emotion.name) }}</span>
+                <span class="emotion-bar-container"><span class="emotion-bar negative" :style="{ width: `${topNegativeEmotions.length > 0 ? (emotion.count / topNegativeEmotions[0].count * 100) : 0}%` }"></span></span>
+                <span class="emotion-count">{{ emotion.count }}</span>
+              </div>
+              <div v-if="topNegativeEmotions.length === 0" class="no-data-message">{{ t('emotions.noNegativeEmotionsYet') }}</div>
+            </div>
+          </div>
+          <div class="analytics-section">
+            <h3>{{ t('emotions.trendChart') }}</h3>
+            <div class="trend-chart">
+              <div v-for="(day, idx) in analytics.trends.slice(0, 90)" :key="idx" class="trend-bar"
+                :style="{ height: `${Math.min(day.pnRatio / (analytics.trends.reduce((max: number, d: any) => Math.max(max, d.pnRatio), 0) || 1) * 100, 100)}%` }"
+                :class="{ positive: Number(day.pnRatio) >= 0.5, negative: Number(day.pnRatio) < 0.5 }"
+                :title="`${formatDate(day.date)}: P/N Ratio ${Number(day.pnRatio).toFixed(2)}`"
+              ></div>
+            </div>
+            <div class="trend-labels"><span>{{ t('emotions.past90Days') }}</span></div>
+          </div>
+        </div>
+        <div v-else class="empty-analytics">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 13h2l2-4 4 8 4-12 2 4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p>{{ t('emotions.noDataYet') }}</p>
+          <span>{{ t('emotions.trackEmotionsFirst') }}</span>
+        </div>
+      </div>
+
+      <div v-if="activeTab === 'notes'" class="notes-view">
+        <div class="notes-content">
+          <div class="notes-header">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <polyline points="10 9 9 9 8 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <p>{{ t('emotions.noDataYet') }}</p>
-            <span>{{ t('emotions.trackEmotionsFirst') }}</span>
+            <h3>{{ t('emotions.dailyNote') }}</h3>
           </div>
-        </div>
-
-        <div v-if="activeTab === 'notes'" class="notes-view">
-          <div class="notes-content">
-            <div class="notes-header">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                <polyline points="10 9 9 9 8 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <h3>{{ t('emotions.dailyNote') }}</h3>
-            </div>
-            <p class="notes-date-label">{{ formatDate(selectedDate) }}</p>
-            <textarea
-              v-model="dailyNote"
-              class="emotion-note-textarea"
-              :placeholder="t('emotions.notePlaceholder')"
-              @input="handleNoteInput"
-              maxlength="2000"
-            ></textarea>
-            <div class="note-footer">
-              <span class="character-count">{{ dailyNote.length }} / 2000</span>
-            </div>
+          <p class="notes-date-label">{{ formatDate(selectedDate) }}</p>
+          <textarea v-model="dailyNote" class="emotion-note-textarea" :placeholder="t('emotions.notePlaceholder')" @input="handleNoteInput" maxlength="2000"></textarea>
+          <div class="note-footer">
+            <span class="character-count">{{ dailyNote.length }} / 2000</span>
           </div>
         </div>
       </div>
 
-      <div v-if="saveStatus" class="save-status" :class="saveStatus">
-        {{ saveStatus === 'saving' ? t('emotions.saving') : t('emotions.saved') }}
+      <div v-if="activeTab === 'eightfold'" class="eightfold-view">
+        <div class="eightfold-inline-stats">
+          <div class="eightfold-stat">
+            <span class="eightfold-stat-label">{{ t('eightfold.completed') }}</span>
+            <span class="eightfold-stat-value">{{ efCompletedCount }}/8</span>
+          </div>
+          <div class="eightfold-stat">
+            <span class="eightfold-stat-label">{{ t('eightfold.progress') }}</span>
+            <span class="eightfold-stat-value">{{ efProgressPercentage }}%</span>
+          </div>
+        </div>
+        <div v-if="loadingPath" class="loading">{{ t('eightfold.loading') }}...</div>
+        <div v-else class="eightfold-path-list">
+          <div v-for="path in eightfoldPaths" :key="path.key" class="eightfold-path-item">
+            <div class="eightfold-checkbox-row">
+              <input type="checkbox" :id="`ef-${path.key}`" :checked="isPathFollowed(path.key)" @change="togglePath(path.key)" />
+              <label :for="`ef-${path.key}`" class="eightfold-path-name">{{ path.displayName }}</label>
+            </div>
+            <div class="eightfold-path-desc">{{ path.description }}</div>
+            <div class="eightfold-path-question">{{ path.questions }}</div>
+            <div v-if="isPathFollowed(path.key)" class="eightfold-path-note">
+              <textarea v-model="pathNotes[path.key]" :placeholder="t('eightfold.notesPlaceholder')" @input="debouncedSavePath" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
       </div>
+    </div>
+
+    <div v-if="saveStatus" class="save-status" :class="saveStatus">
+      {{ saveStatus === 'saving' ? t('emotions.saving') : t('emotions.saved') }}
     </div>
   </div>
 </template>
@@ -250,7 +209,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { saveEmotionLog, getEmotionLogs, getEmotionAnalytics } from '../store';
+import { saveEmotionLog, getEmotionLogs, getEmotionAnalytics, saveEightfoldPathLog, getEightfoldPathLogs } from '../store';
 
 const { t } = useI18n();
 const emit = defineEmits(['close']);
@@ -266,6 +225,93 @@ const loading = ref(false);
 const loadingEmotions = ref(false);
 const analytics = ref<any>(null);
 const dailyNote = ref('');
+
+// Eightfold Path state
+const followedPaths = ref<string[]>([]);
+const pathNotes = ref<Record<string, string>>({});
+const loadingPath = ref(false);
+let pathSaveTimeout: number | null = null;
+
+const eightfoldPathKeys = [
+  'rightView', 'rightIntention', 'rightSpeech', 'rightAction',
+  'rightLivelihood', 'rightEffort', 'rightMindfulness', 'rightConcentration'
+];
+
+const eightfoldPaths = computed(() => eightfoldPathKeys.map(key => ({
+  key,
+  displayName: t(`eightfold.paths.${key}.name`),
+  description: t(`eightfold.paths.${key}.description`),
+  questions: t(`eightfold.paths.${key}.questions`)
+})));
+
+const efCompletedCount = computed(() => followedPaths.value.length);
+const efProgressPercentage = computed(() => Math.round((efCompletedCount.value / 8) * 100));
+
+function isPathFollowed(pathKey: string): boolean {
+  return followedPaths.value.includes(pathKey);
+}
+
+function togglePath(pathKey: string) {
+  if (isPathFollowed(pathKey)) {
+    followedPaths.value = followedPaths.value.filter(p => p !== pathKey);
+    delete pathNotes.value[pathKey];
+  } else {
+    followedPaths.value.push(pathKey);
+  }
+  savePathData();
+}
+
+async function savePathData() {
+  saveStatus.value = 'saving';
+  try {
+    const pathData = followedPaths.value.map(key => ({
+      path: key,
+      note: pathNotes.value[key] || ''
+    }));
+    await saveEightfoldPathLog(selectedDate.value.toISOString(), pathData);
+    saveStatus.value = 'saved';
+    setTimeout(() => { saveStatus.value = null; }, 2000);
+  } catch (err) {
+    console.error('Failed to save path:', err);
+    saveStatus.value = null;
+  }
+}
+
+function debouncedSavePath() {
+  if (pathSaveTimeout !== null) clearTimeout(pathSaveTimeout);
+  pathSaveTimeout = window.setTimeout(() => { savePathData(); }, 1000);
+}
+
+async function loadPathData() {
+  loadingPath.value = true;
+  try {
+    const startDate = new Date(selectedDate.value);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(selectedDate.value);
+    endDate.setHours(23, 59, 59, 999);
+    const response = await getEightfoldPathLogs({
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString()
+    });
+    if (response.pathLogs && response.pathLogs.length > 0) {
+      const log = response.pathLogs[0];
+      followedPaths.value = log.paths.map((p: any) => p.path);
+      pathNotes.value = {};
+      log.paths.forEach((p: any) => {
+        if (p.note) pathNotes.value[p.path] = p.note;
+      });
+    } else {
+      followedPaths.value = [];
+      pathNotes.value = {};
+    }
+  } catch (err) {
+    console.error('Failed to load path:', err);
+    followedPaths.value = [];
+    pathNotes.value = {};
+  } finally {
+    loadingPath.value = false;
+  }
+}
 
 // Emotion definitions - using English names as keys for backend compatibility
 const positiveEmotionKeys = [
@@ -460,6 +506,7 @@ function getTranslatedEmotionName(englishName: string): string {
 
 watch(selectedDate, () => {
   loadEmotions();
+  loadPathData();
 });
 
 watch(activeTab, async (newTab) => {
@@ -470,236 +517,22 @@ watch(activeTab, async (newTab) => {
       console.error('Error in analytics tab:', err);
     }
   }
+  if (newTab === 'eightfold') {
+    await loadPathData();
+  }
 });
 
 onMounted(() => {
   loadEmotions();
+  loadPathData();
 });
 </script>
 
 <style scoped>
-.emotion-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--blur2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.emotion-modal {
-  position: relative;
-  background: var(--base1);
-  border-radius: 12px;
-  width: 90vw;
-  max-width: 850px;
-  max-height: 85vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--border-subtle);
-  animation: slideUp 0.3s ease-out;
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.emotion-close {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  background: none;
-  border: none;
-  font-size: 1.75rem;
-  color: var(--text2);
-  cursor: pointer;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  transition: all 0.2s;
-  z-index: 1;
-}
-
-.emotion-close:hover {
-  background: var(--button-bg-hover);
-  color: var(--text1);
-}
-
-.emotion-header {
-  padding: 1.25rem 1.5rem 1rem;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.emotion-header h2 {
-  margin: 0 0 0.75rem;
-  color: var(--text1);
-  font-size: 1.5rem;
-}
-
-.emotion-date-selector {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  justify-content: center;
-}
-
-.emotion-date-selector button {
-  background: var(--button-bg);
-  border: 1px solid var(--input-border);
-  color: var(--text1);
-  padding: 0.4rem 0.85rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1.1rem;
-  transition: all 0.2s;
-}
-
-.emotion-date-selector button:hover:not(:disabled) {
-  background: var(--button-bg-hover);
-  border-color: var(--button-border-hover);
-}
-
-.emotion-date-selector button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.emotion-date-selector span {
-  color: var(--text1);
-  font-weight: 500;
-  min-width: 140px;
-  text-align: center;
-  font-size: 0.95rem;
-}
-
-.emotion-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  background: var(--blur1);
-}
-
-.stat-box {
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  border-radius: 8px;
-  padding: 0.75rem;
-  text-align: center;
-}
-
-.stat-box.positive {
-  border-color: rgba(76, 175, 80, 0.3);
-}
-
-.stat-box.ratio {
-  border-color: rgba(33, 150, 243, 0.3);
-}
-
-.stat-box.negative {
-  border-color: rgba(244, 67, 54, 0.3);
-}
-
-.stat-label {
-  font-size: 0.8rem;
-  color: var(--text2);
-  margin-bottom: 0.4rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stat-value {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text1);
-}
-
-.emotion-tabs {
-  display: flex;
-  gap: 0.4rem;
-  padding: 0.75rem 1.5rem 0;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.tab {
-  background: none;
-  border: none;
-  color: var(--text2);
-  padding: 0.6rem 1.25rem;
-  cursor: pointer;
-  border-radius: 6px 6px 0 0;
-  transition: all 0.2s;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.tab:hover {
-  color: var(--text1);
-  background: var(--blur3);
-}
-
-.tab.active {
-  color: var(--text1);
-  background: var(--input-bg-focus);
-  border-bottom: 2px solid var(--text1);
-}
-
-.emotion-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem 1.5rem 1.5rem;
-}
 
 .emotion-list {
   display: grid;
   gap: 0.6rem;
-}
-
-.emotion-item {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  padding: 0.75rem;
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.emotion-item:hover {
-  background: var(--input-bg-focus);
-  border-color: var(--input-border-focus);
-}
-
-.emotion-item input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  accent-color: var(--text1);
 }
 
 .emotion-name {
@@ -707,11 +540,6 @@ onMounted(() => {
   color: var(--text1);
   min-width: 130px;
   font-size: 0.95rem;
-}
-
-.emotion-description {
-  color: var(--text2);
-  font-size: 0.85rem;
 }
 
 .save-status {
@@ -734,6 +562,128 @@ onMounted(() => {
 /* Notes tab styles */
 .notes-view {
   min-height: 300px;
+}
+
+/* Eightfold Path tab styles */
+.eightfold-view {
+  min-height: 300px;
+}
+
+.eightfold-inline-stats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.eightfold-stat {
+  flex: 1;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.eightfold-stat-label {
+  font-size: 0.8rem;
+  color: var(--text2);
+}
+
+.eightfold-stat-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text1);
+}
+
+.eightfold-path-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.eightfold-path-item {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  transition: all 0.2s;
+}
+
+.eightfold-path-item:hover {
+  background: var(--input-bg-focus);
+  border-color: var(--input-border-focus);
+}
+
+.eightfold-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.35rem;
+}
+
+.eightfold-checkbox-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--text1);
+  flex-shrink: 0;
+}
+
+.eightfold-path-name {
+  color: var(--text1);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.eightfold-path-desc {
+  color: var(--text2);
+  font-size: 0.8rem;
+  margin-left: 1.65rem;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.eightfold-path-question {
+  color: var(--text2);
+  font-size: 0.75rem;
+  font-style: italic;
+  margin-left: 1.65rem;
+  opacity: 0.7;
+  line-height: 1.4;
+}
+
+.eightfold-path-note {
+  margin-left: 1.65rem;
+  margin-top: 0.5rem;
+}
+
+.eightfold-path-note textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem;
+  color: var(--text1);
+  font-family: inherit;
+  font-size: 0.85rem;
+  resize: vertical;
+  transition: all 0.2s;
+  line-height: 1.5;
+}
+
+.eightfold-path-note textarea:focus {
+  outline: none;
+  border-color: var(--input-border-focus);
+  background: var(--input-bg-focus);
+}
+
+.eightfold-path-note textarea::placeholder {
+  color: var(--text2);
+  opacity: 0.5;
 }
 
 .notes-content {
@@ -1040,168 +990,14 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .emotion-modal {
-    width: 100vw;
-    max-width: 100vw;
-    height: 100vh;
-    max-height: 100vh;
-    border-radius: 0;
-    border: none;
-    animation: slideInFromBottom 0.3s ease-out;
-  }
-
-  @keyframes slideInFromBottom {
-    from {
-      transform: translateY(100%);
-    }
-    to {
-      transform: translateY(0);
-    }
-  }
-
-  .emotion-header {
-    padding: 1rem 1.25rem;
-    position: sticky;
-    top: 0;
-    background: var(--base1);
-    z-index: 10;
-    border-bottom: 1px solid var(--border-subtle);
-    min-height: 72px;
-  }
-
-  .emotion-header h2 {
-    font-size: 1.3rem;
-    margin: 0 0 0.75rem;
-  }
-
-  .emotion-close {
-    top: 1rem;
-    right: 1rem;
-    width: 44px;
-    height: 44px;
-    font-size: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    touch-action: manipulation;
-    border-radius: 50%;
-    transition: background 0.2s;
-    z-index: 11;
-  }
-
-  .emotion-close:hover {
-    background: var(--input-bg-focus);
-  }
-
-  .emotion-date-selector {
-    gap: 1rem;
-  }
-
-  .emotion-date-selector button {
-    padding: 0.5rem 0.75rem;
-    font-size: 1.2rem;
-    min-width: 44px;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    touch-action: manipulation;
-  }
-
-  .emotion-date-selector span {
-    min-width: 180px;
-    font-size: 0.95rem;
-  }
-
-  .emotion-stats {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
-    padding: 1rem 1.25rem;
-    position: sticky;
-    top: 72px;
-    background: var(--base1);
-    z-index: 9;
-    border-bottom: 1px solid var(--border-subtle);
-  }
-
-  .stat-box {
-    padding: 0.875rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    min-height: 72px;
-  }
-
-  .stat-label {
-    font-size: 0.75rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .stat-value {
-    font-size: 1.5rem;
-  }
-
-  .emotion-tabs {
-    padding: 0.75rem 1.25rem 0;
-    gap: 0.5rem;
-    position: sticky;
-    top: 160px;
-    background: var(--base1);
-    z-index: 9;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    border-bottom: 1px solid var(--border-subtle);
-  }
-
-  .emotion-tabs::-webkit-scrollbar {
-    display: none;
-  }
-
-  .tab {
-    padding: 0.75rem 1.25rem;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    flex-shrink: 0;
-    min-height: 48px;
-    touch-action: manipulation;
-  }
-
-  .emotion-content {
-    padding: 1rem 1.25rem 5rem;
-    -webkit-overflow-scrolling: touch;
-  }
-
   .emotion-list {
     gap: 0.75rem;
-  }
-
-  .emotion-item {
-    padding: 1rem;
-    gap: 1rem;
-    flex-wrap: wrap;
-    min-height: 64px;
-    touch-action: manipulation;
-  }
-
-  .emotion-item input[type="checkbox"] {
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
   }
 
   .emotion-name {
     min-width: auto;
     font-size: 1rem;
     flex: 1;
-  }
-
-  .emotion-description {
-    font-size: 0.85rem;
-    width: 100%;
-    padding-left: 40px;
-    line-height: 1.5;
   }
 
   .analytics-view {
@@ -1315,10 +1111,6 @@ onMounted(() => {
   .save-status {
     padding: 0.875rem;
     font-size: 0.9rem;
-    position: sticky;
-    bottom: 0;
-    background: var(--base1);
-    border-top: 1px solid var(--border-subtle);
   }
 
   .notes-view {
@@ -1332,46 +1124,248 @@ onMounted(() => {
 }
 
 @media (max-width: 480px) {
-  .emotion-header {
-    padding: 0.875rem 1rem;
-    min-height: 64px;
-  }
-
-  .emotion-header h2 {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .emotion-close {
-    width: 40px;
-    height: 40px;
-  }
-
-  .emotion-date-selector span {
-    min-width: 150px;
-    font-size: 0.9rem;
-  }
-
-  .emotion-stats {
-    padding: 0.875rem 1rem;
-    gap: 0.5rem;
-  }
-
-  .stat-box {
-    padding: 0.75rem;
-    min-height: 64px;
-  }
-
-  .emotion-content {
-    padding: 0.875rem 1rem 4rem;
-  }
-
   .analytics-card {
     padding: 1rem;
   }
 
   .analytics-section {
     padding: 1rem;
+  }
+}
+
+/* Inline styles */
+
+.emotion-inline {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  -webkit-app-region: no-drag;
+}
+
+.inline-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--input-border);
+}
+
+.inline-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.inline-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text1);
+  letter-spacing: 0.02em;
+}
+
+.inline-date-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inline-date-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.inline-date-btn:hover:not(:disabled) {
+  background: var(--input-bg-focus);
+  color: var(--text1);
+  border-color: var(--input-border-focus);
+}
+
+.inline-date-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.inline-date-text {
+  font-size: 0.8rem;
+  color: var(--text2);
+  min-width: 100px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.inline-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.inline-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.inline-stat-value {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text1);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.inline-stat-label {
+  font-size: 0.65rem;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 400;
+}
+
+.inline-stat-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--input-border);
+  opacity: 0.5;
+}
+
+.inline-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--input-border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.inline-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.inline-tab {
+  flex: 0 0 auto;
+  padding: 0.4rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text2);
+  font-size: 0.72rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.inline-tab:hover {
+  color: var(--text1);
+}
+
+.inline-tab.active {
+  color: var(--text1);
+  border-bottom-color: var(--text1);
+  font-weight: 500;
+}
+
+.inline-content {
+  padding: 1rem 0 0;
+  min-height: 200px;
+}
+
+.inline-emotion-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 0 0.6rem;
+  padding: 0.5rem 0.25rem;
+  border-bottom: 1px solid var(--input-border);
+  cursor: pointer;
+  transition: background 0.15s;
+  align-items: start;
+}
+
+.inline-emotion-item:hover {
+  background: var(--input-bg-focus);
+}
+
+.inline-emotion-item:last-child {
+  border-bottom: none;
+}
+
+.inline-emotion-item input[type="checkbox"] {
+  grid-row: 1 / 3;
+  margin: 0;
+  margin-top: 0.15rem;
+  width: 14px;
+  height: 14px;
+  accent-color: var(--text1);
+  cursor: pointer;
+}
+
+.inline-emotion-name {
+  font-size: 0.8rem;
+  color: var(--text1);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.inline-emotion-desc {
+  grid-column: 2;
+  font-size: 0.68rem;
+  color: var(--text2);
+  line-height: 1.4;
+  opacity: 0.7;
+}
+
+/* Inline mode responsive */
+@media (max-width: 768px) {
+  .emotion-inline {
+    max-width: 100%;
+  }
+
+  .inline-header {
+    gap: 1rem;
+  }
+
+  .inline-title {
+    font-size: 1rem;
+  }
+
+  .inline-stats {
+    gap: 1rem;
+  }
+
+  .inline-stat-value {
+    font-size: 1.2rem;
+  }
+
+  .inline-tabs {
+    gap: 0;
+    padding: 0.5rem 0;
+  }
+
+  .inline-tab {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.68rem;
+  }
+
+  .inline-content {
+    padding: 0.75rem 0 0;
   }
 }
 

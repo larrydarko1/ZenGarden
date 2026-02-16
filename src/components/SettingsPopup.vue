@@ -64,7 +64,7 @@ const emit = defineEmits<{
 	(e: 'language-change', language: string): void;
 }>();
 
-const themes = ['blue', 'white', 'dark'];
+const themes = ['dark', 'light'];
 const languages = {
 	en: 'English',
 	es: 'Español',
@@ -239,11 +239,7 @@ function handleAccountDeletion() {
 	transform: scale(1.05);
 }
 
-.theme-preview.blue {
-	background: linear-gradient(135deg, #1F305E 0%, #35456e 100%);
-}
-
-.theme-preview.white {
+.theme-preview.light {
 	background: linear-gradient(135deg, #F2F3F4 0%, #e3e6ed 100%);
 }
 
