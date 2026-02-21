@@ -30,26 +30,13 @@
     "meditation": {
         "begin": "Commencer",
         "stop": "Arrêter",
-        "audio": {
-            "title": "Paramètres Audio",
-            "track": "Piste de Méditation",
-            "trackLabel": "Piste",
-            "silent": "Silencieux",
-            "ambient": "Son Ambiant",
-            "none": "Aucun",
-            "rain": "Pluie",
-            "forest": "Forêt",
-            "ocean": "Océan",
-            "whitenoise": "Bruit Blanc",
-            "volume": "Volume Principal"
-        },
         "bell": {
             "settings": "Paramètres de la Cloche"
         }
     },
     "philosophy": {
-        "title": "Pourquoi pas d'objectifs ni de séries ?",
-        "subtitle": "Comprendre l'approche Zen de la pratique",
+        "title": "Notre Philosophie Zen",
+        "subtitle": "Comprendre les choix de conception derrière ZenGarden",
         "practice": {
             "title": "La pratique est le chemin",
             "body": "Dans le Zen, la méditation n'est pas un moyen d'atteindre un but—c'est le but lui-même. Chaque moment de pratique est complet et entier. Il n'y a nulle part où aller, rien à accomplir. Lorsque vous vous asseyez, vous êtes déjà là."
@@ -61,6 +48,10 @@
         "noStreaks": {
             "title": "Les séries créent de l'anxiété",
             "body": "Une série de 100 jours peut sembler motivante, mais elle devient une source de stress. Manquer un jour ressemble à un échec. Cela contredit l'esprit de la pratique, qui consiste à lâcher prise, non à s'accrocher aux réalisations."
+        },
+        "silence": {
+            "title": "Embrasser le Silence Naturel",
+            "body": "Dans la tradition Zen, le monde lui-même est la bande sonore de votre méditation. Les sons ambiants artificiels et les pistes musicales peuvent devenir une béquille—une couche supplémentaire entre vous et la réalité. Seule la cloche demeure : elle marque le temps et vous rappelle au présent. La vraie pratique se déroule dans la texture brute et non filtrée de chaque instant."
         },
         "observation": {
             "title": "Nous soutenons l'auto-observation",
@@ -146,6 +137,7 @@
     },
     "breathing": {
         "title": "Exercice de Respiration",
+        "none": "Aucun",
         "box": "Respiration en Boîte",
         "deep": "Respiration Profonde",
         "calm": "Respiration Calmante",

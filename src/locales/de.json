@@ -30,26 +30,13 @@
     "meditation": {
         "begin": "Beginnen",
         "stop": "Stoppen",
-        "audio": {
-            "title": "Audio-Einstellungen",
-            "track": "Meditationsspur",
-            "trackLabel": "Spur",
-            "silent": "Still",
-            "ambient": "Umgebungsklang",
-            "none": "Keiner",
-            "rain": "Regen",
-            "forest": "Wald",
-            "ocean": "Ozean",
-            "whitenoise": "Weißes Rauschen",
-            "volume": "Hauptlautstärke"
-        },
         "bell": {
             "settings": "Glocken-Einstellungen"
         }
     },
     "philosophy": {
-        "title": "Warum keine Ziele oder Serien?",
-        "subtitle": "Den Zen-Ansatz der Praxis verstehen",
+        "title": "Unsere Zen-Philosophie",
+        "subtitle": "Die Designentscheidungen hinter ZenGarden verstehen",
         "practice": {
             "title": "Die Praxis ist der Weg",
             "body": "Im Zen ist Meditation kein Mittel zum Zweck—sie ist der Zweck selbst. Jeder Moment der Praxis ist vollständig und ganz. Es gibt nirgendwo hinzugehen, nichts zu erreichen. Wenn du sitzt, bist du bereits dort."
@@ -61,6 +48,10 @@
         "noStreaks": {
             "title": "Serien erzeugen Angst",
             "body": "Eine 100-Tage-Serie mag motivierend erscheinen, wird aber zu einer Stressquelle. Einen Tag zu verpassen fühlt sich wie ein Versagen an. Dies widerspricht dem Geist der Praxis, bei der es ums Loslassen geht, nicht ums Festhalten an Errungenschaften."
+        },
+        "silence": {
+            "title": "Natürliche Stille Annehmen",
+            "body": "In der Zen-Tradition ist die Welt selbst der Soundtrack deiner Meditation. Künstliche Umgebungsklänge und Musikspuren können zur Krücke werden—eine weitere Schicht zwischen dir und der Realität. Nur die Glocke bleibt: Sie markiert die Zeit und ruft dich in den gegenwärtigen Moment zurück. Wahre Praxis geschieht in der rohen, ungefilterten Textur jedes Augenblicks."
         },
         "observation": {
             "title": "Wir unterstützen Selbstbeobachtung",
@@ -146,6 +137,7 @@
     },
     "breathing": {
         "title": "Atemübung",
+        "none": "Keine",
         "box": "Box-Atmung",
         "deep": "Tiefe Atmung",
         "calm": "Beruhigende Atmung",

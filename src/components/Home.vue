@@ -79,7 +79,7 @@
             :class="['breathing-option-btn', { active: !selectedBreathingExercise }]"
             @click="selectedBreathingExercise = null; showBreathingPicker = false"
           >
-            {{ t('meditation.audio.none') }}
+            {{ t('breathing.none') }}
           </button>
           <button
             v-for="ex in breathingExercises"
@@ -124,8 +124,8 @@
         </transition>
 
         <div class="zen-center" v-show="!journalMode && !calendarMode && !philosophyMode && !settingsMode">
-        <span :class="['zen-phrase', { dimmed: showAudioConfig || showBellConfig }]">{{ currentPhrase }}</span>
-        <span :class="['zen-loader', { dimmed: showAudioConfig || showBellConfig }]">
+        <span :class="['zen-phrase', { dimmed: showBellConfig }]">{{ currentPhrase }}</span>
+        <span :class="['zen-loader', { dimmed: showBellConfig }]">
           <svg width="32" height="32" viewBox="0 0 32 32">
             <rect x="10" y="15" width="12" height="2" rx="1" fill="#F0F8FF">
               <animateTransform attributeName="transform" type="rotate" from="0 16 16" to="360 16 16" dur="2.5s" repeatCount="indefinite"/>
@@ -179,15 +179,6 @@
             </svg>
           </button>
           <button 
-            :class="['duration-btn', 'audio-config-btn', { active: selectedTrack !== 'silent' || selectedAmbient !== 'none' }]"
-            @click="showAudioConfig = !showAudioConfig"
-            :aria-label="'Configure meditation audio'"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 18V5l12-2v13M9 18c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3zm12-2c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <button 
             :class="['duration-btn', 'breathing-config-btn', { active: !!selectedBreathingExercise }]"
             @click="showBreathingPicker = !showBreathingPicker"
             :aria-label="'Configure breathing exercise'"
@@ -200,90 +191,6 @@
           <button class="start-meditation-btn" @click="startMeditation" :aria-label="`Start a ${selectedDuration}-minute meditation session`">
             {{ t('meditation.begin') }}
           </button>
-        </div>
-        
-        <!-- Audio Configuration Panel -->
-        <div v-if="showAudioConfig && !meditationActive" class="audio-config-backdrop" @click="showAudioConfig = false"></div>
-        <div v-if="showAudioConfig && !meditationActive" class="audio-config-panel">
-          <div class="audio-config-header">
-            <h3 class="audio-config-panel-title">{{ t('meditation.audio.title') }}</h3>
-            <button class="config-close-btn" @click="showAudioConfig = false" aria-label="Close audio settings">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-            </button>
-          </div>
-          <div class="audio-config-section">
-            <div class="audio-config-title">{{ t('meditation.audio.track') }}</div>
-            <div class="audio-track-options">
-              <button
-                :class="['audio-track-btn', { active: selectedTrack === 'silent' }]"
-                @click="selectedTrack = 'silent'"
-              >
-                {{ t('meditation.audio.silent') }}
-              </button>
-              <button
-                v-for="num in [1, 2, 3, 4, 5]"
-                :key="'track' + num"
-                :class="['audio-track-btn', { active: selectedTrack === 'track' + num }]"
-                @click="selectedTrack = 'track' + num; previewTrack('track' + num)"
-              >
-                {{ t('meditation.audio.trackLabel') }} {{ num }}
-              </button>
-            </div>
-          </div>
-          
-          <div class="audio-config-section">
-            <div class="audio-config-title">{{ t('meditation.audio.ambient') }}</div>
-            <div class="audio-ambient-options">
-              <button
-                :class="['audio-ambient-btn', { active: selectedAmbient === 'none' }]"
-                @click="selectedAmbient = 'none'"
-              >
-                {{ t('meditation.audio.none') }}
-              </button>
-              <button
-                :class="['audio-ambient-btn', { active: selectedAmbient === 'rain' }]"
-                @click="selectedAmbient = 'rain'; previewAmbient('rain')"
-              >
-                {{ t('meditation.audio.rain') }}
-              </button>
-              <button
-                :class="['audio-ambient-btn', { active: selectedAmbient === 'forest' }]"
-                @click="selectedAmbient = 'forest'; previewAmbient('forest')"
-              >
-                {{ t('meditation.audio.forest') }}
-              </button>
-              <button
-                :class="['audio-ambient-btn', { active: selectedAmbient === 'ocean' }]"
-                @click="selectedAmbient = 'ocean'; previewAmbient('ocean')"
-              >
-                {{ t('meditation.audio.ocean') }}
-              </button>
-              <button
-                :class="['audio-ambient-btn', { active: selectedAmbient === 'whitenoise' }]"
-                @click="selectedAmbient = 'whitenoise'; previewAmbient('whitenoise')"
-              >
-                {{ t('meditation.audio.whitenoise') }}
-              </button>
-            </div>
-          </div>
-          
-          <div class="audio-config-section">
-            <div class="audio-config-title">{{ t('meditation.audio.volume') }}</div>
-            <div class="volume-control">
-              <input 
-                type="range" 
-                v-model.number="masterVolume" 
-                min="0" 
-                max="1" 
-                step="0.1"
-                class="volume-slider"
-                @input="updatePreviewVolume"
-              />
-              <span class="volume-label">{{ Math.round(masterVolume * 100) }}%</span>
-            </div>
-          </div>
         </div>
         
         <!-- Bell Configuration Panel -->
@@ -326,47 +233,8 @@
       <div v-if="meditationActive" class="zen-meditation-overlay">
         <component :is="ANIMATIONS[meditationAnimationIdx]" />
         
-        <!-- Audio & Bell Settings Toolbar -->
+        <!-- Bell Settings Toolbar -->
         <div class="bell-settings-toolbar">
-          <!-- Volume Controls -->
-          <div class="volume-controls">
-            <button 
-              :class="['volume-toggle-btn', { muted: isMuted }]"
-              @click="toggleMute"
-              :aria-label="isMuted ? 'Unmute audio' : 'Mute audio'"
-            >
-              <svg v-if="!isMuted" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            
-            <div class="volume-slider-container">
-              <button 
-                class="volume-slider-toggle"
-                @click="showVolumeSlider = !showVolumeSlider"
-                :aria-label="'Adjust volume'"
-              >
-                {{ Math.round(masterVolume * 100) }}%
-              </button>
-              <div v-if="showVolumeSlider" class="volume-slider-popup">
-                <input 
-                  type="range" 
-                  v-model.number="masterVolume" 
-                  min="0" 
-                  max="1" 
-                  step="0.05"
-                  class="volume-slider-vertical"
-                  @input="updateMeditationVolume"
-                  orient="vertical"
-                />
-              </div>
-            </div>
-          </div>
-          
-          <div class="toolbar-divider"></div>
           <button 
             :class="['bell-toggle-btn', { active: bellEnabled }]"
             @click="bellEnabled = !bellEnabled"
@@ -595,18 +463,6 @@ function toggleBreathingDuringMeditation() {
   }
 }
 
-// Audio settings
-const selectedTrack = ref('silent') // 'silent', 'track1', 'track2', 'track3', 'track4', 'track5'
-const selectedAmbient = ref('none') // 'none', 'rain', 'forest', 'ocean', 'whitenoise'
-const showAudioConfig = ref(false)
-const masterVolume = ref(0.7)
-const isMuted = ref(false)
-const showVolumeSlider = ref(false)
-let trackAudio: HTMLAudioElement | null = null
-let ambientAudio: HTMLAudioElement | null = null
-let previewTrackAudio: HTMLAudioElement | null = null
-let previewAmbientAudio: HTMLAudioElement | null = null
-
 const showNotes = ref(false)
 const journalMode = ref(false)
 const calendarMode = ref(false)
@@ -620,7 +476,6 @@ function toggleJournalMode() {
     calendarMode.value = false
     philosophyMode.value = false
     settingsMode.value = false
-    showAudioConfig.value = false
     showBellConfig.value = false
     showBreathingPicker.value = false
   }
@@ -632,7 +487,6 @@ function toggleCalendarMode() {
     journalMode.value = false
     philosophyMode.value = false
     settingsMode.value = false
-    showAudioConfig.value = false
     showBellConfig.value = false
     showBreathingPicker.value = false
     if (user.value) fetchMeditations()
@@ -645,7 +499,6 @@ function togglePhilosophyMode() {
     journalMode.value = false
     calendarMode.value = false
     settingsMode.value = false
-    showAudioConfig.value = false
     showBellConfig.value = false
     showBreathingPicker.value = false
   }
@@ -657,7 +510,6 @@ function toggleSettingsMode() {
     journalMode.value = false
     calendarMode.value = false
     philosophyMode.value = false
-    showAudioConfig.value = false
     showBellConfig.value = false
     showBreathingPicker.value = false
   }
@@ -674,7 +526,6 @@ function handleSettingsLanguageChange(language: string) {
 const meditations = ref<Array<{ Date: string | { $date: string }, Username?: string, duration?: number, notes?: string }>>([])  
 const completedMeditationDuration = ref(0)
 
-const audio = ref<HTMLAudioElement | null>(null)
 const alertAudio = ref<HTMLAudioElement | null>(null)
 
 function setRandomPhrase() {
@@ -774,124 +625,10 @@ function playBellSound() {
   })
 }
 
-async function stopMeditationAudioSmooth() {
-  if (audio.value) {
-    const fadeDuration = 2 // seconds
-    const step = 0.05
-    let currentVolume = audio.value.volume
-    while (currentVolume > 0.01) {
-      currentVolume = Math.max(0, currentVolume - step)
-      audio.value.volume = currentVolume
-      await new Promise(r => setTimeout(r, fadeDuration * 50))
-    }
-    audio.value.pause()
-    audio.value.currentTime = 0
-    audio.value.volume = 1 // reset for next play
-  }
-}
-
-function playTrack() {
-  if (selectedTrack.value !== 'silent') {
-    if (trackAudio) {
-      trackAudio.pause()
-      trackAudio.currentTime = 0
-    }
-    trackAudio = new Audio(`./${selectedTrack.value}.mp3`)
-    trackAudio.loop = true
-    trackAudio.volume = isMuted.value ? 0 : masterVolume.value
-    trackAudio.play().catch(err => console.error('Track playback failed:', err))
-  } else {
-  }
-}
-
-function playAmbient() {
-  if (selectedAmbient.value !== 'none') {
-    if (ambientAudio) {
-      ambientAudio.pause()
-      ambientAudio.currentTime = 0
-    }
-    ambientAudio = new Audio(`./${selectedAmbient.value}.mp3`)
-    ambientAudio.loop = true
-    ambientAudio.volume = isMuted.value ? 0 : masterVolume.value * 0.6 // Slightly lower ambient volume
-    ambientAudio.play().catch(err => console.error('Ambient playback failed:', err))
-  } else {
-  }
-}
-
-function stopAllAudio() {
-  if (audio.value) {
-    audio.value.pause()
-    audio.value.currentTime = 0
-  }
-  if (trackAudio) {
-    trackAudio.pause()
-    trackAudio.currentTime = 0
-  }
-  if (ambientAudio) {
-    ambientAudio.pause()
-    ambientAudio.currentTime = 0
-  }
-}
-
-function toggleMute() {
-  isMuted.value = !isMuted.value
-  updateMeditationVolume()
-}
-
-function updateMeditationVolume() {
-  const vol = isMuted.value ? 0 : masterVolume.value
-  if (audio.value) audio.value.volume = vol
-  if (trackAudio) trackAudio.volume = vol
-  if (ambientAudio) ambientAudio.volume = vol * 0.6
-}
-
-function previewTrack(track: string) {
-  if (previewTrackAudio) {
-    previewTrackAudio.pause()
-    previewTrackAudio.currentTime = 0
-  }
-  previewTrackAudio = new Audio(`./${track}.mp3`)
-  previewTrackAudio.volume = masterVolume.value
-  previewTrackAudio.play().catch(err => console.log('Track preview failed:', err))
-  
-  // Stop preview after 3 seconds
-  setTimeout(() => {
-    if (previewTrackAudio) {
-      previewTrackAudio.pause()
-      previewTrackAudio.currentTime = 0
-    }
-  }, 3000)
-}
-
-function previewAmbient(ambient: string) {
-  if (previewAmbientAudio) {
-    previewAmbientAudio.pause()
-    previewAmbientAudio.currentTime = 0
-  }
-  previewAmbientAudio = new Audio(`./${ambient}.mp3`)
-  previewAmbientAudio.volume = masterVolume.value * 0.6
-  previewAmbientAudio.play().catch(err => console.log('Ambient preview failed:', err))
-  
-  // Stop preview after 3 seconds
-  setTimeout(() => {
-    if (previewAmbientAudio) {
-      previewAmbientAudio.pause()
-      previewAmbientAudio.currentTime = 0
-    }
-  }, 3000)
-}
-
-function updatePreviewVolume() {
-  if (previewTrackAudio) previewTrackAudio.volume = masterVolume.value
-  if (previewAmbientAudio) previewAmbientAudio.volume = masterVolume.value * 0.6
-}
-
 async function stopMeditation() {
   meditationActive.value = false
   stopBreathingCycle()
   if (meditationIntervalId) clearInterval(meditationIntervalId)
-  await stopMeditationAudioSmooth()
-  stopAllAudio()
   playAlert()
 }
 
@@ -899,8 +636,6 @@ async function finishMeditation() {
   meditationActive.value = false
   stopBreathingCycle()
   if (meditationIntervalId) clearInterval(meditationIntervalId)
-  await stopMeditationAudioSmooth()
-  stopAllAudio()
   playAlert()
   
   completedMeditationDuration.value = (selectedDuration.value * 60) - meditationSeconds.value
@@ -945,7 +680,6 @@ async function startMeditation() {
   meditationActive.value = true
   meditationSeconds.value = selectedDuration.value * 60
   lastBellTime = 0
-  showVolumeSlider.value = false
   meditationAnimationIdx.value = Math.floor(Math.random() * ANIMATIONS.length)
   meditationIntervalId = window.setInterval(() => {
     if (meditationSeconds.value > 0) {
@@ -968,8 +702,6 @@ async function startMeditation() {
     }
   }, 1000)
   playAlert()
-  playTrack()
-  playAmbient()
   if (selectedBreathingExercise.value) {
     startBreathingCycle()
   }
@@ -1399,24 +1131,20 @@ async function handleLogout() {
 }
 
 .breathing-picker-panel {
-  position: absolute;
-  bottom: 6rem;
+  position: fixed;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   background: var(--input-bg);
   border: 1px solid var(--input-border);
-  border-radius: 8px;
-  width: 280px;
-  max-height: 320px;
+  border-radius: 12px;
+  width: 300px;
+  max-width: 90vw;
+  max-height: 80vh;
   overflow-y: auto;
   z-index: 1002;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  animation: fadeSlideUp 0.2s ease-out;
-}
-
-@keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  animation: popupFadeIn 0.2s ease-out;
 }
 
 .breathing-picker-header {
@@ -1621,121 +1349,6 @@ async function handleLogout() {
   z-index: 1001;
 }
 
-.volume-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.volume-toggle-btn {
-  padding: 0.5rem;
-  background: transparent;
-  border: none;
-  color: var(--text2);
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.volume-toggle-btn:hover {
-  background: var(--input-bg-focus);
-  color: var(--text1);
-}
-
-.volume-toggle-btn.muted {
-  color: var(--error-text);
-}
-
-.volume-slider-container {
-  position: relative;
-}
-
-.volume-slider-toggle {
-  padding: 0.4rem 0.8rem;
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  border-radius: 6px;
-  color: var(--text1);
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  min-width: 50px;
-  font-variant-numeric: tabular-nums;
-}
-
-.volume-slider-toggle:hover {
-  background: var(--input-bg-focus);
-  border-color: var(--input-border-focus);
-}
-
-.volume-slider-popup {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 1rem 0.75rem;
-  background: var(--blur2);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--input-border);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 1003;
-  animation: dropdownSlide 0.15s ease;
-}
-
-.volume-slider-vertical {
-  -webkit-appearance: slider-vertical;
-  appearance: slider-vertical;
-  width: 6px;
-  height: 120px;
-  border-radius: 3px;
-  background: var(--input-bg-focus);
-  outline: none;
-  cursor: pointer;
-  writing-mode: bt-lr;
-}
-
-.volume-slider-vertical::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--button-bg);
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.volume-slider-vertical::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-}
-
-.volume-slider-vertical::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--button-bg);
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.volume-slider-vertical::-moz-range-thumb:hover {
-  transform: scale(1.15);
-}
-
-.toolbar-divider {
-  width: 1px;
-  height: 24px;
-  background: var(--input-border);
-  opacity: 0.5;
-}
-
 .bell-toggle-btn {
   padding: 0.5rem;
   background: transparent;
@@ -1838,169 +1451,85 @@ async function handleLogout() {
   }
 }
 
-.bell-config-btn,
-.audio-config-btn {
+.bell-config-btn {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.audio-config-btn.active {
-  background: var(--button-bg);
-  color: var(--text1);
-}
-
-.audio-config-backdrop,
 .bell-config-backdrop {
-  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 9998;
+  animation: fadeIn 0.2s ease;
 }
 
 .dropdown-backdrop-inline {
   display: none;
 }
 
-.audio-config-header,
 .bell-config-header {
-  display: none;
-}
-
-.audio-config-panel {
-  position: absolute;
-  bottom: 5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 1.25rem;
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  border-radius: 12px;
-  animation: slideUp 0.2s ease;
-  min-width: 400px;
-  max-width: 500px;
-  z-index: 10000;
-}
-
-.audio-config-section {
-  margin-bottom: 1.25rem;
-}
-
-.audio-config-section:last-child {
-  margin-bottom: 0;
-}
-
-.audio-config-title {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--text1);
-  margin-bottom: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.9;
-}
-
-.audio-track-options,
-.audio-ambient-options {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-}
-
-.audio-track-btn,
-.audio-ambient-btn {
-  padding: 0.65rem;
-  background: transparent;
-  border: 1px solid var(--input-border);
-  border-radius: 8px;
-  color: var(--text2);
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-  text-align: center;
-}
-
-.audio-track-btn:hover,
-.audio-ambient-btn:hover {
-  background: var(--input-bg-focus);
-  color: var(--text1);
-  border-color: var(--input-border-focus);
-  transform: translateY(-1px);
-}
-
-.audio-track-btn.active,
-.audio-ambient-btn.active {
-  background: var(--button-bg);
-  color: var(--text1);
-  border-color: var(--input-border-focus);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.volume-control {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--input-border);
 }
 
-.volume-slider {
-  flex: 1;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--input-bg-focus);
-  outline: none;
-  cursor: pointer;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.volume-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--button-bg);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.volume-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-}
-
-.volume-slider::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--button-bg);
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s;
-}
-
-.volume-slider::-moz-range-thumb:hover {
-  transform: scale(1.2);
-}
-
-.volume-label {
-  min-width: 45px;
-  text-align: right;
-  font-size: 0.85rem;
-  font-weight: 500;
+.bell-config-panel-title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 400;
   color: var(--text1);
-  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.config-close-btn {
+  padding: 0.35rem;
+  background: transparent;
+  border: none;
+  color: var(--text2);
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.config-close-btn:hover {
+  background: var(--input-bg-focus);
+  color: var(--text1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .bell-config-panel {
-  position: absolute;
-  bottom: 5rem;
+  position: fixed;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  padding: 1rem;
+  transform: translate(-50%, -50%);
+  padding: 0;
   background: var(--input-bg);
   border: 1px solid var(--input-border);
-  border-radius: 8px;
-  animation: slideUp 0.2s ease;
-  min-width: 300px;
-  z-index: 2000;
+  border-radius: 12px;
+  animation: popupFadeIn 0.2s ease;
+  min-width: 280px;
+  max-width: 360px;
+  width: 85vw;
+  z-index: 9999;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.bell-config-panel > .bell-config-options {
+  padding: 1rem 1.25rem;
 }
 
 .bell-config-options {
@@ -2038,17 +1567,6 @@ async function handleLogout() {
   border-color: var(--input-border-focus);
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -2078,14 +1596,15 @@ async function handleLogout() {
   }
 
   .nav-item {
-    font-size: 0.6rem;
-    gap: 0.15rem;
-    padding: 0.3rem 0.2rem;
+    font-size: 0.7rem;
+    gap: 0.3rem;
+    padding: 0.5rem 0.4rem;
+    min-width: 56px;
   }
 
   .nav-item svg {
-    width: 20px;
-    height: 20px;
+    width: 26px;
+    height: 26px;
   }
 
   /* Hide zen phrase and loader on mobile for cleaner layout */
@@ -2120,7 +1639,6 @@ async function handleLogout() {
   }
 
   .breathing-picker-panel {
-    bottom: 6rem;
     width: calc(100% - 2rem);
     max-width: 320px;
   }
@@ -2179,13 +1697,15 @@ async function handleLogout() {
   }
 
   .nav-item {
-    font-size: 0.55rem;
-    padding: 0.25rem 0.15rem;
+    font-size: 0.65rem;
+    gap: 0.25rem;
+    padding: 0.45rem 0.3rem;
+    min-width: 50px;
   }
 
   .nav-item svg {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
   }
 
   .zen-phrase {
@@ -2239,12 +1759,12 @@ async function handleLogout() {
   }
 
   .nav-item {
-    font-size: 0.55rem;
+    font-size: 0.6rem;
   }
 
   .nav-item svg {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
   }
 
   .zen-phrase {
@@ -2290,13 +1810,15 @@ async function handleLogout() {
 /* Very small screens */
 @media (max-width: 360px) {
   .nav-item {
-    font-size: 0.5rem;
-    padding: 0.2rem 0.1rem;
+    font-size: 0.6rem;
+    gap: 0.4rem;
+    padding: 0.2rem 0.2rem;
+    min-width: 46px;
   }
 
   .nav-item svg {
-    width: 16px;
-    height: 16px;
+    width: 22px;
+    height: 22px;
   }
 
   .zen-phrase {
@@ -2324,16 +1846,10 @@ async function handleLogout() {
   }
 }
 
-/* Mobile optimizations for audio/bell config panels */
+/* Mobile optimizations for bell config panels */
 @media (max-width: 768px) {
-  .audio-config-backdrop,
   .bell-config-backdrop {
-    display: block;
-    position: fixed;
-    inset: 0;
     background: rgba(0, 0, 0, 0.75);
-    z-index: 9998;
-    animation: fadeIn 0.2s ease;
   }
 
   .dropdown-backdrop-inline {
@@ -2342,36 +1858,6 @@ async function handleLogout() {
     inset: 0;
     background: transparent;
     z-index: 1001;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  .audio-config-panel {
-    position: fixed;
-    inset: 0;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    max-width: 100%;
-    min-width: 100%;
-    height: 100vh;
-    max-height: 100vh;
-    transform: none;
-    border-radius: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    z-index: 9999;
-    padding: 0.75rem;
-    padding-top: 4rem;
-    padding-bottom: 2rem;
-    box-sizing: border-box;
-    animation: slideUpMobile 0.3s ease;
   }
 
   @keyframes slideUpMobile {
@@ -2385,11 +1871,7 @@ async function handleLogout() {
     }
   }
 
-  .audio-config-header,
   .bell-config-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     position: fixed;
     top: 0;
     left: 0;
@@ -2403,27 +1885,16 @@ async function handleLogout() {
     box-sizing: border-box;
   }
 
-  .audio-config-panel-title,
   .bell-config-panel-title {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--text1);
-    margin: 0;
   }
 
   .config-close-btn {
-    padding: 0.5rem;
-    background: transparent;
-    border: none;
-    color: var(--text2);
-    cursor: pointer;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
     min-width: 40px;
     min-height: 40px;
+    padding: 0.5rem;
+    border-radius: 8px;
   }
 
   .config-close-btn:hover,
@@ -2432,44 +1903,9 @@ async function handleLogout() {
     color: var(--text1);
   }
   
-  .audio-track-options,
-  .audio-ambient-options {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  .audio-track-btn,
-  .audio-ambient-btn {
-    padding: 0.65rem 0.5rem;
-    font-size: 0.8rem;
-    min-height: 44px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .audio-config-section {
-    margin-bottom: 1rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .audio-config-title {
-    font-size: 0.8rem;
-    margin-bottom: 0.5rem;
-  }
-  
   .bell-config-panel {
     position: fixed;
     inset: 0;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     width: 100%;
     max-width: 100%;
     min-width: 100%;
@@ -2481,11 +1917,16 @@ async function handleLogout() {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     z-index: 9999;
+    padding: 0;
+    box-sizing: border-box;
+    animation: slideUpMobile 0.3s ease;
+    box-shadow: none;
+  }
+
+  .bell-config-panel > .bell-config-options {
     padding: 0.75rem;
     padding-top: 4rem;
     padding-bottom: 2rem;
-    box-sizing: border-box;
-    animation: slideUpMobile 0.3s ease;
   }
   
   .bell-sound-options {
@@ -2566,7 +2007,6 @@ async function handleLogout() {
     justify-content: center;
   }
 
-  .volume-toggle-btn,
   .bell-toggle-btn {
     min-width: 36px;
     min-height: 36px;
@@ -2574,13 +2014,11 @@ async function handleLogout() {
     box-sizing: border-box;
   }
 
-  .volume-toggle-btn svg,
   .bell-toggle-btn svg {
     width: 14px;
     height: 14px;
   }
 
-  .volume-slider-toggle,
   .bell-dropdown-btn {
     min-height: 36px;
     padding: 0.35rem 0.6rem;
@@ -2603,60 +2041,13 @@ async function handleLogout() {
   .toolbar-divider {
     height: 20px;
   }
-
-  .volume-slider-popup {
-    transform: translateX(-50%);
-    padding: 0.75rem 0.5rem;
-  }
-
-  .volume-slider-vertical {
-    height: 100px;
-  }
-  
-  .volume-control {
-    gap: 0.5rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .volume-label {
-    font-size: 0.8rem;
-    min-width: 40px;
-  }
-  
-  .volume-slider {
-    height: 6px;
-  }
-  
-  .volume-slider::-webkit-slider-thumb {
-    width: 18px;
-    height: 18px;
-  }
-  
-  .volume-slider::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
-  }
 }
 
 @media (max-width: 480px) {
-  .audio-track-options,
-  .audio-ambient-options {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-
-  .audio-track-btn,
-  .audio-ambient-btn {
-    padding: 0.75rem 0.5rem;
-    font-size: 0.85rem;
-  }
-
   .bell-sound-options {
     grid-template-columns: 1fr;
   }
 
-  .audio-config-panel,
   .bell-config-panel {
     padding: 0.5rem;
     padding-top: 4rem;
@@ -2673,20 +2064,17 @@ async function handleLogout() {
     border-radius: 6px;
   }
 
-  .volume-toggle-btn,
   .bell-toggle-btn {
     min-width: 32px;
     min-height: 32px;
     padding: 0.3rem;
   }
 
-  .volume-toggle-btn svg,
   .bell-toggle-btn svg {
     width: 12px;
     height: 12px;
   }
 
-  .volume-slider-toggle,
   .bell-dropdown-btn {
     min-height: 32px;
     padding: 0.3rem 0.5rem;
@@ -2702,14 +2090,12 @@ async function handleLogout() {
     height: 18px;
   }
 
-  .volume-toggle-btn,
   .bell-toggle-btn {
     min-width: 36px;
     min-height: 36px;
     padding: 0.4rem;
   }
 
-  .volume-slider-toggle,
   .bell-dropdown-btn {
     min-height: 36px;
     padding: 0.4rem 0.6rem;

@@ -30,26 +30,13 @@
     "meditation": {
         "begin": "Inizia",
         "stop": "Ferma",
-        "audio": {
-            "title": "Impostazioni Audio",
-            "track": "Traccia di Meditazione",
-            "trackLabel": "Traccia",
-            "silent": "Silenzio",
-            "ambient": "Suono Ambientale",
-            "none": "Nessuno",
-            "rain": "Pioggia",
-            "forest": "Foresta",
-            "ocean": "Oceano",
-            "whitenoise": "Rumore Bianco",
-            "volume": "Volume Principale"
-        },
         "bell": {
             "settings": "Impostazioni Campana"
         }
     },
     "philosophy": {
-        "title": "Perché nessun obiettivo o serie?",
-        "subtitle": "Comprendere l'approccio Zen alla pratica",
+        "title": "La Nostra Filosofia Zen",
+        "subtitle": "Comprendere le scelte di design dietro ZenGarden",
         "practice": {
             "title": "La pratica è il percorso",
             "body": "Nello Zen, la meditazione non è un mezzo per raggiungere un fine—è il fine stesso. Ogni momento di pratica è completo e intero. Non c'è nessun posto dove andare, nulla da raggiungere. Quando ti siedi, sei già lì."
@@ -61,6 +48,10 @@
         "noStreaks": {
             "title": "Le serie creano ansia",
             "body": "Una serie di 100 giorni può sembrare motivante, ma diventa una fonte di stress. Perdere un giorno sembra un fallimento. Questo contraddice lo spirito della pratica, che riguarda il lasciar andare, non l'aggrapparsi ai risultati."
+        },
+        "silence": {
+            "title": "Abbracciare il Silenzio Naturale",
+            "body": "Nella tradizione Zen, il mondo stesso è la colonna sonora della meditazione. I suoni ambientali artificiali e le tracce musicali possono diventare una stampella—un altro strato tra te e la realtà. Resta solo la campana: segna il tempo e ti richiama al presente. La vera pratica avviene nella trama grezza e non filtrata di ogni momento."
         },
         "observation": {
             "title": "Sosteniamo l'auto-osservazione",
@@ -146,6 +137,7 @@
     },
     "breathing": {
         "title": "Esercizio di Respirazione",
+        "none": "Nessuno",
         "box": "Respirazione a Scatola",
         "deep": "Respirazione Profonda",
         "calm": "Respiro Calmante",

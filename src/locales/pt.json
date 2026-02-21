@@ -30,26 +30,13 @@
     "meditation": {
         "begin": "Começar",
         "stop": "Parar",
-        "audio": {
-            "title": "Configurações de Áudio",
-            "track": "Faixa de Meditação",
-            "trackLabel": "Faixa",
-            "silent": "Silencioso",
-            "ambient": "Som Ambiente",
-            "none": "Nenhum",
-            "rain": "Chuva",
-            "forest": "Floresta",
-            "ocean": "Oceano",
-            "whitenoise": "Ruído Branco",
-            "volume": "Volume Principal"
-        },
         "bell": {
             "settings": "Configurações de Sino"
         }
     },
     "philosophy": {
-        "title": "Por que não há metas ou sequências?",
-        "subtitle": "Compreendendo a abordagem Zen da prática",
+        "title": "Nossa Filosofia Zen",
+        "subtitle": "Compreendendo as escolhas de design por trás do ZenGarden",
         "practice": {
             "title": "A prática é o caminho",
             "body": "No Zen, a meditação não é um meio para um fim—é o próprio fim. Cada momento de prática é completo e inteiro. Não há lugar para ir, nada a alcançar. Quando você se senta, você já está lá."
@@ -61,6 +48,10 @@
         "noStreaks": {
             "title": "Sequências criam ansiedade",
             "body": "Uma sequência de 100 dias pode parecer motivadora, mas se torna uma fonte de estresse. Perder um dia parece uma falha. Isso contradiz o espírito da prática, que é sobre deixar ir, não se apegar a conquistas."
+        },
+        "silence": {
+            "title": "Abraçar o Silêncio Natural",
+            "body": "Na tradição Zen, o mundo em si é a trilha sonora da sua meditação. Sons ambientes artificiais e faixas musicais podem se tornar uma muleta—mais uma camada entre você e a realidade. Apenas o sino permanece: ele marca o tempo e te chama de volta ao presente. A verdadeira prática acontece na textura crua e não filtrada de cada momento."
         },
         "observation": {
             "title": "Apoiamos a auto-observação",
@@ -146,6 +137,7 @@
     },
     "breathing": {
         "title": "Exercício de Respiração",
+        "none": "Nenhum",
         "box": "Respiração em Caixa",
         "deep": "Respiração Profunda",
         "calm": "Respiração Calmante",

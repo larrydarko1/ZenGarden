@@ -5,7 +5,7 @@
 ![Pull Requests](https://img.shields.io/github/issues-pr/larrydarko1/ZenGarden)
 ![Contributors](https://img.shields.io/github/contributors/larrydarko1/ZenGarden)
 
-Zen Garden is a **local-first, cross-platform meditation app** built with **Electron** (desktop), **Capacitor** (mobile), **Vue 3**, and TypeScript. All your data stays on your device in MongoDB-compatible JSON files - no server, no cloud, completely private. Features guided meditations, a meditation calendar, and relaxing animations.
+Zen Garden is a **local-first, cross-platform meditation app** built with **Electron** (desktop), **Capacitor** (mobile), **Vue 3**, and TypeScript. All your data stays on your device in MongoDB-compatible JSON files - no server, no cloud, completely private. Features a meditation timer with bell sounds, breathing exercises, a meditation calendar, and relaxing Zen animations.
 
 > **IMPORTANT:** This app runs natively on **Desktop** (macOS, Windows, Linux) and **Mobile** (Android). All data is stored in JSON files on your device and never leaves it.
 
@@ -23,6 +23,8 @@ Zen Garden is a **local-first, cross-platform meditation app** built with **Elec
 ## Features
 
 ### Meditation & Mindfulness
+- **Meditation timer** - configurable duration with bell interval markers
+- **Bell sounds only** - no artificial ambient sounds or music; in Zen tradition, the world is your soundtrack
 - **Meditation calendar** - visual tracking of your meditation history
 - **Session notes** - reflect and journal after each session
 
@@ -37,8 +39,8 @@ Zen Garden is a **local-first, cross-platform meditation app** built with **Elec
 - **Duration impact analysis** - see how meditation length affects your wellbeing
 
 ### Design & Experience
+- **Zen philosophy built-in** - explains the design choices behind the app
 - **Animated Zen backgrounds** - Wind, Waves, and other animations
-- **Three themes** - Blue, White, and Dark modes
 - **Fully responsive** - optimized for different screen sizes
 - **8 languages** - English, Spanish, Italian, French, German, Portuguese, Chinese, Japanese
 

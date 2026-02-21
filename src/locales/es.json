@@ -30,26 +30,13 @@
     "meditation": {
         "begin": "Comenzar",
         "stop": "Detener",
-        "audio": {
-            "title": "Configuración de Audio",
-            "track": "Pista de Meditación",
-            "trackLabel": "Pista",
-            "silent": "Silencio",
-            "ambient": "Sonido Ambiental",
-            "none": "Ninguno",
-            "rain": "Lluvia",
-            "forest": "Bosque",
-            "ocean": "Océano",
-            "whitenoise": "Ruido Blanco",
-            "volume": "Volumen Maestro"
-        },
         "bell": {
             "settings": "Configuración de Campana"
         }
     },
     "philosophy": {
-        "title": "¿Por qué no hay metas ni rachas?",
-        "subtitle": "Entendiendo el enfoque Zen de la práctica",
+        "title": "Nuestra Filosofía Zen",
+        "subtitle": "Comprendiendo las decisiones de diseño detrás de ZenGarden",
         "practice": {
             "title": "La práctica es el camino",
             "body": "En el Zen, la meditación no es un medio para un fin, es el fin en sí mismo. Cada momento de práctica es completo y entero. No hay ningún lugar al que ir, nada que lograr. Cuando te sientas, ya estás ahí."
@@ -61,6 +48,10 @@
         "noStreaks": {
             "title": "Las rachas crean ansiedad",
             "body": "Una racha de 100 días puede parecer motivadora, pero se convierte en una fuente de estrés. Perder un día se siente como un fracaso. Esto contradice el espíritu de la práctica, que se trata de soltar, no de aferrarse a logros."
+        },
+        "silence": {
+            "title": "Abrazar el Silencio Natural",
+            "body": "En la tradición Zen, el mundo mismo es la banda sonora de tu meditación. Los sonidos ambientales artificiales y las pistas musicales pueden convertirse en una muleta—otra capa entre tú y la realidad. Solo queda la campana: marca el tiempo y te devuelve al presente. La verdadera práctica ocurre en la textura cruda y sin filtros de cada momento."
         },
         "observation": {
             "title": "Apoyamos la auto-observación",
@@ -146,6 +137,7 @@
     },
     "breathing": {
         "title": "Ejercicio de Respiración",
+        "none": "Ninguno",
         "box": "Respiración en Caja",
         "deep": "Respiración Profunda",
         "calm": "Respiración Calmante",

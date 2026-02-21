@@ -37,26 +37,13 @@
     "meditation": {
         "begin": "Begin",
         "stop": "Stop",
-        "audio": {
-            "title": "Audio Settings",
-            "track": "Meditation Track",
-            "trackLabel": "Track",
-            "silent": "Silent",
-            "ambient": "Ambient Sound",
-            "none": "None",
-            "rain": "Rain",
-            "forest": "Forest",
-            "ocean": "Ocean",
-            "whitenoise": "White Noise",
-            "volume": "Master Volume"
-        },
         "bell": {
             "settings": "Bell Settings"
         }
     },
     "philosophy": {
-        "title": "Why No Goals or Streaks?",
-        "subtitle": "Understanding the Zen approach to practice",
+        "title": "Our Zen Philosophy",
+        "subtitle": "Understanding the design choices behind ZenGarden",
         "practice": {
             "title": "The Practice Is the Path",
             "body": "In Zen, meditation is not a means to an end—it is the end itself. Each moment of practice is complete and whole. There is nowhere to go, nothing to achieve. When you sit, you are already there."
@@ -68,6 +55,10 @@
         "noStreaks": {
             "title": "Streaks Create Anxiety",
             "body": "A 100-day streak might seem motivating, but it becomes a source of stress. Missing one day feels like failure. This contradicts the spirit of practice, which is about letting go, not holding on to achievements."
+        },
+        "silence": {
+            "title": "Embrace Natural Silence",
+            "body": "In Zen tradition, the world itself is your meditation soundtrack. Artificial ambient sounds and music tracks can become a crutch—another layer between you and reality. Only the bell remains: it marks time and calls you back to the present. True practice happens in the raw, unfiltered texture of each moment."
         },
         "observation": {
             "title": "We Support Self-Observation",
@@ -153,6 +144,7 @@
     },
     "breathing": {
         "title": "Breathing Exercise",
+        "none": "None",
         "box": "Box Breathing",
         "deep": "Deep Breathing",
         "calm": "Calming Breath",
