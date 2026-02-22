@@ -171,8 +171,8 @@
           </div>
           <button 
             :class="['duration-btn', 'bell-config-btn', { active: bellEnabled }]"
-            @click="bellEnabled = !bellEnabled; showBellConfig = bellEnabled"
-            :aria-label="bellEnabled ? 'Disable interval bells' : 'Enable interval bells'"
+            @click="showBellConfig = !showBellConfig"
+            :aria-label="'Configure bell settings'"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2C10.9 2 10 2.9 10 4C10 4.6 10.2 5.1 10.6 5.5C8 6.1 6 8.3 6 11V16L4 18V19H20V18L18 16V11C18 8.3 16 6.1 13.4 5.5C13.8 5.1 14 4.6 14 4C14 2.9 13.1 2 12 2ZM10 20C10 21.1 10.9 22 12 22C13.1 22 14 21.1 14 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -194,33 +194,39 @@
         </div>
         
         <!-- Bell Configuration Panel -->
-        <div v-if="showBellConfig && !meditationActive" class="bell-config-backdrop" @click="showBellConfig = false"></div>
-        <div v-if="showBellConfig && !meditationActive" class="bell-config-panel">
-          <div class="bell-config-header">
-            <h3 class="bell-config-panel-title">{{ t('meditation.bell.settings') }}</h3>
+        <div v-if="showBellConfig && !meditationActive" class="breathing-picker-backdrop" @click="showBellConfig = false"></div>
+        <div v-if="showBellConfig && !meditationActive" class="breathing-picker-panel bell-picker-panel">
+          <div class="breathing-picker-header">
+            <h3 class="breathing-picker-title">{{ t('meditation.bell.settings') }}</h3>
             <button class="config-close-btn" @click="showBellConfig = false" aria-label="Close bell settings">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               </svg>
             </button>
           </div>
-          <div class="bell-config-options">
-            <div class="bell-dropdown">
-              <button class="bell-dropdown-btn" @click="showConfigIntervalDropdown = !showConfigIntervalDropdown">
-                {{ bellInterval }} min <span class="dropdown-arrow">▾</span>
-              </button>
-              <div v-if="showConfigIntervalDropdown" class="bell-dropdown-menu">
-                <button @click="bellInterval = 5; showConfigIntervalDropdown = false">Every 5 min</button>
-                <button @click="bellInterval = 10; showConfigIntervalDropdown = false">Every 10 min</button>
-                <button @click="bellInterval = 15; showConfigIntervalDropdown = false">Every 15 min</button>
-                <button @click="bellInterval = 20; showConfigIntervalDropdown = false">Every 20 min</button>
-              </div>
-            </div>
-            <div class="bell-sound-options">
+          <div class="breathing-picker-options">
+            <button
+              :class="['breathing-option-btn', { active: !bellEnabled }]"
+              @click="bellEnabled = false; showBellConfig = false"
+            >
+              {{ t('breathing.none') }}
+            </button>
+            <button
+              v-for="interval in [5, 10, 15, 20]"
+              :key="interval"
+              :class="['breathing-option-btn', { active: bellEnabled && bellInterval === interval }]"
+              @click="bellEnabled = true; bellInterval = interval; showBellConfig = false"
+            >
+              <div class="breathing-option-name">Every {{ interval }} min</div>
+            </button>
+          </div>
+          <div v-if="bellEnabled" class="bell-sound-section">
+            <div class="bell-sound-section-title">Sound</div>
+            <div class="bell-sound-options-inline">
               <button
                 v-for="sound in ['1', '2', '3', '4']"
                 :key="sound"
-                :class="['bell-sound-btn', { active: bellSound === sound }]"
+                :class="['breathing-option-btn', 'bell-sound-inline-btn', { active: bellSound === sound }]"
                 @click="selectBellSound(sound)"
               >
                 Bell {{ sound }}
@@ -358,7 +364,6 @@ const bellSound = ref('1')
 const showBellConfig = ref(false)
 const showIntervalDropdown = ref(false)
 const showSoundDropdown = ref(false)
-const showConfigIntervalDropdown = ref(false)
 let lastBellTime = 0
 let bellAudioInstance: HTMLAudioElement | null = null
 
@@ -1457,33 +1462,35 @@ async function handleLogout() {
   justify-content: center;
 }
 
-.bell-config-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  z-index: 9998;
-  animation: fadeIn 0.2s ease;
+.bell-sound-section {
+  padding: 0.25rem 0.5rem 0.5rem;
+  border-top: 1px solid var(--input-border);
+}
+
+.bell-sound-section-title {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.25rem 0.15rem;
+}
+
+.bell-sound-options-inline {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.25rem;
+}
+
+.bell-sound-inline-btn {
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.5rem;
 }
 
 .dropdown-backdrop-inline {
   display: none;
-}
-
-.bell-config-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid var(--input-border);
-}
-
-.bell-config-panel-title {
-  margin: 0;
-  font-size: 0.8rem;
-  font-weight: 400;
-  color: var(--text1);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .config-close-btn {
@@ -1507,64 +1514,6 @@ async function handleLogout() {
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-
-.bell-config-panel {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 0;
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  border-radius: 12px;
-  animation: popupFadeIn 0.2s ease;
-  min-width: 280px;
-  max-width: 360px;
-  width: 85vw;
-  z-index: 9999;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-.bell-config-panel > .bell-config-options {
-  padding: 1rem 1.25rem;
-}
-
-.bell-config-options {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.bell-sound-options {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
-}
-
-.bell-sound-btn {
-  padding: 0.5rem;
-  background: transparent;
-  border: 1px solid var(--input-border);
-  border-radius: 6px;
-  color: var(--text2);
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.bell-sound-btn:hover {
-  background: var(--input-bg-focus);
-  color: var(--text1);
-  border-color: var(--input-border-focus);
-}
-
-.bell-sound-btn.active {
-  background: var(--button-bg);
-  color: var(--text1);
-  border-color: var(--input-border-focus);
 }
 
 @keyframes slideIn {
@@ -1848,10 +1797,6 @@ async function handleLogout() {
 
 /* Mobile optimizations for bell config panels */
 @media (max-width: 768px) {
-  .bell-config-backdrop {
-    background: rgba(0, 0, 0, 0.75);
-  }
-
   .dropdown-backdrop-inline {
     display: block;
     position: fixed;
@@ -1871,25 +1816,6 @@ async function handleLogout() {
     }
   }
 
-  .bell-config-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    padding: 0.75rem;
-    background: var(--base1);
-    border-bottom: 1px solid var(--input-border);
-    z-index: 10001;
-    min-height: 52px;
-    box-sizing: border-box;
-  }
-
-  .bell-config-panel-title {
-    font-size: 1rem;
-    font-weight: 600;
-  }
-
   .config-close-btn {
     min-width: 40px;
     min-height: 40px;
@@ -1901,64 +1827,6 @@ async function handleLogout() {
   .config-close-btn:active {
     background: var(--input-bg);
     color: var(--text1);
-  }
-  
-  .bell-config-panel {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    max-width: 100%;
-    min-width: 100%;
-    height: 100vh;
-    max-height: 100vh;
-    transform: none;
-    border-radius: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    z-index: 9999;
-    padding: 0;
-    box-sizing: border-box;
-    animation: slideUpMobile 0.3s ease;
-    box-shadow: none;
-  }
-
-  .bell-config-panel > .bell-config-options {
-    padding: 0.75rem;
-    padding-top: 4rem;
-    padding-bottom: 2rem;
-  }
-  
-  .bell-sound-options {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  .bell-sound-btn {
-    padding: 0.65rem 0.5rem;
-    font-size: 0.8rem;
-    min-height: 44px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .bell-config-options {
-    gap: 0.5rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .bell-dropdown {
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .bell-dropdown-btn {
-    width: 100%;
-    justify-content: space-between;
-    box-sizing: border-box;
   }
 
   .bell-dropdown-menu {
@@ -1992,7 +1860,8 @@ async function handleLogout() {
 
   /* Make bell settings toolbar more mobile-friendly */
   .bell-settings-toolbar {
-    top: 0.5rem;
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 3rem);
     left: 0.5rem;
     right: 0.5rem;
     width: calc(100% - 1rem);
@@ -2044,21 +1913,13 @@ async function handleLogout() {
 }
 
 @media (max-width: 480px) {
-  .bell-sound-options {
-    grid-template-columns: 1fr;
-  }
-
-  .bell-config-panel {
-    padding: 0.5rem;
-    padding-top: 4rem;
-  }
-
   .bell-settings-toolbar {
+    position: fixed;
     padding: 0.3rem 0.4rem;
     gap: 0.3rem;
     left: 0.4rem;
     right: 0.4rem;
-    top: 0.4rem;
+    top: calc(env(safe-area-inset-top, 0px) + 3rem);
     width: calc(100% - 0.8rem);
     max-width: calc(100% - 0.8rem);
     border-radius: 6px;

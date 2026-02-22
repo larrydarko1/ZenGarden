@@ -80,6 +80,7 @@ Your data is stored in MongoDB-compatible JSON files:
 ### Prerequisites
 - Node.js (v18+ recommended)
 - npm
+- **For Android development:** [Android Studio](https://developer.android.com/studio) installed (provides the JDK and Android SDK)
 
 ### Setup
 
@@ -111,7 +112,14 @@ This will:
 
 #### Mobile Development
 
-See [MOBILE.md](MOBILE.md) for complete mobile development guide.
+Requires **Android Studio** to be installed at the default location. The npm scripts automatically set `JAVA_HOME` and `ANDROID_HOME` to use Android Studio's bundled JDK and SDK, so no manual environment variable configuration is needed.
+
+| Variable | Path (set automatically by the scripts) |
+|---|---|
+| `JAVA_HOME` | `/Applications/Android Studio.app/Contents/jbr/Contents/Home` |
+| `ANDROID_HOME` | `~/Library/Android/sdk` |
+
+> **Note:** If Android Studio is installed in a non-default location, or you're on Linux/Windows, update the paths in the `cap:run:android` script in [package.json](package.json).
 
 **Quick Start:**
 ```sh
@@ -121,7 +129,7 @@ npm run build:mobile
 # Open in native IDEs
 npm run cap:open:android  # Requires Android Studio
 
-# Run on device/emulator
+# Build, sync, and run on device/emulator (JAVA_HOME & ANDROID_HOME are set inline)
 npm run cap:run:android
 ```
 
