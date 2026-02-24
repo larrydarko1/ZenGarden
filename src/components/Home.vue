@@ -123,7 +123,8 @@
           </div>
         </transition>
 
-        <div class="zen-center" v-show="!journalMode && !calendarMode && !philosophyMode && !settingsMode">
+        <transition name="center-fade">
+        <div class="zen-center" v-if="centerTextVisible && !anySectionOpen">
         <span :class="['zen-phrase', { dimmed: showBellConfig }]">{{ currentPhrase }}</span>
         <span :class="['zen-loader', { dimmed: showBellConfig }]">
           <svg width="32" height="32" viewBox="0 0 32 32">
@@ -132,7 +133,10 @@
             </rect>
           </svg>
         </span>
-        <div v-if="!meditationActive" class="meditation-control-bar">
+      </div>
+    </transition>
+
+        <div v-if="!meditationActive && !anySectionOpen" class="meditation-control-bar">
           <button
             v-for="duration in [5, 10, 15, 30]"
             :key="duration"
@@ -234,7 +238,6 @@
             </div>
           </div>
         </div>
-      </div>
     </div>
       <div v-if="meditationActive" class="zen-meditation-overlay">
         <component :is="ANIMATIONS[meditationAnimationIdx]" />
@@ -473,6 +476,27 @@ const journalMode = ref(false)
 const calendarMode = ref(false)
 const philosophyMode = ref(false)
 const settingsMode = ref(false)
+
+// Delayed center text visibility: hide immediately on section open, 1s delay on close
+const centerTextVisible = ref(true)
+let centerTextTimeout: number | undefined
+
+const anySectionOpen = computed(() => journalMode.value || calendarMode.value || philosophyMode.value || settingsMode.value)
+
+watch(anySectionOpen, (open) => {
+  if (centerTextTimeout) {
+    clearTimeout(centerTextTimeout)
+    centerTextTimeout = undefined
+  }
+  if (open) {
+    centerTextVisible.value = false
+  } else {
+    // Delay 3 seconds before showing center text again
+    centerTextTimeout = window.setTimeout(() => {
+      centerTextVisible.value = true
+    }, 1000)
+  }
+})
 
 function toggleJournalMode() {
   journalMode.value = !journalMode.value
@@ -727,6 +751,7 @@ onMounted(async () => {
 onUnmounted(() => {
   if (phraseIntervalId) clearInterval(phraseIntervalId)
   if (meditationIntervalId) clearInterval(meditationIntervalId)
+  if (centerTextTimeout) clearTimeout(centerTextTimeout)
   stopBreathingCycle()
 })
 
@@ -788,6 +813,8 @@ async function handleLogout() {
   align-items: center;
   justify-content: center;
   padding: 0 2rem;
+  position: relative;
+  overflow: hidden;
 }
 .goals-horizontal {
   padding: 1rem 2rem;
@@ -804,7 +831,7 @@ async function handleLogout() {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .zen-loader.dimmed {
@@ -828,12 +855,37 @@ async function handleLogout() {
   max-width: 90vw;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .zen-phrase.dimmed {
   opacity: 0.15;
   pointer-events: none;
+}
+
+/* Center text fade-in transition (leave is instant to prevent layout shift) */
+.center-fade-enter-active {
+  animation: centerFadeIn 1.2s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.center-fade-leave-active {
+  display: none;
+}
+
+@keyframes centerFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+    filter: blur(4px);
+  }
+  60% {
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
 }
 .meditation-timer {
   margin-top: 2.5rem;
@@ -866,7 +918,10 @@ async function handleLogout() {
   font-size: 0.8rem;
   font-weight: 400;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 4px;
   min-width: 40px;
 }
@@ -874,11 +929,18 @@ async function handleLogout() {
 .duration-btn:hover {
   background: var(--input-bg-focus);
   color: var(--text1);
+  transform: translateY(-1px);
+}
+
+.duration-btn:active {
+  transform: translateY(0) scale(0.96);
+  transition-duration: 0.08s;
 }
 
 .duration-btn.active {
   background: var(--button-bg);
   color: var(--text1);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.04);
 }
 
 .duration-btn.custom-btn {
@@ -950,15 +1012,19 @@ async function handleLogout() {
   margin-left: 0.25rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  transition: all 0.15s;
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .start-meditation-btn:hover {
   background: var(--button-bg-hover);
+  box-shadow: 0 2px 12px rgba(255, 255, 255, 0.06);
 }
 
 .start-meditation-btn:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+  transition-duration: 0.08s;
 }
 
 .meditation-btn {
@@ -967,7 +1033,10 @@ async function handleLogout() {
   bottom: 2rem;
   color: var(--text1);
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  transition: background 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
   outline: none;
   padding: 0.6em 1.6em;
@@ -980,6 +1049,12 @@ async function handleLogout() {
   background: var(--blur1);
   color: var(--text2);
   box-shadow: 0 2px 16px 0 var(--input-border);
+  transform: translateY(-1px);
+}
+
+.meditation-btn:active {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 0.08s;
 }
 
 .timer-display {
@@ -1021,7 +1096,10 @@ async function handleLogout() {
   font-weight: 400;
   cursor: pointer;
   border-radius: 8px;
-  transition: all 0.2s ease;
+  transition: color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   letter-spacing: 0.02em;
   position: relative;
   min-width: 52px;
@@ -1030,12 +1108,14 @@ async function handleLogout() {
 .nav-item svg {
   flex-shrink: 0;
   opacity: 0.7;
-  transition: all 0.2s ease;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-item span {
   line-height: 1;
   white-space: nowrap;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-item:hover {
@@ -1045,10 +1125,12 @@ async function handleLogout() {
 
 .nav-item:hover svg {
   opacity: 1;
+  transform: translateY(-1px);
 }
 
 .nav-item:active {
-  transform: scale(0.95);
+  transform: scale(0.93);
+  transition-duration: 0.1s;
 }
 
 .nav-logout {
@@ -1064,10 +1146,12 @@ async function handleLogout() {
   color: var(--text1) !important;
   background: var(--button-bg) !important;
   position: relative;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
 }
 
 .nav-active svg {
   opacity: 1 !important;
+  transform: translateY(-1px);
 }
 
 .nav-active::after {
@@ -1075,12 +1159,24 @@ async function handleLogout() {
   position: absolute;
   bottom: 2px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scaleX(0);
   width: 16px;
   height: 2px;
   background: var(--text1);
   border-radius: 1px;
   opacity: 0.6;
+  animation: navIndicatorIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes navIndicatorIn {
+  from {
+    transform: translateX(-50%) scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) scaleX(1);
+    opacity: 0.6;
+  }
 }
 
 /* Journal Mode */
@@ -1101,6 +1197,8 @@ async function handleLogout() {
   box-sizing: border-box;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 1;
 }
 
 .journal-inline-container.has-header {
@@ -1109,21 +1207,38 @@ async function handleLogout() {
 
 /* Journal transition */
 .journal-fade-enter-active {
-  animation: journalEnter 0.35s ease-out;
+  animation: journalEnter 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  animation-delay: 0.05s;
+  animation-fill-mode: both;
 }
 
 .journal-fade-leave-active {
-  animation: journalEnter 0.25s ease-in reverse;
+  position: absolute !important;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  animation: journalLeave 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes journalEnter {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(10px);
+    filter: blur(2px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes journalLeave {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 
@@ -1133,6 +1248,12 @@ async function handleLogout() {
   inset: 0;
   background: rgba(0, 0, 0, 0.3);
   z-index: 1001;
+  animation: backdropFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .breathing-picker-panel {
@@ -1149,7 +1270,20 @@ async function handleLogout() {
   overflow-y: auto;
   z-index: 1002;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  animation: popupFadeIn 0.2s ease-out;
+  animation: popupFadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes popupFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    filter: blur(0px);
+  }
 }
 
 .breathing-picker-header {
@@ -1186,7 +1320,10 @@ async function handleLogout() {
   border-radius: 4px;
   color: var(--text2);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: left;
   width: 100%;
 }
@@ -1194,6 +1331,12 @@ async function handleLogout() {
 .breathing-option-btn:hover {
   background: var(--input-bg-focus);
   color: var(--text1);
+  transform: translateX(2px);
+}
+
+.breathing-option-btn:active {
+  transform: translateX(2px) scale(0.98);
+  transition-duration: 0.08s;
 }
 
 .breathing-option-btn.active {

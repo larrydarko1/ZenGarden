@@ -199,9 +199,13 @@
       </div>
     </div>
 
-    <div v-if="saveStatus" class="save-status" :class="saveStatus">
-      {{ saveStatus === 'saving' ? t('emotions.saving') : t('emotions.saved') }}
-    </div>
+    <transition name="save-indicator">
+      <div v-if="saveStatus" class="save-indicator" :class="saveStatus">
+        <span v-if="saveStatus === 'saving'" class="save-spinner"></span>
+        <svg v-else width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="save-label">{{ saveStatus === 'saving' ? t('emotions.saving') : t('emotions.saved') }}</span>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -541,21 +545,71 @@ onMounted(() => {
   font-size: 0.95rem;
 }
 
-.save-status {
-  padding: 0.65rem;
-  text-align: center;
-  font-size: 0.85rem;
-  border-top: 1px solid var(--border-subtle);
+.save-indicator {
+  position: fixed;
+  bottom: 4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  z-index: 200;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-.save-status.saving {
+.save-indicator.saving {
   background: rgba(255, 193, 7, 0.1);
-  color: #FFC107;
+  border: 1px solid rgba(255, 193, 7, 0.15);
+  color: rgba(255, 193, 7, 0.8);
 }
 
-.save-status.saved {
+.save-indicator.saved {
   background: rgba(76, 175, 80, 0.1);
-  color: #4CAF50;
+  border: 1px solid rgba(76, 175, 80, 0.15);
+  color: rgba(76, 175, 80, 0.8);
+}
+
+.save-spinner {
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.save-label {
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+.save-indicator-enter-active {
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.save-indicator-leave-active {
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.save-indicator-enter-from {
+  opacity: 0;
+  transform: translateX(-50%) translateY(6px);
+}
+
+.save-indicator-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-4px);
 }
 
 /* Notes tab styles */

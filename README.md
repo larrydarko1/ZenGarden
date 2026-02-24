@@ -102,7 +102,7 @@ npm install
 #### Desktop Development
 ```sh
 # Start the Electron app in development mode
-npm run dev:electron
+npm run dev
 ```
 
 This will:
