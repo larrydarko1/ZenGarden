@@ -1,16 +1,16 @@
 {
   "name": "zen-garden",
   "private": true,
-  "version": "1.1.7",
+  "version": "1.1.8",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
     "dev": "NODE_ENV=development concurrently \"vite\" \"wait-on http://localhost:3000 && electron .\"",
     "build": "vue-tsc -b && vite build",
     "build:electron": "npm run build && electron-builder",
-    "build:mac": "npm run build && electron-builder --mac",
-    "build:win": "npm run build && electron-builder --win",
-    "build:linux": "npm run build && electron-builder --linux",
+    "build:mac": "npm run build && electron-builder --mac --publish never",
+    "build:win": "npm run build && electron-builder --win --publish never",
+    "build:linux": "npm run build && electron-builder --linux --publish never",
     "preview": "vite preview",
     "build:mobile": "npm run build && npx cap sync",
     "cap:sync": "npx cap sync",
@@ -48,7 +48,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/larrydarko1/zen-garden.git"
+    "url": "https://github.com/larrydarko1/ZenGarden.git"
   },
   "build": {
     "appId": "com.zengarden.app",
