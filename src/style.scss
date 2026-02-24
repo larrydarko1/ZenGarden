@@ -99,6 +99,11 @@ a,
   --error-bg: rgba(231, 76, 60, 0.1);
   --error-border: rgba(231, 76, 60, 0.2);
   --error-text: #e74c3c;
+
+  /* Auth background mesh */
+  --auth-accent1: rgba(160, 140, 200, 0.08);
+  --auth-accent2: rgba(120, 170, 190, 0.06);
+  --auth-accent3: rgba(180, 160, 140, 0.07);
 }
 
 // Dark theme
@@ -126,4 +131,9 @@ a,
   --error-bg: rgba(231, 76, 60, 0.1);
   --error-border: rgba(231, 76, 60, 0.2);
   --error-text: #e74c3c;
+
+  /* Auth background mesh */
+  --auth-accent1: rgba(100, 80, 160, 0.12);
+  --auth-accent2: rgba(60, 130, 160, 0.10);
+  --auth-accent3: rgba(140, 100, 80, 0.10);
 }

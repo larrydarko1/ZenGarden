@@ -9,7 +9,7 @@ function createWindow() {
     // Set app icon based on platform
     const iconPath = process.platform === 'darwin'
         ? path.join(__dirname, '../build/icon.icns')
-        : path.join(__dirname, '../build/icon.icns');
+        : path.join(__dirname, '../build/icon.ico');
 
     mainWindow = new BrowserWindow({
         width: 1200,

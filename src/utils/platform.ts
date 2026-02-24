@@ -18,7 +18,7 @@ export function isDesktop(): boolean {
  * Check if the app is running on mobile web
  */
 export function isMobile(): boolean {
-    return /Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
 /**

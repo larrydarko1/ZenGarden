@@ -8,7 +8,7 @@ Thank you for considering contributing to Zen Garden! This is a desktop applicat
 2. **Clone your fork**
    ```sh
    git clone https://github.com/larrydarko1/ZenGarden.git
-   cd zen-garden
+   cd ZenGarden
    ```
 3. **Install dependencies**
    ```sh
@@ -16,7 +16,7 @@ Thank you for considering contributing to Zen Garden! This is a desktop applicat
    ```
 4. **Start the development environment**
    ```sh
-   npm run dev:electron
+   npm run dev
    ```
 
 This will launch the Electron app with hot reload enabled.
@@ -25,7 +25,7 @@ This will launch the Electron app with hot reload enabled.
 
 - `electron/` - Electron main process and storage backend (Node.js)
 - `src/` - Vue 3 frontend (renderer process)
-- `src/storage/` - Storage adapters and types
+- `src/store/` - Storage adapters and types
 - `src/components/` - Vue components
 - `src/locales/` - Internationalization files
 

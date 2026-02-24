@@ -12,8 +12,6 @@ if (!fs.existsSync(dataPath)) {
     fs.mkdirSync(dataPath, { recursive: true });
 }
 
-console.log('📁 Data location:', dataPath);
-
 // Clean up old SQLite files if they exist
 const oldFiles = [
     path.join(userDataPath, 'zengarden.db'),
@@ -23,7 +21,6 @@ const oldFiles = [
 oldFiles.forEach(file => {
     if (fs.existsSync(file)) {
         fs.unlinkSync(file);
-        console.log('🧹 Cleaned up old file:', path.basename(file));
     }
 });
 
@@ -123,7 +120,6 @@ try {
     const saved = JSON.parse(sessionData);
     if (saved.username && saved.token) {
         currentSession = saved;
-        console.log('🔐 Restored session for:', saved.username);
     }
 } catch (error) {
     // No saved session, start fresh
@@ -250,20 +246,11 @@ const storageHandlers = {
             const user = users.find(u => u.username === username.trim());
 
             if (!user) {
-                console.log('User not found:', username.trim());
                 throw new Error('Invalid username or password');
             }
 
-            console.log('User found:', user.username);
-            console.log('User has password field:', !!user.password);
-            console.log('User has passwordHash field:', !!user.passwordHash);
-            if (user.password) {
-                console.log('Password field starts with:', user.password.substring(0, 20));
-            }
-
-            // Verify password using the new function that supports both formats
+            // Verify password using the function that supports both Argon2 and PBKDF2 formats
             const isValid = await verifyPassword(password, user);
-            console.log('Password verification result:', isValid);
 
             if (!isValid) {
                 throw new Error('Invalid username or password');
@@ -310,7 +297,7 @@ const storageHandlers = {
             const users = readCollection('users');
             const user = users.find(u => u.username === currentSession.username);
 
-            if (!verifyPassword(password, user.passwordHash, user.salt)) {
+            if (!(await verifyPassword(password, user))) {
                 throw new Error('Invalid password');
             }
 
@@ -350,7 +337,7 @@ const storageHandlers = {
             const users = readCollection('users');
             const user = users.find(u => u.username === currentSession.username);
 
-            if (!verifyPassword(currentPassword, user.passwordHash, user.salt)) {
+            if (!(await verifyPassword(currentPassword, user))) {
                 throw new Error('Current password is incorrect');
             }
 
@@ -406,7 +393,7 @@ const storageHandlers = {
             const userIndex = users.findIndex(u => u.username === currentSession.username);
             const user = users[userIndex];
 
-            if (!verifyPassword(password, user.passwordHash, user.salt)) {
+            if (!(await verifyPassword(password, user))) {
                 throw new Error('Invalid password');
             }
 
@@ -712,7 +699,6 @@ function setupStorageHandlers(ipcMain) {
     for (const [channel, handler] of Object.entries(storageHandlers)) {
         ipcMain.handle(channel, handler);
     }
-    console.log('✅ Storage handlers registered');
 }
 
 module.exports = { setupStorageHandlers };

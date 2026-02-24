@@ -649,8 +649,8 @@ function playBellSound() {
   
   bellAudioInstance = new Audio(`./bell${bellSound.value}.mp3`)
   bellAudioInstance.volume = 0.5
-  bellAudioInstance.play().catch(err => {
-    console.log('Bell sound playback failed:', err)
+  bellAudioInstance.play().catch(() => {
+    // Bell sound playback failed silently
   })
 }
 

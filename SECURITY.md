@@ -2,7 +2,7 @@
 
 ## Security Architecture
 
-Zen Garden is a **desktop-only application** with local-first architecture, which provides enhanced security:
+Zen Garden is a **local-first, cross-platform application** with offline architecture, which provides enhanced security:
 
 - ✅ **No server-side code** - No backend vulnerabilities
 - ✅ **Local-only storage** - Data stored in JSON files on user's computer
@@ -14,15 +14,16 @@ Zen Garden is a **desktop-only application** with local-first architecture, whic
 ## Data Privacy
 
 All user data is stored locally at:
-- **macOS:** `~/Library/Application Support/zen-garden/`
-- **Windows:** `%APPDATA%/zen-garden/`
-- **Linux:** `~/.config/zen-garden/`
+- **macOS:** `~/Library/Application Support/zen-garden/data/`
+- **Windows:** `%APPDATA%/zen-garden/data/`
+- **Linux:** `~/.config/zen-garden/data/`
+- **Android:** File Manager → Documents → ZenGarden → `data/`
 
 Your meditation data, emotions, and journal entries never leave your device.
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in the Electron app or client-side code, please report it by:
+If you discover a security vulnerability in the Electron app, mobile app, or client-side code, please report it by:
 
 1. Opening a GitHub issue with the label `security`
 2. Or emailing the maintainer directly (for sensitive issues)

@@ -76,10 +76,7 @@ function selectLanguage(lang: string) {
 	emit('language-change', lang);
 }
 
-function handleUsernameChange(newUsername: string) {
-	// Username was changed successfully, might want to update UI
-	console.log('Username changed to:', newUsername);
-	// Optionally refresh the page or update any displayed username
+function handleUsernameChange(_newUsername: string) {
 	window.location.reload();
 }
 

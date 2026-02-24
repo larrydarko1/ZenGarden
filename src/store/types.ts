@@ -1,6 +1,6 @@
 // Storage Types and Interfaces
 
-export type StorageMode = 'local' | 'server';
+export type StorageMode = 'local';
 
 // User Types
 export interface User {

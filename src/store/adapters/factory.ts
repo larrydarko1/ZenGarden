@@ -22,7 +22,6 @@ export class StorageFactory {
             const electronAdapter = new ElectronStorageAdapter();
             if (await electronAdapter.isAvailable()) {
                 this.instance = electronAdapter;
-                console.log('🖥️  Desktop mode: JSON storage via Electron');
                 return electronAdapter;
             }
         } catch {
@@ -34,7 +33,6 @@ export class StorageFactory {
             const capacitorAdapter = new CapacitorStorageAdapter();
             if (await capacitorAdapter.isAvailable()) {
                 this.instance = capacitorAdapter;
-                console.log('📱 Mobile mode: JSON storage via Capacitor');
                 return capacitorAdapter;
             }
         } catch {
@@ -56,9 +54,8 @@ export class StorageFactory {
      */
     static async switchMode(mode: StorageMode): Promise<void> {
         if (mode !== 'local') {
-            throw new Error('Only local mode is supported in this version. Server mode has been removed.');
+            throw new Error('Only local mode is supported in this version.');
         }
-        console.log('✅ Already running in LOCAL mode');
     }
 
     /**

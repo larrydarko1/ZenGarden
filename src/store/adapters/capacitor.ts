@@ -131,10 +131,9 @@ async function initializeStorage(): Promise<void> {
                     directory: Directory.Documents,
                     encoding: Encoding.UTF8
                 });
-                console.log(`📝 Created: ${filename}`);
+                console.log(`Created: ${filename}`);
             }
         }
-        console.log('✅ Mobile storage initialized');
     } catch (error) {
         console.error('Storage initialization error:', error);
     }

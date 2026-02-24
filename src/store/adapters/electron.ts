@@ -1,4 +1,4 @@
-// Electron Storage Adapter - Bridges Vue frontend to Node.js SQLite backend
+// Electron Storage Adapter - Bridges Vue frontend to Node.js JSON file backend
 import type {
     IStorageAdapter,
     User,

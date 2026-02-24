@@ -461,7 +461,6 @@ async function loadAnalytics() {
   loading.value = true;
   try {
     const response = await getEmotionAnalytics(90);
-    console.log('Analytics response:', response);
     analytics.value = response;
   } catch (err) {
     console.error('Failed to load analytics:', err);
