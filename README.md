@@ -11,7 +11,7 @@ Zen Garden is a **local-first, cross-platform meditation app** built with **Elec
 
 ## Demo
 
-![Zen Garden Demo](./public/demo.png)
+![Zen Garden Demo](./public/demo.gif)
 
 ## Tech Stack
 - **Desktop:** Electron (Native macOS, Windows, Linux app)
