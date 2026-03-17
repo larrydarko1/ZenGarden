@@ -1,42 +1,35 @@
 // Platform detection utilities for ZenGarden
 
-/**
- * Check if the app is running in Electron
- */
-export function isElectron(): boolean {
-    return !!(window as any).electronAPI?.isElectron?.();
+interface ElectronWindow {
+    electronAPI?: {
+        isElectron?: () => boolean;
+    };
 }
 
-/**
- * Check if the app is running on desktop (Electron)
- */
+export function isElectron(): boolean {
+    return !!(window as unknown as ElectronWindow).electronAPI?.isElectron?.();
+}
+
 export function isDesktop(): boolean {
     return isElectron();
 }
 
-/**
- * Check if the app is running on mobile web
- */
 export function isMobile(): boolean {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
-/**
- * Check if the app is running on web (not Electron)
- */
 export function isWeb(): boolean {
     return !isElectron();
 }
 
-/**
- * Get the current platform (darwin, win32, linux, web, mobile)
- */
 export function getPlatform(): string {
     if (isElectron()) {
-        return (window as any).electron?.platform || 'unknown';
+        const ua = navigator.userAgent.toLowerCase();
+        if (ua.includes('mac')) return 'darwin';
+        if (ua.includes('win')) return 'win32';
+        if (ua.includes('linux')) return 'linux';
+        return 'unknown';
     }
-    if (isMobile()) {
-        return 'mobile';
-    }
+    if (isMobile()) return 'mobile';
     return 'web';
 }

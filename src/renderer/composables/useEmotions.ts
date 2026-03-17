@@ -5,6 +5,7 @@
 import { ref, computed, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { saveEmotionLog, getEmotionLogs, getEmotionAnalytics } from '../store';
+import type { EmotionAnalytics, EmotionStat } from '../store/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -102,8 +103,7 @@ export function useEmotions(selectedDate: Ref<Date>, activeTab: Ref<string>) {
     const loadingEmotions = ref(false);
     // Named `loading` to match the template binding in EmotionTracker.vue
     const loading = ref(false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const analytics = ref<any>(null);
+    const analytics = ref<EmotionAnalytics | null>(null);
 
     let noteTimeout: number | null = null;
 
@@ -135,12 +135,10 @@ export function useEmotions(selectedDate: Ref<Date>, activeTab: Ref<string>) {
     });
 
     const topPositiveEmotions = computed(() =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (analytics.value?.topEmotions ?? []).filter((e: any) => e.type === 'positive').slice(0, 10),
+        (analytics.value?.topEmotions ?? []).filter((e: EmotionStat) => e.type === 'positive').slice(0, 10),
     );
     const topNegativeEmotions = computed(() =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (analytics.value?.topEmotions ?? []).filter((e: any) => e.type === 'negative').slice(0, 10),
+        (analytics.value?.topEmotions ?? []).filter((e: EmotionStat) => e.type === 'negative').slice(0, 10),
     );
 
     function isEmotionSelected(name: string): boolean {

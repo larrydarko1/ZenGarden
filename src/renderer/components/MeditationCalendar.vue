@@ -1,3 +1,6 @@
+// MeditationCalendar — year-based monthly calendar highlighting completed meditation days. // Owns: month navigation,
+day grid computation, selected-day detail display. // Does NOT own: meditation data fetching (receives meditations as
+prop).
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';

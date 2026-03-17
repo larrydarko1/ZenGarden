@@ -1,6 +1,18 @@
 // Capacitor Storage Adapter - Mobile JSON file storage (MongoDB-compatible)
-import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+// Owns: class facade implementing IStorageAdapter. Delegates to capacitor/ sub-modules.
+
 import { Preferences } from '@capacitor/preferences';
+import {
+    DB_FILES,
+    readCollection,
+    writeCollection,
+    readSession,
+    writeSession,
+    generateObjectId,
+    initializeStorage,
+} from './capacitor/db';
+import { hashPassword, verifyPassword, upgradeHashIfNeeded } from './capacitor/crypto';
+import type { UserWithPassword } from './capacitor/crypto';
 import type {
     IStorageAdapter,
     User,
@@ -16,128 +28,6 @@ import type {
     EightfoldPathAnalytics,
     DateRangeQuery,
 } from '../types';
-
-// Internal User type with password (not exposed in public API)
-interface UserWithPassword extends User {
-    _id: string;
-    password: string;
-}
-
-// JSON file paths (same structure as Electron/MongoDB)
-const DB_FILES = {
-    users: 'users.json',
-    meditations: 'meditations.json',
-    emotionLogs: 'emotion_logs.json',
-    eightfoldPathLogs: 'eightfold_path_logs.json',
-    session: 'session.json',
-};
-
-// Helper: Read JSON collection from file
-async function readCollection<T>(filename: string): Promise<T[]> {
-    try {
-        const result = await Filesystem.readFile({
-            path: `ZenGarden/data/${filename}`,
-            directory: Directory.Documents,
-            encoding: Encoding.UTF8,
-        });
-        const data = typeof result.data === 'string' ? result.data : '';
-        return JSON.parse(data) || [];
-    } catch (error) {
-        // File doesn't exist yet, return empty array
-        return [];
-    }
-}
-
-// Helper: Write JSON collection to file
-async function writeCollection<T>(filename: string, data: T[]): Promise<void> {
-    await Filesystem.writeFile({
-        path: `ZenGarden/data/${filename}`,
-        data: JSON.stringify(data, null, 2),
-        directory: Directory.Documents,
-        encoding: Encoding.UTF8,
-    });
-}
-
-// Helper: Read session object
-async function readSession(): Promise<any> {
-    try {
-        const result = await Filesystem.readFile({
-            path: `ZenGarden/data/${DB_FILES.session}`,
-            directory: Directory.Documents,
-            encoding: Encoding.UTF8,
-        });
-        const data = typeof result.data === 'string' ? result.data : '{}';
-        return JSON.parse(data) || {};
-    } catch {
-        return {};
-    }
-}
-
-// Helper: Write session object
-async function writeSession(session: any): Promise<void> {
-    await Filesystem.writeFile({
-        path: `ZenGarden/data/${DB_FILES.session}`,
-        data: JSON.stringify(session, null, 2),
-        directory: Directory.Documents,
-        encoding: Encoding.UTF8,
-    });
-}
-
-// Helper: Generate MongoDB-style ObjectId
-function generateObjectId(): string {
-    const timestamp = Math.floor(Date.now() / 1000).toString(16);
-    const random = Math.random().toString(16).substring(2, 18);
-    return timestamp + random.padEnd(16, '0');
-}
-
-// Helper: Hash password (PBKDF2)
-async function hashPassword(password: string): Promise<string> {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-}
-
-// Helper: Verify password
-async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-    const hash = await hashPassword(password);
-    return hash === hashedPassword;
-}
-
-// Initialize data directory on first load
-async function initializeStorage(): Promise<void> {
-    try {
-        // Try to create data directory (no-op if exists)
-        await Filesystem.mkdir({
-            path: 'ZenGarden/data',
-            directory: Directory.Documents,
-            recursive: true,
-        });
-
-        // Initialize each JSON file if it doesn't exist
-        for (const [key, filename] of Object.entries(DB_FILES)) {
-            try {
-                await Filesystem.readFile({
-                    path: `ZenGarden/data/${filename}`,
-                    directory: Directory.Documents,
-                });
-            } catch {
-                // File doesn't exist, create it
-                const initialData = key === 'session' ? {} : [];
-                await Filesystem.writeFile({
-                    path: `ZenGarden/data/${filename}`,
-                    data: JSON.stringify(initialData, null, 2),
-                    directory: Directory.Documents,
-                    encoding: Encoding.UTF8,
-                });
-                console.log(`Created: ${filename}`);
-            }
-        }
-    } catch (error) {
-        console.error('Storage initialization error:', error);
-    }
-}
 
 export class CapacitorStorageAdapter implements IStorageAdapter {
     private initialized = false;
@@ -159,10 +49,6 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         }
     }
 
-    getMode() {
-        return 'local' as const;
-    }
-
     // AUTH OPERATIONS
     async register(
         credentials: UserCredentials,
@@ -176,6 +62,10 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         // Check if username exists
         if (users.some((u) => u.username === credentials.username)) {
             throw new Error('Username already exists');
+        }
+
+        if (credentials.password.length < 8) {
+            throw new Error('Password must be at least 8 characters');
         }
 
         // Create new user (MongoDB-compatible structure)
@@ -211,6 +101,10 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         if (!user || !(await verifyPassword(credentials.password, user.password))) {
             throw new Error('Invalid username or password');
         }
+
+        // Upgrade legacy SHA-256 hash to PBKDF2 on successful login
+        const userIndex = users.findIndex((u) => u.username === credentials.username);
+        await upgradeHashIfNeeded(users, userIndex, credentials.password, DB_FILES.users);
 
         // Save session
         await writeSession({ currentUser: user.username });
@@ -295,6 +189,10 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         if (userIndex === -1) throw new Error('User not found');
         if (!(await verifyPassword(currentPassword, users[userIndex].password))) {
             throw new Error('Current password is incorrect');
+        }
+
+        if (newPassword.length < 8) {
+            throw new Error('Password must be at least 8 characters');
         }
 
         users[userIndex].password = await hashPassword(newPassword);
@@ -485,15 +383,23 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         // Calculate emotion frequencies
         const emotionCounts: Record<string, number> = {};
         const emotionTypes: Record<string, string> = {};
+        const uniqueEmotions = new Set<string>();
+        let positiveDays = 0;
+        let negativeDays = 0;
+
         recentLogs.forEach((log) => {
+            if (log.pnRatio >= 0.5) positiveDays++;
+            else negativeDays++;
+
             log.emotions.forEach((emotion) => {
+                uniqueEmotions.add(emotion.name);
                 emotionCounts[emotion.name] = (emotionCounts[emotion.name] || 0) + 1;
                 emotionTypes[emotion.name] = emotion.type;
             });
         });
 
         // Build emotion frequency array
-        const mostFrequentEmotions = Object.entries(emotionCounts)
+        const topEmotions = Object.entries(emotionCounts)
             .map(([name, count]) => ({ name, count, type: emotionTypes[name] }))
             .sort((a, b) => b.count - a.count);
 
@@ -513,7 +419,10 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
             averagePositiveCount: recentLogs.length > 0 ? totalPositive / recentLogs.length : 0,
             averageNegativeCount: recentLogs.length > 0 ? totalNegative / recentLogs.length : 0,
             averagePNRatio: recentLogs.length > 0 ? totalRatio / recentLogs.length : 0,
-            mostFrequentEmotions,
+            emotionDiversity: uniqueEmotions.size,
+            positiveDays,
+            negativeDays,
+            topEmotions,
             trends,
         };
     }
@@ -653,7 +562,21 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         const session = await readSession();
         if (!session.currentUser) throw new Error('Not authenticated');
 
-        const importData = JSON.parse(jsonData);
+        let parsed: unknown;
+        try {
+            parsed = JSON.parse(jsonData);
+        } catch {
+            throw new Error('Invalid JSON data');
+        }
+
+        // Validate top-level structure before trusting any fields
+        if (typeof parsed !== 'object' || parsed === null) {
+            throw new Error('Import data must be a JSON object');
+        }
+        const importPayload = parsed as Record<string, unknown>;
+
+        const isArrayOfObjects = (val: unknown): val is Record<string, unknown>[] =>
+            Array.isArray(val) && val.every((item) => typeof item === 'object' && item !== null);
 
         // Read existing data
         const [meditations, emotionLogs, eightfoldPathLogs] = await Promise.all([
@@ -664,36 +587,57 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
 
         const counts = { meditations: 0, emotionLogs: 0, eightfoldPathLogs: 0 };
 
-        // Import meditations
-        if (importData.meditations) {
-            importData.meditations.forEach((m: Meditation) => {
-                m.Username = session.currentUser;
-                m._id = generateObjectId();
-                meditations.push(m);
+        // Import meditations — only accept objects with required fields
+        if (isArrayOfObjects(importPayload.meditations)) {
+            for (const m of importPayload.meditations) {
+                if (typeof m['Date'] !== 'string' || typeof m['duration'] !== 'number') continue;
+                meditations.push({
+                    _id: generateObjectId(),
+                    Username: session.currentUser,
+                    Date: m['Date'] as string,
+                    duration: m['duration'] as number,
+                    notes: typeof m['notes'] === 'string' ? (m['notes'] as string) : '',
+                } as Meditation);
                 counts.meditations++;
-            });
+            }
             await writeCollection(DB_FILES.meditations, meditations);
         }
 
-        // Import emotion logs
-        if (importData.emotionLogs) {
-            importData.emotionLogs.forEach((e: EmotionLog) => {
-                e.username = session.currentUser;
-                e._id = generateObjectId();
-                emotionLogs.push(e);
+        // Import emotion logs — validate required array shapes
+        if (isArrayOfObjects(importPayload.emotionLogs)) {
+            for (const e of importPayload.emotionLogs) {
+                if (typeof e['date'] !== 'string' || !Array.isArray(e['emotions'])) continue;
+                emotionLogs.push({
+                    _id: generateObjectId(),
+                    username: session.currentUser,
+                    date: e['date'],
+                    emotions: e['emotions'],
+                    positiveCount: typeof e['positiveCount'] === 'number' ? e['positiveCount'] : 0,
+                    negativeCount: typeof e['negativeCount'] === 'number' ? e['negativeCount'] : 0,
+                    pnRatio: typeof e['pnRatio'] === 'number' ? e['pnRatio'] : 0,
+                    note: typeof e['note'] === 'string' ? e['note'] : undefined,
+                    updatedAt: new Date().toISOString(),
+                } as EmotionLog);
                 counts.emotionLogs++;
-            });
+            }
             await writeCollection(DB_FILES.emotionLogs, emotionLogs);
         }
 
-        // Import eightfold path logs
-        if (importData.eightfoldPathLogs) {
-            importData.eightfoldPathLogs.forEach((e: EightfoldPathLog) => {
-                e.username = session.currentUser;
-                e._id = generateObjectId();
-                eightfoldPathLogs.push(e);
+        // Import eightfold path logs — validate required fields
+        if (isArrayOfObjects(importPayload.eightfoldPathLogs)) {
+            for (const e of importPayload.eightfoldPathLogs) {
+                if (typeof e['date'] !== 'string' || !Array.isArray(e['paths'])) continue;
+                eightfoldPathLogs.push({
+                    _id: generateObjectId(),
+                    username: session.currentUser,
+                    date: e['date'],
+                    paths: e['paths'],
+                    completedCount: typeof e['completedCount'] === 'number' ? e['completedCount'] : 0,
+                    progressPercentage: typeof e['progressPercentage'] === 'number' ? e['progressPercentage'] : 0,
+                    updatedAt: new Date().toISOString(),
+                } as EightfoldPathLog);
                 counts.eightfoldPathLogs++;
-            });
+            }
             await writeCollection(DB_FILES.eightfoldPathLogs, eightfoldPathLogs);
         }
 

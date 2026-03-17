@@ -1,3 +1,4 @@
+// ZenWavesAnimation — SVG animation rendering two layered ocean-like wave paths.
 <script setup lang="ts">
 // Pure animation component
 </script>

@@ -1,3 +1,4 @@
+// ZenParticlesAnimation — SVG animation with three tiers of glowing particles drifting horizontally.
 <script setup lang="ts">
 // Pure animation component
 </script>

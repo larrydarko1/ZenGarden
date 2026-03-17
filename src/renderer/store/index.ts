@@ -10,11 +10,6 @@ export async function getStorageAdapter() {
     return StorageFactory.getAdapter();
 }
 
-export async function getStorageMode() {
-    const adapter = await getStorageAdapter();
-    return adapter.getMode();
-}
-
 export async function checkStorageAvailability() {
     return StorageFactory.checkAvailability();
 }

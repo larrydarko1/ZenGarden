@@ -1,3 +1,5 @@
+// main — app entry point: creates the Vue instance, registers plugins, mounts to DOM.
+
 import { createApp } from 'vue';
 import './style.scss';
 import App from './App.vue';

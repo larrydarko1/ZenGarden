@@ -1,3 +1,6 @@
+// SessionNotes — post-meditation modal prompting the user to save session notes. // Owns: notes textarea state,
+save/skip/close actions, modal backdrop. // Does NOT own: modal visibility (parent), note persistence (emits
+save/skip/close).
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';

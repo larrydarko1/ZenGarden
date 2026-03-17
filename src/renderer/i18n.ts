@@ -1,3 +1,5 @@
+// i18n — vue-i18n instance with 8 locale bundles, English as default/fallback.
+
 import { createI18n } from 'vue-i18n';
 import en from './locales/en.json';
 import es from './locales/es.json';

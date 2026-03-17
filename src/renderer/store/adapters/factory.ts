@@ -1,11 +1,10 @@
 // Storage Adapter Factory - Auto-detect Desktop (Electron) or Mobile (Capacitor)
-import type { IStorageAdapter, StorageMode } from '../types';
+import type { IStorageAdapter } from '../types';
 import { ElectronStorageAdapter } from './electron';
 import { CapacitorStorageAdapter } from './capacitor';
 
 export class StorageFactory {
     private static instance: IStorageAdapter | null = null;
-    private static mode: StorageMode = 'local';
 
     /**
      * Get the appropriate storage adapter (Electron for desktop, Capacitor for mobile)
@@ -40,22 +39,6 @@ export class StorageFactory {
         }
 
         throw new Error('No storage adapter available. This app requires Electron (desktop) or Capacitor (mobile).');
-    }
-
-    /**
-     * Get current storage mode (always 'local')
-     */
-    static getMode(): StorageMode {
-        return this.mode;
-    }
-
-    /**
-     * Switch storage mode (no-op in local-only mode)
-     */
-    static async switchMode(mode: StorageMode): Promise<void> {
-        if (mode !== 'local') {
-            throw new Error('Only local mode is supported in this version.');
-        }
     }
 
     /**

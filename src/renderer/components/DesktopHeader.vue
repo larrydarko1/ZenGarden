@@ -1,34 +1,19 @@
+// DesktopHeader — platform-aware draggable title bar for the Electron desktop window. // Owns: OS detection from
+user-agent, drag region, platform-specific CSS. // Does NOT own: window controls, visibility (App.vue).
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted } from 'vue';
+import { isElectron } from '../utils/platform';
 
 const platform = ref('');
-const isMaximized = ref(false);
 
-// Detect platform
+// Detect OS for platform-specific title bar styling
 onMounted(() => {
-    if ((window as any).electron) {
-        platform.value = (window as any).electron.platform || '';
+    if (!isElectron()) return;
 
-        // Listen for maximize state changes
-        if ((window as any).electron.onMaximizeChange) {
-            (window as any).electron.onMaximizeChange((maximized: boolean) => {
-                isMaximized.value = maximized;
-            });
-        }
-
-        // Check initial maximize state
-        checkMaximizeState();
-    }
-});
-
-async function checkMaximizeState() {
-    if ((window as any).electron?.isMaximized) {
-        isMaximized.value = await (window as any).electron.isMaximized();
-    }
-}
-
-onUnmounted(() => {
-    // Clean up listeners if needed
+    const ua = navigator.userAgent.toLowerCase();
+    if (ua.includes('mac')) platform.value = 'darwin';
+    else if (ua.includes('win')) platform.value = 'win32';
+    else if (ua.includes('linux')) platform.value = 'linux';
 });
 </script>
 

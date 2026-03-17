@@ -26,6 +26,7 @@
         "vite.config.ts",
         "vitest.config.ts",
         "src/main/**/*.ts",
-        "src/preload/**/*.ts"
+        "src/preload/**/*.ts",
+        "tests/main/**/*.ts"
     ]
 }

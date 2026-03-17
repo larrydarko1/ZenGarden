@@ -1,7 +1,5 @@
 // Storage Types and Interfaces
 
-export type StorageMode = 'local';
-
 // User Types
 export interface User {
     username: string;
@@ -81,12 +79,21 @@ export interface EightfoldPathInput {
 }
 
 // Analytics Types
+export interface EmotionStat {
+    name: string;
+    count: number;
+    type: string;
+}
+
 export interface EmotionAnalytics {
     totalDays: number;
     averagePositiveCount: number;
     averageNegativeCount: number;
     averagePNRatio: number;
-    mostFrequentEmotions: { name: string; count: number; type: string }[];
+    emotionDiversity: number;
+    positiveDays: number;
+    negativeDays: number;
+    topEmotions: EmotionStat[];
     trends: { date: string; pnRatio: number }[];
 }
 
@@ -109,7 +116,6 @@ export interface DateRangeQuery {
 export interface IStorageAdapter {
     // Mode detection
     isAvailable(): Promise<boolean>;
-    getMode(): StorageMode;
 
     // Auth
     register(credentials: UserCredentials, theme?: string, language?: string): Promise<AuthResponse>;

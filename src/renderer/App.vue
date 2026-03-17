@@ -1,3 +1,6 @@
+// App — root shell managing theme/language state, desktop header, and auth gating. // Owns: global theme/language
+persistence, meditation-active flag, desktop detection. // Does NOT own: UI content (Home.vue), data persistence
+(store/).
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -5,6 +8,7 @@ import Home from './components/Home.vue';
 import DesktopHeader from './components/DesktopHeader.vue';
 import { updateTheme, updateLanguage } from './store';
 import { isDesktop } from './utils/platform';
+import type { User } from './store/types';
 
 const { locale } = useI18n();
 
@@ -23,7 +27,7 @@ function onMeditationActive(val: boolean) {
     meditationActive.value = val;
 }
 
-function onUserChanged(user: any) {
+function onUserChanged(user: User | null) {
     isAuthenticated.value = !!user;
 }
 

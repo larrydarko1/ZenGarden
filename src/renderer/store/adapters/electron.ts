@@ -6,8 +6,10 @@ import type {
     AuthResponse,
     Meditation,
     MeditationInput,
+    Emotion,
     EmotionLog,
     EmotionLogInput,
+    PathItem,
     EightfoldPathLog,
     EightfoldPathInput,
     EmotionAnalytics,
@@ -28,11 +30,11 @@ interface ElectronAPI {
     updateLanguage: (language: string) => Promise<{ message: string }>;
     createMeditation: (date: string, duration: number, notes: string) => Promise<Meditation>;
     getMeditations: () => Promise<Meditation[]>;
-    saveEmotionLog: (date: string, emotions: any[], note?: string) => Promise<EmotionLog>;
-    getEmotionLogs: (query?: any) => Promise<EmotionLog[]>;
+    saveEmotionLog: (date: string, emotions: Emotion[], note?: string) => Promise<EmotionLog>;
+    getEmotionLogs: (query?: DateRangeQuery) => Promise<EmotionLog[]>;
     getEmotionAnalytics: (days?: number) => Promise<EmotionAnalytics>;
-    saveEightfoldPathLog: (date: string, paths: any[]) => Promise<EightfoldPathLog>;
-    getEightfoldPathLogs: (query?: any) => Promise<EightfoldPathLog[]>;
+    saveEightfoldPathLog: (date: string, paths: PathItem[]) => Promise<EightfoldPathLog>;
+    getEightfoldPathLogs: (query?: DateRangeQuery) => Promise<EightfoldPathLog[]>;
     getEightfoldPathAnalytics: (days?: number) => Promise<EightfoldPathAnalytics>;
     isElectron: () => boolean;
 }
@@ -55,10 +57,6 @@ export class ElectronStorageAdapter implements IStorageAdapter {
 
     async isAvailable(): Promise<boolean> {
         return !!window.electronAPI;
-    }
-
-    getMode() {
-        return 'local' as const;
     }
 
     // AUTH OPERATIONS

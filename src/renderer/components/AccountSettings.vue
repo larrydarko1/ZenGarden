@@ -1,3 +1,5 @@
+// AccountSettings — username change, password change, recovery codes, account deletion. // Owns: form validation,
+success/error feedback, clipboard copy. // Does NOT own: data mutations (store), parent notification (emits events).
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -26,7 +28,14 @@ const passwordSuccess = ref('');
 const passwordError = ref('');
 
 // Recovery Codes
-const recoveryStatus = ref<any>(null);
+interface RecoveryStatus {
+    hasRecoveryCodes: boolean;
+    totalCodes?: number;
+    usedCodes?: number;
+    remainingCodes?: number;
+}
+
+const recoveryStatus = ref<RecoveryStatus | null>(null);
 const showGenerateForm = ref(false);
 const showRecoveryCodes = ref(false);
 const recoveryCodes = ref<string[]>([]);
@@ -97,8 +106,8 @@ async function changeUsername() {
         setTimeout(() => {
             usernameSuccess.value = '';
         }, 3000);
-    } catch (error: any) {
-        usernameError.value = error.message || t('account.usernameUpdateFailed');
+    } catch (error: unknown) {
+        usernameError.value = error instanceof Error ? error.message : t('account.usernameUpdateFailed');
     } finally {
         isChangingUsername.value = false;
     }
@@ -135,8 +144,8 @@ async function changePassword() {
         setTimeout(() => {
             passwordSuccess.value = '';
         }, 3000);
-    } catch (error: any) {
-        passwordError.value = error.message || t('account.passwordUpdateFailed');
+    } catch (error: unknown) {
+        passwordError.value = error instanceof Error ? error.message : t('account.passwordUpdateFailed');
     } finally {
         isChangingPassword.value = false;
     }
@@ -151,8 +160,8 @@ async function deleteAccount() {
 
         // Notify parent that account was deleted
         emit('accountDeleted');
-    } catch (error: any) {
-        deleteError.value = error.message || t('account.deleteFailed');
+    } catch (error: unknown) {
+        deleteError.value = error instanceof Error ? error.message : t('account.deleteFailed');
         isDeletingAccount.value = false;
     }
 }

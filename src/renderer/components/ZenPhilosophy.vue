@@ -1,3 +1,5 @@
+// ZenPhilosophy — static informational panel displaying the app's meditation philosophy. // Owns: section layout with
+SVG icons, i18n-driven text content. // Does NOT own: content strings (locale files), visibility (parent).
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 

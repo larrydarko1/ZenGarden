@@ -1,3 +1,6 @@
+// MonkAuth — login, registration, and password recovery forms with auto-session restore. // Owns: form state, input
+validation, loading/error feedback, auto-login on mount. // Does NOT own: auth operations (store), post-auth routing
+(emits auth event).
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -47,8 +50,8 @@ async function register() {
     try {
         const res = await storageRegister(username.value, password.value);
         setSession(res.token, res.user);
-    } catch (e: any) {
-        error.value = e.message;
+    } catch (e: unknown) {
+        error.value = e instanceof Error ? e.message : String(e);
     } finally {
         isLoading.value = false;
     }
@@ -60,8 +63,8 @@ async function login() {
     try {
         const res = await storageLogin(loginUsername.value, loginPassword.value);
         setSession(res.token, res.user);
-    } catch (e: any) {
-        error.value = e.message;
+    } catch (e: unknown) {
+        error.value = e instanceof Error ? e.message : String(e);
     } finally {
         isLoading.value = false;
     }
