@@ -1,17 +1,3 @@
-<template>
-    <div id="app" :class="[currentTheme, { 'has-desktop-header': isDesktopApp }]">
-        <DesktopHeader v-if="isDesktopApp" />
-        <Home
-            @meditation-active="onMeditationActive"
-            @theme-changed="setThemeFromLogin"
-            @language-changed="setLanguageFromLogin"
-            @user-changed="onUserChanged"
-            @theme-change="setTheme"
-            @language-change="setLanguage"
-        />
-    </div>
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -75,5 +61,19 @@ async function setLanguage(language: string) {
     }
 }
 </script>
+
+<template>
+    <div id="app" :class="[currentTheme, { 'has-desktop-header': isDesktopApp }]">
+        <DesktopHeader v-if="isDesktopApp" />
+        <Home
+            @meditation-active="onMeditationActive"
+            @theme-changed="setThemeFromLogin"
+            @language-changed="setLanguageFromLogin"
+            @user-changed="onUserChanged"
+            @theme-change="setTheme"
+            @language-change="setLanguage"
+        />
+    </div>
+</template>
 
 <style></style>

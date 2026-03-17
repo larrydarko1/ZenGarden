@@ -1,24 +1,3 @@
-<template>
-    <div class="philosophy-inline">
-        <div class="philosophy-sections">
-            <div v-for="(section, idx) in sections" :key="idx" class="philosophy-section">
-                <div class="section-icon" v-html="section.icon"></div>
-                <div class="section-text">
-                    <h3>{{ t(section.titleKey) }}</h3>
-                    <p>{{ t(section.bodyKey) }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="philosophy-divider"></div>
-
-        <div class="philosophy-quote">
-            <p class="quote-text">{{ t('philosophy.quote.text') }}</p>
-            <p class="quote-author">{{ t('philosophy.quote.author') }}</p>
-        </div>
-    </div>
-</template>
-
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
@@ -56,6 +35,27 @@ const sections = [
     },
 ];
 </script>
+
+<template>
+    <div class="philosophy-inline">
+        <div class="philosophy-sections">
+            <div v-for="(section, idx) in sections" :key="idx" class="philosophy-section">
+                <div class="section-icon" v-html="section.icon"></div>
+                <div class="section-text">
+                    <h3>{{ t(section.titleKey) }}</h3>
+                    <p>{{ t(section.bodyKey) }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="philosophy-divider"></div>
+
+        <div class="philosophy-quote">
+            <p class="quote-text">{{ t('philosophy.quote.text') }}</p>
+            <p class="quote-author">{{ t('philosophy.quote.author') }}</p>
+        </div>
+    </div>
+</template>
 
 <style scoped>
 .philosophy-inline {

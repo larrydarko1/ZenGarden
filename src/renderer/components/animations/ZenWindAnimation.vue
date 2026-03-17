@@ -1,3 +1,7 @@
+<script setup lang="ts">
+// Pure animation component
+</script>
+
 <template>
     <svg class="zen-wind-anim" width="100vw" height="100vh" viewBox="0 0 1920 1080" preserveAspectRatio="none">
         <defs>
@@ -31,10 +35,6 @@
         </g>
     </svg>
 </template>
-
-<script setup lang="ts">
-// No logic needed
-</script>
 
 <style scoped>
 .zen-wind-anim {

@@ -1,3 +1,7 @@
+<script setup lang="ts">
+// Pure animation component - falling petals
+</script>
+
 <template>
     <div class="zen-breathe-anim">
         <svg class="zen-breathe-svg" width="100vw" height="100vh" viewBox="0 0 1920 1080" preserveAspectRatio="none">
@@ -56,10 +60,6 @@
         </svg>
     </div>
 </template>
-
-<script setup lang="ts">
-// Pure animation component - falling petals
-</script>
 
 <style scoped>
 .zen-breathe-anim {

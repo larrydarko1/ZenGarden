@@ -1,9 +1,3 @@
-<template>
-    <div class="desktop-header" :class="platform">
-        <div class="desktop-header-drag-region"></div>
-    </div>
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 
@@ -37,6 +31,12 @@ onUnmounted(() => {
     // Clean up listeners if needed
 });
 </script>
+
+<template>
+    <div class="desktop-header" :class="platform">
+        <div class="desktop-header-drag-region"></div>
+    </div>
+</template>
 
 <style scoped>
 .desktop-header {

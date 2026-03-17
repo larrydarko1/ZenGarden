@@ -1,77 +1,3 @@
-<template>
-    <div class="calendar-inline">
-        <div class="calendar-header">
-            <button
-                class="calendar-arrow"
-                :disabled="visibleMonth === 0"
-                aria-label="Previous month"
-                @click="prevMonth"
-            >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                    <path
-                        d="M15 18l-6-6 6-6"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                    />
-                </svg>
-            </button>
-            <span class="calendar-title">{{ monthNames[visibleMonth] }} {{ year }}</span>
-            <button class="calendar-arrow" :disabled="visibleMonth === 11" aria-label="Next month" @click="nextMonth">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                    <path
-                        d="M9 18l6-6-6-6"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                    />
-                </svg>
-            </button>
-        </div>
-
-        <div class="calendar-body">
-            <div class="calendar-grid-section">
-                <div class="calendar-weekdays">
-                    <span v-for="d in weekdays" :key="d">{{ d }}</span>
-                </div>
-                <div class="calendar-days">
-                    <span
-                        v-for="(day, idx) in getDaysInMonth(year, visibleMonth)"
-                        :key="idx"
-                        :class="[
-                            'calendar-day',
-                            day.date && day.isToday ? 'today' : '',
-                            day.date && day.complete === true ? 'complete' : '',
-                            day.date && day.complete === false ? 'incomplete' : '',
-                            selectedDay && day.date && getLocalDateKey(day.date) === getLocalDateKey(selectedDay)
-                                ? 'selected'
-                                : '',
-                        ]"
-                        :style="{ cursor: day.date && day.complete ? 'pointer' : 'default' }"
-                        @click="day.date && day.complete ? (selectedDay = day.date) : null"
-                    >
-                        {{ day.date ? day.date.getDate() : '' }}
-                    </span>
-                </div>
-            </div>
-
-            <div v-if="selectedDay && selectedDayMeditations.length > 0" class="meditation-details">
-                <h3>{{ monthNames[selectedDay.getMonth()] }} {{ selectedDay.getDate() }}</h3>
-                <div v-for="(med, idx) in selectedDayMeditations" :key="idx" class="meditation-entry">
-                    <div class="meditation-info">
-                        <span class="meditation-duration">⏱ {{ med.duration || 0 }} {{ t('calendar.minutes') }}</span>
-                    </div>
-                    <div v-if="med.notes" class="meditation-notes">
-                        <strong>{{ t('calendar.notes') }}:</strong> {{ med.notes }}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -161,6 +87,80 @@ function getDaysInMonth(year: number, month: number) {
     return days;
 }
 </script>
+
+<template>
+    <div class="calendar-inline">
+        <div class="calendar-header">
+            <button
+                class="calendar-arrow"
+                :disabled="visibleMonth === 0"
+                aria-label="Previous month"
+                @click="prevMonth"
+            >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path
+                        d="M15 18l-6-6 6-6"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                </svg>
+            </button>
+            <span class="calendar-title">{{ monthNames[visibleMonth] }} {{ year }}</span>
+            <button class="calendar-arrow" :disabled="visibleMonth === 11" aria-label="Next month" @click="nextMonth">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path
+                        d="M9 18l6-6-6-6"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                </svg>
+            </button>
+        </div>
+
+        <div class="calendar-body">
+            <div class="calendar-grid-section">
+                <div class="calendar-weekdays">
+                    <span v-for="d in weekdays" :key="d">{{ d }}</span>
+                </div>
+                <div class="calendar-days">
+                    <span
+                        v-for="(day, idx) in getDaysInMonth(year, visibleMonth)"
+                        :key="idx"
+                        :class="[
+                            'calendar-day',
+                            day.date && day.isToday ? 'today' : '',
+                            day.date && day.complete === true ? 'complete' : '',
+                            day.date && day.complete === false ? 'incomplete' : '',
+                            selectedDay && day.date && getLocalDateKey(day.date) === getLocalDateKey(selectedDay)
+                                ? 'selected'
+                                : '',
+                        ]"
+                        :style="{ cursor: day.date && day.complete ? 'pointer' : 'default' }"
+                        @click="day.date && day.complete ? (selectedDay = day.date) : null"
+                    >
+                        {{ day.date ? day.date.getDate() : '' }}
+                    </span>
+                </div>
+            </div>
+
+            <div v-if="selectedDay && selectedDayMeditations.length > 0" class="meditation-details">
+                <h3>{{ monthNames[selectedDay.getMonth()] }} {{ selectedDay.getDate() }}</h3>
+                <div v-for="(med, idx) in selectedDayMeditations" :key="idx" class="meditation-entry">
+                    <div class="meditation-info">
+                        <span class="meditation-duration">⏱ {{ med.duration || 0 }} {{ t('calendar.minutes') }}</span>
+                    </div>
+                    <div v-if="med.notes" class="meditation-notes">
+                        <strong>{{ t('calendar.notes') }}:</strong> {{ med.notes }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
 
 <style scoped>
 .calendar-inline {

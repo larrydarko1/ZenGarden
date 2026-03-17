@@ -1,3 +1,7 @@
+<script setup lang="ts">
+// Pure animation component - lava lamp effect
+</script>
+
 <template>
     <div class="zen-lava-anim">
         <svg class="zen-lava-svg" width="100vw" height="100vh" viewBox="0 0 1920 1080" preserveAspectRatio="none">
@@ -143,10 +147,6 @@
         </svg>
     </div>
 </template>
-
-<script setup lang="ts">
-// Pure animation component - lava lamp effect
-</script>
 
 <style scoped>
 .zen-lava-anim {

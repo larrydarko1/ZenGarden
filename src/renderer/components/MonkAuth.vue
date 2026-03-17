@@ -1,3 +1,101 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { register as storageRegister, login as storageLogin, getCurrentUser } from '../store';
+
+const { t } = useI18n();
+
+const emit = defineEmits(['auth']);
+
+const mode = ref<'login' | 'register' | 'recovery'>('login');
+const username = ref('');
+const password = ref('');
+const loginUsername = ref('');
+const loginPassword = ref('');
+const user = ref<{ username: string } | null>(null);
+const error = ref('');
+const isLoading = ref(false);
+const isReady = ref(false);
+
+// Recovery state
+const recoveryUsername = ref('');
+const recoveryCode = ref('');
+const newRecoveryPassword = ref('');
+const confirmRecoveryPassword = ref('');
+const recoverySuccess = ref(false);
+
+onMounted(() => {
+    // Trigger entrance animation after mount
+    requestAnimationFrame(() => {
+        isReady.value = true;
+    });
+});
+
+function switchMode(newMode: 'login' | 'register' | 'recovery') {
+    error.value = '';
+    mode.value = newMode;
+}
+
+function setSession(token: string, userObj: { username: string; theme?: string }) {
+    user.value = userObj;
+    emit('auth', { user: userObj, token });
+}
+
+async function register() {
+    error.value = '';
+    isLoading.value = true;
+    try {
+        const res = await storageRegister(username.value, password.value);
+        setSession(res.token, res.user);
+    } catch (e: any) {
+        error.value = e.message;
+    } finally {
+        isLoading.value = false;
+    }
+}
+
+async function login() {
+    error.value = '';
+    isLoading.value = true;
+    try {
+        const res = await storageLogin(loginUsername.value, loginPassword.value);
+        setSession(res.token, res.user);
+    } catch (e: any) {
+        error.value = e.message;
+    } finally {
+        isLoading.value = false;
+    }
+}
+
+async function resetPassword() {
+    error.value = '';
+    if (newRecoveryPassword.value !== confirmRecoveryPassword.value) {
+        error.value = t('auth.passwordsDoNotMatch');
+        return;
+    }
+    error.value = t('auth.recoveryNotSupported');
+}
+
+function goToLogin() {
+    mode.value = 'login';
+    recoverySuccess.value = false;
+    recoveryUsername.value = '';
+    recoveryCode.value = '';
+    newRecoveryPassword.value = '';
+    confirmRecoveryPassword.value = '';
+    error.value = '';
+}
+
+// Check if user is still logged in on mount
+getCurrentUser()
+    .then((res) => {
+        setSession('', res.user);
+    })
+    .catch(() => {
+        // Not logged in, show auth screen
+    });
+</script>
+
 <template>
     <div class="monk-auth" :class="{ 'is-ready': isReady }">
         <!-- Animated gradient mesh background -->
@@ -283,104 +381,6 @@
         </transition>
     </div>
 </template>
-
-<script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { register as storageRegister, login as storageLogin, getCurrentUser } from '../store';
-
-const { t } = useI18n();
-
-const emit = defineEmits(['auth']);
-
-const mode = ref<'login' | 'register' | 'recovery'>('login');
-const username = ref('');
-const password = ref('');
-const loginUsername = ref('');
-const loginPassword = ref('');
-const user = ref<{ username: string } | null>(null);
-const error = ref('');
-const isLoading = ref(false);
-const isReady = ref(false);
-
-// Recovery state
-const recoveryUsername = ref('');
-const recoveryCode = ref('');
-const newRecoveryPassword = ref('');
-const confirmRecoveryPassword = ref('');
-const recoverySuccess = ref(false);
-
-onMounted(() => {
-    // Trigger entrance animation after mount
-    requestAnimationFrame(() => {
-        isReady.value = true;
-    });
-});
-
-function switchMode(newMode: 'login' | 'register' | 'recovery') {
-    error.value = '';
-    mode.value = newMode;
-}
-
-function setSession(token: string, userObj: { username: string; theme?: string }) {
-    user.value = userObj;
-    emit('auth', { user: userObj, token });
-}
-
-async function register() {
-    error.value = '';
-    isLoading.value = true;
-    try {
-        const res = await storageRegister(username.value, password.value);
-        setSession(res.token, res.user);
-    } catch (e: any) {
-        error.value = e.message;
-    } finally {
-        isLoading.value = false;
-    }
-}
-
-async function login() {
-    error.value = '';
-    isLoading.value = true;
-    try {
-        const res = await storageLogin(loginUsername.value, loginPassword.value);
-        setSession(res.token, res.user);
-    } catch (e: any) {
-        error.value = e.message;
-    } finally {
-        isLoading.value = false;
-    }
-}
-
-async function resetPassword() {
-    error.value = '';
-    if (newRecoveryPassword.value !== confirmRecoveryPassword.value) {
-        error.value = t('auth.passwordsDoNotMatch');
-        return;
-    }
-    error.value = t('auth.recoveryNotSupported');
-}
-
-function goToLogin() {
-    mode.value = 'login';
-    recoverySuccess.value = false;
-    recoveryUsername.value = '';
-    recoveryCode.value = '';
-    newRecoveryPassword.value = '';
-    confirmRecoveryPassword.value = '';
-    error.value = '';
-}
-
-// Check if user is still logged in on mount
-getCurrentUser()
-    .then((res) => {
-        setSession('', res.user);
-    })
-    .catch(() => {
-        // Not logged in, show auth screen
-    });
-</script>
 
 <style scoped>
 /* ─── Layout ─── */

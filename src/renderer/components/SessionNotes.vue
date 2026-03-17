@@ -1,29 +1,3 @@
-<template>
-    <div class="notes-modal-bg" aria-label="Session notes modal background" @click.self="handleClose">
-        <div class="notes-modal" role="dialog" aria-labelledby="notes-title" aria-modal="true">
-            <div class="notes-header">
-                <h2 id="notes-title">{{ t('notes.title') }}</h2>
-                <button class="notes-close" aria-label="Close notes modal" @click="handleClose">×</button>
-            </div>
-            <div class="notes-content">
-                <p class="notes-prompt">{{ t('notes.subtitle') }}</p>
-                <textarea
-                    v-model="notes"
-                    class="notes-textarea"
-                    :placeholder="t('notes.placeholder')"
-                    rows="6"
-                    aria-label="Meditation session notes"
-                    @keydown.esc="handleClose"
-                ></textarea>
-                <div class="notes-actions">
-                    <button class="notes-btn notes-btn-secondary" @click="handleSkip">{{ t('notes.skip') }}</button>
-                    <button class="notes-btn notes-btn-primary" @click="handleSave">{{ t('notes.save') }}</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -54,6 +28,32 @@ function handleClose() {
     emit('close');
 }
 </script>
+
+<template>
+    <div class="notes-modal-bg" aria-label="Session notes modal background" @click.self="handleClose">
+        <div class="notes-modal" role="dialog" aria-labelledby="notes-title" aria-modal="true">
+            <div class="notes-header">
+                <h2 id="notes-title">{{ t('notes.title') }}</h2>
+                <button class="notes-close" aria-label="Close notes modal" @click="handleClose">×</button>
+            </div>
+            <div class="notes-content">
+                <p class="notes-prompt">{{ t('notes.subtitle') }}</p>
+                <textarea
+                    v-model="notes"
+                    class="notes-textarea"
+                    :placeholder="t('notes.placeholder')"
+                    rows="6"
+                    aria-label="Meditation session notes"
+                    @keydown.esc="handleClose"
+                ></textarea>
+                <div class="notes-actions">
+                    <button class="notes-btn notes-btn-secondary" @click="handleSkip">{{ t('notes.skip') }}</button>
+                    <button class="notes-btn notes-btn-primary" @click="handleSave">{{ t('notes.save') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
 
 <style scoped>
 .notes-modal-bg {

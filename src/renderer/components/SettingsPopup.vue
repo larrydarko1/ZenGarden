@@ -1,40 +1,3 @@
-<template>
-    <div class="settings-inline">
-        <div class="settings-section">
-            <h3 class="section-label">{{ t('settings.theme') }}</h3>
-            <div class="theme-options">
-                <button
-                    v-for="theme in themes"
-                    :key="theme"
-                    :class="['theme-option', theme, { active: currentTheme === theme }]"
-                    @click="selectTheme(theme)"
-                >
-                    <div class="theme-preview" :class="theme"></div>
-                    <span class="theme-name">{{ t(`settings.themes.${theme}`) }}</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="settings-section">
-            <h3 class="section-label">{{ t('settings.language') }}</h3>
-            <div class="language-options">
-                <button
-                    v-for="(langName, langCode) in languages"
-                    :key="langCode"
-                    :class="['language-option', { active: currentLanguage === langCode }]"
-                    @click="selectLanguage(langCode)"
-                >
-                    {{ langName }}
-                </button>
-            </div>
-        </div>
-
-        <div class="settings-divider"></div>
-
-        <AccountSettings @username-changed="handleUsernameChange" @account-deleted="handleAccountDeletion" />
-    </div>
-</template>
-
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -83,6 +46,43 @@ function handleAccountDeletion() {
     window.location.reload();
 }
 </script>
+
+<template>
+    <div class="settings-inline">
+        <div class="settings-section">
+            <h3 class="section-label">{{ t('settings.theme') }}</h3>
+            <div class="theme-options">
+                <button
+                    v-for="theme in themes"
+                    :key="theme"
+                    :class="['theme-option', theme, { active: currentTheme === theme }]"
+                    @click="selectTheme(theme)"
+                >
+                    <div class="theme-preview" :class="theme"></div>
+                    <span class="theme-name">{{ t(`settings.themes.${theme}`) }}</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="section-label">{{ t('settings.language') }}</h3>
+            <div class="language-options">
+                <button
+                    v-for="(langName, langCode) in languages"
+                    :key="langCode"
+                    :class="['language-option', { active: currentLanguage === langCode }]"
+                    @click="selectLanguage(langCode)"
+                >
+                    {{ langName }}
+                </button>
+            </div>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <AccountSettings @username-changed="handleUsernameChange" @account-deleted="handleAccountDeletion" />
+    </div>
+</template>
 
 <style scoped>
 .settings-inline {

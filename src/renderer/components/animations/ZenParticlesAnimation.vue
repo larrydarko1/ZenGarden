@@ -1,3 +1,7 @@
+<script setup lang="ts">
+// Pure animation component
+</script>
+
 <template>
     <div class="zen-particles-anim">
         <svg class="zen-particles-svg" width="100vw" height="100vh" viewBox="0 0 1920 1080" preserveAspectRatio="none">
@@ -104,10 +108,6 @@
         </svg>
     </div>
 </template>
-
-<script setup lang="ts">
-// Pure animation component
-</script>
 
 <style scoped>
 .zen-particles-anim {

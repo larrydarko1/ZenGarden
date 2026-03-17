@@ -1,3 +1,277 @@
+<script setup lang="ts">
+import MeditationCalendar from './MeditationCalendar.vue';
+import SessionNotes from './SessionNotes.vue';
+import EmotionTracker from './EmotionTracker.vue';
+import ZenPhilosophy from './ZenPhilosophy.vue';
+import SettingsPopup from './SettingsPopup.vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
+import ZenWindAnimation from './animations/ZenWindAnimation.vue';
+import ZenWavesAnimation from './animations/ZenWavesAnimation.vue';
+import ZenBreatheAnimation from './animations/ZenBreatheAnimation.vue';
+import ZenParticlesAnimation from './animations/ZenParticlesAnimation.vue';
+import ZenLavaAnimation from './animations/ZenLavaAnimation.vue';
+import MonkAuth from './MonkAuth.vue';
+import { getMeditations, createMeditation, getCurrentUser, logout } from '../store';
+import { useI18n } from 'vue-i18n';
+import { isDesktop } from '../utils/platform';
+import { useMeditationSession } from '../composables/useMeditationSession';
+
+const { t, tm } = useI18n();
+
+const ANIMATIONS = [ZenWindAnimation, ZenWavesAnimation, ZenBreatheAnimation, ZenParticlesAnimation, ZenLavaAnimation];
+
+// ── Meditation session ────────────────────────────────────────────────────────
+const {
+    meditationActive,
+    meditationSeconds,
+    selectedDuration,
+    isCustomDuration,
+    customDurationValue,
+    customInput,
+    bellEnabled,
+    bellInterval,
+    bellSound,
+    showBellConfig,
+    showIntervalDropdown,
+    showSoundDropdown,
+    showBreathingPicker,
+    selectedBreathingExercise,
+    breathingActive,
+    breathingPhase,
+    breathingPhaseText,
+    breathingPhaseDuration,
+    breathingCycleCount,
+    breathingExercises,
+    completedMeditationDuration,
+    showNotes,
+    meditationAnimationIdx,
+    selectPresetDuration,
+    enableCustomDuration,
+    applyCustomDuration,
+    cancelCustomDuration,
+    selectBellSound,
+    selectBellSoundFromDropdown,
+    toggleBreathingDuringMeditation,
+    startMeditation: startMeditationSession,
+    stopMeditation,
+    cleanup: cleanupMeditation,
+    formatTime,
+} = useMeditationSession();
+
+// Wrap to pass ANIMATIONS.length without exposing it to the template
+function startMeditation() {
+    startMeditationSession(ANIMATIONS.length);
+}
+
+const emit = defineEmits([
+    'meditation-active',
+    'theme-changed',
+    'language-changed',
+    'user-changed',
+    'theme-change',
+    'language-change',
+]);
+
+const desktopApp = ref(false);
+
+watch(meditationActive, (val) => {
+    emit('meditation-active', val);
+});
+
+// ── Phrases ───────────────────────────────────────────────────────────────────
+const phrases = computed(() => tm('phrases') as string[]);
+const currentPhrase = ref(phrases.value[Math.floor(Math.random() * phrases.value.length)]);
+let phraseIntervalId: number | undefined;
+
+function setRandomPhrase() {
+    let next;
+    do {
+        next = phrases.value[Math.floor(Math.random() * phrases.value.length)];
+    } while (next === currentPhrase.value && phrases.value.length > 1);
+    currentPhrase.value = next;
+}
+
+// ── Panel state ───────────────────────────────────────────────────────────────
+const journalMode = ref(false);
+const calendarMode = ref(false);
+const philosophyMode = ref(false);
+const settingsMode = ref(false);
+const centerTextVisible = ref(true);
+let centerTextTimeout: number | undefined;
+
+const anySectionOpen = computed(
+    () => journalMode.value || calendarMode.value || philosophyMode.value || settingsMode.value,
+);
+
+watch(anySectionOpen, (open) => {
+    if (centerTextTimeout) {
+        clearTimeout(centerTextTimeout);
+        centerTextTimeout = undefined;
+    }
+    if (open) {
+        centerTextVisible.value = false;
+    } else {
+        centerTextTimeout = window.setTimeout(() => {
+            centerTextVisible.value = true;
+        }, 1000);
+    }
+});
+
+function toggleJournalMode() {
+    journalMode.value = !journalMode.value;
+    if (journalMode.value) {
+        calendarMode.value = false;
+        philosophyMode.value = false;
+        settingsMode.value = false;
+        showBellConfig.value = false;
+        showBreathingPicker.value = false;
+    }
+}
+
+function toggleCalendarMode() {
+    calendarMode.value = !calendarMode.value;
+    if (calendarMode.value) {
+        journalMode.value = false;
+        philosophyMode.value = false;
+        settingsMode.value = false;
+        showBellConfig.value = false;
+        showBreathingPicker.value = false;
+        if (user.value) fetchMeditations();
+    }
+}
+
+function togglePhilosophyMode() {
+    philosophyMode.value = !philosophyMode.value;
+    if (philosophyMode.value) {
+        journalMode.value = false;
+        calendarMode.value = false;
+        settingsMode.value = false;
+        showBellConfig.value = false;
+        showBreathingPicker.value = false;
+    }
+}
+
+function toggleSettingsMode() {
+    settingsMode.value = !settingsMode.value;
+    if (settingsMode.value) {
+        journalMode.value = false;
+        calendarMode.value = false;
+        philosophyMode.value = false;
+        showBellConfig.value = false;
+        showBreathingPicker.value = false;
+    }
+}
+
+function handleSettingsThemeChange(theme: string) {
+    emit('theme-change', theme);
+}
+
+function handleSettingsLanguageChange(language: string) {
+    emit('language-change', language);
+}
+
+// ── Data ──────────────────────────────────────────────────────────────────────
+const meditations = ref<
+    Array<{ Date: string | { $date: string }; Username?: string; duration?: number; notes?: string }>
+>([]);
+const user = ref<{ username: string; theme?: string; stats?: unknown; goals?: unknown } | null>(null);
+const token = ref<string | null>(null);
+
+async function fetchMeditations() {
+    try {
+        const res = await getMeditations();
+        meditations.value = (res.meditations || []).map((m) => ({
+            Date: typeof m.Date === 'string' ? m.Date : m.Date instanceof Date ? m.Date.toISOString() : m.Date,
+            Username: m.Username,
+            duration: m.duration,
+            notes: m.notes,
+        }));
+    } catch (_e) {
+        meditations.value = [];
+    }
+}
+
+async function fetchUserData() {
+    try {
+        const res = await getCurrentUser();
+        user.value = res.user;
+        emit('theme-changed', res.user.theme);
+        if (res.user.language) {
+            emit('language-changed', res.user.language);
+        }
+    } catch (_e) {
+        // Silently handle — user will be logged out if token is invalid
+    }
+}
+
+async function saveSessionNotes(notes: string) {
+    try {
+        await createMeditation(new Date().toISOString(), Math.round(completedMeditationDuration.value / 60), notes);
+        await fetchMeditations();
+        await fetchUserData();
+        showNotes.value = false;
+    } catch (_e) {
+        // Saving meditation failed — UI handles gracefully
+    }
+}
+
+async function skipSessionNotes() {
+    try {
+        await createMeditation(new Date().toISOString(), Math.round(completedMeditationDuration.value / 60), '');
+        await fetchMeditations();
+        await fetchUserData();
+        showNotes.value = false;
+    } catch (_e) {
+        // Saving meditation failed — UI handles gracefully
+    }
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+async function handleAuth(evt: {
+    user: { username: string; theme?: string; language?: string; stats?: unknown; goals?: unknown };
+    token: string;
+}) {
+    user.value = evt.user;
+    token.value = evt.token;
+    emit('user-changed', evt.user);
+    await fetchUserData();
+    await fetchMeditations();
+    if (evt.user?.theme) emit('theme-changed', evt.user.theme);
+    if (evt.user?.language) emit('language-changed', evt.user.language);
+}
+
+async function handleLogout() {
+    try {
+        await logout();
+        user.value = null;
+        token.value = null;
+        emit('user-changed', null);
+    } catch (error) {
+        console.error('Logout error:', error);
+    }
+}
+
+// ── Lifecycle ─────────────────────────────────────────────────────────────────
+onMounted(async () => {
+    desktopApp.value = isDesktop();
+    phraseIntervalId = window.setInterval(setRandomPhrase, 10000);
+    if (token.value) {
+        try {
+            await fetchUserData();
+            await fetchMeditations();
+        } catch (_e) {
+            token.value = null;
+        }
+    }
+});
+
+onUnmounted(() => {
+    if (phraseIntervalId) clearInterval(phraseIntervalId);
+    if (centerTextTimeout) clearTimeout(centerTextTimeout);
+    cleanupMeditation();
+});
+</script>
+
 <template>
     <div class="zen-bg">
         <MonkAuth v-if="!user" @auth="handleAuth" />
@@ -502,478 +776,6 @@
         </template>
     </div>
 </template>
-
-<script setup lang="ts">
-import MeditationCalendar from './MeditationCalendar.vue';
-import SessionNotes from './SessionNotes.vue';
-import EmotionTracker from './EmotionTracker.vue';
-import ZenPhilosophy from './ZenPhilosophy.vue';
-import SettingsPopup from './SettingsPopup.vue';
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
-import ZenWindAnimation from './animations/ZenWindAnimation.vue';
-import ZenWavesAnimation from './animations/ZenWavesAnimation.vue';
-import ZenBreatheAnimation from './animations/ZenBreatheAnimation.vue';
-import ZenParticlesAnimation from './animations/ZenParticlesAnimation.vue';
-import ZenLavaAnimation from './animations/ZenLavaAnimation.vue';
-import MonkAuth from './MonkAuth.vue';
-import { getMeditations, createMeditation, getCurrentUser, logout } from '../store';
-import { useI18n } from 'vue-i18n';
-import { isDesktop } from '../utils/platform';
-
-const { t, tm } = useI18n();
-// Zen phrases
-const phrases = computed(() => tm('phrases') as string[]);
-const currentPhrase = ref(phrases.value[Math.floor(Math.random() * phrases.value.length)]);
-let phraseIntervalId: number | undefined;
-
-const emit = defineEmits([
-    'meditation-active',
-    'theme-changed',
-    'language-changed',
-    'user-changed',
-    'theme-change',
-    'language-change',
-]);
-const desktopApp = ref(false);
-onMounted(() => {
-    desktopApp.value = isDesktop();
-});
-const meditationActive = ref(false);
-
-// Watch meditationActive and emit event on change
-watch(meditationActive, (val) => {
-    emit('meditation-active', val);
-});
-const meditationSeconds = ref(600); // 10 minutes
-const selectedDuration = ref(10); // minutes
-const isCustomDuration = ref(false);
-const customDurationValue = ref(10);
-const customInput = ref<HTMLInputElement | null>(null);
-let meditationIntervalId: number | undefined;
-
-// Bell settings
-const bellEnabled = ref(false);
-const bellInterval = ref(10); // minutes
-const bellSound = ref('1');
-const showBellConfig = ref(false);
-const showIntervalDropdown = ref(false);
-const showSoundDropdown = ref(false);
-let lastBellTime = 0;
-let bellAudioInstance: HTMLAudioElement | null = null;
-
-// Breathing exercise settings
-interface BreathingExercise {
-    id: string;
-    name: string;
-    description: string;
-    pattern: { phase: string; duration: number; text: string }[];
-}
-
-const showBreathingPicker = ref(false);
-const selectedBreathingExercise = ref<BreathingExercise | null>(null);
-const breathingActive = ref(false);
-const breathingPhase = ref('in');
-const breathingPhaseText = ref('');
-const breathingPhaseDuration = ref(4);
-const breathingCycleCount = ref(1);
-let breathingIntervalId: number | undefined;
-
-const breathingExercises: BreathingExercise[] = [
-    {
-        id: 'box',
-        name: t('breathing.box'),
-        description: t('breathing.descriptions.box'),
-        pattern: [
-            { phase: 'in', duration: 4, text: t('breathing.breatheIn') },
-            { phase: 'hold', duration: 4, text: t('breathing.hold') },
-            { phase: 'out', duration: 4, text: t('breathing.breatheOut') },
-            { phase: 'hold', duration: 4, text: t('breathing.hold') },
-        ],
-    },
-    {
-        id: '478',
-        name: t('breathing.fourSevenEight'),
-        description: t('breathing.descriptions.fourSevenEight'),
-        pattern: [
-            { phase: 'in', duration: 4, text: t('breathing.breatheIn') },
-            { phase: 'hold', duration: 7, text: t('breathing.hold') },
-            { phase: 'out', duration: 8, text: t('breathing.breatheOut') },
-        ],
-    },
-    {
-        id: 'deep',
-        name: t('breathing.deep'),
-        description: t('breathing.descriptions.deep'),
-        pattern: [
-            { phase: 'in', duration: 6, text: t('breathing.breatheIn') },
-            { phase: 'out', duration: 6, text: t('breathing.breatheOut') },
-        ],
-    },
-    {
-        id: 'energizing',
-        name: t('breathing.energizing'),
-        description: t('breathing.descriptions.energizing'),
-        pattern: [
-            { phase: 'in', duration: 2, text: t('breathing.breatheIn') },
-            { phase: 'out', duration: 4, text: t('breathing.breatheOut') },
-        ],
-    },
-];
-
-function startBreathingCycle() {
-    if (!selectedBreathingExercise.value) return;
-    breathingActive.value = true;
-    breathingCycleCount.value = 1;
-    let patternIndex = 0;
-    const pattern = selectedBreathingExercise.value.pattern;
-
-    function nextPhase() {
-        if (!breathingActive.value || !selectedBreathingExercise.value) return;
-        const current = pattern[patternIndex];
-        breathingPhase.value = current.phase;
-        breathingPhaseText.value = current.text;
-        breathingPhaseDuration.value = current.duration;
-        patternIndex++;
-        if (patternIndex >= pattern.length) {
-            patternIndex = 0;
-            breathingCycleCount.value++;
-        }
-    }
-
-    nextPhase();
-    breathingIntervalId = window.setInterval(() => {
-        nextPhase();
-    }, breathingPhaseDuration.value * 1000);
-}
-
-function stopBreathingCycle() {
-    breathingActive.value = false;
-    if (breathingIntervalId) {
-        clearInterval(breathingIntervalId);
-        breathingIntervalId = undefined;
-    }
-}
-
-function toggleBreathingDuringMeditation() {
-    if (breathingActive.value) {
-        stopBreathingCycle();
-    } else if (selectedBreathingExercise.value) {
-        startBreathingCycle();
-    }
-}
-
-const showNotes = ref(false);
-const journalMode = ref(false);
-const calendarMode = ref(false);
-const philosophyMode = ref(false);
-const settingsMode = ref(false);
-
-// Delayed center text visibility: hide immediately on section open, 1s delay on close
-const centerTextVisible = ref(true);
-let centerTextTimeout: number | undefined;
-
-const anySectionOpen = computed(
-    () => journalMode.value || calendarMode.value || philosophyMode.value || settingsMode.value,
-);
-
-watch(anySectionOpen, (open) => {
-    if (centerTextTimeout) {
-        clearTimeout(centerTextTimeout);
-        centerTextTimeout = undefined;
-    }
-    if (open) {
-        centerTextVisible.value = false;
-    } else {
-        // Delay 3 seconds before showing center text again
-        centerTextTimeout = window.setTimeout(() => {
-            centerTextVisible.value = true;
-        }, 1000);
-    }
-});
-
-function toggleJournalMode() {
-    journalMode.value = !journalMode.value;
-    // Close other panels when entering journal mode
-    if (journalMode.value) {
-        calendarMode.value = false;
-        philosophyMode.value = false;
-        settingsMode.value = false;
-        showBellConfig.value = false;
-        showBreathingPicker.value = false;
-    }
-}
-
-function toggleCalendarMode() {
-    calendarMode.value = !calendarMode.value;
-    if (calendarMode.value) {
-        journalMode.value = false;
-        philosophyMode.value = false;
-        settingsMode.value = false;
-        showBellConfig.value = false;
-        showBreathingPicker.value = false;
-        if (user.value) fetchMeditations();
-    }
-}
-
-function togglePhilosophyMode() {
-    philosophyMode.value = !philosophyMode.value;
-    if (philosophyMode.value) {
-        journalMode.value = false;
-        calendarMode.value = false;
-        settingsMode.value = false;
-        showBellConfig.value = false;
-        showBreathingPicker.value = false;
-    }
-}
-
-function toggleSettingsMode() {
-    settingsMode.value = !settingsMode.value;
-    if (settingsMode.value) {
-        journalMode.value = false;
-        calendarMode.value = false;
-        philosophyMode.value = false;
-        showBellConfig.value = false;
-        showBreathingPicker.value = false;
-    }
-}
-
-function handleSettingsThemeChange(theme: string) {
-    emit('theme-change', theme);
-}
-
-function handleSettingsLanguageChange(language: string) {
-    emit('language-change', language);
-}
-
-const meditations = ref<
-    Array<{ Date: string | { $date: string }; Username?: string; duration?: number; notes?: string }>
->([]);
-const completedMeditationDuration = ref(0);
-
-const alertAudio = ref<HTMLAudioElement | null>(null);
-
-function setRandomPhrase() {
-    let next;
-    do {
-        next = phrases.value[Math.floor(Math.random() * phrases.value.length)];
-    } while (next === currentPhrase.value && phrases.value.length > 1);
-    currentPhrase.value = next;
-}
-
-function selectPresetDuration(duration: number) {
-    isCustomDuration.value = false;
-    selectedDuration.value = duration;
-}
-
-function enableCustomDuration() {
-    isCustomDuration.value = true;
-    customDurationValue.value = selectedDuration.value;
-    setTimeout(() => {
-        customInput.value?.focus();
-        customInput.value?.select();
-    }, 50);
-}
-
-function applyCustomDuration() {
-    if (customDurationValue.value >= 1 && customDurationValue.value <= 180) {
-        selectedDuration.value = customDurationValue.value;
-        isCustomDuration.value = false;
-    } else {
-        customDurationValue.value = Math.max(1, Math.min(180, customDurationValue.value));
-    }
-}
-
-function cancelCustomDuration() {
-    isCustomDuration.value = false;
-    customDurationValue.value = selectedDuration.value;
-}
-
-function selectBellSound(sound: string) {
-    bellSound.value = sound;
-    playBellSound(); // Preview the sound
-}
-
-function selectBellSoundFromDropdown(sound: string) {
-    bellSound.value = sound;
-    showSoundDropdown.value = false;
-    playBellSound(); // Preview the sound
-}
-
-async function fetchMeditations() {
-    try {
-        const res = await getMeditations();
-        meditations.value = (res.meditations || []).map((m) => ({
-            Date: typeof m.Date === 'string' ? m.Date : m.Date instanceof Date ? m.Date.toISOString() : m.Date,
-            Username: m.Username,
-            duration: m.duration,
-            notes: m.notes,
-        }));
-    } catch (e) {
-        meditations.value = [];
-    }
-}
-
-async function fetchUserData() {
-    try {
-        const res = await getCurrentUser();
-        user.value = res.user;
-        emit('theme-changed', res.user.theme);
-        if (res.user.language) {
-            emit('language-changed', res.user.language);
-        }
-    } catch (e) {
-        // Silently handle error - user will be logged out if token invalid
-    }
-}
-
-function playAlert() {
-    if (!alertAudio.value) {
-        alertAudio.value = new Audio('./alert.mp3');
-    }
-    alertAudio.value.currentTime = 0;
-    alertAudio.value.play();
-}
-
-function playBellSound() {
-    if (bellAudioInstance) {
-        bellAudioInstance.pause();
-        bellAudioInstance.currentTime = 0;
-    }
-
-    bellAudioInstance = new Audio(`./bell${bellSound.value}.mp3`);
-    bellAudioInstance.volume = 0.5;
-    bellAudioInstance.play().catch(() => {
-        // Bell sound playback failed silently
-    });
-}
-
-async function stopMeditation() {
-    meditationActive.value = false;
-    stopBreathingCycle();
-    if (meditationIntervalId) clearInterval(meditationIntervalId);
-    playAlert();
-}
-
-async function finishMeditation() {
-    meditationActive.value = false;
-    stopBreathingCycle();
-    if (meditationIntervalId) clearInterval(meditationIntervalId);
-    playAlert();
-
-    completedMeditationDuration.value = selectedDuration.value * 60 - meditationSeconds.value;
-    showNotes.value = true;
-}
-
-async function saveSessionNotes(notes: string) {
-    try {
-        await createMeditation(new Date().toISOString(), Math.round(completedMeditationDuration.value / 60), notes);
-        await fetchMeditations();
-        await fetchUserData();
-        showNotes.value = false;
-    } catch (e) {
-        // Error saving meditation - UI can handle gracefully
-    }
-}
-
-async function skipSessionNotes() {
-    try {
-        await createMeditation(new Date().toISOString(), Math.round(completedMeditationDuration.value / 60), '');
-        await fetchMeditations();
-        await fetchUserData();
-        showNotes.value = false;
-    } catch (e) {
-        // Error saving meditation - UI can handle gracefully
-    }
-}
-
-const ANIMATIONS = [ZenWindAnimation, ZenWavesAnimation, ZenBreatheAnimation, ZenParticlesAnimation, ZenLavaAnimation];
-const meditationAnimationIdx = ref(0);
-
-async function startMeditation() {
-    if (meditationActive.value) return;
-    meditationActive.value = true;
-    meditationSeconds.value = selectedDuration.value * 60;
-    lastBellTime = 0;
-    meditationAnimationIdx.value = Math.floor(Math.random() * ANIMATIONS.length);
-    meditationIntervalId = window.setInterval(() => {
-        if (meditationSeconds.value > 0) {
-            meditationSeconds.value--;
-
-            // Check for interval bells
-            if (bellEnabled.value && bellInterval.value > 0) {
-                const totalSeconds = selectedDuration.value * 60;
-                const elapsedSeconds = totalSeconds - meditationSeconds.value;
-                const elapsedMinutes = elapsedSeconds / 60;
-                const currentBellMinute = Math.floor(elapsedMinutes / bellInterval.value) * bellInterval.value;
-
-                if (currentBellMinute > lastBellTime && elapsedMinutes >= bellInterval.value) {
-                    playBellSound();
-                    lastBellTime = currentBellMinute;
-                }
-            }
-        } else {
-            finishMeditation();
-        }
-    }, 1000);
-    playAlert();
-    if (selectedBreathingExercise.value) {
-        startBreathingCycle();
-    }
-}
-
-onMounted(async () => {
-    phraseIntervalId = window.setInterval(setRandomPhrase, 10000);
-    if (token.value) {
-        try {
-            await fetchUserData();
-            await fetchMeditations();
-        } catch (e) {
-            // Session expired or error - logout user
-            token.value = null;
-        }
-    }
-});
-onUnmounted(() => {
-    if (phraseIntervalId) clearInterval(phraseIntervalId);
-    if (meditationIntervalId) clearInterval(meditationIntervalId);
-    if (centerTextTimeout) clearTimeout(centerTextTimeout);
-    stopBreathingCycle();
-});
-
-function formatTime(sec: number) {
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-}
-
-const user = ref<{ username: string; theme?: string; stats?: any; goals?: any } | null>(null);
-const token = ref<string | null>(null);
-
-async function handleAuth(evt: { user: any; token: string }) {
-    user.value = evt.user;
-    token.value = evt.token;
-    emit('user-changed', evt.user);
-    await fetchUserData();
-    await fetchMeditations();
-    if (evt.user && evt.user.theme) {
-        emit('theme-changed', evt.user.theme);
-    }
-    if (evt.user && evt.user.language) {
-        emit('language-changed', evt.user.language);
-    }
-}
-
-async function handleLogout() {
-    try {
-        await logout();
-        user.value = null;
-        token.value = null;
-        emit('user-changed', null);
-    } catch (error) {
-        console.error('Logout error:', error);
-    }
-}
-</script>
 
 <style scoped>
 .logo {

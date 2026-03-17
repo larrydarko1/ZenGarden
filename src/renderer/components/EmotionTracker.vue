@@ -1,3 +1,95 @@
+<script setup lang="ts">
+import { ref, computed, watch, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useEmotions } from '../composables/useEmotions';
+import { useEightfoldPath } from '../composables/useEightfoldPath';
+
+const { t } = useI18n();
+const emit = defineEmits(['close']);
+
+// Date state
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+const selectedDate = ref(today);
+const activeTab = ref('positive');
+
+const isToday = computed(() => {
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+    const selected = new Date(selectedDate.value);
+    selected.setHours(0, 0, 0, 0);
+    return selected.getTime() >= todayDate.getTime();
+});
+
+function formatDate(date: Date | string) {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function changeDate(delta: number) {
+    const newDate = new Date(selectedDate.value);
+    newDate.setDate(newDate.getDate() + delta);
+    newDate.setHours(0, 0, 0, 0);
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+    if (newDate.getTime() <= todayDate.getTime()) {
+        selectedDate.value = newDate;
+    }
+}
+
+// Composables
+const {
+    selectedEmotions,
+    dailyNote,
+    saveStatus,
+    loadingEmotions,
+    loading,
+    analytics,
+    positiveEmotions,
+    negativeEmotions,
+    positiveCount,
+    negativeCount,
+    pnRatio,
+    topPositiveEmotions,
+    topNegativeEmotions,
+    isEmotionSelected,
+    getTranslatedEmotionName,
+    toggleEmotion,
+    handleNoteInput,
+    loadEmotions,
+    loadAnalytics,
+} = useEmotions(selectedDate, activeTab);
+
+const {
+    followedPaths,
+    pathNotes,
+    loadingPath,
+    eightfoldPaths,
+    efCompletedCount,
+    efProgressPercentage,
+    isPathFollowed,
+    togglePath,
+    debouncedSavePath,
+    loadPathData,
+} = useEightfoldPath(selectedDate, saveStatus);
+
+// Orchestration
+watch(selectedDate, () => {
+    loadEmotions();
+    loadPathData();
+});
+
+watch(activeTab, async (newTab) => {
+    if (newTab === 'analytics') await loadAnalytics();
+    if (newTab === 'eightfold') await loadPathData();
+});
+
+onMounted(() => {
+    loadEmotions();
+    loadPathData();
+});
+</script>
+
 <template>
     <div class="emotion-inline">
         <div class="inline-header">
@@ -357,398 +449,6 @@
         </transition>
     </div>
 </template>
-
-<script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import {
-    saveEmotionLog,
-    getEmotionLogs,
-    getEmotionAnalytics,
-    saveEightfoldPathLog,
-    getEightfoldPathLogs,
-} from '../store';
-
-const { t } = useI18n();
-const emit = defineEmits(['close']);
-
-// Initialize to today at start of day
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-const selectedDate = ref(today);
-const activeTab = ref('positive');
-const selectedEmotions = ref<Array<{ name: string; type: string; description: string }>>([]);
-const saveStatus = ref<'saving' | 'saved' | null>(null);
-const loading = ref(false);
-const loadingEmotions = ref(false);
-const analytics = ref<any>(null);
-const dailyNote = ref('');
-
-// Eightfold Path state
-const followedPaths = ref<string[]>([]);
-const pathNotes = ref<Record<string, string>>({});
-const loadingPath = ref(false);
-let pathSaveTimeout: number | null = null;
-
-const eightfoldPathKeys = [
-    'rightView',
-    'rightIntention',
-    'rightSpeech',
-    'rightAction',
-    'rightLivelihood',
-    'rightEffort',
-    'rightMindfulness',
-    'rightConcentration',
-];
-
-const eightfoldPaths = computed(() =>
-    eightfoldPathKeys.map((key) => ({
-        key,
-        displayName: t(`eightfold.paths.${key}.name`),
-        description: t(`eightfold.paths.${key}.description`),
-        questions: t(`eightfold.paths.${key}.questions`),
-    })),
-);
-
-const efCompletedCount = computed(() => followedPaths.value.length);
-const efProgressPercentage = computed(() => Math.round((efCompletedCount.value / 8) * 100));
-
-function isPathFollowed(pathKey: string): boolean {
-    return followedPaths.value.includes(pathKey);
-}
-
-function togglePath(pathKey: string) {
-    if (isPathFollowed(pathKey)) {
-        followedPaths.value = followedPaths.value.filter((p) => p !== pathKey);
-        delete pathNotes.value[pathKey];
-    } else {
-        followedPaths.value.push(pathKey);
-    }
-    savePathData();
-}
-
-async function savePathData() {
-    saveStatus.value = 'saving';
-    try {
-        const pathData = followedPaths.value.map((key) => ({
-            path: key,
-            note: pathNotes.value[key] || '',
-        }));
-        await saveEightfoldPathLog(selectedDate.value.toISOString(), pathData);
-        saveStatus.value = 'saved';
-        setTimeout(() => {
-            saveStatus.value = null;
-        }, 2000);
-    } catch (err) {
-        console.error('Failed to save path:', err);
-        saveStatus.value = null;
-    }
-}
-
-function debouncedSavePath() {
-    if (pathSaveTimeout !== null) clearTimeout(pathSaveTimeout);
-    pathSaveTimeout = window.setTimeout(() => {
-        savePathData();
-    }, 1000);
-}
-
-async function loadPathData() {
-    loadingPath.value = true;
-    try {
-        const startDate = new Date(selectedDate.value);
-        startDate.setHours(0, 0, 0, 0);
-        const endDate = new Date(selectedDate.value);
-        endDate.setHours(23, 59, 59, 999);
-        const response = await getEightfoldPathLogs({
-            startDate: startDate.toISOString(),
-            endDate: endDate.toISOString(),
-        });
-        if (response.pathLogs && response.pathLogs.length > 0) {
-            const log = response.pathLogs[0];
-            followedPaths.value = log.paths.map((p: any) => p.path);
-            pathNotes.value = {};
-            log.paths.forEach((p: any) => {
-                if (p.note) pathNotes.value[p.path] = p.note;
-            });
-        } else {
-            followedPaths.value = [];
-            pathNotes.value = {};
-        }
-    } catch (err) {
-        console.error('Failed to load path:', err);
-        followedPaths.value = [];
-        pathNotes.value = {};
-    } finally {
-        loadingPath.value = false;
-    }
-}
-
-// Emotion definitions - using English names as keys for backend compatibility
-const positiveEmotionKeys = [
-    'Joy',
-    'Happiness',
-    'Contentment',
-    'Satisfaction',
-    'Pride',
-    'Gratitude',
-    'Love',
-    'Affection',
-    'Compassion',
-    'Excitement',
-    'Enthusiasm',
-    'Optimism',
-    'Hope',
-    'Relief',
-    'Amusement',
-    'Delight',
-    'Inspiration',
-    'Confidence',
-    'Calm',
-    'Serenity',
-    'Peaceful',
-    'Accomplished',
-    'Validated',
-    'Accepted',
-    'Belonging',
-    'Curiosity',
-    'Wonder',
-    'Awe',
-];
-
-const negativeEmotionKeys = [
-    'Sadness',
-    'Grief',
-    'Despair',
-    'Loneliness',
-    'Anger',
-    'Rage',
-    'Frustration',
-    'Irritation',
-    'Fear',
-    'Anxiety',
-    'Dread',
-    'Panic',
-    'Shame',
-    'Guilt',
-    'Embarrassment',
-    'Humiliation',
-    'Disgust',
-    'Contempt',
-    'Jealousy',
-    'Envy',
-    'Resentment',
-    'Bitterness',
-    'Regret',
-    'Disappointment',
-    'Discouragement',
-    'Helplessness',
-    'Hopelessness',
-    'Inadequacy',
-    'Insecurity',
-    'Vulnerability',
-    'Stress',
-    'Tension',
-    'Worry',
-    'Doubt',
-    'Confusion',
-    'Overwhelm',
-    'Betrayal',
-    'Hurt',
-    'Rejection',
-];
-
-// Create emotion objects with translations
-const positiveEmotions = computed(() =>
-    positiveEmotionKeys.map((key) => ({
-        name: key, // English key for backend
-        type: 'positive',
-        displayName: t(`emotions.list.${key}.name`),
-        description: t(`emotions.list.${key}.description`),
-    })),
-);
-
-const negativeEmotions = computed(() =>
-    negativeEmotionKeys.map((key) => ({
-        name: key, // English key for backend
-        type: 'negative',
-        displayName: t(`emotions.list.${key}.name`),
-        description: t(`emotions.list.${key}.description`),
-    })),
-);
-
-const positiveCount = computed(() => selectedEmotions.value.filter((e) => e.type === 'positive').length);
-
-const negativeCount = computed(() => selectedEmotions.value.filter((e) => e.type === 'negative').length);
-
-const pnRatio = computed(() => {
-    const total = positiveCount.value + negativeCount.value;
-    if (total === 0) return '0.00';
-    return (positiveCount.value / total).toFixed(2);
-});
-
-const isToday = computed(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const selected = new Date(selectedDate.value);
-    selected.setHours(0, 0, 0, 0);
-    return selected.getTime() >= today.getTime();
-});
-
-function formatDate(date: Date | string) {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-const isEmotionSelected = computed(() => {
-    return (name: string) => {
-        return selectedEmotions.value.some((e) => e.name === name);
-    };
-});
-
-function toggleEmotion(emotion: { name: string; type: string; description: string }) {
-    const index = selectedEmotions.value.findIndex((e) => e.name === emotion.name);
-    if (index > -1) {
-        selectedEmotions.value.splice(index, 1);
-    } else {
-        selectedEmotions.value.push(emotion);
-    }
-    saveEmotions();
-}
-
-function handleNoteInput() {
-    clearTimeout((window as any).emotionNoteTimeout);
-    (window as any).emotionNoteTimeout = setTimeout(() => {
-        saveEmotions();
-    }, 1500);
-}
-
-async function saveEmotions() {
-    saveStatus.value = 'saving';
-    try {
-        await saveEmotionLog(
-            selectedDate.value.toISOString(),
-            selectedEmotions.value.map((e) => ({ name: e.name, type: e.type as 'positive' | 'negative' })),
-            dailyNote.value || undefined,
-        );
-        saveStatus.value = 'saved';
-        // Refresh analytics if tab is active
-        if (activeTab.value === 'analytics') {
-            await loadAnalytics();
-        }
-        setTimeout(() => {
-            saveStatus.value = null;
-        }, 2000);
-    } catch (err) {
-        console.error('Failed to save emotions:', err);
-        saveStatus.value = null;
-    }
-}
-
-async function loadEmotions() {
-    loadingEmotions.value = true;
-    try {
-        const startDate = new Date(selectedDate.value);
-        startDate.setHours(0, 0, 0, 0);
-        const endDate = new Date(selectedDate.value);
-        endDate.setHours(23, 59, 59, 999);
-
-        const response = await getEmotionLogs({
-            startDate: startDate.toISOString(),
-            endDate: endDate.toISOString(),
-        });
-
-        if (response.emotionLogs && response.emotionLogs.length > 0) {
-            // Ensure we have the full emotion objects with all properties
-            const loadedEmotions = response.emotionLogs[0].emotions || [];
-            // Map to ensure we have complete emotion objects
-            selectedEmotions.value = loadedEmotions.map((e: any) => {
-                // Find the full emotion definition
-                const fullEmotion = [...positiveEmotions.value, ...negativeEmotions.value].find(
-                    (emotion) => emotion.name === e.name,
-                );
-                return fullEmotion || e;
-            });
-            dailyNote.value = response.emotionLogs[0].note || '';
-        } else {
-            selectedEmotions.value = [];
-            dailyNote.value = '';
-        }
-    } catch (err) {
-        console.error('Failed to load emotions:', err);
-        selectedEmotions.value = [];
-    } finally {
-        loadingEmotions.value = false;
-    }
-}
-
-async function loadAnalytics() {
-    loading.value = true;
-    try {
-        const response = await getEmotionAnalytics(90);
-        analytics.value = response;
-    } catch (err) {
-        console.error('Failed to load analytics:', err);
-        analytics.value = null;
-    } finally {
-        loading.value = false;
-    }
-}
-
-function changeDate(delta: number) {
-    const newDate = new Date(selectedDate.value);
-    newDate.setDate(newDate.getDate() + delta);
-    newDate.setHours(0, 0, 0, 0);
-
-    // Don't go beyond today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Allow dates up to and including today
-    if (newDate.getTime() <= today.getTime()) {
-        selectedDate.value = newDate;
-    }
-}
-
-const topPositiveEmotions = computed(() => {
-    if (!analytics.value?.topEmotions) return [];
-    return analytics.value.topEmotions.filter((e: any) => e.type === 'positive').slice(0, 10);
-});
-
-const topNegativeEmotions = computed(() => {
-    if (!analytics.value?.topEmotions) return [];
-    return analytics.value.topEmotions.filter((e: any) => e.type === 'negative').slice(0, 10);
-});
-
-function getTranslatedEmotionName(englishName: string): string {
-    // Find the emotion in our lists to get the translated name
-    const allEmotions = [...positiveEmotions.value, ...negativeEmotions.value];
-    const emotion = allEmotions.find((e) => e.name === englishName);
-    return emotion ? emotion.displayName : englishName;
-}
-
-watch(selectedDate, () => {
-    loadEmotions();
-    loadPathData();
-});
-
-watch(activeTab, async (newTab) => {
-    if (newTab === 'analytics') {
-        try {
-            await loadAnalytics();
-        } catch (err) {
-            console.error('Error in analytics tab:', err);
-        }
-    }
-    if (newTab === 'eightfold') {
-        await loadPathData();
-    }
-});
-
-onMounted(() => {
-    loadEmotions();
-    loadPathData();
-});
-</script>
 
 <style scoped>
 .emotion-list {
