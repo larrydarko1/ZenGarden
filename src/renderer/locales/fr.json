@@ -1,0 +1,545 @@
+{
+    "settings": {
+        "title": "Paramètres",
+        "theme": "Thème",
+        "language": "Langue",
+        "themes": {
+            "light": "Clair",
+            "dark": "Sombre"
+        },
+        "languages": {
+            "en": "English",
+            "es": "Español",
+            "it": "Italiano",
+            "fr": "Français",
+            "de": "Deutsch",
+            "pt": "Português",
+            "zh": "中文",
+            "ja": "日本語"
+        }
+    },
+    "header": {
+        "greeting": "Bonjour",
+        "breathe": "Respirer",
+        "emotions": "Journal",
+        "eightfoldPath": "Noble Sentier",
+        "calendar": "Calendrier",
+        "philosophy": "Philosophie",
+        "logout": "Déconnexion"
+    },
+    "meditation": {
+        "begin": "Commencer",
+        "stop": "Arrêter",
+        "bell": {
+            "settings": "Paramètres de la Cloche"
+        }
+    },
+    "philosophy": {
+        "title": "Notre Philosophie Zen",
+        "subtitle": "Comprendre les choix de conception derrière ZenGarden",
+        "practice": {
+            "title": "La pratique est le chemin",
+            "body": "Dans le Zen, la méditation n'est pas un moyen d'atteindre un but—c'est le but lui-même. Chaque moment de pratique est complet et entier. Il n'y a nulle part où aller, rien à accomplir. Lorsque vous vous asseyez, vous êtes déjà là."
+        },
+        "noGoals": {
+            "title": "Les objectifs renforcent l'égo",
+            "body": "Établir des objectifs comme 'méditer X fois' ou 'atteindre Y minutes' renforce l'illusion d'un soi séparé qui doit accomplir des choses. Cela crée dukkha (souffrance) lorsque les objectifs ne sont pas atteints et attachement lorsqu'ils le sont."
+        },
+        "noStreaks": {
+            "title": "Les séries créent de l'anxiété",
+            "body": "Une série de 100 jours peut sembler motivante, mais elle devient une source de stress. Manquer un jour ressemble à un échec. Cela contredit l'esprit de la pratique, qui consiste à lâcher prise, non à s'accrocher aux réalisations."
+        },
+        "silence": {
+            "title": "Embrasser le Silence Naturel",
+            "body": "Dans la tradition Zen, le monde lui-même est la bande sonore de votre méditation. Les sons ambiants artificiels et les pistes musicales peuvent devenir une béquille—une couche supplémentaire entre vous et la réalité. Seule la cloche demeure : elle marque le temps et vous rappelle au présent. La vraie pratique se déroule dans la texture brute et non filtrée de chaque instant."
+        },
+        "observation": {
+            "title": "Nous soutenons l'auto-observation",
+            "body": "Les aperçus que vous voyez ici—corrélations émotionnelles, réflexions dharma—sont des outils de compréhension, pas de comptage. Ils vous aident à observer les motifs sans jugement, soutenant la conscience plutôt que l'accomplissement."
+        },
+        "quote": {
+            "text": "Avant l'éveil, couper du bois, porter de l'eau. Après l'éveil, couper du bois, porter de l'eau.",
+            "author": "— Proverbe Zen"
+        }
+    },
+    "auth": {
+        "welcome": "Bienvenue sur ZenGarden",
+        "username": "Nom d'utilisateur",
+        "password": "Mot de passe",
+        "login": "Connexion",
+        "register": "S'inscrire",
+        "switchToRegister": "Pas de compte ? Inscrivez-vous",
+        "switchToLogin": "Vous avez un compte ? Connectez-vous",
+        "forgotPassword": "Mot de passe oublié ?",
+        "recoverPassword": "Récupérer le Mot de Passe",
+        "recoveryInfo": "Entrez votre nom d'utilisateur et l'un de vos codes de récupération pour réinitialiser votre mot de passe.",
+        "recoveryCode": "Code de récupération",
+        "newPassword": "Nouveau mot de passe",
+        "confirmNewPassword": "Confirmer le nouveau mot de passe",
+        "resetPassword": "Réinitialiser le Mot de Passe",
+        "backToLogin": "Retour à la connexion",
+        "passwordResetSuccess": "Mot de Passe Réinitialisé !",
+        "passwordResetMessage": "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+        "goToLogin": "Aller à la Connexion"
+    },
+    "account": {
+        "title": "Paramètres du Compte",
+        "changeUsername": "Changer le Nom d'utilisateur",
+        "newUsernamePlaceholder": "Nouveau nom d'utilisateur",
+        "updateUsername": "Mettre à Jour le Nom d'utilisateur",
+        "usernameUpdated": "Nom d'utilisateur mis à jour avec succès",
+        "usernameUpdateFailed": "Échec de la mise à jour du nom d'utilisateur",
+        "changePassword": "Changer le Mot de Passe",
+        "currentPasswordPlaceholder": "Mot de passe actuel",
+        "newPasswordPlaceholder": "Nouveau mot de passe",
+        "confirmPasswordPlaceholder": "Confirmer le nouveau mot de passe",
+        "updatePassword": "Mettre à Jour le Mot de Passe",
+        "passwordUpdated": "Mot de passe mis à jour avec succès",
+        "passwordUpdateFailed": "Échec de la mise à jour du mot de passe",
+        "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+        "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
+        "recoveryCodes": "Codes de Récupération",
+        "recoveryCodesDescription": "Les codes de récupération vous permettent de réinitialiser votre mot de passe si vous l'oubliez. Générez 12 codes à usage unique et conservez-les dans un endroit sûr.",
+        "totalCodes": "Codes totaux",
+        "usedCodes": "Codes utilisés",
+        "remainingCodes": "Codes restants",
+        "generateCodes": "Générer des Codes de Récupération",
+        "regenerateCodes": "Regénérer des Codes de Récupération",
+        "generateCodesWarning": "Attention : La génération de nouveaux codes invalidera tous les codes précédents.",
+        "confirmPasswordToGenerate": "Entrez votre mot de passe pour générer des codes",
+        "confirm": "Confirmer",
+        "recoveryCodesFailed": "Échec de la génération des codes de récupération",
+        "saveCodesWarning": "Important : Sauvegardez ces codes maintenant !",
+        "saveCodesDescription": "Vous ne pourrez plus voir ces codes. Conservez-les dans un endroit sûr comme un gestionnaire de mots de passe.",
+        "copyAll": "Tout Copier",
+        "copied": "Copié !",
+        "iHaveSavedCodes": "J'ai sauvegardé mes codes",
+        "deleteAccount": "Supprimer le Compte",
+        "deleteWarning": "Cette action est permanente et ne peut pas être annulée. Toutes vos données, y compris les méditations et les journaux d'émotions, seront supprimées.",
+        "deleteAccountButton": "Supprimer Mon Compte",
+        "confirmPasswordToDelete": "Entrez votre mot de passe pour confirmer",
+        "confirmDelete": "Oui, Supprimer Mon Compte",
+        "cancel": "Annuler",
+        "deleteFailed": "Échec de la suppression du compte",
+        "exportData": "Exporter les Données",
+        "exportDescription": "Téléchargez toutes vos données de méditation et émotions.",
+        "exportJSON": "Exporter en JSON",
+        "exportCSV": "Exporter en CSV",
+        "exportSuccess": "Données exportées avec succès",
+        "exportFailed": "Échec de l'exportation des données"
+    },
+    "notes": {
+        "title": "Session Terminée",
+        "subtitle": "Comment était votre méditation ?",
+        "placeholder": "Écrivez vos pensées...",
+        "save": "Enregistrer",
+        "skip": "Passer"
+    },
+    "breathing": {
+        "title": "Exercice de Respiration",
+        "none": "Aucun",
+        "box": "Respiration en Boîte",
+        "deep": "Respiration Profonde",
+        "calm": "Respiration Calmante",
+        "fourSevenEight": "Respiration 4-7-8",
+        "energizing": "Respiration Énergisante",
+        "start": "Commencer",
+        "stop": "Arrêter",
+        "close": "Fermer",
+        "cycle": "Cycle",
+        "breatheIn": "Inspirer",
+        "hold": "Retenir",
+        "breatheOut": "Expirer",
+        "descriptions": {
+            "box": "Parties égales : inspirer, retenir, expirer, retenir (4-4-4-4)",
+            "fourSevenEight": "Technique calmante : inspirer 4, retenir 7, expirer 8",
+            "deep": "Respirations longues et lentes : inspirer 6, expirer 6",
+            "energizing": "Inspiration rapide, expiration plus longue : 2 dedans, 4 dehors"
+        }
+    },
+    "calendar": {
+        "title": "Calendrier de Méditation",
+        "minutes": "min",
+        "close": "Fermer",
+        "notes": "Notes",
+        "months": [
+            "Janvier",
+            "Février",
+            "Mars",
+            "Avril",
+            "Mai",
+            "Juin",
+            "Juillet",
+            "Août",
+            "Septembre",
+            "Octobre",
+            "Novembre",
+            "Décembre"
+        ],
+        "weekdays": ["D", "L", "M", "M", "J", "V", "S"]
+    },
+    "emotions": {
+        "title": "Journal",
+        "positive": "Positives",
+        "negative": "Négatives",
+        "pnRatio": "Ratio P/N",
+        "positiveTab": "Émotions Positives",
+        "negativeTab": "Émotions Négatives",
+        "analytics": "Analyses",
+        "saving": "Enregistrement...",
+        "saved": "Enregistré ✓",
+        "loading": "Chargement...",
+        "loadingAnalytics": "Chargement des analyses",
+        "noDataYet": "Pas encore de données",
+        "trackEmotionsFirst": "Suivez d'abord quelques émotions pour voir vos analyses",
+        "totalDaysTracked": "Jours Suivis",
+        "avgPNRatio": "Ratio P/N Moyen",
+        "emotionDiversity": "Émotions Uniques",
+        "daysSummary": "Équilibre Émotionnel",
+        "positiveDays": "Jours Positifs (P/N ≥ 0.5)",
+        "negativeDays": "Jours Négatifs (P/N < 0.5)",
+        "topEmotions": "Émotions les Plus Fréquentes",
+        "topPositiveEmotions": "Top Émotions Positives",
+        "topNegativeEmotions": "Top Émotions Négatives",
+        "noPositiveEmotionsYet": "Aucune émotion positive enregistrée",
+        "noNegativeEmotionsYet": "Aucune émotion négative enregistrée",
+        "trendChart": "Tendance du Ratio P/N",
+        "past30Days": "30 Derniers Jours",
+        "past90Days": "90 Derniers Jours",
+        "dailyNote": "Note du jour",
+        "notePlaceholder": "Comment vous sentez-vous aujourd'hui ? Écrivez vos pensées ici...",
+        "list": {
+            "Joy": {
+                "name": "Joie",
+                "description": "Bonheur et plaisir pur"
+            },
+            "Happiness": {
+                "name": "Bonheur",
+                "description": "État général de bien-être"
+            },
+            "Contentment": {
+                "name": "Contentement",
+                "description": "Satisfaction paisible avec la vie"
+            },
+            "Satisfaction": {
+                "name": "Satisfaction",
+                "description": "Épanouissement par l'accomplissement"
+            },
+            "Pride": {
+                "name": "Fierté",
+                "description": "Reconnaissance positive de vos réalisations"
+            },
+            "Gratitude": {
+                "name": "Gratitude",
+                "description": "Appréciation pour ce que vous avez"
+            },
+            "Love": {
+                "name": "Amour",
+                "description": "Affection profonde et soin pour les autres"
+            },
+            "Affection": {
+                "name": "Affection",
+                "description": "Chaleur et tendresse envers quelqu'un"
+            },
+            "Compassion": {
+                "name": "Compassion",
+                "description": "Empathie et désir d'aider les autres"
+            },
+            "Excitement": {
+                "name": "Excitation",
+                "description": "Anticipation énergisée"
+            },
+            "Enthusiasm": {
+                "name": "Enthousiasme",
+                "description": "Engagement passionné avec quelque chose"
+            },
+            "Optimism": {
+                "name": "Optimisme",
+                "description": "Perspective pleine d'espoir sur l'avenir"
+            },
+            "Hope": {
+                "name": "Espoir",
+                "description": "Croyance que de bonnes choses se produiront"
+            },
+            "Relief": {
+                "name": "Soulagement",
+                "description": "Libération de la tension ou de l'inquiétude"
+            },
+            "Amusement": {
+                "name": "Amusement",
+                "description": "Trouver quelque chose de drôle ou divertissant"
+            },
+            "Delight": {
+                "name": "Ravissement",
+                "description": "Joie ou plaisir soudain"
+            },
+            "Inspiration": {
+                "name": "Inspiration",
+                "description": "Motivation à créer ou agir"
+            },
+            "Confidence": {
+                "name": "Confiance",
+                "description": "Croyance en vos capacités"
+            },
+            "Calm": {
+                "name": "Calme",
+                "description": "État paisible et détendu"
+            },
+            "Serenity": {
+                "name": "Sérénité",
+                "description": "Paix intérieure profonde"
+            },
+            "Peaceful": {
+                "name": "Paisible",
+                "description": "Absence de conflit ou de perturbation"
+            },
+            "Accomplished": {
+                "name": "Accompli",
+                "description": "Sentiment d'achèvement ou de succès"
+            },
+            "Validated": {
+                "name": "Validé",
+                "description": "Se sentir reconnu et affirmé"
+            },
+            "Accepted": {
+                "name": "Accepté",
+                "description": "Se sentir accueilli et appartenir"
+            },
+            "Belonging": {
+                "name": "Appartenance",
+                "description": "Connexion à un groupe ou une communauté"
+            },
+            "Curiosity": {
+                "name": "Curiosité",
+                "description": "Intérêt pour l'apprentissage ou l'exploration"
+            },
+            "Wonder": {
+                "name": "Émerveillement",
+                "description": "Admiration pour quelque chose de remarquable"
+            },
+            "Awe": {
+                "name": "Stupéfaction",
+                "description": "Sentiment écrasant d'émerveillement"
+            },
+            "Sadness": {
+                "name": "Tristesse",
+                "description": "Chagrin profond ou malheur"
+            },
+            "Grief": {
+                "name": "Deuil",
+                "description": "Douleur intense de la perte"
+            },
+            "Despair": {
+                "name": "Désespoir",
+                "description": "Perte d'espoir et de motivation"
+            },
+            "Loneliness": {
+                "name": "Solitude",
+                "description": "Sentiment douloureux d'isolement"
+            },
+            "Anger": {
+                "name": "Colère",
+                "description": "Fort mécontentement ou hostilité"
+            },
+            "Rage": {
+                "name": "Rage",
+                "description": "Colère intense et incontrôlable"
+            },
+            "Frustration": {
+                "name": "Frustration",
+                "description": "Agacement dû à des objectifs bloqués"
+            },
+            "Irritation": {
+                "name": "Irritation",
+                "description": "Agacement mineur ou impatience"
+            },
+            "Fear": {
+                "name": "Peur",
+                "description": "Crainte du danger ou du mal"
+            },
+            "Anxiety": {
+                "name": "Anxiété",
+                "description": "Inquiétude face à des résultats incertains"
+            },
+            "Dread": {
+                "name": "Appréhension",
+                "description": "Peur intense de quelque chose de spécifique"
+            },
+            "Panic": {
+                "name": "Panique",
+                "description": "Terreur soudaine et écrasante"
+            },
+            "Shame": {
+                "name": "Honte",
+                "description": "Profonde gêne à propos de soi-même"
+            },
+            "Guilt": {
+                "name": "Culpabilité",
+                "description": "Regret pour quelque chose que vous avez mal fait"
+            },
+            "Embarrassment": {
+                "name": "Embarras",
+                "description": "Conscience de soi dans des situations sociales"
+            },
+            "Humiliation": {
+                "name": "Humiliation",
+                "description": "Se sentir publiquement dégradé"
+            },
+            "Disgust": {
+                "name": "Dégoût",
+                "description": "Répulsion ou forte désapprobation"
+            },
+            "Contempt": {
+                "name": "Mépris",
+                "description": "Sentiment que quelqu'un est en dessous de vous"
+            },
+            "Jealousy": {
+                "name": "Jalousie",
+                "description": "Peur de perdre quelque chose de précieux"
+            },
+            "Envy": {
+                "name": "Envie",
+                "description": "Désir pour ce que les autres ont"
+            },
+            "Resentment": {
+                "name": "Ressentiment",
+                "description": "Colère amère face à un traitement injuste"
+            },
+            "Bitterness": {
+                "name": "Amertume",
+                "description": "Colère et déception persistantes"
+            },
+            "Regret": {
+                "name": "Regret",
+                "description": "Souhaiter avoir fait quelque chose différemment"
+            },
+            "Disappointment": {
+                "name": "Déception",
+                "description": "Déconvenue due à des attentes non satisfaites"
+            },
+            "Discouragement": {
+                "name": "Découragement",
+                "description": "Perte de motivation ou de confiance"
+            },
+            "Helplessness": {
+                "name": "Impuissance",
+                "description": "Sentiment d'incapacité à changer une situation"
+            },
+            "Hopelessness": {
+                "name": "Désespoir",
+                "description": "Croyance que les choses ne s'amélioreront pas"
+            },
+            "Inadequacy": {
+                "name": "Insuffisance",
+                "description": "Sentiment de ne pas être assez bon"
+            },
+            "Insecurity": {
+                "name": "Insécurité",
+                "description": "Doute sur votre valeur ou vos capacités"
+            },
+            "Vulnerability": {
+                "name": "Vulnérabilité",
+                "description": "Se sentir exposé ou à risque"
+            },
+            "Stress": {
+                "name": "Stress",
+                "description": "Tension due à la pression ou aux exigences"
+            },
+            "Tension": {
+                "name": "Tension",
+                "description": "Tension physique ou mentale"
+            },
+            "Worry": {
+                "name": "Inquiétude",
+                "description": "Préoccupation anxieuse à propos de quelque chose"
+            },
+            "Doubt": {
+                "name": "Doute",
+                "description": "Incertitude sur soi-même ou les décisions"
+            },
+            "Confusion": {
+                "name": "Confusion",
+                "description": "Désorientation mentale ou incertitude"
+            },
+            "Overwhelm": {
+                "name": "Submergé",
+                "description": "Se sentir débordé par trop de choses"
+            },
+            "Betrayal": {
+                "name": "Trahison",
+                "description": "Douleur due à une confiance brisée"
+            },
+            "Hurt": {
+                "name": "Blessé",
+                "description": "Douleur émotionnelle due aux actions d'autrui"
+            },
+            "Rejection": {
+                "name": "Rejet",
+                "description": "Douleur d'être exclu ou indésirable"
+            }
+        }
+    },
+    "eightfold": {
+        "title": "Noble Sentier Octuple",
+        "completed": "Complété",
+        "progress": "Progrès",
+        "loading": "Chargement",
+        "saving": "Enregistrement...",
+        "saved": "Enregistré ✓",
+        "notesPlaceholder": "Ajoutez des notes sur la façon dont vous avez suivi ce chemin aujourd'hui...",
+        "paths": {
+            "rightView": {
+                "name": "Vue Juste",
+                "description": "Comprendre les Quatre Nobles Vérités et voir la réalité telle qu'elle est",
+                "questions": "Ai-je vu les situations clairement aujourd'hui ? Ai-je reconnu la souffrance et ses causes ?"
+            },
+            "rightIntention": {
+                "name": "Intention Juste",
+                "description": "Cultiver des pensées de compassion, de bienveillance et d'innocuité",
+                "questions": "Mes intentions étaient-elles pures aujourd'hui ? Ai-je souhaité du bien aux autres et à moi-même ?"
+            },
+            "rightSpeech": {
+                "name": "Parole Juste",
+                "description": "Parler avec vérité, gentillesse et pleine conscience sans commérages ni mots durs",
+                "questions": "Ai-je parlé avec vérité ? Ai-je évité les ragots, les mensonges ou les mots blessants ?"
+            },
+            "rightAction": {
+                "name": "Action Juste",
+                "description": "Agir de manière éthique, en évitant de nuire à tous les êtres vivants",
+                "questions": "Ai-je agi avec intégrité ? Ai-je évité de voler, de nuire ou de trahir la confiance ?"
+            },
+            "rightLivelihood": {
+                "name": "Moyens d'Existence Justes",
+                "description": "Gagner sa vie de manière à ne pas nuire aux autres ni à soi-même",
+                "questions": "Mon travail contribue-t-il positivement ? Est-ce que je gagne honnêtement et éthiquement ?"
+            },
+            "rightEffort": {
+                "name": "Effort Juste",
+                "description": "Cultiver des états d'esprit positifs et prévenir les malsains",
+                "questions": "Ai-je laissé partir les pensées négatives ? Ai-je nourri des qualités positives ?"
+            },
+            "rightMindfulness": {
+                "name": "Attention Juste",
+                "description": "Maintenir la conscience du moment présent du corps, des sentiments, de l'esprit et des phénomènes",
+                "questions": "Étais-je présent aujourd'hui ? Ai-je remarqué mes pensées, sentiments et actions ?"
+            },
+            "rightConcentration": {
+                "name": "Concentration Juste",
+                "description": "Développer une concentration profonde par la pratique de la méditation",
+                "questions": "Ai-je médité ou pratiqué une concentration profonde ? Ai-je cultivé la paix intérieure ?"
+            }
+        }
+    },
+    "phrases": [
+        "Inspire la paix, expire la tension.",
+        "Le moment présent est tout ce que nous avons vraiment.",
+        "Le calme est la clé de la clarté.",
+        "Laisse les pensées passer comme des nuages dans le ciel.",
+        "Plus tu deviens calme, plus tu peux entendre.",
+        "Coule comme l'eau, stable et clair.",
+        "Dans le calme, le monde se transforme.",
+        "Lâche prise et sois simplement.",
+        "L'équilibre n'est pas quelque chose que tu trouves, c'est quelque chose que tu crées.",
+        "La paix vient de l'intérieur."
+    ]
+}

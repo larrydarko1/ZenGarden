@@ -1,0 +1,139 @@
+:root {
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #242424;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body,
+#app {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    /* Improved mobile rendering */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    overscroll-behavior-y: none;
+}
+
+/* Electron window dragging support */
+#app {
+    /* Make the entire app draggable on Electron */
+    -webkit-app-region: drag;
+}
+
+/* Make interactive elements clickable */
+button,
+input,
+textarea,
+select,
+a,
+[role='button'],
+.clickable {
+    -webkit-app-region: no-drag;
+}
+
+/* Allow scrolling on content containers - target by common class patterns */
+[class*='content'],
+[class*='list'],
+[class*='body'],
+[class*='container'],
+[class*='wrapper'],
+[class*='entries'],
+[class*='items'],
+.modal,
+.popup,
+.dropdown-menu {
+    -webkit-app-region: no-drag;
+}
+
+/* Better font scaling on mobile */
+@media (max-width: 768px) {
+    html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+}
+
+/* Smooth scrolling for all devices */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+// THEMES for app proper
+//# Theme variables scoped to #app for Vue compatibility
+
+// Light theme
+#app.light {
+    --text1: #222831;
+    --text2: #393e46;
+    --base1: #f2f3f4;
+    --base2: #e3e6ed;
+    --blur1: #e3e6ed33;
+    --blur2: #f7f7fae6;
+    --blur3: #393e461a;
+    --blur4: #393e4633;
+    --error: #e74c3c;
+    --error2: #f5c6cb;
+
+    /* Reusable component variables */
+    --input-bg: rgba(57, 62, 70, 0.03);
+    --input-bg-focus: rgba(57, 62, 70, 0.06);
+    --input-border: rgba(57, 62, 70, 0.12);
+    --input-border-focus: rgba(57, 62, 70, 0.25);
+    --button-bg: rgba(57, 62, 70, 0.1);
+    --button-bg-hover: rgba(57, 62, 70, 0.15);
+    --button-border-hover: rgba(57, 62, 70, 0.25);
+    --border-subtle: rgba(57, 62, 70, 0.2);
+    --error-bg: rgba(231, 76, 60, 0.1);
+    --error-border: rgba(231, 76, 60, 0.2);
+    --error-text: #e74c3c;
+
+    /* Auth background mesh */
+    --auth-accent1: rgba(160, 140, 200, 0.08);
+    --auth-accent2: rgba(120, 170, 190, 0.06);
+    --auth-accent3: rgba(180, 160, 140, 0.07);
+}
+
+// Dark theme
+#app.dark {
+    --text1: #e0e0e0;
+    --text2: #b0b0b0;
+    --base1: #181a20;
+    --base2: #23262f;
+    --blur1: #23262f33;
+    --blur2: #181a20e6;
+    --blur3: #e0e0e01a;
+    --blur4: #b0b0b033;
+    --error: #e74c3c;
+    --error2: #f5c6cb;
+
+    /* Reusable component variables */
+    --input-bg: rgba(224, 224, 224, 0.02);
+    --input-bg-focus: rgba(224, 224, 224, 0.04);
+    --input-border: rgba(224, 224, 224, 0.08);
+    --input-border-focus: rgba(224, 224, 224, 0.2);
+    --button-bg: rgba(224, 224, 224, 0.1);
+    --button-bg-hover: rgba(224, 224, 224, 0.15);
+    --button-border-hover: rgba(224, 224, 224, 0.25);
+    --border-subtle: rgba(224, 224, 224, 0.15);
+    --error-bg: rgba(231, 76, 60, 0.1);
+    --error-border: rgba(231, 76, 60, 0.2);
+    --error-text: #e74c3c;
+
+    /* Auth background mesh */
+    --auth-accent1: rgba(100, 80, 160, 0.12);
+    --auth-accent2: rgba(60, 130, 160, 0.1);
+    --auth-accent3: rgba(140, 100, 80, 0.1);
+}
