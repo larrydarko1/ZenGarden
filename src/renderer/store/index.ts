@@ -1,4 +1,7 @@
-// Main Storage API - Unified interface for all storage operations
+// store/index — convenience functions delegating to the active storage adapter.
+// Owns: re-exports, thin async wrappers for each storage operation.
+// Does NOT own: adapter selection (factory.ts), type definitions (types.ts).
+
 import { StorageFactory } from './adapters/factory';
 
 // Re-export types
@@ -62,9 +65,9 @@ export async function updateLanguage(language: 'en' | 'es' | 'it' | 'fr' | 'de' 
 }
 
 // Meditation operations
-export async function createMeditation(Date: string, duration: number, notes: string) {
+export async function createMeditation(date: string, duration: number, notes: string) {
     const adapter = await getStorageAdapter();
-    return adapter.createMeditation({ Date, duration, notes });
+    return adapter.createMeditation({ date, duration, notes });
 }
 
 export async function getMeditations() {
@@ -106,6 +109,22 @@ export async function getEightfoldPathLogs(query?: { startDate?: string; endDate
 export async function getEightfoldPathAnalytics(days?: number) {
     const adapter = await getStorageAdapter();
     return adapter.getEightfoldPathAnalytics(days);
+}
+
+// Recovery codes
+export async function getRecoveryStatus() {
+    const adapter = await getStorageAdapter();
+    return adapter.getRecoveryStatus();
+}
+
+export async function generateRecoveryCodes(password: string) {
+    const adapter = await getStorageAdapter();
+    return adapter.generateRecoveryCodes(password);
+}
+
+export async function resetPasswordWithRecoveryCode(username: string, code: string, newPassword: string) {
+    const adapter = await getStorageAdapter();
+    return adapter.resetPasswordWithRecoveryCode(username, code, newPassword);
 }
 
 // Data export/import (only for local mode)

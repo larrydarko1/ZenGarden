@@ -27,6 +27,7 @@ import type {
     EmotionAnalytics,
     EightfoldPathAnalytics,
     DateRangeQuery,
+    RecoveryStatus,
 } from '../types';
 
 export class CapacitorStorageAdapter implements IStorageAdapter {
@@ -49,7 +50,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         }
     }
 
-    // AUTH OPERATIONS
+    // ─── Auth ─────────────────────────────────────────────────────────────────
     async register(
         credentials: UserCredentials,
         theme?: 'light' | 'dark',
@@ -170,7 +171,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         // Update username in all meditation records
         const meditations = await readCollection<Meditation>(DB_FILES.meditations);
         const updatedMeditations = meditations.map((m) =>
-            m.Username === oldUsername ? { ...m, Username: newUsername } : m,
+            m.username === oldUsername ? { ...m, username: newUsername } : m,
         );
         await writeCollection(DB_FILES.meditations, updatedMeditations);
 
@@ -221,7 +222,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
 
         // Delete user's meditation data
         const meditations = await readCollection<Meditation>(DB_FILES.meditations);
-        const filteredMeditations = meditations.filter((m) => m.Username !== session.currentUser);
+        const filteredMeditations = meditations.filter((m) => m.username !== session.currentUser);
         await writeCollection(DB_FILES.meditations, filteredMeditations);
 
         // Clear session
@@ -230,7 +231,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         return { message: 'Account deleted successfully' };
     }
 
-    // SETTINGS OPERATIONS
+    // ─── Settings ────────────────────────────────────────────────────────────
     async updateTheme(theme: 'light' | 'dark'): Promise<{ message: string; theme: 'light' | 'dark' }> {
         await this.ensureInitialized();
 
@@ -267,7 +268,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         return { message: 'Language updated successfully', language };
     }
 
-    // MEDITATION OPERATIONS
+    // ─── Meditations ─────────────────────────────────────────────────────────
     async createMeditation(input: MeditationInput): Promise<{ message: string; meditation: Meditation }> {
         await this.ensureInitialized();
 
@@ -278,8 +279,8 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
 
         const newMeditation: Meditation = {
             _id: generateObjectId(),
-            Username: session.currentUser,
-            Date: input.Date,
+            username: session.currentUser,
+            date: input.date,
             duration: input.duration,
             notes: input.notes,
         };
@@ -297,12 +298,12 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         if (!session.currentUser) throw new Error('Not authenticated');
 
         const meditations = await readCollection<Meditation>(DB_FILES.meditations);
-        const userMeditations = meditations.filter((m) => m.Username === session.currentUser);
+        const userMeditations = meditations.filter((m) => m.username === session.currentUser);
 
         return { meditations: userMeditations };
     }
 
-    // EMOTION OPERATIONS
+    // ─── Emotions ────────────────────────────────────────────────────────────
     async saveEmotionLog(input: EmotionLogInput): Promise<{ message: string; emotionLog: EmotionLog }> {
         await this.ensureInitialized();
 
@@ -427,7 +428,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         };
     }
 
-    // EIGHTFOLD PATH OPERATIONS
+    // ─── Eightfold path ──────────────────────────────────────────────────────
     async saveEightfoldPathLog(input: EightfoldPathInput): Promise<{ message: string; pathLog: EightfoldPathLog }> {
         await this.ensureInitialized();
 
@@ -530,7 +531,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         };
     }
 
-    // DATA EXPORT/IMPORT (MongoDB compatible)
+    // ─── Data export/import ──────────────────────────────────────────────────
     async exportData(): Promise<string> {
         await this.ensureInitialized();
 
@@ -544,7 +545,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         ]);
 
         const data = {
-            meditations: meditations.filter((m) => m.Username === session.currentUser),
+            meditations: meditations.filter((m) => m.username === session.currentUser),
             emotionLogs: emotionLogs.filter((e) => e.username === session.currentUser),
             eightfoldPathLogs: eightfoldPathLogs.filter((e) => e.username === session.currentUser),
             exportDate: new Date().toISOString(),
@@ -593,8 +594,8 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
                 if (typeof m['Date'] !== 'string' || typeof m['duration'] !== 'number') continue;
                 meditations.push({
                     _id: generateObjectId(),
-                    Username: session.currentUser,
-                    Date: m['Date'] as string,
+                    username: session.currentUser,
+                    date: m['Date'] as string,
                     duration: m['duration'] as number,
                     notes: typeof m['notes'] === 'string' ? (m['notes'] as string) : '',
                 } as Meditation);
@@ -642,5 +643,108 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         }
 
         return { message: 'Data imported successfully', imported: counts };
+    }
+
+    // ─── Recovery codes ─────────────────────────────────────────────────────
+    async getRecoveryStatus(): Promise<RecoveryStatus> {
+        await this.ensureInitialized();
+
+        const session = await readSession();
+        if (!session.currentUser) throw new Error('Not authenticated');
+
+        const users = await readCollection<
+            UserWithPassword & { recoveryCodes?: Array<{ hash: string; salt: string; used: boolean }> }
+        >(DB_FILES.users);
+        const user = users.find((u) => u.username === session.currentUser);
+        if (!user) throw new Error('User not found');
+
+        const codes = user.recoveryCodes ?? [];
+        const usedCount = codes.filter((c) => c.used).length;
+
+        return {
+            hasRecoveryCodes: codes.length > 0,
+            totalCodes: codes.length,
+            usedCodes: usedCount,
+            remainingCodes: codes.length - usedCount,
+        };
+    }
+
+    async generateRecoveryCodes(password: string): Promise<{ codes: string[] }> {
+        await this.ensureInitialized();
+
+        const session = await readSession();
+        if (!session.currentUser) throw new Error('Not authenticated');
+
+        const users = await readCollection<
+            UserWithPassword & { recoveryCodes?: Array<{ hash: string; salt: string; used: boolean }> }
+        >(DB_FILES.users);
+        const userIndex = users.findIndex((u) => u.username === session.currentUser);
+        if (userIndex === -1) throw new Error('User not found');
+
+        if (!(await verifyPassword(password, users[userIndex].password))) {
+            throw new Error('Invalid password');
+        }
+
+        // Generate 10 random codes and hash each one for storage
+        const plaintextCodes: string[] = [];
+        const hashedCodes: Array<{ hash: string; salt: string; used: boolean }> = [];
+
+        for (let i = 0; i < 10; i++) {
+            const bytes = new Uint8Array(6);
+            crypto.getRandomValues(bytes);
+            const code = Array.from(bytes)
+                .map((b) => b.toString(36).padStart(2, '0'))
+                .join('')
+                .substring(0, 8)
+                .toUpperCase();
+            plaintextCodes.push(code);
+
+            // Hash the code using PBKDF2 via Web Crypto
+            const codeHash = await hashPassword(code);
+            // Store as {hash: fullPbkdf2String, salt: '', used: false}
+            hashedCodes.push({ hash: codeHash, salt: '', used: false });
+        }
+
+        users[userIndex].recoveryCodes = hashedCodes;
+        await writeCollection(DB_FILES.users, users);
+
+        return { codes: plaintextCodes };
+    }
+
+    async resetPasswordWithRecoveryCode(
+        username: string,
+        code: string,
+        newPassword: string,
+    ): Promise<{ message: string }> {
+        await this.ensureInitialized();
+
+        if (!newPassword || newPassword.length < 8) {
+            throw new Error('Password must be at least 8 characters');
+        }
+
+        const users = await readCollection<
+            UserWithPassword & { recoveryCodes?: Array<{ hash: string; salt: string; used: boolean }> }
+        >(DB_FILES.users);
+        const user = users.find((u) => u.username === username.trim());
+        if (!user) throw new Error('Invalid username or recovery code');
+
+        const codes = user.recoveryCodes ?? [];
+        let matchIdx = -1;
+        for (let i = 0; i < codes.length; i++) {
+            if (!codes[i].used && (await verifyPassword(code.toUpperCase(), codes[i].hash))) {
+                matchIdx = i;
+                break;
+            }
+        }
+
+        if (matchIdx === -1) throw new Error('Invalid username or recovery code');
+
+        // Mark code as used and update password
+        codes[matchIdx].used = true;
+        user.recoveryCodes = codes;
+        user.password = await hashPassword(newPassword);
+        await writeCollection(DB_FILES.users, users);
+
+        return { message: 'Password reset successfully' };
     }
 }

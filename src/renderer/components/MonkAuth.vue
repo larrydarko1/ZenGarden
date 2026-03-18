@@ -4,7 +4,12 @@ validation, loading/error feedback, auto-login on mount. // Does NOT own: auth o
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { register as storageRegister, login as storageLogin, getCurrentUser } from '../store';
+import {
+    register as storageRegister,
+    login as storageLogin,
+    getCurrentUser,
+    resetPasswordWithRecoveryCode,
+} from '../store';
 
 const { t } = useI18n();
 
@@ -76,7 +81,15 @@ async function resetPassword() {
         error.value = t('auth.passwordsDoNotMatch');
         return;
     }
-    error.value = t('auth.recoveryNotSupported');
+    isLoading.value = true;
+    try {
+        await resetPasswordWithRecoveryCode(recoveryUsername.value, recoveryCode.value, newRecoveryPassword.value);
+        recoverySuccess.value = true;
+    } catch (e: unknown) {
+        error.value = e instanceof Error ? e.message : String(e);
+    } finally {
+        isLoading.value = false;
+    }
 }
 
 function goToLogin() {

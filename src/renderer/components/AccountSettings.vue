@@ -7,7 +7,10 @@ import {
     updateUsername as updateUsernameStorage,
     updatePassword as updatePasswordStorage,
     deleteAccount as deleteAccountStorage,
+    getRecoveryStatus as getRecoveryStatusStorage,
+    generateRecoveryCodes as generateRecoveryCodesStorage,
 } from '../store';
+import type { RecoveryStatus } from '../store';
 
 const { t } = useI18n();
 
@@ -28,13 +31,6 @@ const passwordSuccess = ref('');
 const passwordError = ref('');
 
 // Recovery Codes
-interface RecoveryStatus {
-    hasRecoveryCodes: boolean;
-    totalCodes?: number;
-    usedCodes?: number;
-    remainingCodes?: number;
-}
-
 const recoveryStatus = ref<RecoveryStatus | null>(null);
 const showGenerateForm = ref(false);
 const showRecoveryCodes = ref(false);
@@ -42,7 +38,7 @@ const recoveryCodes = ref<string[]>([]);
 const recoveryPassword = ref('');
 const isGeneratingCodes = ref(false);
 const recoveryError = ref('');
-const codiesCopied = ref(false);
+const codesCopied = ref(false);
 
 // Delete Account
 const showDeleteConfirm = ref(false);
@@ -51,14 +47,28 @@ const isDeletingAccount = ref(false);
 const deleteError = ref('');
 
 onMounted(async () => {
-    // Recovery codes not supported in local-only mode
-    recoveryStatus.value = { hasRecoveryCodes: false };
+    try {
+        recoveryStatus.value = await getRecoveryStatusStorage();
+    } catch {
+        recoveryStatus.value = { hasRecoveryCodes: false, totalCodes: 0, usedCodes: 0, remainingCodes: 0 };
+    }
 });
 
 async function generateRecoveryCodes() {
-    recoveryError.value = t('account.recoveryCodesNotSupported');
-    isGeneratingCodes.value = false;
-    // Recovery codes not supported in local-only mode
+    recoveryError.value = '';
+    isGeneratingCodes.value = true;
+    try {
+        const result = await generateRecoveryCodesStorage(recoveryPassword.value);
+        recoveryCodes.value = result.codes;
+        showRecoveryCodes.value = true;
+        showGenerateForm.value = false;
+        recoveryPassword.value = '';
+        recoveryStatus.value = await getRecoveryStatusStorage();
+    } catch (e: unknown) {
+        recoveryError.value = e instanceof Error ? e.message : String(e);
+    } finally {
+        isGeneratingCodes.value = false;
+    }
 }
 
 function cancelGenerateCodes() {
@@ -70,16 +80,16 @@ function cancelGenerateCodes() {
 function closeRecoveryCodes() {
     showRecoveryCodes.value = false;
     recoveryCodes.value = [];
-    codiesCopied.value = false;
+    codesCopied.value = false;
 }
 
 async function copyAllCodes() {
     const codesText = recoveryCodes.value.map((code, index) => `${index + 1}. ${code}`).join('\n');
     try {
         await navigator.clipboard.writeText(codesText);
-        codiesCopied.value = true;
+        codesCopied.value = true;
         setTimeout(() => {
-            codiesCopied.value = false;
+            codesCopied.value = false;
         }, 2000);
     } catch (error) {
         console.error('Failed to copy codes:', error);
@@ -348,7 +358,7 @@ function cancelDelete() {
                 </div>
                 <div class="button-row">
                     <button class="zen-btn" @click="copyAllCodes">
-                        {{ codiesCopied ? t('account.copied') : t('account.copyAll') }}
+                        {{ codesCopied ? t('account.copied') : t('account.copyAll') }}
                     </button>
                     <button class="zen-btn" @click="closeRecoveryCodes">
                         {{ t('account.iHaveSavedCodes') }}

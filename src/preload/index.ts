@@ -39,4 +39,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
         ipcRenderer.invoke('storage:saveEightfoldPathLog', date, paths),
     getEightfoldPathLogs: (query: unknown) => ipcRenderer.invoke('storage:getEightfoldPathLogs', query),
     getEightfoldPathAnalytics: (days: number) => ipcRenderer.invoke('storage:getEightfoldPathAnalytics', days),
+
+    // Recovery codes
+    getRecoveryStatus: () => ipcRenderer.invoke('storage:getRecoveryStatus'),
+    generateRecoveryCodes: (password: string) => ipcRenderer.invoke('storage:generateRecoveryCodes', password),
+    resetPasswordWithRecoveryCode: (username: string, code: string, newPassword: string) =>
+        ipcRenderer.invoke('storage:resetPasswordWithRecoveryCode', username, code, newPassword),
 });

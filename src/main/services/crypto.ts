@@ -36,6 +36,29 @@ export function hashPasswordPbkdf2(password: string, salt?: string): { hash: str
     return { hash, salt: useSalt };
 }
 
+// ─── Recovery codes ───────────────────────────────────────────────────────────
+
+// Generate 10 random 8-char alphanumeric recovery codes
+export function generateRecoveryCodes(): string[] {
+    const codes: string[] = [];
+    for (let i = 0; i < 10; i++) {
+        const bytes = crypto.randomBytes(6);
+        codes.push(bytes.toString('base64url').substring(0, 8).toUpperCase());
+    }
+    return codes;
+}
+
+// Hash a single recovery code for storage
+export function hashRecoveryCode(code: string): { hash: string; salt: string } {
+    return hashPasswordPbkdf2(code.toUpperCase());
+}
+
+// Verify a recovery code against a stored hash
+export function verifyRecoveryCode(code: string, storedHash: string, salt: string): boolean {
+    const { hash } = hashPasswordPbkdf2(code.toUpperCase(), salt);
+    return hash === storedHash;
+}
+
 // ─── Verification ─────────────────────────────────────────────────────────────
 
 export async function verifyPassword(password: string, user: StoredUser): Promise<boolean> {

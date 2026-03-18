@@ -1,4 +1,7 @@
-// Electron Storage Adapter - Bridges Vue frontend to Node.js JSON file backend
+// electron — Electron storage adapter bridging Vue to Node.js JSON file backend via IPC.
+// Owns: ElectronAPI interface, IStorageAdapter implementation for desktop.
+// Does NOT own: IPC handlers (main/services/), type definitions (types.ts).
+
 import type {
     IStorageAdapter,
     User,
@@ -15,6 +18,7 @@ import type {
     EmotionAnalytics,
     EightfoldPathAnalytics,
     DateRangeQuery,
+    RecoveryStatus,
 } from '../types';
 
 // Type definition for the Electron API exposed by preload script
@@ -36,6 +40,13 @@ interface ElectronAPI {
     saveEightfoldPathLog: (date: string, paths: PathItem[]) => Promise<EightfoldPathLog>;
     getEightfoldPathLogs: (query?: DateRangeQuery) => Promise<EightfoldPathLog[]>;
     getEightfoldPathAnalytics: (days?: number) => Promise<EightfoldPathAnalytics>;
+    getRecoveryStatus: () => Promise<RecoveryStatus>;
+    generateRecoveryCodes: (password: string) => Promise<{ codes: string[] }>;
+    resetPasswordWithRecoveryCode: (
+        username: string,
+        code: string,
+        newPassword: string,
+    ) => Promise<{ message: string }>;
     isElectron: () => boolean;
 }
 
@@ -59,7 +70,7 @@ export class ElectronStorageAdapter implements IStorageAdapter {
         return !!window.electronAPI;
     }
 
-    // AUTH OPERATIONS
+    // ─── Auth ─────────────────────────────────────────────────────────────────
     async register(
         credentials: UserCredentials,
         theme?: 'light' | 'dark',
@@ -98,7 +109,7 @@ export class ElectronStorageAdapter implements IStorageAdapter {
         return this.api.deleteAccount(password);
     }
 
-    // SETTINGS OPERATIONS
+    // ─── Settings ────────────────────────────────────────────────────────────
     async updateTheme(theme: 'light' | 'dark'): Promise<{ message: string; theme: 'light' | 'dark' }> {
         const result = await this.api.updateTheme(theme);
         return { ...result, theme };
@@ -111,9 +122,9 @@ export class ElectronStorageAdapter implements IStorageAdapter {
         return { ...result, language };
     }
 
-    // MEDITATION OPERATIONS
+    // ─── Meditations ─────────────────────────────────────────────────────────
     async createMeditation(input: MeditationInput): Promise<{ message: string; meditation: Meditation }> {
-        const meditation = await this.api.createMeditation(input.Date, input.duration, input.notes);
+        const meditation = await this.api.createMeditation(input.date, input.duration, input.notes);
         return { message: 'Meditation saved successfully', meditation };
     }
 
@@ -122,7 +133,7 @@ export class ElectronStorageAdapter implements IStorageAdapter {
         return { meditations };
     }
 
-    // EMOTION OPERATIONS
+    // ─── Emotions ────────────────────────────────────────────────────────────
     async saveEmotionLog(input: EmotionLogInput): Promise<{ message: string; emotionLog: EmotionLog }> {
         const emotionLog = await this.api.saveEmotionLog(input.date, input.emotions, input.note);
         return { message: 'Emotion log saved successfully', emotionLog };
@@ -137,7 +148,7 @@ export class ElectronStorageAdapter implements IStorageAdapter {
         return this.api.getEmotionAnalytics(days);
     }
 
-    // EIGHTFOLD PATH OPERATIONS
+    // ─── Eightfold path ──────────────────────────────────────────────────────
     async saveEightfoldPathLog(input: EightfoldPathInput): Promise<{ message: string; pathLog: EightfoldPathLog }> {
         const pathLog = await this.api.saveEightfoldPathLog(input.date, input.paths);
         return { message: 'Eightfold path log saved successfully', pathLog };
@@ -150,5 +161,22 @@ export class ElectronStorageAdapter implements IStorageAdapter {
 
     async getEightfoldPathAnalytics(days?: number): Promise<EightfoldPathAnalytics> {
         return this.api.getEightfoldPathAnalytics(days);
+    }
+
+    // ─── Recovery codes ─────────────────────────────────────────────────────
+    async getRecoveryStatus(): Promise<RecoveryStatus> {
+        return this.api.getRecoveryStatus();
+    }
+
+    async generateRecoveryCodes(password: string): Promise<{ codes: string[] }> {
+        return this.api.generateRecoveryCodes(password);
+    }
+
+    async resetPasswordWithRecoveryCode(
+        username: string,
+        code: string,
+        newPassword: string,
+    ): Promise<{ message: string }> {
+        return this.api.resetPasswordWithRecoveryCode(username, code, newPassword);
     }
 }

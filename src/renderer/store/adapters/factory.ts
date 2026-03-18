@@ -1,4 +1,7 @@
-// Storage Adapter Factory - Auto-detect Desktop (Electron) or Mobile (Capacitor)
+// factory — auto-detects Electron (desktop) or Capacitor (mobile) and caches the adapter.
+// Owns: adapter instantiation, availability probing, singleton cache.
+// Does NOT own: adapter implementations (electron.ts, capacitor.ts), types (types.ts).
+
 import type { IStorageAdapter } from '../types';
 import { ElectronStorageAdapter } from './electron';
 import { CapacitorStorageAdapter } from './capacitor';
@@ -6,10 +9,7 @@ import { CapacitorStorageAdapter } from './capacitor';
 export class StorageFactory {
     private static instance: IStorageAdapter | null = null;
 
-    /**
-     * Get the appropriate storage adapter (Electron for desktop, Capacitor for mobile)
-     * Both use local JSON file storage with MongoDB-compatible structure
-     */
+    // Return the appropriate adapter (Electron for desktop, Capacitor for mobile)
     static async getAdapter(): Promise<IStorageAdapter> {
         // Return cached instance if available
         if (this.instance) {
@@ -41,9 +41,7 @@ export class StorageFactory {
         throw new Error('No storage adapter available. This app requires Electron (desktop) or Capacitor (mobile).');
     }
 
-    /**
-     * Check availability (always returns local: true, server: false)
-     */
+    // Check availability (always returns local: true, server: false)
     static async checkAvailability(): Promise<{ server: boolean; local: boolean }> {
         let local = false;
         try {
@@ -62,9 +60,7 @@ export class StorageFactory {
         return { server: false, local };
     }
 
-    /**
-     * Reset factory (useful for testing)
-     */
+    // Reset factory (useful for testing)
     static reset(): void {
         this.instance = null;
     }

@@ -175,7 +175,7 @@ function handleSettingsLanguageChange(language: string) {
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 const meditations = ref<
-    Array<{ Date: string | { $date: string }; Username?: string; duration?: number; notes?: string }>
+    Array<{ date: string | { $date: string }; username?: string; duration?: number; notes?: string }>
 >([]);
 const user = ref<{ username: string; theme?: string; stats?: unknown; goals?: unknown } | null>(null);
 const token = ref<string | null>(null);
@@ -184,8 +184,8 @@ async function fetchMeditations() {
     try {
         const res = await getMeditations();
         meditations.value = (res.meditations || []).map((m) => ({
-            Date: typeof m.Date === 'string' ? m.Date : m.Date instanceof Date ? m.Date.toISOString() : m.Date,
-            Username: m.Username,
+            date: typeof m.date === 'string' ? m.date : m.date instanceof Date ? m.date.toISOString() : m.date,
+            username: m.username,
             duration: m.duration,
             notes: m.notes,
         }));

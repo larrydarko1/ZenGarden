@@ -19,8 +19,8 @@ export const dataHandlers: Record<string, HandlerFn> = {
         const meditations = readCollection<RawDoc>('meditations');
         const newMeditation = {
             _id: generateId(),
-            Username: session.username,
-            Date: date,
+            username: session.username,
+            date,
             duration,
             notes,
             createdAt: new Date().toISOString(),
@@ -37,8 +37,8 @@ export const dataHandlers: Record<string, HandlerFn> = {
 
         const meditations = readCollection<RawDoc>('meditations');
         return meditations
-            .filter((m) => m['Username'] === session.username || m['username'] === session.username)
-            .sort((a, b) => new Date(b['Date'] as string).getTime() - new Date(a['Date'] as string).getTime());
+            .filter((m) => m['username'] === session.username)
+            .sort((a, b) => new Date(b['date'] as string).getTime() - new Date(a['date'] as string).getTime());
     },
 
     // ── Emotion logs ─────────────────────────────────────────────────────
@@ -219,21 +219,43 @@ export const dataHandlers: Record<string, HandlerFn> = {
         );
 
         if (logs.length === 0) {
-            return { totalDays: 0, averageCompletedCount: 0, averageProgressPercentage: 0 };
+            return {
+                totalDays: 0,
+                averageCompletion: 0,
+                perfectDays: 0,
+                mostFollowedPaths: [],
+                trends: [],
+            };
         }
 
-        const totals = logs.reduce(
-            (acc, l) => ({
-                completed: acc.completed + (l['completedCount'] as number),
-                progress: acc.progress + (l['progressPercentage'] as number),
-            }),
-            { completed: 0, progress: 0 } as { completed: number; progress: number },
-        );
+        const totalCompleted = logs.reduce((acc, l) => acc + (l['completedCount'] as number), 0);
+        const perfectDays = logs.filter((l) => (l['completedCount'] as number) === 8).length;
+
+        const pathCounts: Record<string, number> = {};
+        logs.forEach((l) => {
+            const paths = l['paths'] as Array<{ path: string; note?: string }> | undefined;
+            paths?.forEach((p) => {
+                if (p.note?.trim()) {
+                    pathCounts[p.path] = (pathCounts[p.path] || 0) + 1;
+                }
+            });
+        });
+
+        const mostFollowedPaths = Object.entries(pathCounts)
+            .map(([path, count]) => ({ path, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 8);
+
+        const trends = logs
+            .sort((a, b) => (a['date'] as string).localeCompare(b['date'] as string))
+            .map((l) => ({ date: l['date'] as string, completedCount: l['completedCount'] as number }));
 
         return {
             totalDays: logs.length,
-            averageCompletedCount: totals.completed / logs.length,
-            averageProgressPercentage: totals.progress / logs.length,
+            averageCompletion: totalCompleted / logs.length,
+            perfectDays,
+            mostFollowedPaths,
+            trends,
         };
     },
 };

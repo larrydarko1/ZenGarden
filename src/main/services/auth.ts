@@ -1,10 +1,19 @@
-// auth — IPC handlers for authentication and user settings.
-// Owns: register, login, logout, getCurrentUser, deleteAccount, updateUsername/Password/Theme/Language.
+// auth — IPC handlers for authentication, user settings, and recovery codes.
+// Owns: register, login, logout, getCurrentUser, deleteAccount, updateUsername/Password/Theme/Language, recovery codes.
 // Does NOT own: data persistence helpers (db.ts), crypto (crypto.ts), data handlers (data.ts).
 
 import type { CollectionName, HandlerFn, RawDoc, Session, StoredUser } from './db';
 import { readCollection, writeCollection, readSession, saveSession } from './db';
-import { generateId, generateToken, hashPassword, hashPasswordPbkdf2, verifyPassword } from './crypto';
+import {
+    generateId,
+    generateToken,
+    hashPassword,
+    hashPasswordPbkdf2,
+    verifyPassword,
+    generateRecoveryCodes,
+    hashRecoveryCode,
+    verifyRecoveryCode,
+} from './crypto';
 
 // ─── Session state ────────────────────────────────────────────────────────────
 
@@ -112,7 +121,7 @@ export const authHandlers: Record<string, HandlerFn> = {
             const items = readCollection<RawDoc>(col);
             writeCollection(
                 col,
-                items.filter((item) => item['username'] !== username && item['Username'] !== username),
+                items.filter((item) => item['username'] !== username),
             );
         });
 
@@ -146,7 +155,6 @@ export const authHandlers: Record<string, HandlerFn> = {
             const items = readCollection<RawDoc>(col);
             items.forEach((item) => {
                 if (item['username'] === oldUsername) item['username'] = trimmed;
-                if (item['Username'] === oldUsername) item['Username'] = trimmed;
             });
             writeCollection(col, items);
         });
@@ -203,5 +211,79 @@ export const authHandlers: Record<string, HandlerFn> = {
         user.language = language as string;
         writeCollection('users', users);
         return { message: 'Language updated successfully' };
+    },
+
+    // ── Recovery codes ────────────────────────────────────────────────────
+
+    'storage:getRecoveryStatus': async () => {
+        if (!currentSession) throw new Error('Not authenticated');
+
+        const users = readCollection<StoredUser>('users');
+        const user = users.find((u) => u.username === currentSession!.username);
+        if (!user) throw new Error('User not found');
+
+        const codes = user.recoveryCodes ?? [];
+        const usedCount = codes.filter((c) => c.used).length;
+
+        return {
+            hasRecoveryCodes: codes.length > 0,
+            totalCodes: codes.length,
+            usedCodes: usedCount,
+            remainingCodes: codes.length - usedCount,
+        };
+    },
+
+    'storage:generateRecoveryCodes': async (_event, password) => {
+        if (!currentSession) throw new Error('Not authenticated');
+
+        const users = readCollection<StoredUser>('users');
+        const user = users.find((u) => u.username === currentSession!.username);
+        if (!user) throw new Error('User not found');
+
+        if (!(await verifyPassword(password as string, user))) {
+            throw new Error('Invalid password');
+        }
+
+        // Generate plaintext codes and store only their hashes
+        const plaintextCodes = generateRecoveryCodes();
+        user.recoveryCodes = plaintextCodes.map((code) => {
+            const { hash, salt } = hashRecoveryCode(code);
+            return { hash, salt, used: false };
+        });
+
+        writeCollection('users', users);
+
+        // Return plaintext codes to display once — they are never stored
+        return { codes: plaintextCodes };
+    },
+
+    'storage:resetPasswordWithRecoveryCode': async (_event, username, code, newPassword) => {
+        const trimmed = (username as string).trim();
+        const pw = newPassword as string;
+        if (!pw || pw.length < 8) {
+            throw new Error('Password must be at least 8 characters');
+        }
+
+        const users = readCollection<StoredUser>('users');
+        const user = users.find((u) => u.username === trimmed);
+        if (!user) throw new Error('Invalid username or recovery code');
+
+        const codes = user.recoveryCodes ?? [];
+        const matchIdx = codes.findIndex((c) => !c.used && verifyRecoveryCode(code as string, c.hash, c.salt));
+
+        if (matchIdx === -1) throw new Error('Invalid username or recovery code');
+
+        // Mark the code as used so it cannot be replayed
+        codes[matchIdx].used = true;
+        user.recoveryCodes = codes;
+
+        // Update password to PBKDF2
+        const { hash, salt } = hashPasswordPbkdf2(pw);
+        user.passwordHash = hash;
+        user.salt = salt;
+        delete user.password;
+
+        writeCollection('users', users);
+        return { message: 'Password reset successfully' };
     },
 };

@@ -44,6 +44,8 @@ export interface StoredUser {
         currentStreak: number;
         longestStreak: number;
     };
+    // Each code is stored as its PBKDF2 hash so plaintext is never persisted
+    recoveryCodes?: Array<{ hash: string; salt: string; used: boolean }>;
     createdAt: string;
 }
 

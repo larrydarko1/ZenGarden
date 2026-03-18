@@ -8,8 +8,8 @@ import { useI18n } from 'vue-i18n';
 const { t, tm } = useI18n();
 
 type Meditation = {
-    Date: string | { $date: string };
-    Username?: string;
+    date: string | { $date: string };
+    username?: string;
     duration?: number;
     notes?: string;
 };
@@ -27,10 +27,10 @@ const selectedDayMeditations = computed(() => {
     const key = getLocalDateKey(selectedDay.value);
     return props.meditations.filter((m) => {
         let dateValue: string | Date | undefined = undefined;
-        if (m.Date && typeof m.Date === 'object' && '$date' in m.Date) {
-            dateValue = m.Date.$date;
-        } else if (m.Date) {
-            dateValue = m.Date;
+        if (m.date && typeof m.date === 'object' && '$date' in m.date) {
+            dateValue = m.date.$date;
+        } else if (m.date) {
+            dateValue = m.date;
         }
         if (dateValue) {
             const d = new Date(dateValue);
@@ -62,10 +62,10 @@ function getDaysInMonth(year: number, month: number) {
     const completedMap: Record<string, boolean> = {};
     for (const m of props.meditations) {
         let dateValue: string | Date | undefined = undefined;
-        if (m.Date && typeof m.Date === 'object' && '$date' in m.Date) {
-            dateValue = m.Date.$date;
-        } else if (m.Date) {
-            dateValue = m.Date;
+        if (m.date && typeof m.date === 'object' && '$date' in m.date) {
+            dateValue = m.date.$date;
+        } else if (m.date) {
+            dateValue = m.date;
         }
         if (dateValue) {
             const d = new Date(dateValue);

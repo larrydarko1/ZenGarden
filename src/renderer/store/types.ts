@@ -1,6 +1,8 @@
-// Storage Types and Interfaces
+// types — shared TypeScript interfaces for the storage layer.
+// Owns: all type/interface definitions consumed by adapters, composables, and components.
+// Does NOT own: implementation logic (adapters/), persistence (db.ts).
 
-// User Types
+// ─── User ─────────────────────────────────────────────────────────────────────
 export interface User {
     username: string;
     theme: 'light' | 'dark';
@@ -21,14 +23,14 @@ export interface AuthResponse {
 // Meditation Types
 export interface Meditation {
     _id?: string;
-    Username: string;
-    Date: Date | string;
+    username: string;
+    date: Date | string;
     duration: number;
     notes: string;
 }
 
 export interface MeditationInput {
-    Date: string;
+    date: string;
     duration: number;
     notes: string;
 }
@@ -112,6 +114,14 @@ export interface DateRangeQuery {
     limit?: number;
 }
 
+// Recovery Types
+export interface RecoveryStatus {
+    hasRecoveryCodes: boolean;
+    totalCodes: number;
+    usedCodes: number;
+    remainingCodes: number;
+}
+
 // Storage Adapter Interface
 export interface IStorageAdapter {
     // Mode detection
@@ -148,6 +158,11 @@ export interface IStorageAdapter {
     saveEightfoldPathLog(log: EightfoldPathInput): Promise<{ message: string; pathLog: EightfoldPathLog }>;
     getEightfoldPathLogs(query?: DateRangeQuery): Promise<{ pathLogs: EightfoldPathLog[] }>;
     getEightfoldPathAnalytics(days?: number): Promise<EightfoldPathAnalytics>;
+
+    // Recovery Codes
+    getRecoveryStatus(): Promise<RecoveryStatus>;
+    generateRecoveryCodes(password: string): Promise<{ codes: string[] }>;
+    resetPasswordWithRecoveryCode(username: string, code: string, newPassword: string): Promise<{ message: string }>;
 
     // Data Export/Import (for local mode backup)
     exportData?(): Promise<string>;

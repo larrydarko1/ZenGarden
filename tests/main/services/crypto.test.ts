@@ -1,7 +1,15 @@
 // @vitest-environment node
 
 import { describe, it, expect } from 'vitest';
-import { generateId, generateToken, hashPasswordPbkdf2, verifyPassword } from '../../../src/main/services/crypto';
+import {
+    generateId,
+    generateToken,
+    hashPasswordPbkdf2,
+    verifyPassword,
+    generateRecoveryCodes,
+    hashRecoveryCode,
+    verifyRecoveryCode,
+} from '../../../src/main/services/crypto';
 
 // ─── generateId ───────────────────────────────────────────────────────────────
 
@@ -105,5 +113,68 @@ describe('verifyPassword', () => {
             createdAt: '',
         };
         expect(await verifyPassword('anything', fakeUser)).toBe(false);
+    });
+});
+
+// ─── generateRecoveryCodes ────────────────────────────────────────────────────
+
+describe('generateRecoveryCodes', () => {
+    it('returns exactly 10 codes', () => {
+        const codes = generateRecoveryCodes();
+        expect(codes).toHaveLength(10);
+    });
+
+    it('returns 8-character uppercase alphanumeric codes', () => {
+        const codes = generateRecoveryCodes();
+        codes.forEach((code) => {
+            expect(code).toHaveLength(8);
+            expect(code).toMatch(/^[A-Z0-9_-]{8}$/);
+        });
+    });
+
+    it('returns unique codes within a set', () => {
+        const codes = generateRecoveryCodes();
+        expect(new Set(codes).size).toBe(10);
+    });
+
+    it('returns different sets on successive calls', () => {
+        const a = generateRecoveryCodes();
+        const b = generateRecoveryCodes();
+        expect(a).not.toEqual(b);
+    });
+});
+
+// ─── hashRecoveryCode / verifyRecoveryCode ────────────────────────────────────
+
+describe('hashRecoveryCode', () => {
+    it('returns an object with hash and salt', () => {
+        const result = hashRecoveryCode('ABCD1234');
+        expect(result).toHaveProperty('hash');
+        expect(result).toHaveProperty('salt');
+        expect(result.hash).toBeTruthy();
+        expect(result.salt).toBeTruthy();
+    });
+});
+
+describe('verifyRecoveryCode', () => {
+    it('returns true for a matching code', () => {
+        const code = 'TESTCODE';
+        const { hash, salt } = hashRecoveryCode(code);
+        expect(verifyRecoveryCode(code, hash, salt)).toBe(true);
+    });
+
+    it('is case-insensitive', () => {
+        const { hash, salt } = hashRecoveryCode('TESTCODE');
+        expect(verifyRecoveryCode('testcode', hash, salt)).toBe(true);
+    });
+
+    it('returns false for a wrong code', () => {
+        const { hash, salt } = hashRecoveryCode('TESTCODE');
+        expect(verifyRecoveryCode('WRONGONE', hash, salt)).toBe(false);
+    });
+
+    it('returns false with a mismatched salt', () => {
+        const { hash } = hashRecoveryCode('TESTCODE');
+        expect(verifyRecoveryCode('TESTCODE', hash, 'wrong-salt')).toBe(false);
     });
 });
