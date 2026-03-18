@@ -187,7 +187,7 @@
         "negativeTab": "Emoções Negativas",
         "analytics": "Análise",
         "saving": "Salvando...",
-        "saved": "Salvo ✓",
+        "saved": "Salvo",
         "loading": "Carregando...",
         "loadingAnalytics": "Carregando análise",
         "noDataYet": "Ainda não há dados",
@@ -485,7 +485,7 @@
         "progress": "Progresso",
         "loading": "Carregando",
         "saving": "Salvando...",
-        "saved": "Salvo ✓",
+        "saved": "Salvo",
         "notesPlaceholder": "Adicione notas sobre como você seguiu este caminho hoje...",
         "paths": {
             "rightView": {

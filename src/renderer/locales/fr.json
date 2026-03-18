@@ -187,7 +187,7 @@
         "negativeTab": "Émotions Négatives",
         "analytics": "Analyses",
         "saving": "Enregistrement...",
-        "saved": "Enregistré ✓",
+        "saved": "Enregistré",
         "loading": "Chargement...",
         "loadingAnalytics": "Chargement des analyses",
         "noDataYet": "Pas encore de données",
@@ -485,7 +485,7 @@
         "progress": "Progrès",
         "loading": "Chargement",
         "saving": "Enregistrement...",
-        "saved": "Enregistré ✓",
+        "saved": "Enregistré",
         "notesPlaceholder": "Ajoutez des notes sur la façon dont vous avez suivi ce chemin aujourd'hui...",
         "paths": {
             "rightView": {

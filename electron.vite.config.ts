@@ -27,6 +27,7 @@ export default defineConfig({
         plugins: [vue()],
         base: './',
         root: resolve(__dirname, 'src/renderer'),
+        publicDir: resolve(__dirname, 'public'),
         server: {
             port: 3000,
             strictPort: true,

@@ -9,6 +9,7 @@ export default defineConfig({
     // Relative paths required for Capacitor's WebView
     base: './',
     root: resolve(__dirname, 'src/renderer'),
+    publicDir: resolve(__dirname, 'public'),
     build: {
         // Capacitor reads from the webDir defined in capacitor.config.ts (dist/)
         outDir: resolve(__dirname, 'dist'),

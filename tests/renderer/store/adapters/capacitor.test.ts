@@ -96,7 +96,7 @@ describe('CapacitorStorageAdapter', () => {
 
         it('does not include password in response', async () => {
             const result = await adapter.register({ username: 'monk', password: 'password123' });
-            expect((result.user as Record<string, unknown>)['password']).toBeUndefined();
+            expect((result.user as unknown as Record<string, unknown>)['password']).toBeUndefined();
         });
     });
 

@@ -174,7 +174,7 @@
         "negativeTab": "消极情绪",
         "analytics": "分析",
         "saving": "保存中...",
-        "saved": "已保存 ✓",
+        "saved": "已保存",
         "loading": "加载中...",
         "loadingAnalytics": "加载分析",
         "noDataYet": "暂无数据",
@@ -472,7 +472,7 @@
         "progress": "进度",
         "loading": "加载中",
         "saving": "保存中...",
-        "saved": "已保存 ✓",
+        "saved": "已保存",
         "notesPlaceholder": "添加关于您今天如何遵循此道路的笔记...",
         "paths": {
             "rightView": {
