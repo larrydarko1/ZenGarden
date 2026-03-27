@@ -2,7 +2,7 @@
 // Owns: BrowserWindow setup, IPC registration, app lifecycle, session clearing.
 // Does NOT own: data persistence (src/main/services/storage.ts), bridge API (src/preload/index.ts).
 
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { BrowserWindow, ipcMain, screen, app } from 'electron';
 import path from 'path';
 import { setupStorageHandlers } from './services/storage';
 
@@ -11,6 +11,7 @@ import { setupStorageHandlers } from './services/storage';
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow(): void {
+    const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
     // After electron-vite bundles to out/main/index.js, __dirname resolves to out/main/
     const iconPath =
         process.platform === 'darwin'
@@ -18,10 +19,10 @@ function createWindow(): void {
             : path.join(__dirname, '../../build/icon.ico');
 
     mainWindow = new BrowserWindow({
-        width: 1200,
-        height: 800,
-        minWidth: 800,
-        minHeight: 600,
+        width: Math.round(sw * 0.9),
+        height: Math.round(sh * 0.9),
+        minWidth: Math.round(sw * 0.45),
+        minHeight: Math.round(sh * 0.5),
         icon: iconPath,
         webPreferences: {
             // out/main/__dirname → ../../ → root → out/preload/index.mjs
@@ -35,8 +36,7 @@ function createWindow(): void {
             partition: 'persist:zen-garden',
         },
         backgroundColor: '#1a1a1a',
-        titleBarStyle: 'hidden',
-        frame: false,
+        title: '',
         show: false,
     });
 
