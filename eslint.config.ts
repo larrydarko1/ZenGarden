@@ -4,7 +4,7 @@ import vue from 'eslint-plugin-vue';
 import prettier from 'eslint-config-prettier';
 import globals from 'globals';
 
-export default ts.config(
+export default [
     // ── Global ignores ───────────────────────────────────────────────────────
     { ignores: ['out/', 'dist/', 'dist-electron/', 'node_modules/', 'android/'] },
 
@@ -53,4 +53,4 @@ export default ts.config(
 
     // ── Prettier last — disables conflicting formatting rules ────────────────
     prettier,
-);
+];
