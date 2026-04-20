@@ -6,6 +6,10 @@ on:
     types: [completed]
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -16,14 +20,14 @@ jobs:
     if: >
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     outputs:
       version: ${{ steps.pkg.outputs.version }}
       tag: ${{ steps.pkg.outputs.tag }}
       exists: ${{ steps.check.outputs.exists }}
     steps:
-      # https://github.com/actions/checkout/releases/tag/v5.0.1
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
       - name: Read version from package.json
         id: pkg
@@ -49,26 +53,22 @@ jobs:
     needs: version
     if: needs.version.outputs.exists == 'false'
     runs-on: macos-latest
+    timeout-minutes: 30
     steps:
-      # https://github.com/actions/checkout/releases/tag/v5.0.1
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
-      # https://github.com/actions/setup-node/releases/tag/v5.0.0
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Build macOS DMG (unsigned)
+      - name: Build macOS DMG (ad-hoc signed)
         run: npm run build:mac
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CSC_IDENTITY_AUTO_DISCOVERY: false
 
-      # https://github.com/actions/upload-artifact/releases/tag/v4.6.2
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: mac-dmg
           path: dist-electron/*.dmg
@@ -78,25 +78,22 @@ jobs:
     needs: version
     if: needs.version.outputs.exists == 'false'
     runs-on: windows-latest
+    timeout-minutes: 30
     steps:
-      # https://github.com/actions/checkout/releases/tag/v5.0.1
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
-      # https://github.com/actions/setup-node/releases/tag/v5.0.0
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
       - name: Build Windows EXE (unsigned)
         run: npm run build:win
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # https://github.com/actions/upload-artifact/releases/tag/v4.6.2
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: win-exe
           path: dist-electron/*.exe
@@ -105,77 +102,34 @@ jobs:
   build-linux:
     needs: version
     if: needs.version.outputs.exists == 'false'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
-      # https://github.com/actions/checkout/releases/tag/v5.0.1
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
-      # https://github.com/actions/setup-node/releases/tag/v5.0.0
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
       - name: Build Linux AppImage
         run: npm run build:linux
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # https://github.com/actions/upload-artifact/releases/tag/v4.6.2
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: linux-appimage
           path: dist-electron/*.AppImage
 
-  # ── Android APK (unsigned) ────────────────────────────
-  build-android:
-    needs: version
-    if: needs.version.outputs.exists == 'false'
-    runs-on: ubuntu-latest
-    steps:
-      # https://github.com/actions/checkout/releases/tag/v5.0.1
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
-
-      # https://github.com/actions/setup-node/releases/tag/v5.0.0
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
-        with:
-          node-version: 22
-          cache: npm
-
-      # https://github.com/actions/setup-java/releases/tag/v4.8.0
-      - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
-        with:
-          distribution: temurin
-          java-version: 21
-
-      # https://github.com/android-actions/setup-android/releases/tag/v3.2.2
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
-
-      - run: npm ci
-
-      - name: Build web assets and sync
-        run: npm run build:mobile
-
-      - name: Build APK
-        working-directory: android
-        run: chmod +x gradlew && ./gradlew assembleDebug
-
-      # https://github.com/actions/upload-artifact/releases/tag/v4.6.2
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: android-apk
-          path: android/app/build/outputs/apk/debug/*.apk
-
   # ── Create tag & GitHub Release ────────────────────────
   release:
-    needs: [version, build-mac, build-win, build-linux, build-android]
-    runs-on: ubuntu-latest
+    needs: [version, build-mac, build-win, build-linux]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      # https://github.com/actions/checkout/releases/tag/v5.0.1
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
       - name: Create tag
         run: |
@@ -184,30 +138,26 @@ jobs:
           git tag -a "${{ needs.version.outputs.tag }}" -m "Release ${{ needs.version.outputs.tag }}"
           git push origin "${{ needs.version.outputs.tag }}"
 
-      # https://github.com/actions/download-artifact/releases/tag/v4.3.0
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           path: artifacts
           merge-multiple: true
 
-      # https://github.com/softprops/action-gh-release/releases/tag/v2.6.1
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe
+        uses: softprops/action-gh-release@b25b93d384199fc0fc8c2e126b2d937a0cbeb2ae # v2
         with:
           tag_name: ${{ needs.version.outputs.tag }}
-          name: ZenGarden ${{ needs.version.outputs.tag }} (unsigned)
+          name: ZenGarden ${{ needs.version.outputs.tag }}
           draft: false
           prerelease: false
           generate_release_notes: true
           body: |
-            ## ⚠️ Unsigned builds
-            These builds are **not code-signed**. Your OS may show a warning when installing.
-            - **macOS**: Right-click → Open, then click Open in the dialog
+            ## Installation notes
+            These builds are not signed with an official certificate, so your OS may show a security warning when installing.
+            - **macOS**: Right-click the app → Open, then click Open in the dialog. If macOS says the app is "damaged", run: `xattr -cr /Applications/ZenGarden.app`
             - **Windows**: Click "More info" → "Run anyway"
             - **Linux**: `chmod +x` the AppImage before running
-            - **Android**: Enable "Install from unknown sources" in Settings
           files: |
             artifacts/**/*.dmg
             artifacts/**/*.exe
             artifacts/**/*.AppImage
-            artifacts/**/*.apk
