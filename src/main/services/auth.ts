@@ -28,7 +28,7 @@ export function getCurrentSession(): Session | null {
 export const authHandlers: Record<string, HandlerFn> = {
     // ── Auth ─────────────────────────────────────────────────────────────
 
-    'storage:register': async (_event, username, password, theme = 'dark', language = 'en') => {
+    ['storage:register']: async (_event, username, password, theme = 'dark', language = 'en') => {
         const trimmed = (username as string).trim();
         if (!/^[a-zA-Z0-9]+$/.test(trimmed) || trimmed.length < 3 || trimmed.length > 32) {
             throw new Error('Username must be 3-32 alphanumeric characters');
@@ -66,7 +66,7 @@ export const authHandlers: Record<string, HandlerFn> = {
         return { message: 'Registration successful', user: { username: trimmed, theme, language }, token };
     },
 
-    'storage:login': async (_event, username, password) => {
+    ['storage:login']: async (_event, username, password) => {
         const users = readCollection<StoredUser>('users');
         const user = users.find((u) => u.username === (username as string).trim());
 
@@ -85,7 +85,7 @@ export const authHandlers: Record<string, HandlerFn> = {
         };
     },
 
-    'storage:getCurrentUser': async () => {
+    ['storage:getCurrentUser']: async () => {
         if (!currentSession) return null;
 
         const users = readCollection<StoredUser>('users');
@@ -95,13 +95,13 @@ export const authHandlers: Record<string, HandlerFn> = {
         return { username: user.username, theme: user.theme, language: user.language };
     },
 
-    'storage:logout': async () => {
+    ['storage:logout']: async () => {
         currentSession = null;
         saveSession(null);
         return { message: 'Logged out successfully' };
     },
 
-    'storage:deleteAccount': async (_event, password) => {
+    ['storage:deleteAccount']: async (_event, password) => {
         if (!currentSession) throw new Error('Not authenticated');
 
         const users = readCollection<StoredUser>('users');
@@ -132,7 +132,7 @@ export const authHandlers: Record<string, HandlerFn> = {
 
     // ── Settings ─────────────────────────────────────────────────────────
 
-    'storage:updateUsername': async (_event, newUsername, password) => {
+    ['storage:updateUsername']: async (_event, newUsername, password) => {
         if (!currentSession) throw new Error('Not authenticated');
 
         const trimmed = (newUsername as string).trim();
@@ -164,7 +164,7 @@ export const authHandlers: Record<string, HandlerFn> = {
         return { message: 'Username updated successfully' };
     },
 
-    'storage:updatePassword': async (_event, currentPassword, newPassword) => {
+    ['storage:updatePassword']: async (_event, currentPassword, newPassword) => {
         if (!currentSession) throw new Error('Not authenticated');
 
         const pw = newPassword as string;
@@ -189,7 +189,7 @@ export const authHandlers: Record<string, HandlerFn> = {
         return { message: 'Password updated successfully' };
     },
 
-    'storage:updateTheme': async (_event, theme) => {
+    ['storage:updateTheme']: async (_event, theme) => {
         if (!currentSession) throw new Error('Not authenticated');
 
         const users = readCollection<StoredUser>('users');
@@ -201,7 +201,7 @@ export const authHandlers: Record<string, HandlerFn> = {
         return { message: 'Theme updated successfully' };
     },
 
-    'storage:updateLanguage': async (_event, language) => {
+    ['storage:updateLanguage']: async (_event, language) => {
         if (!currentSession) throw new Error('Not authenticated');
 
         const users = readCollection<StoredUser>('users');
@@ -215,7 +215,7 @@ export const authHandlers: Record<string, HandlerFn> = {
 
     // ── Recovery codes ────────────────────────────────────────────────────
 
-    'storage:getRecoveryStatus': async () => {
+    ['storage:getRecoveryStatus']: async () => {
         if (!currentSession) throw new Error('Not authenticated');
 
         const users = readCollection<StoredUser>('users');
@@ -233,7 +233,7 @@ export const authHandlers: Record<string, HandlerFn> = {
         };
     },
 
-    'storage:generateRecoveryCodes': async (_event, password) => {
+    ['storage:generateRecoveryCodes']: async (_event, password) => {
         if (!currentSession) throw new Error('Not authenticated');
 
         const users = readCollection<StoredUser>('users');
@@ -257,7 +257,7 @@ export const authHandlers: Record<string, HandlerFn> = {
         return { codes: plaintextCodes };
     },
 
-    'storage:resetPasswordWithRecoveryCode': async (_event, username, code, newPassword) => {
+    ['storage:resetPasswordWithRecoveryCode']: async (_event, username, code, newPassword) => {
         const trimmed = (username as string).trim();
         const pw = newPassword as string;
         if (!pw || pw.length < 8) {

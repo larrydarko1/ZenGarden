@@ -12,7 +12,7 @@ import { getCurrentSession } from './auth';
 export const dataHandlers: Record<string, HandlerFn> = {
     // ── Meditations ──────────────────────────────────────────────────────
 
-    'storage:createMeditation': async (_event, date, duration, notes) => {
+    ['storage:createMeditation']: async (_event, date, duration, notes) => {
         const session = getCurrentSession();
         if (!session) throw new Error('Not authenticated');
 
@@ -31,7 +31,7 @@ export const dataHandlers: Record<string, HandlerFn> = {
         return newMeditation;
     },
 
-    'storage:getMeditations': async () => {
+    ['storage:getMeditations']: async () => {
         const session = getCurrentSession();
         if (!session) throw new Error('Not authenticated');
 
@@ -43,7 +43,7 @@ export const dataHandlers: Record<string, HandlerFn> = {
 
     // ── Emotion logs ─────────────────────────────────────────────────────
 
-    'storage:saveEmotionLog': async (_event, date, emotions, note) => {
+    ['storage:saveEmotionLog']: async (_event, date, emotions, note) => {
         const session = getCurrentSession();
         if (!session) throw new Error('Not authenticated');
 
@@ -78,7 +78,7 @@ export const dataHandlers: Record<string, HandlerFn> = {
         return emotionLog;
     },
 
-    'storage:getEmotionLogs': async (_event, query = {}) => {
+    ['storage:getEmotionLogs']: async (_event, query = {}) => {
         const session = getCurrentSession();
         if (!session) throw new Error('Not authenticated');
 
@@ -93,7 +93,7 @@ export const dataHandlers: Record<string, HandlerFn> = {
         return logs;
     },
 
-    'storage:getEmotionAnalytics': async (_event, days = 30) => {
+    ['storage:getEmotionAnalytics']: async (_event, days = 30) => {
         const session = getCurrentSession();
         if (!session) throw new Error('Not authenticated');
 
@@ -160,7 +160,7 @@ export const dataHandlers: Record<string, HandlerFn> = {
 
     // ── Eightfold path ───────────────────────────────────────────────────
 
-    'storage:saveEightfoldPathLog': async (_event, date, paths) => {
+    ['storage:saveEightfoldPathLog']: async (_event, date, paths) => {
         const session = getCurrentSession();
         if (!session) throw new Error('Not authenticated');
 
@@ -191,7 +191,7 @@ export const dataHandlers: Record<string, HandlerFn> = {
         return pathLog;
     },
 
-    'storage:getEightfoldPathLogs': async (_event, query = {}) => {
+    ['storage:getEightfoldPathLogs']: async (_event, query = {}) => {
         const session = getCurrentSession();
         if (!session) throw new Error('Not authenticated');
 
@@ -206,7 +206,7 @@ export const dataHandlers: Record<string, HandlerFn> = {
         return logs;
     },
 
-    'storage:getEightfoldPathAnalytics': async (_event, days = 30) => {
+    ['storage:getEightfoldPathAnalytics']: async (_event, days = 30) => {
         const session = getCurrentSession();
         if (!session) throw new Error('Not authenticated');
 
