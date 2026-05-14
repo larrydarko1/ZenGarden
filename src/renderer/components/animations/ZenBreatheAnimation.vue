@@ -1,4 +1,3 @@
-// ZenBreatheAnimation — SVG animation of 25 falling petals that sway, rotate, and fade.
 <script setup lang="ts">
 // Pure animation component - falling petals
 </script>

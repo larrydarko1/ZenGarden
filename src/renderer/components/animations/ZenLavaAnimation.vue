@@ -1,4 +1,3 @@
-// ZenLavaAnimation — SVG lava-lamp effect with blurred elliptical blobs that rise and morph.
 <script setup lang="ts">
 // Pure animation component - lava lamp effect
 </script>

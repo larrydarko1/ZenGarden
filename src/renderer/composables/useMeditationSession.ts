@@ -1,6 +1,8 @@
-// useMeditationSession — timer, bell, and breathing exercise state and lifecycle.
-// Owns: meditation countdown, bell scheduling, breathing cycle, audio playback, session result.
-// Does NOT own: animation selection (Home.vue), session notes saving (Home.vue), auth (Home.vue).
+/**
+ * useMeditationSession — timer, bell, and breathing exercise state and lifecycle.
+ * Owns: meditation countdown, bell scheduling, breathing cycle, audio playback, session result.
+ * Does NOT own: animation selection (Home.vue), session notes saving (Home.vue), auth (Home.vue).
+ */
 
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';

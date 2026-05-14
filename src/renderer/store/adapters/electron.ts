@@ -1,6 +1,8 @@
-// electron — Electron storage adapter bridging Vue to Node.js JSON file backend via IPC.
-// Owns: ElectronAPI interface, IStorageAdapter implementation for desktop.
-// Does NOT own: IPC handlers (main/services/), type definitions (types.ts).
+/**
+ * electron — Electron storage adapter bridging Vue to Node.js JSON file backend via IPC.
+ * Owns: ElectronAPI interface, IStorageAdapter implementation for desktop.
+ * Does NOT own: IPC handlers (main/services/), type definitions (types.ts).
+ */
 
 import type {
     IStorageAdapter,

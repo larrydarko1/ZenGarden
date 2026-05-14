@@ -1,6 +1,8 @@
-// useEightfoldPath — Noble Eightfold Path tracking state and persistence for a given day.
-// Owns: path key list, translated path objects, follow/unfollow, note debounce, persistence.
-// Does NOT own: date navigation (EmotionTracker.vue), save indicator display (EmotionTracker.vue).
+/**
+ * useEightfoldPath — Noble Eightfold Path tracking state and persistence for a given day.
+ * Owns: path key list, translated path objects, follow/unfollow, note debounce, persistence.
+ * Does NOT own: date navigation (EmotionTracker.vue), save indicator display (EmotionTracker.vue).
+ */
 
 import { ref, computed, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';

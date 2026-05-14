@@ -1,5 +1,7 @@
-// Capacitor Storage Adapter - Mobile JSON file storage (MongoDB-compatible)
-// Owns: class facade implementing IStorageAdapter. Delegates to capacitor/ sub-modules.
+/**
+ * Capacitor Storage Adapter - Mobile JSON file storage (MongoDB-compatible)
+ * Owns: class facade implementing IStorageAdapter. Delegates to capacitor/ sub-modules.
+ */
 
 import { Preferences } from '@capacitor/preferences';
 import {

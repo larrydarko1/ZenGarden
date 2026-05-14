@@ -1,5 +1,7 @@
-// capacitor/db — JSON file persistence primitives for Capacitor.
-// Owns: file I/O, session management, ID generation, storage initialization.
+/**
+ * Capacitor DB - JSON file persistence primitives for Capacitor.
+ * Owns: file I/O, session management, ID generation, storage initialization.
+ */
 
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 

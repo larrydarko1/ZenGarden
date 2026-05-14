@@ -1,6 +1,3 @@
-// MonkAuth — login, registration, and password recovery forms with auto-session restore. // Owns: form state, input
-validation, loading/error feedback, auto-login on mount. // Does NOT own: auth operations (store), post-auth routing
-(emits auth event).
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';

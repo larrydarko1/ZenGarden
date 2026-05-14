@@ -1,6 +1,8 @@
-// types — shared TypeScript interfaces for the storage layer.
-// Owns: all type/interface definitions consumed by adapters, composables, and components.
-// Does NOT own: implementation logic (adapters/), persistence (db.ts).
+/**
+ * types — shared TypeScript interfaces for the storage layer.
+ * Owns: all type/interface definitions consumed by adapters, composables, and components.
+ * Does NOT own: implementation logic (adapters/), persistence (db.ts).
+ */
 
 // ─── User ─────────────────────────────────────────────────────────────────────
 export interface User {

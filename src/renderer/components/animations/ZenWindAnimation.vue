@@ -1,4 +1,3 @@
-// ZenWindAnimation — SVG animation rendering horizontal wind streaks sweeping left to right.
 <script setup lang="ts">
 // Pure animation component
 </script>

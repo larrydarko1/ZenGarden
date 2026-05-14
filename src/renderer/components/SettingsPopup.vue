@@ -1,6 +1,3 @@
-// SettingsPopup — inline settings panel for theme, language, and account management. // Owns: theme/language selection
-UI, delegating account management to AccountSettings. // Does NOT own: persisting theme/language (emits to parent),
-account CRUD (AccountSettings).
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';

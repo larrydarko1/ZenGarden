@@ -1,6 +1,8 @@
-// platform — runtime platform detection (Electron vs Capacitor vs web).
-// Owns: isElectron(), isCapacitor(), isMobile(), isWeb() checks.
-// Does NOT own: adapter selection (store/adapters/factory.ts).
+/**
+ * platform — runtime platform detection (Electron vs Capacitor vs web).
+ * Owns: isElectron(), isCapacitor(), isMobile(), isWeb() checks.
+ * Does NOT own: adapter selection (store/adapters/factory.ts).
+ */
 
 interface ElectronWindow {
     electronAPI?: {

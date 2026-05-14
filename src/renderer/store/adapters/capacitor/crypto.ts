@@ -1,11 +1,12 @@
-// capacitor/crypto — Password hashing and verification via Web Crypto API.
-// Owns: PBKDF2 hashing, legacy SHA-256 verification, hash upgrade logic.
+/**
+ * Capacitor Crypto - Password hashing and verification via Web Crypto API.
+ * Owns: PBKDF2 hashing, legacy SHA-256 verification, hash upgrade logic.
+ */
 
 import { writeCollection } from './db';
+import type { User } from '../../types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-import type { User } from '../../types';
 
 export interface UserWithPassword extends User {
     _id: string;
@@ -16,14 +17,6 @@ export interface UserWithPassword extends User {
 
 const PBKDF2_ITERATIONS = 100_000;
 const PBKDF2_PREFIX = 'pbkdf2:';
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function hexEncode(buffer: ArrayBuffer): string {
-    return Array.from(new Uint8Array(buffer))
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
-}
 
 // ─── Password hashing ────────────────────────────────────────────────────────
 
@@ -73,4 +66,12 @@ export async function upgradeHashIfNeeded(
         users[userIndex].password = await hashPassword(password);
         await writeCollection(usersFilename, users);
     }
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function hexEncode(buffer: ArrayBuffer): string {
+    return Array.from(new Uint8Array(buffer))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
 }

@@ -1,6 +1,8 @@
-// Preload script — bridge between the Vue renderer and the Electron main process.
-// Exposes a narrow, typed API via contextBridge. Nothing else from Node or Electron
-// leaks into the renderer world.
+/**
+ * Preload script — bridge between the Vue renderer and the Electron main process.
+ * Exposes a narrow, typed API via contextBridge. Nothing else from Node or Electron
+ * leaks into the renderer world.
+ */
 
 import { contextBridge, ipcRenderer } from 'electron';
 

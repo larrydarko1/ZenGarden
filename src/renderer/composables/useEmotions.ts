@@ -1,6 +1,8 @@
-// useEmotions — emotion selection state, save/load for a given date, and analytics.
-// Owns: emotion key lists, computed translated lists, toggle, persistence calls, analytics load.
-// Does NOT own: date navigation (EmotionTracker.vue), rendering (EmotionTracker.vue).
+/**
+ * useEmotions — emotion selection state, save/load for a given date, and analytics.
+ * Owns: emotion key lists, computed translated lists, toggle, persistence calls, analytics load.
+ * Does NOT own: date navigation (EmotionTracker.vue), rendering (EmotionTracker.vue).
+ */
 
 import { ref, computed, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';

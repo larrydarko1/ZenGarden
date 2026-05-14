@@ -1,6 +1,3 @@
-// BottomNav — bottom tab bar for main app navigation. // Owns: nav buttons, SVG icons, active state highlighting. //
-Does NOT own: panel rendering (Home.vue), auth (MonkAuth.vue).
-
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 

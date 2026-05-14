@@ -1,6 +1,8 @@
-// factory — auto-detects Electron (desktop) or Capacitor (mobile) and caches the adapter.
-// Owns: adapter instantiation, availability probing, singleton cache.
-// Does NOT own: adapter implementations (electron.ts, capacitor.ts), types (types.ts).
+/**
+ * factory — auto-detects Electron (desktop) or Capacitor (mobile) and caches the adapter.
+ * Owns: adapter instantiation, availability probing, singleton cache.
+ * Does NOT own: adapter implementations (electron.ts, capacitor.ts), types (types.ts).
+ */
 
 import type { IStorageAdapter } from '../types';
 import { ElectronStorageAdapter } from './electron';

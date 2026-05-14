@@ -1,5 +1,3 @@
-// DailyNotes — textarea for daily freeform notes with 2000-char limit indicator. // Owns: note textarea rendering,
-character count display. // Does NOT own: note persistence or date selection (receives props, emits events).
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 

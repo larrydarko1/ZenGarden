@@ -1,6 +1,3 @@
-// EmotionAnalytics — dashboard with summary cards, ranked emotion lists, and 90-day P/N trend chart. // Owns:
-visualization layout (cards, bar charts, trend bars), empty-state display. // Does NOT own: analytics data computation
-(receives all data as props).
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 

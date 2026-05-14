@@ -1,6 +1,3 @@
-// EmotionTracker — daily emotion-tracking orchestrator with tabs for emotions, analytics, path, notes. // Owns: date
-navigation, tab switching, wiring composables to child components. // Does NOT own: emotion data logic (useEmotions),
-path logic (useEightfoldPath), analytics rendering.
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -26,22 +23,6 @@ const isToday = computed(() => {
     selected.setHours(0, 0, 0, 0);
     return selected.getTime() >= todayDate.getTime();
 });
-
-function formatDate(date: Date | string) {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-function changeDate(delta: number) {
-    const newDate = new Date(selectedDate.value);
-    newDate.setDate(newDate.getDate() + delta);
-    newDate.setHours(0, 0, 0, 0);
-    const todayDate = new Date();
-    todayDate.setHours(0, 0, 0, 0);
-    if (newDate.getTime() <= todayDate.getTime()) {
-        selectedDate.value = newDate;
-    }
-}
 
 // Composables
 const {
@@ -78,6 +59,22 @@ const {
     debouncedSavePath,
     loadPathData,
 } = useEightfoldPath(selectedDate, saveStatus);
+
+function formatDate(date: Date | string) {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function changeDate(delta: number) {
+    const newDate = new Date(selectedDate.value);
+    newDate.setDate(newDate.getDate() + delta);
+    newDate.setHours(0, 0, 0, 0);
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+    if (newDate.getTime() <= todayDate.getTime()) {
+        selectedDate.value = newDate;
+    }
+}
 
 // Orchestration
 watch(selectedDate, () => {

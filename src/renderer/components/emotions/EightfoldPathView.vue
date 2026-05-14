@@ -1,6 +1,3 @@
-// EightfoldPathView — checklist UI for the Noble Eightfold Path with progress stats and per-path notes. // Owns:
-checkbox + notes UI for each path, progress bar display. // Does NOT own: path data or toggle/save logic (receives
-props, emits events).
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 

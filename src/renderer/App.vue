@@ -75,5 +75,3 @@ async function setLanguage(language: string) {
         />
     </div>
 </template>
-
-<style></style>

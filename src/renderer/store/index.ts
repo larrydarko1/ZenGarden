@@ -1,6 +1,8 @@
-// store/index — convenience functions delegating to the active storage adapter.
-// Owns: re-exports, thin async wrappers for each storage operation.
-// Does NOT own: adapter selection (factory.ts), type definitions (types.ts).
+/**
+ * store/index — convenience functions delegating to the active storage adapter.
+ * Owns: re-exports, thin async wrappers for each storage operation.
+ * Does NOT own: adapter selection (factory.ts), type definitions (types.ts).
+ */
 
 import { StorageFactory } from './adapters/factory';
 

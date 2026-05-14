@@ -1,6 +1,3 @@
-// Home — main dashboard coordinating meditation sessions, panel navigation, and auth gating. // Owns: panel toggle
-state, meditation lifecycle, user login/logout, zen phrases, bottom nav. // Does NOT own: auth UI (MonkAuth), settings
-(SettingsPopup), calendar, emotions, animations.
 <script setup lang="ts">
 import MeditationCalendar from './MeditationCalendar.vue';
 import SessionNotes from './SessionNotes.vue';
@@ -61,11 +58,6 @@ const {
     formatTime,
 } = useMeditationSession();
 
-// Wrap to pass ANIMATIONS.length without exposing it to the template
-function startMeditation() {
-    startMeditationSession(ANIMATIONS.length);
-}
-
 const emit = defineEmits([
     'meditation-active',
     'theme-changed',
@@ -80,6 +72,11 @@ const desktopApp = ref(false);
 watch(meditationActive, (val) => {
     emit('meditation-active', val);
 });
+
+// Wrap to pass ANIMATIONS.length without exposing it to the template
+function startMeditation() {
+    startMeditationSession(ANIMATIONS.length);
+}
 
 // ── Phrases ───────────────────────────────────────────────────────────────────
 const phrases = computed(() => tm('phrases') as string[]);

@@ -1,7 +1,3 @@
-// MeditationOverlay — full-screen active meditation view with timer, bell, and breathing controls. // Owns: meditation
-animation display, bell toolbar, breathing sphere, timer, stop button. // Does NOT own: meditation session lifecycle
-(useMeditationSession), animation components.
-
 <script setup lang="ts">
 import { ref, type Component } from 'vue';
 import { useI18n } from 'vue-i18n';
