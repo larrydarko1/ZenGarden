@@ -1,6 +1,8 @@
-// Electron Main Process — ZenGarden
-// Owns: BrowserWindow setup, IPC registration, app lifecycle, session clearing.
-// Does NOT own: data persistence (src/main/services/storage.ts), bridge API (src/preload/index.ts).
+/**
+ * Electron Main Process — ZenGarden
+ * Owns: BrowserWindow setup, IPC registration, app lifecycle, session clearing.
+ * Does NOT own: data persistence (src/main/services/storage.ts), bridge API (src/preload/index.ts).
+ */
 
 import { BrowserWindow, ipcMain, screen, app } from 'electron';
 import path from 'path';

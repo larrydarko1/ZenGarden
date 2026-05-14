@@ -1,6 +1,8 @@
-// crypto — password hashing, verification, and token/ID generation.
-// Owns: Argon2 / PBKDF2 hashing, password verification, token generation, ID generation.
-// Does NOT own: user storage (db.ts), IPC handlers (auth.ts).
+/**
+ * crypto — password hashing, verification, and token/ID generation.
+ * Owns: Argon2 / PBKDF2 hashing, password verification, token generation, ID generation.
+ * Does NOT own: user storage (db.ts), IPC handlers (auth.ts).
+ */
 
 import crypto from 'crypto';
 import type { StoredUser } from './db';

@@ -1,6 +1,8 @@
-// auth — IPC handlers for authentication, user settings, and recovery codes.
-// Owns: register, login, logout, getCurrentUser, deleteAccount, updateUsername/Password/Theme/Language, recovery codes.
-// Does NOT own: data persistence helpers (db.ts), crypto (crypto.ts), data handlers (data.ts).
+/**
+ * auth — IPC handlers for authentication, user settings, and recovery codes.
+ * Owns: register, login, logout, getCurrentUser, deleteAccount, updateUsername/Password/Theme/Language, recovery codes.
+ * Does NOT own: data persistence helpers (db.ts), crypto (crypto.ts), data handlers (data.ts).
+ */
 
 import type { CollectionName, HandlerFn, RawDoc, Session, StoredUser } from './db';
 import { readCollection, writeCollection, readSession, saveSession } from './db';

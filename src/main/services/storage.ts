@@ -1,6 +1,8 @@
-// storage — IPC handler registration entry point.
-// Owns: merging handler maps and registering them with ipcMain.
-// Does NOT own: persistence (db.ts), crypto (crypto.ts), handler logic (auth.ts, data.ts).
+/**
+ * storage — IPC handler registration entry point.
+ * Owns: merging handler maps and registering them with ipcMain.
+ * Does NOT own: persistence (db.ts), crypto (crypto.ts), handler logic (auth.ts, data.ts).
+ */
 
 import type { IpcMain } from 'electron';
 import { authHandlers } from './auth';

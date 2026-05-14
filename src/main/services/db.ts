@@ -1,29 +1,12 @@
-// db — JSON file persistence primitives for the Electron main process.
-// Owns: file paths, collection read/write, session read/write, document normalisation.
-// Does NOT own: IPC registration (storage.ts), crypto (crypto.ts).
+/**
+ * db — JSON file persistence primitives for the Electron main process.
+ * Owns: file paths, collection read/write, session read/write, document normalisation.
+ * Does NOT own: IPC registration (storage.ts), crypto (crypto.ts).
+ */
 
 import { app } from 'electron';
 import path from 'path';
 import fs from 'fs';
-
-// ─── Paths ───────────────────────────────────────────────────────────────────
-
-const userDataPath = app.getPath('userData');
-const dataPath = path.join(userDataPath, 'data');
-
-if (!fs.existsSync(dataPath)) {
-    fs.mkdirSync(dataPath, { recursive: true });
-}
-
-// Clean up old SQLite files left from a previous migration
-const legacyFiles = [
-    path.join(userDataPath, 'zengarden.db'),
-    path.join(userDataPath, 'zengarden.db-shm'),
-    path.join(userDataPath, 'zengarden.db-wal'),
-];
-legacyFiles.forEach((f) => {
-    if (fs.existsSync(f)) fs.unlinkSync(f);
-});
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -69,6 +52,25 @@ export interface RawDoc {
 }
 
 export type HandlerFn = (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => Promise<unknown>;
+
+// ─── Paths ───────────────────────────────────────────────────────────────────
+
+const userDataPath = app.getPath('userData');
+const dataPath = path.join(userDataPath, 'data');
+
+if (!fs.existsSync(dataPath)) {
+    fs.mkdirSync(dataPath, { recursive: true });
+}
+
+// Clean up old SQLite files left from a previous migration
+const legacyFiles = [
+    path.join(userDataPath, 'zengarden.db'),
+    path.join(userDataPath, 'zengarden.db-shm'),
+    path.join(userDataPath, 'zengarden.db-wal'),
+];
+legacyFiles.forEach((f) => {
+    if (fs.existsSync(f)) fs.unlinkSync(f);
+});
 
 // ─── File registry ────────────────────────────────────────────────────────────
 

@@ -1,6 +1,8 @@
-// data — IPC handlers for meditations, emotion logs, and eightfold path.
-// Owns: CRUD + analytics for meditation/emotion/eightfold data.
-// Does NOT own: auth/session (auth.ts), persistence primitives (db.ts).
+/**
+ * data — IPC handlers for meditations, emotion logs, and eightfold path.
+ * Owns: CRUD + analytics for meditation/emotion/eightfold data.
+ * Does NOT own: auth/session (auth.ts), persistence primitives (db.ts).
+ */
 
 import type { HandlerFn, RawDoc } from './db';
 import { readCollection, writeCollection } from './db';
