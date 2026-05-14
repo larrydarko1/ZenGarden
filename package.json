@@ -1,9 +1,19 @@
 {
     "name": "zen-garden",
-    "private": true,
     "version": "1.1.9",
+    "description": "A local-only meditation and mindfulness app built with Vue 3. Runs completely offline with no server required.",
+    "homepage": "https://github.com/larrydarko1/ZenGarden#readme",
+    "bugs": {
+        "url": "https://github.com/larrydarko1/ZenGarden/issues"
+    },
+    "license": "MIT",
+    "author": "Lorenzo Mazzola",
     "type": "module",
     "main": "out/main/index.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/larrydarko1/ZenGarden.git"
+    },
     "scripts": {
         "dev": "electron-vite dev",
         "build": "vue-tsc -b && electron-vite build",
@@ -23,15 +33,6 @@
         "test:watch": "vitest",
         "prepare": "husky",
         "ci:check": "npm audit --audit-level=high --omit=dev && npm run lint && npm run format:check && npm test && npm run build"
-    },
-    "lint-staged": {
-        "*.{ts,vue}": [
-            "eslint --fix",
-            "prettier --write"
-        ],
-        "*.{scss,json,md}": [
-            "prettier --write"
-        ]
     },
     "dependencies": {
         "@capacitor/android": "^8.0.1",
@@ -69,13 +70,12 @@
         "vitest": "^3.2.4",
         "vue-tsc": "^2.2.10"
     },
-    "description": "A local-only meditation and mindfulness app built with Vue 3. Runs completely offline with no server required.",
-    "author": "Lorenzo Mazzola",
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/larrydarko1/ZenGarden.git"
+    "engines": {
+        "node": ">=20",
+        "npm": ">=10"
     },
+    "private": true,
+    "packageManager": "npm@11.11.0",
     "build": {
         "appId": "com.zengarden.app",
         "productName": "ZenGarden",
@@ -118,5 +118,14 @@
             ],
             "category": "Utility"
         }
+    },
+    "lint-staged": {
+        "*.{ts,vue}": [
+            "eslint --fix",
+            "prettier --write"
+        ],
+        "*.{scss,json,md}": [
+            "prettier --write"
+        ]
     }
 }
