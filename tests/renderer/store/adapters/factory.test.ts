@@ -4,20 +4,31 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
-const mockElectronAvailable = vi.fn<() => Promise<boolean>>();
-const mockCapacitorAvailable = vi.fn<() => Promise<boolean>>();
+const { mockElectronAvailable, mockCapacitorAvailable } = vi.hoisted(() => {
+    const mockElectronAvailable = vi.fn<() => Promise<boolean>>();
+    const mockCapacitorAvailable = vi.fn<() => Promise<boolean>>();
+    return { mockElectronAvailable, mockCapacitorAvailable };
+});
 
-vi.mock('../../../../src/renderer/store/adapters/electron', () => ({
-    ElectronStorageAdapter: vi.fn().mockImplementation(() => ({
-        isAvailable: mockElectronAvailable,
-    })),
-}));
+vi.mock('../../../../src/renderer/store/adapters/electron', () => {
+    return {
+        ElectronStorageAdapter: class {
+            async isAvailable() {
+                return mockElectronAvailable();
+            }
+        },
+    };
+});
 
-vi.mock('../../../../src/renderer/store/adapters/capacitor', () => ({
-    CapacitorStorageAdapter: vi.fn().mockImplementation(() => ({
-        isAvailable: mockCapacitorAvailable,
-    })),
-}));
+vi.mock('../../../../src/renderer/store/adapters/capacitor', () => {
+    return {
+        CapacitorStorageAdapter: class {
+            async isAvailable() {
+                return mockCapacitorAvailable();
+            }
+        },
+    };
+});
 
 import { StorageFactory } from '../../../../src/renderer/store/adapters/factory';
 
@@ -34,14 +45,14 @@ describe('StorageFactory', () => {
             mockElectronAvailable.mockResolvedValue(true);
             const adapter = await StorageFactory.getAdapter();
             expect(adapter).toBeDefined();
-            expect(adapter.isAvailable).toBe(mockElectronAvailable);
+            expect(await adapter.isAvailable()).toBe(true);
         });
 
         it('falls back to CapacitorStorageAdapter when Electron is unavailable', async () => {
             mockElectronAvailable.mockResolvedValue(false);
             mockCapacitorAvailable.mockResolvedValue(true);
             const adapter = await StorageFactory.getAdapter();
-            expect(adapter.isAvailable).toBe(mockCapacitorAvailable);
+            expect(await adapter.isAvailable()).toBe(true);
         });
 
         it('throws when neither adapter is available', async () => {
