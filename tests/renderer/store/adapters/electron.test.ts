@@ -1,50 +1,53 @@
-// @vitest-environment jsdom
-
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { ElectronStorageAdapter } from '../../../../src/renderer/store/adapters/electron';
+import { ElectronStorageAdapter } from '@/renderer/store/adapters/electron';
+import type { IpcResult } from '@/schemas/storage';
 
-// ─── Mock ElectronAPI ─────────────────────────────────────────────────────────
+/** The success envelope every bridge method now answers with. */
+function ok<T>(data: T): IpcResult<T> {
+    return { success: true, data };
+}
+let mockAPI: ReturnType<typeof createMockAPI>;
 
 function createMockAPI() {
     return {
         isElectron: () => true,
         register: vi
             .fn()
-            .mockResolvedValue({ message: 'ok', user: { username: 'u', theme: 'dark', language: 'en' }, token: 't' }),
+            .mockResolvedValue(
+                ok({ message: 'ok', user: { username: 'u', theme: 'dark', language: 'en' }, token: 't' }),
+            ),
         login: vi
             .fn()
-            .mockResolvedValue({ message: 'ok', user: { username: 'u', theme: 'dark', language: 'en' }, token: 't' }),
-        logout: vi.fn().mockResolvedValue({ message: 'ok' }),
-        getCurrentUser: vi.fn().mockResolvedValue({ username: 'u', theme: 'dark', language: 'en' }),
-        updateUsername: vi.fn().mockResolvedValue({ message: 'ok' }),
-        updatePassword: vi.fn().mockResolvedValue({ message: 'ok' }),
-        deleteAccount: vi.fn().mockResolvedValue({ message: 'ok' }),
-        updateTheme: vi.fn().mockResolvedValue({ message: 'ok' }),
-        updateLanguage: vi.fn().mockResolvedValue({ message: 'ok' }),
-        createMeditation: vi.fn().mockResolvedValue({ _id: '1', date: '2025-01-15', duration: 10 }),
-        getMeditations: vi.fn().mockResolvedValue([{ _id: '1', date: '2025-01-15' }]),
-        saveEmotionLog: vi.fn().mockResolvedValue({ _id: '1', date: '2025-01-15', emotions: [] }),
-        getEmotionLogs: vi.fn().mockResolvedValue([{ _id: '1' }]),
-        getEmotionAnalytics: vi.fn().mockResolvedValue({ totalDays: 5 }),
-        saveEightfoldPathLog: vi.fn().mockResolvedValue({ _id: '1', date: '2025-01-15' }),
-        getEightfoldPathLogs: vi.fn().mockResolvedValue([{ _id: '1' }]),
-        getEightfoldPathAnalytics: vi.fn().mockResolvedValue({ totalDays: 3 }),
+            .mockResolvedValue(
+                ok({ message: 'ok', user: { username: 'u', theme: 'dark', language: 'en' }, token: 't' }),
+            ),
+        logout: vi.fn().mockResolvedValue(ok({ message: 'ok' })),
+        getCurrentUser: vi.fn().mockResolvedValue(ok({ username: 'u', theme: 'dark', language: 'en' })),
+        updateUsername: vi.fn().mockResolvedValue(ok({ message: 'ok' })),
+        updatePassword: vi.fn().mockResolvedValue(ok({ message: 'ok' })),
+        deleteAccount: vi.fn().mockResolvedValue(ok({ message: 'ok' })),
+        updateTheme: vi.fn().mockResolvedValue(ok({ message: 'ok' })),
+        updateLanguage: vi.fn().mockResolvedValue(ok({ message: 'ok' })),
+        createMeditation: vi.fn().mockResolvedValue(ok({ _id: '1', date: '2025-01-15', duration: 10 })),
+        getMeditations: vi.fn().mockResolvedValue(ok([{ _id: '1', date: '2025-01-15' }])),
+        saveEmotionLog: vi.fn().mockResolvedValue(ok({ _id: '1', date: '2025-01-15', emotions: [] })),
+        getEmotionLogs: vi.fn().mockResolvedValue(ok([{ _id: '1' }])),
+        getEmotionAnalytics: vi.fn().mockResolvedValue(ok({ totalDays: 5 })),
+        saveEightfoldPathLog: vi.fn().mockResolvedValue(ok({ _id: '1', date: '2025-01-15' })),
+        getEightfoldPathLogs: vi.fn().mockResolvedValue(ok([{ _id: '1' }])),
+        getEightfoldPathAnalytics: vi.fn().mockResolvedValue(ok({ totalDays: 3 })),
         getRecoveryStatus: vi
             .fn()
-            .mockResolvedValue({ hasRecoveryCodes: false, totalCodes: 0, usedCodes: 0, remainingCodes: 0 }),
-        generateRecoveryCodes: vi.fn().mockResolvedValue({ codes: ['A', 'B'] }),
-        resetPasswordWithRecoveryCode: vi.fn().mockResolvedValue({ message: 'ok' }),
+            .mockResolvedValue(ok({ hasRecoveryCodes: false, totalCodes: 0, usedCodes: 0, remainingCodes: 0 })),
+        generateRecoveryCodes: vi.fn().mockResolvedValue(ok({ codes: ['A', 'B'] })),
+        resetPasswordWithRecoveryCode: vi.fn().mockResolvedValue(ok({ message: 'ok' })),
     };
 }
-
-let mockAPI: ReturnType<typeof createMockAPI>;
 
 beforeEach(() => {
     mockAPI = createMockAPI();
     (window as { electronAPI?: unknown }).electronAPI = mockAPI;
 });
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('ElectronStorageAdapter', () => {
     describe('constructor', () => {
@@ -58,20 +61,18 @@ describe('ElectronStorageAdapter', () => {
         });
     });
 
-    describe('isAvailable', () => {
+    describe('probeAvailability', () => {
         it('returns true when electronAPI exists', async () => {
             const adapter = new ElectronStorageAdapter();
-            expect(await adapter.isAvailable()).toBe(true);
+            expect(await adapter.probeAvailability()).toBe(true);
         });
     });
-
-    // ── Auth ──────────────────────────────────────────────────────────────
 
     describe('auth operations', () => {
         it('register passes credentials to IPC', async () => {
             const adapter = new ElectronStorageAdapter();
-            await adapter.register({ username: 'user', password: 'pass' }, 'dark', 'en');
-            expect(mockAPI.register).toHaveBeenCalledWith('user', 'pass', 'dark', 'en');
+            await adapter.register({ username: 'user', password: 'pass' }, { theme: 'dark', language: 'en' });
+            expect(mockAPI.register).toHaveBeenCalledWith('user', 'pass', { theme: 'dark', language: 'en' });
         });
 
         it('login passes credentials to IPC', async () => {
@@ -93,13 +94,11 @@ describe('ElectronStorageAdapter', () => {
         });
 
         it('getCurrentUser throws when user is null', async () => {
-            mockAPI.getCurrentUser.mockResolvedValue(null);
+            mockAPI.getCurrentUser.mockResolvedValue(ok(null));
             const adapter = new ElectronStorageAdapter();
             await expect(adapter.getCurrentUser()).rejects.toThrow('Not authenticated');
         });
     });
-
-    // ── Settings ──────────────────────────────────────────────────────────
 
     describe('settings operations', () => {
         it('updateTheme returns theme in response', async () => {
@@ -124,8 +123,6 @@ describe('ElectronStorageAdapter', () => {
         });
     });
 
-    // ── Meditations ───────────────────────────────────────────────────────
-
     describe('meditation operations', () => {
         it('createMeditation passes input fields to IPC', async () => {
             const adapter = new ElectronStorageAdapter();
@@ -139,8 +136,6 @@ describe('ElectronStorageAdapter', () => {
             expect(res.meditations).toHaveLength(1);
         });
     });
-
-    // ── Emotions ──────────────────────────────────────────────────────────
 
     describe('emotion operations', () => {
         it('saveEmotionLog passes input fields to IPC', async () => {
@@ -163,8 +158,6 @@ describe('ElectronStorageAdapter', () => {
         });
     });
 
-    // ── Eightfold path ────────────────────────────────────────────────────
-
     describe('eightfold path operations', () => {
         it('saveEightfoldPathLog passes input fields to IPC', async () => {
             const adapter = new ElectronStorageAdapter();
@@ -185,8 +178,6 @@ describe('ElectronStorageAdapter', () => {
             expect(res.totalDays).toBe(3);
         });
     });
-
-    // ── Recovery codes ────────────────────────────────────────────────────
 
     describe('recovery code operations', () => {
         it('getRecoveryStatus returns status', async () => {

@@ -2,12 +2,27 @@
     "name": "zen-garden",
     "version": "1.1.9",
     "description": "A local-only meditation and mindfulness app built with Vue 3. Runs completely offline with no server required.",
+    "keywords": [
+        "meditation",
+        "mindfulness",
+        "zen",
+        "electron",
+        "vue",
+        "offline",
+        "local-first",
+        "privacy",
+        "desktop-app",
+        "capacitor"
+    ],
     "homepage": "https://github.com/larrydarko1/ZenGarden#readme",
     "bugs": {
         "url": "https://github.com/larrydarko1/ZenGarden/issues"
     },
     "license": "MIT",
-    "author": "Lorenzo Mazzola",
+    "author": {
+        "name": "Lorenzo Mazzola",
+        "email": "hello@larrydarko.dev"
+    },
     "type": "module",
     "main": "out/main/index.js",
     "repository": {
@@ -15,24 +30,43 @@
         "url": "https://github.com/larrydarko1/ZenGarden.git"
     },
     "scripts": {
+        "predev": "install-electron",
         "dev": "electron-vite dev",
         "build": "vue-tsc -b && electron-vite build",
         "build:electron": "npm run build && electron-builder",
         "build:mac": "npm run build && electron-builder --mac --publish never",
-        "build:win": "npm run build && electron-builder --win --publish never",
         "build:linux": "npm run build && electron-builder --linux --publish never",
         "build:mobile": "vite build && npx cap sync",
         "cap:sync": "npx cap sync",
         "cap:open:android": "npx cap open android",
         "cap:run:android": "JAVA_HOME=/Applications/Android\\ Studio.app/Contents/jbr/Contents/Home ANDROID_HOME=$HOME/Library/Android/sdk npm run build:mobile && JAVA_HOME=/Applications/Android\\ Studio.app/Contents/jbr/Contents/Home ANDROID_HOME=$HOME/Library/Android/sdk npx cap run android",
-        "lint": "eslint src/",
-        "lint:fix": "eslint src/ --fix",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "lint:dup": "jscpd src --config .jscpd.json --reporters console",
         "format": "prettier --write \"src/**/*.{ts,vue,scss,json}\"",
         "format:check": "prettier --check \"src/**/*.{ts,vue,scss,json}\"",
+        "audit:check": "node scripts/check/check-audit.mjs",
+        "code:check": "node scripts/check/check-code-style.mjs",
+        "dead:check": "node scripts/check/check-dead-code.mjs",
+        "declorder:check": "node scripts/check/check-declaration-order.mjs",
+        "dup:check": "node scripts/check/check-duplication.mjs",
+        "error:check": "node scripts/check/check-error-handling.mjs",
+        "html:check": "node scripts/check/check-html-standards.mjs",
+        "i18n:check": "node scripts/check/check-i18n.mjs",
+        "ipc:check": "node scripts/check/check-ipc-standards.mjs",
+        "pipeline:check": "node scripts/check/check-pipeline.mjs",
+        "pkg:check": "node scripts/check/check-package-json.mjs",
+        "refactor:check": "node scripts/check/check-refactoring.mjs",
+        "scss:check": "node scripts/check/check-scss-standards.mjs",
+        "security:check": "node scripts/check/check-electron-security.mjs",
+        "test:check": "node scripts/check/check-testing.mjs",
+        "stylelint": "stylelint \"src/**/*.{scss,vue}\"",
+        "stylelint:fix": "stylelint \"src/**/*.{scss,vue}\" --fix",
+        "prepare": "husky",
         "test": "vitest run",
         "test:watch": "vitest",
-        "prepare": "husky",
-        "ci:check": "npm audit --audit-level=high --omit=dev && npm run lint && npm run format:check && npm test && npm run build"
+        "test:coverage": "npx vitest run --coverage",
+        "ci:check": "npm run audit:check && npm run lint && npm run format:check && npm run stylelint && npm run pkg:check && npm run pipeline:check && npm run code:check && npm run declorder:check && npm run html:check && npm run scss:check && npm run refactor:check && npm run ipc:check && npm run security:check && npm run error:check && npm run dup:check && npm run dead:check && npm run i18n:check && npm run test:coverage && npm run test:check && npm run build"
     },
     "dependencies": {
         "@capacitor/android": "^8.0.1",
@@ -41,39 +75,60 @@
         "@capacitor/filesystem": "^8.1.0",
         "@capacitor/preferences": "^8.0.0",
         "argon2": "^0.44.0",
+        "electron-log": "~5.4.3",
         "vue": "^3.5.17",
-        "vue-i18n": "^9.14.5"
+        "vue-i18n": "^11.4.10",
+        "zod": "^4.4.3"
     },
     "devDependencies": {
         "@commitlint/cli": "^20.5.0",
-        "@commitlint/config-conventional": "^20.5.0",
+        "@commitlint/config-conventional": "^21.2.2",
         "@eslint/js": "^10.0.1",
+        "@intlify/eslint-plugin-vue-i18n": "^4.5.1",
         "@types/node": "^24.0.13",
-        "@vitejs/plugin-vue": "^6.0.0",
-        "@vue/test-utils": "^2.4.6",
-        "@vue/tsconfig": "^0.7.0",
-        "electron": "^40.0.0",
+        "@vitejs/plugin-vue": "^6.0.8",
+        "@vitest/coverage-v8": "^4.1.11",
+        "@vitest/eslint-plugin": "^1.6.27",
+        "@vue/test-utils": "^2.4.11",
+        "@vue/tsconfig": "^0.9.1",
+        "electron": "^44.0.0",
         "electron-builder": "^26.4.0",
         "electron-vite": "^5.0.0",
         "eslint": "^10.0.3",
         "eslint-config-prettier": "^10.1.8",
+        "eslint-import-resolver-typescript": "^4.4.5",
+        "eslint-plugin-import-x": "^4.17.1",
         "eslint-plugin-vue": "^10.8.0",
+        "eslint-plugin-vuejs-accessibility": "^2.6.0",
         "globals": "^17.4.0",
         "husky": "^9.1.7",
-        "jsdom": "^26.1.0",
+        "jscpd": "^5.0.16",
+        "jsdom": "^30.0.1",
+        "jsonc-eslint-parser": "^3.3.0",
+        "knip": "^6.32.2",
         "lint-staged": "^16.4.0",
+        "postcss-html": "^2.0.0",
         "prettier": "^3.8.1",
-        "sass-embedded": "^1.92.1",
-        "typescript": "~5.8.3",
-        "typescript-eslint": "^8.57.1",
+        "sass-embedded": "^1.103.1",
+        "stylelint": "^17.14.1",
+        "stylelint-config-standard-scss": "^17.0.0",
+        "stylelint-declaration-strict-value": "^1.11.1",
+        "stylelint-scss": "^7.2.0",
+        "typescript": "~6.0.2",
+        "typescript-eslint": "^8.67.0",
         "vite": "^7.0.0",
-        "vitest": "^3.2.4",
-        "vue-tsc": "^2.2.10"
+        "vitest": "^4.1.11",
+        "vue-tsc": "^3.3.11",
+        "yaml": "^2.9.0"
     },
     "engines": {
-        "node": ">=20",
+        "node": ">=24",
         "npm": ">=10"
     },
+    "os": [
+        "darwin",
+        "linux"
+    ],
     "private": true,
     "packageManager": "npm@11.11.0",
     "build": {
@@ -84,39 +139,58 @@
         },
         "files": [
             "package.json",
+            "build/icon.png",
             {
                 "from": "out",
                 "to": "out",
                 "filter": [
                     "**/*"
                 ]
-            },
-            "node_modules/**/*"
+            }
         ],
+        "dmg": {
+            "background": "build/dmg-background.png",
+            "iconSize": 100,
+            "iconTextSize": 14,
+            "title": "${productName} ${version}",
+            "contents": [
+                {
+                    "x": 180,
+                    "y": 260
+                },
+                {
+                    "x": 480,
+                    "y": 260,
+                    "type": "link",
+                    "path": "/Applications"
+                }
+            ]
+        },
         "mac": {
             "category": "public.app-category.healthcare-fitness",
+            "identity": null,
+            "artifactName": "${productName}-${version}-${arch}.${ext}",
             "target": [
                 {
                     "target": "dmg",
                     "arch": [
-                        "arm64",
-                        "x64"
+                        "arm64"
                     ]
                 }
-            ],
-            "icon": "build/icon.icns"
-        },
-        "win": {
-            "target": [
-                "nsis"
-            ],
-            "icon": "build/icon.ico"
+            ]
         },
         "linux": {
             "target": [
-                "AppImage"
+                "AppImage",
+                "deb",
+                "rpm",
+                "tar.gz"
             ],
-            "category": "Utility"
+            "category": "Utility",
+            "maintainer": "Lorenzo Mazzola",
+            "vendor": "Lorenzo Mazzola",
+            "synopsis": "A local-first, privacy-focused note-taking app with on-device AI",
+            "syncDesktopName": true
         }
     },
     "lint-staged": {

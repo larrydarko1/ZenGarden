@@ -1,5 +1,3 @@
-// @vitest-environment node
-
 import { describe, it, expect } from 'vitest';
 import {
     generateId,
@@ -9,9 +7,7 @@ import {
     generateRecoveryCodes,
     hashRecoveryCode,
     verifyRecoveryCode,
-} from '../../../src/main/services/crypto';
-
-// ─── generateId ───────────────────────────────────────────────────────────────
+} from '@/main/services/crypto';
 
 describe('generateId', () => {
     it('returns a non-empty string', () => {
@@ -23,8 +19,6 @@ describe('generateId', () => {
         expect(ids.size).toBe(100);
     });
 });
-
-// ─── generateToken ────────────────────────────────────────────────────────────
 
 describe('generateToken', () => {
     it('returns a 64-character hex string', () => {
@@ -38,8 +32,6 @@ describe('generateToken', () => {
         expect(a).not.toBe(b);
     });
 });
-
-// ─── hashPasswordPbkdf2 ──────────────────────────────────────────────────────
 
 describe('hashPasswordPbkdf2', () => {
     it('returns an object with hash and salt', () => {
@@ -69,8 +61,6 @@ describe('hashPasswordPbkdf2', () => {
         expect(s1).not.toBe(s2);
     });
 });
-
-// ─── verifyPassword (PBKDF2 path) ────────────────────────────────────────────
 
 describe('verifyPassword', () => {
     it('returns true for a correct PBKDF2 password', async () => {
@@ -116,8 +106,6 @@ describe('verifyPassword', () => {
     });
 });
 
-// ─── generateRecoveryCodes ────────────────────────────────────────────────────
-
 describe('generateRecoveryCodes', () => {
     it('returns exactly 10 codes', () => {
         const codes = generateRecoveryCodes();
@@ -143,8 +131,6 @@ describe('generateRecoveryCodes', () => {
         expect(a).not.toEqual(b);
     });
 });
-
-// ─── hashRecoveryCode / verifyRecoveryCode ────────────────────────────────────
 
 describe('hashRecoveryCode', () => {
     it('returns an object with hash and salt', () => {

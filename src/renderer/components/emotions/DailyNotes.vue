@@ -19,21 +19,24 @@ const { t } = useI18n();
     <div class="notes-view">
         <div class="notes-content">
             <div class="notes-header">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
                         stroke="currentColor"
                         stroke-width="2"
                         stroke-linecap="round"
-                        stroke-linejoin="round"
-                    />
+                        stroke-linejoin="round" />
                     <polyline
                         points="14 2 14 8 20 8"
                         stroke="currentColor"
                         stroke-width="2"
                         stroke-linecap="round"
-                        stroke-linejoin="round"
-                    />
+                        stroke-linejoin="round" />
                     <line
                         x1="16"
                         y1="13"
@@ -41,8 +44,7 @@ const { t } = useI18n();
                         y2="13"
                         stroke="currentColor"
                         stroke-width="2"
-                        stroke-linecap="round"
-                    />
+                        stroke-linecap="round" />
                     <line
                         x1="16"
                         y1="17"
@@ -50,15 +52,13 @@ const { t } = useI18n();
                         y2="17"
                         stroke="currentColor"
                         stroke-width="2"
-                        stroke-linecap="round"
-                    />
+                        stroke-linecap="round" />
                     <polyline
                         points="10 9 9 9 8 9"
                         stroke="currentColor"
                         stroke-width="2"
                         stroke-linecap="round"
-                        stroke-linejoin="round"
-                    />
+                        stroke-linejoin="round" />
                 </svg>
                 <h3>{{ t('emotions.dailyNote') }}</h3>
             </div>
@@ -67,12 +67,12 @@ const { t } = useI18n();
                 :value="dailyNote"
                 class="emotion-note-textarea"
                 :placeholder="t('emotions.notePlaceholder')"
+                :aria-label="t('emotions.notePlaceholder')"
                 maxlength="2000"
                 @input="
                     emit('update:dailyNote', ($event.target as HTMLTextAreaElement).value);
                     emit('note-input');
-                "
-            ></textarea>
+                "></textarea>
             <div class="note-footer">
                 <span class="character-count">{{ dailyNote.length }} / 2000</span>
             </div>
@@ -80,68 +80,68 @@ const { t } = useI18n();
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .notes-view {
-    min-height: 300px;
+    min-height: $size-44;
 }
 
 .notes-content {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: $space-3;
 }
 
 .notes-header {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    color: var(--text1);
+    gap: $space-2;
+    color: $text1;
 }
 
 .notes-header svg {
-    opacity: 0.7;
+    opacity: $opacity-mid-high;
     flex-shrink: 0;
 }
 
 .notes-header h3 {
     margin: 0;
-    font-size: 1.15rem;
-    font-weight: 600;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
 }
 
 .notes-date-label {
     margin: 0;
-    font-size: 0.85rem;
-    color: var(--text2);
+    font-size: $font-size-sm;
+    color: $text2;
 }
 
 .emotion-note-textarea {
     width: 100%;
-    min-height: 200px;
-    padding: 1rem;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 8px;
-    color: var(--text1);
+    min-height: $size-40;
+    padding: $space-4;
+    background: $input-bg;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius-lg;
+    color: $text1;
     font-family: inherit;
-    font-size: 0.95rem;
-    line-height: 1.6;
+    font-size: $font-size-base;
+    line-height: $line-height-relaxed;
     resize: vertical;
     transition:
-        border-color 0.2s,
-        background 0.2s;
+        border-color $duration-base,
+        background $duration-base;
     box-sizing: border-box;
 }
 
 .emotion-note-textarea:focus {
     outline: none;
-    border-color: var(--input-border-focus);
-    background: var(--input-bg-focus);
+    border-color: $input-border-focus;
+    background: $input-bg-focus;
 }
 
 .emotion-note-textarea::placeholder {
-    color: var(--text2);
-    opacity: 0.6;
+    color: $text2;
+    opacity: $opacity-mid;
 }
 
 .note-footer {
@@ -150,19 +150,19 @@ const { t } = useI18n();
 }
 
 .note-footer .character-count {
-    font-size: 0.8rem;
-    color: var(--text2);
-    opacity: 0.7;
+    font-size: $font-size-xs;
+    color: $text2;
+    opacity: $opacity-mid-high;
 }
 
-@media (max-width: 768px) {
+@media (width <= #{$breakpoint-xl}) {
     .notes-view {
         min-height: auto;
     }
 
     .emotion-note-textarea {
-        min-height: 180px;
-        font-size: 1rem;
+        min-height: $size-39;
+        font-size: $font-size-base;
     }
 }
 </style>

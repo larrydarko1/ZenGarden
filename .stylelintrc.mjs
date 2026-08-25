@@ -1,0 +1,101 @@
+export default {
+  extends: ['stylelint-config-standard-scss'],
+  plugins: ['stylelint-scss', 'stylelint-declaration-strict-value'],
+  rules: {
+    // –– COLOR FUNCTIONS –––––––––––––––––––––––––––––––––––––––––––––––
+    'color-function-notation': 'modern',
+
+    // –– UNITS –––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+    'declaration-property-unit-allowed-list': {
+      'font-size': ['rem'],
+      'line-height': [],
+      'margin': ['em'],
+      'margin-top': ['em'],
+      'margin-bottom': ['em'],
+      'margin-left': ['em'],
+      'margin-right': ['em'],
+      'padding': ['em'],
+      'padding-top': ['em'],
+      'padding-bottom': ['em'],
+      'padding-left': ['em'],
+      'padding-right': ['em'],
+      'gap': ['em'],
+      'row-gap': ['em'],
+      'column-gap': ['em'],
+      'border-radius': ['em'],
+      'min-width': ['%','px','vh','vw', 'dvh', 'dvw', 'ch'],
+      'max-width': ['%', 'px','vh','vw', 'dvh', 'dvw', 'ch'],
+      'min-height': ['%','px', 'vh', 'vw', 'dvh', 'dvw'],
+      'max-height': ['%','px', 'vh', 'vw', 'dvh', 'dvw'],
+      'width': ['px','%','vh', 'vw', 'dvh', 'dvw'],
+      'height': ['px', '%', 'vh', 'vw', 'dvh', 'dvw'],
+      'top': ['px', '%'],
+      'right': ['px', '%'],
+      'bottom': ['px', '%'],
+      'left': ['px', '%'],
+      'blur': ['px'],
+      'grid-template-columns': ['fr', 'rem', '%'],
+      'grid-template-rows': ['fr', 'rem', '%'],
+    },
+
+    // –– NO VENDOR PREFIXES –––––––––––––––––––––––––––––––––––––––––––––––
+    'property-no-vendor-prefix': true,
+    'value-no-vendor-prefix': true,
+    'selector-no-vendor-prefix': true,
+    'at-rule-no-vendor-prefix': true,
+
+    // –– SCSS VARIABLES –––––––––––––––––––––––––––––––––––––––––––––––
+    'scss/dollar-variable-pattern': '^[a-z][a-z0-9-]*$',
+    'scss/dollar-variable-empty-line-before': null,
+
+    // –– LAYOUT –––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+    'property-no-unknown': [
+      true,
+      {
+        'ignoreProperties': ['/^composes/']
+      }
+    ],
+
+    // –– SCSS NESTED PROPERTIES –––––––––––––––––––––––––––––––––––––––––––
+    'scss/declaration-nested-properties': 'never',
+
+    // –– DESIGN TOKENS –––––––––––––––––––––––––––––––––––––––––––––––
+    'no-unknown-custom-properties': true,
+    'scale-unlimited/declaration-strict-value': [
+      ['/color$/', 'fill', 'stroke'],
+      {
+        // `currentcolor` is listed lowercase as well as camel: `value-keyword-case` above
+        // rewrites every occurrence to lowercase, after which `currentColor` never matches.
+        ignoreValues: ['transparent', 'currentColor', 'currentcolor', 'inherit', 'initial', 'unset', 'revert', 'none'],
+        disableFix: true,
+      },
+    ],
+
+    // –– SCOPED STYLES –––––––––––––––––––––––––––––––––––––––––––––––
+    'selector-max-specificity': ['1,4,1'],
+    'selector-max-id': 1,
+
+    // –– GENERAL BEST PRACTICES –––––––––––––––––––––––––––––––––––––
+    'color-no-invalid-hex': true,
+    'declaration-no-important': true,
+    'declaration-block-no-duplicate-properties': true,
+    'no-descending-specificity': null,
+    'selector-pseudo-element-no-unknown': true,
+    'media-feature-name-no-unknown': true,
+    'at-rule-no-unknown': null,
+
+    // –– IGNORE SCOPED STYLES SPECIFICITY FOR VUE –––––––––––––––––––––––––––––––––––––––––––
+    'selector-pseudo-class-no-unknown': [
+      true,
+      {
+        'ignorePseudoClasses': ['deep', 'global', 'v-deep', 'v-global']
+      }
+    ]
+  },
+  overrides: [
+    {
+      files: ['**/*.vue'],
+      customSyntax: 'postcss-html'
+    }
+  ]
+}

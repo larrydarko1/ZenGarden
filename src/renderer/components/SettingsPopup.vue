@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import AccountSettings from './AccountSettings.vue';
-
-const { t, locale } = useI18n();
+import AccountSettings from '@/renderer/components/AccountSettings.vue';
 
 const emit = defineEmits<{
-    (e: 'close'): void;
-    (e: 'theme-change', theme: string): void;
-    (e: 'language-change', language: string): void;
+    'close': [];
+    'theme-change': [theme: string];
+    'language-change': [language: string];
 }>();
 
 const themes = ['dark', 'light'];
@@ -23,24 +21,26 @@ const languages = {
     ja: '日本語',
 };
 
-const currentTheme = ref('dark'); // Will be set from user data
+const { t, locale } = useI18n();
+
+const currentTheme = ref('dark');
 const currentLanguage = ref(locale.value);
 
-function selectTheme(theme: string) {
+function selectTheme(theme: string): void {
     currentTheme.value = theme;
     emit('theme-change', theme);
 }
 
-function selectLanguage(lang: string) {
+function selectLanguage(lang: string): void {
     currentLanguage.value = lang;
     emit('language-change', lang);
 }
 
-function handleUsernameChange(_newUsername: string) {
+function handleUsernameChange(_newUsername: string): void {
     window.location.reload();
 }
 
-function handleAccountDeletion() {
+function handleAccountDeletion(): void {
     // Account deleted, redirect to login
     emit('close');
     window.location.reload();
@@ -55,10 +55,12 @@ function handleAccountDeletion() {
                 <button
                     v-for="theme in themes"
                     :key="theme"
-                    :class="['theme-option', theme, { active: currentTheme === theme }]"
-                    @click="selectTheme(theme)"
-                >
-                    <div class="theme-preview" :class="theme"></div>
+                    class="theme-option"
+                    :class="[theme, { active: currentTheme === theme }]"
+                    @click="selectTheme(theme)">
+                    <div
+                        class="theme-preview"
+                        :class="theme"></div>
                     <span class="theme-name">{{ t(`settings.themes.${theme}`) }}</span>
                 </button>
             </div>
@@ -70,9 +72,9 @@ function handleAccountDeletion() {
                 <button
                     v-for="(langName, langCode) in languages"
                     :key="langCode"
-                    :class="['language-option', { active: currentLanguage === langCode }]"
-                    @click="selectLanguage(langCode)"
-                >
+                    class="language-option"
+                    :class="[{ active: currentLanguage === langCode }]"
+                    @click="selectLanguage(langCode)">
                     {{ langName }}
                 </button>
             </div>
@@ -80,11 +82,13 @@ function handleAccountDeletion() {
 
         <div class="settings-divider"></div>
 
-        <AccountSettings @username-changed="handleUsernameChange" @account-deleted="handleAccountDeletion" />
+        <AccountSettings
+            @username-changed="handleUsernameChange"
+            @account-deleted="handleAccountDeletion" />
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .settings-inline {
     width: 100%;
     display: flex;
@@ -93,7 +97,7 @@ function handleAccountDeletion() {
 }
 
 .settings-section {
-    margin-bottom: 1.25rem;
+    margin-bottom: $space-5;
 }
 
 .settings-section:last-of-type {
@@ -101,134 +105,133 @@ function handleAccountDeletion() {
 }
 
 .section-label {
-    color: var(--text2);
-    font-size: 0.7rem;
-    font-weight: 400;
+    color: $text2;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-normal;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin: 0 0 0.6rem 0;
+    letter-spacing: $letter-spacing-5;
+    margin: 0 0 $space-2;
 }
 
 .settings-divider {
-    height: 1px;
-    background: var(--input-border);
-    margin: 0.5rem 0 1.25rem;
-    opacity: 0.5;
+    height: $size-0;
+    background: $input-border;
+    margin: $space-2 0 $space-5;
+    opacity: $opacity-mid-low;
 }
 
 .theme-options {
     display: flex;
-    gap: 0.75rem;
+    gap: $space-3;
 }
 
 .theme-option {
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 8px;
-    padding: 0.75rem;
+    background: $input-bg;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius-lg;
+    padding: $space-3;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all $transition-fast;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    gap: $space-2;
     flex: 1;
 }
 
 .theme-option:hover {
-    background: var(--input-bg-focus);
-    border-color: var(--border-subtle);
+    background: $input-bg-focus;
+    border-color: $border-subtle;
 }
 
 .theme-option.active {
-    background: var(--border-subtle);
-    border-color: var(--border-subtle);
+    background: $border-subtle;
+    border-color: $border-subtle;
 }
 
 .theme-preview {
-    width: 40px;
-    height: 40px;
-    border-radius: 6px;
-    border: 1px solid var(--input-border);
-    transition: transform 0.15s;
+    width: $size-20;
+    height: $size-20;
+    border-radius: $border-radius;
+    border: $border-width-thin $input-border;
+    transition: transform $transition-fast;
 }
 
 .theme-option:hover .theme-preview {
-    transform: scale(1.05);
+    transform: scale($scale-105);
 }
 
 .theme-preview.light {
-    background: linear-gradient(135deg, #f2f3f4 0%, #e3e6ed 100%);
+    background: $swatch-light;
 }
 
 .theme-preview.dark {
-    background: linear-gradient(135deg, #181a20 0%, #23262f 100%);
+    background: $swatch-dark;
 }
 
 .theme-name {
-    color: var(--text1);
-    font-size: 0.7rem;
-    font-weight: 400;
+    color: $text1;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-normal;
 }
 
 .language-options {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem;
+    gap: $space-2;
 }
 
 .language-option {
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 6px;
-    padding: 0.5rem 0.35rem;
-    color: var(--text2);
-    font-size: 0.75rem;
+    background: $input-bg;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius;
+    padding: $space-2 $space-1;
+    color: $text2;
+    font-size: $font-size-xs;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all $transition-fast;
     text-align: center;
-    font-weight: 400;
+    font-weight: $font-weight-normal;
 }
 
 .language-option:hover {
-    background: var(--input-bg-focus);
-    border-color: var(--border-subtle);
-    color: var(--text1);
+    background: $input-bg-focus;
+    border-color: $border-subtle;
+    color: $text1;
 }
 
 .language-option.active {
-    background: var(--border-subtle);
-    border-color: var(--border-subtle);
-    color: var(--text1);
-    font-weight: 400;
+    background: $border-subtle;
+    border-color: $border-subtle;
+    color: $text1;
+    font-weight: $font-weight-normal;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+@media (width <= #{$breakpoint-xl}) {
     .settings-section {
-        margin-bottom: 1.5rem;
+        margin-bottom: $space-6;
     }
 
     .section-label {
-        font-size: 0.75rem;
-        margin-bottom: 0.75rem;
+        font-size: $font-size-xs;
+        margin-bottom: $space-3;
     }
 
     .theme-option {
-        padding: 0.875rem;
-        min-height: 64px;
+        padding: $space-3;
+        min-height: $size-28;
         touch-action: manipulation;
     }
 
     .language-options {
         grid-template-columns: repeat(2, 1fr);
-        gap: 0.6rem;
+        gap: $space-2;
     }
 
     .language-option {
-        padding: 0.75rem;
-        font-size: 0.8rem;
-        min-height: 44px;
+        padding: $space-3;
+        font-size: $font-size-xs;
+        min-height: $size-21;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -236,7 +239,7 @@ function handleAccountDeletion() {
     }
 }
 
-@media (max-width: 480px) {
+@media (width <= #{$breakpoint-md}) {
     .language-options {
         grid-template-columns: 1fr 1fr;
     }

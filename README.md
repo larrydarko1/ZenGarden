@@ -1,13 +1,8 @@
 # ZenGarden
 
-![License](https://img.shields.io/github/license/larrydarko1/ZenGarden)
-![Issues](https://img.shields.io/github/issues/larrydarko1/ZenGarden)
-![Pull Requests](https://img.shields.io/github/issues-pr/larrydarko1/ZenGarden)
-![Contributors](https://img.shields.io/github/contributors/larrydarko1/ZenGarden)
-
 Zen Garden is a **local-first, cross-platform meditation app** built with **Electron** (desktop), **Capacitor** (mobile), **Vue 3**, and TypeScript. All your data stays on your device in MongoDB-compatible JSON files - no server, no cloud, completely private. Features a meditation timer with bell sounds, breathing exercises, a meditation calendar, and relaxing Zen animations.
 
-> **IMPORTANT:** This app runs natively on **Desktop** (macOS, Windows, Linux) and **Mobile** (Android). All data is stored in JSON files on your device and never leaves it.
+> **IMPORTANT:** This app runs natively on **Desktop** (macOS, Linux) and **Mobile** (Android). All data is stored in JSON files on your device and never leaves it.
 
 ## Demo
 
@@ -43,7 +38,7 @@ Zen Garden is a **local-first, cross-platform meditation app** built with **Elec
 
 ### Technical Features
 
-- **Cross-Platform** - Native apps for macOS, Windows, Linux, and Android
+- **Cross-Platform** - Native apps for macOS, Linux, and Android
 - **100% Offline** - works completely without internet connection
 - **User-Accessible Storage** - JSON files you can view, backup, and control
 - **Privacy-first** - no server, no tracking, no data collection, no telemetry
@@ -84,7 +79,6 @@ Your data is stored in MongoDB-compatible JSON files:
 ### Desktop
 
 - **macOS:** `~/Library/Application Support/zen-garden/data/`
-- **Windows:** `%APPDATA%/zen-garden/data/`
 - **Linux:** `~/.config/zen-garden/data/`
 
 ### Mobile
@@ -150,7 +144,7 @@ Requires **Android Studio** to be installed at the default location. The npm scr
 | `JAVA_HOME`    | `/Applications/Android Studio.app/Contents/jbr/Contents/Home` |
 | `ANDROID_HOME` | `~/Library/Android/sdk`                                       |
 
-> **Note:** If Android Studio is installed in a non-default location, or you're on Linux/Windows, update the paths in the `cap:run:android` script in [package.json](package.json).
+> **Note:** If Android Studio is installed in a non-default location, or you're on Linux, update the paths in the `cap:run:android` script in [package.json](package.json).
 
 **Quick Start:**
 
@@ -198,9 +192,6 @@ npm run build:electron
 # Build specifically for macOS
 npm run build:mac
 
-# Build for Windows (requires Windows or cross-compilation setup)
-npm run build:win
-
 # Build for Linux
 npm run build:linux
 ```
@@ -208,8 +199,7 @@ npm run build:linux
 The built installers will be in the `dist-electron/` directory:
 
 - **macOS:** `.dmg` installer
-- **Windows:** `.exe` installer
-- **Linux:** `.AppImage` file
+- **Linux:** `.AppImage`, `.deb`, `.rpm` and `.tar.gz` packages
 
 ### Installing the App
 
@@ -231,7 +221,7 @@ To share the app with others:
 
 ## Tech Stack
 
-- **Desktop:** Electron 40, electron-vite 5 (Native macOS, Windows, Linux app)
+- **Desktop:** Electron 40, electron-vite 5 (Native macOS, Linux app)
 - **Mobile:** Capacitor 8 (Native Android app)
 - **Frontend:** Vue 3, TypeScript (strict), Vite, SCSS, vue-i18n
 - **Storage:** JSON files with atomic writes (MongoDB-compatible document structure)
@@ -352,7 +342,6 @@ This makes it easy to:
 **Desktop:** Simply copy the entire data folder:
 
 - **macOS:** `~/Library/Application Support/zen-garden/data/`
-- **Windows:** `%APPDATA%/zen-garden/data/`
 - **Linux:** `~/.config/zen-garden/data/`
 
 **Mobile:** Access files through your device:

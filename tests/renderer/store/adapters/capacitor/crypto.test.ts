@@ -1,31 +1,21 @@
-// @vitest-environment jsdom
-// Web Crypto API is available in Node.js 20+ (globalThis.crypto.subtle)
-
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-
-// ─── Mocks ────────────────────────────────────────────────────────────────────
-
-const mockWriteCollection = vi.fn().mockResolvedValue(undefined);
-
-vi.mock('../../../../../src/renderer/store/adapters/capacitor/db', () => ({
-    writeCollection: (...args: unknown[]) => mockWriteCollection(...args),
-}));
-
 import {
+    type UserWithPassword,
     hashPassword,
     verifyPassword,
     upgradeHashIfNeeded,
-} from '../../../../../src/renderer/store/adapters/capacitor/crypto';
-import type { UserWithPassword } from '../../../../../src/renderer/store/adapters/capacitor/crypto';
+} from '@/renderer/store/adapters/capacitor/crypto';
 
-// ─── Tests ────────────────────────────────────────────────────────────────────
+const mockWriteCollection = vi.fn().mockResolvedValue(undefined);
+
+vi.mock('@/renderer/store/adapters/capacitor/db', () => ({
+    writeCollection: (...args: unknown[]) => mockWriteCollection(...args),
+}));
 
 describe('capacitor/crypto', () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
-
-    // ── hashPassword ──────────────────────────────────────────────────────
 
     describe('hashPassword', () => {
         it('produces a PBKDF2-prefixed hash', async () => {
@@ -48,8 +38,6 @@ describe('capacitor/crypto', () => {
             expect(parts1[2]).not.toBe(parts2[2]);
         });
     });
-
-    // ── verifyPassword ────────────────────────────────────────────────────
 
     describe('verifyPassword', () => {
         it('returns true for correct password', async () => {
@@ -78,8 +66,6 @@ describe('capacitor/crypto', () => {
             expect(await verifyPassword('wrong', sha256Hex)).toBe(false);
         });
     });
-
-    // ── upgradeHashIfNeeded ───────────────────────────────────────────────
 
     describe('upgradeHashIfNeeded', () => {
         it('upgrades a legacy SHA-256 hash to PBKDF2', async () => {

@@ -3,11 +3,8 @@
  * Owns: Argon2 / PBKDF2 hashing, password verification, token generation, ID generation.
  * Does NOT own: user storage (db.ts), IPC handlers (auth.ts).
  */
-
 import crypto from 'crypto';
-import type { StoredUser } from './db';
-
-// ─── ID / Token ───────────────────────────────────────────────────────────────
+import type { StoredUser } from '@/main/services/db';
 
 export function generateId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substring(2);
@@ -16,8 +13,6 @@ export function generateId(): string {
 export function generateToken(): string {
     return crypto.randomBytes(32).toString('hex');
 }
-
-// ─── Hashing ──────────────────────────────────────────────────────────────────
 
 // Hash with Argon2 if available (preferred), fall back to PBKDF2
 export async function hashPassword(password: string): Promise<string | { hash: string; salt: string }> {
@@ -38,9 +33,6 @@ export function hashPasswordPbkdf2(password: string, salt?: string): { hash: str
     return { hash, salt: useSalt };
 }
 
-// ─── Recovery codes ───────────────────────────────────────────────────────────
-
-// Generate 10 random 8-char alphanumeric recovery codes
 export function generateRecoveryCodes(): string[] {
     const codes: string[] = [];
     for (let i = 0; i < 10; i++) {
@@ -50,22 +42,18 @@ export function generateRecoveryCodes(): string[] {
     return codes;
 }
 
-// Hash a single recovery code for storage
 export function hashRecoveryCode(code: string): { hash: string; salt: string } {
     return hashPasswordPbkdf2(code.toUpperCase());
 }
 
-// Verify a recovery code against a stored hash
 export function verifyRecoveryCode(code: string, storedHash: string, salt: string): boolean {
     const { hash } = hashPasswordPbkdf2(code.toUpperCase(), salt);
     return hash === storedHash;
 }
 
-// ─── Verification ─────────────────────────────────────────────────────────────
-
 export async function verifyPassword(password: string, user: StoredUser): Promise<boolean> {
     // Argon2 path — full hash string stored in user.password
-    if (user.password?.startsWith('$argon2')) {
+    if (user.password?.startsWith('$argon2') === true) {
         try {
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             const argon2 = require('argon2') as { verify: (h: string, p: string) => Promise<boolean> };
@@ -76,9 +64,10 @@ export async function verifyPassword(password: string, user: StoredUser): Promis
     }
 
     // PBKDF2 path — split hash + salt fields
-    if (user.passwordHash && user.salt) {
-        const { hash } = hashPasswordPbkdf2(password, user.salt);
-        return hash === user.passwordHash;
+    const { passwordHash, salt } = user;
+    if (passwordHash !== undefined && salt !== undefined) {
+        const { hash } = hashPasswordPbkdf2(password, salt);
+        return hash === passwordHash;
     }
 
     return false;

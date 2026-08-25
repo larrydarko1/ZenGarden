@@ -2,23 +2,16 @@
  * Capacitor Crypto - Password hashing and verification via Web Crypto API.
  * Owns: PBKDF2 hashing, legacy SHA-256 verification, hash upgrade logic.
  */
+import { writeCollection } from '@/renderer/store/adapters/capacitor/db';
+import type { User } from '@/renderer/store/types';
 
-import { writeCollection } from './db';
-import type { User } from '../../types';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface UserWithPassword extends User {
+export type UserWithPassword = {
     _id: string;
     password: string;
-}
-
-// ─── Constants ────────────────────────────────────────────────────────────────
+} & User;
 
 const PBKDF2_ITERATIONS = 100_000;
 const PBKDF2_PREFIX = 'pbkdf2:';
-
-// ─── Password hashing ────────────────────────────────────────────────────────
 
 export async function hashPassword(password: string): Promise<string> {
     const salt = crypto.getRandomValues(new Uint8Array(16));
@@ -39,7 +32,8 @@ export async function verifyPassword(password: string, storedHash: string): Prom
         if (parts.length !== 2) return false;
         const saltHex = parts[0];
         const expectedHash = parts[1];
-        const salt = new Uint8Array(saltHex.match(/.{2}/g)!.map((b) => parseInt(b, 16)));
+        const saltBytes = saltHex.match(/.{2}/g) ?? [];
+        const salt = new Uint8Array(saltBytes.map((byte) => parseInt(byte, 16)));
         const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, [
             'deriveBits',
         ]);
@@ -67,8 +61,6 @@ export async function upgradeHashIfNeeded(
         await writeCollection(usersFilename, users);
     }
 }
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function hexEncode(buffer: ArrayBuffer): string {
     return Array.from(new Uint8Array(buffer))

@@ -1,0 +1,105 @@
+/**
+ * Global reset and base styles
+ * Resets, universal styles, animations, and element defaults
+ */
+
+@use '@/renderer/styles/variables' as *;
+
+/* –––––– Root –––––– */
+
+:root {
+    font-family: $font-family;
+    line-height: $line-height-base;
+    font-weight: $font-weight-normal;
+    color-scheme: light dark;
+    color: $text1;
+    background-color: $base1;
+    font-synthesis: none;
+    text-rendering: optimizelegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* –––––– Html, Body, App –––––– */
+
+html,
+body,
+#app {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    overscroll-behavior-y: none;
+}
+
+@media (width <= #{$breakpoint-xl}) {
+    html {
+        text-size-adjust: 100%;
+    }
+}
+
+/* Smooth scrolling for all devices */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+/* –––––– Reduced motion –––––– */
+
+/**
+ * The single escape hatch for every transition and animation in the app. The
+ * SFCs declare motion freely; this is what makes all of it opt-out in one place
+ * for users who asked the OS for less of it.
+ * Kept at 0.01ms rather than `none` so animationend/transitionend still fire —
+ * anything that waits on one keeps working instead of hanging, and every
+ * animation still lands on its final keyframe instead of never starting.
+ */
+@media (prefers-reduced-motion: reduce) {
+    /* stylelint-disable declaration-no-important -- a global override has to beat the scoped SFC rules it is overriding; specificity alone cannot reach them. */
+    *,
+    *::before,
+    *::after {
+        animation-duration: $duration-none !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: $duration-none !important;
+        scroll-behavior: auto !important;
+    }
+    /* stylelint-enable declaration-no-important */
+}
+
+/* –––––– Electron window dragging –––––– */
+
+/**
+ * The frameless window has no titlebar, so the whole app surface is the drag
+ * handle — and every interactive element then has to opt back out, or it is
+ * dragged instead of clicked.
+ */
+#app {
+    -webkit-app-region: drag;
+}
+
+button,
+input,
+textarea,
+select,
+a,
+[role='button'],
+.clickable {
+    -webkit-app-region: no-drag;
+}
+
+/* Scrollable content containers, matched by the class patterns they share */
+[class*='content'],
+[class*='list'],
+[class*='body'],
+[class*='container'],
+[class*='wrapper'],
+[class*='entries'],
+[class*='items'],
+.modal,
+.popup,
+.dropdown-menu {
+    -webkit-app-region: no-drag;
+}

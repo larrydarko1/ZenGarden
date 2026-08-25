@@ -1,0 +1,35 @@
+/**
+ * Shared component patterns
+ *
+ * Reusable style patterns that appear in 2+ unrelated components.
+ * Promote a pattern here only once it's duplicated — component-specific
+ * styles stay scoped in the SFC.
+ */
+
+@use '@/renderer/styles/variables' as *;
+
+/* ––––– Scrollbar ––––– */
+
+/**
+ * The overlay panels all scroll their own content. Chromium's default
+ * scrollbar is opaque and light-themed, so every one of them hid it by hand
+ * before this existed.
+ */
+@mixin scrollbar($width: $size-3) {
+    &::-webkit-scrollbar {
+        width: $width;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: $button-bg;
+        border-radius: $border-radius-xs;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: $button-bg-hover;
+    }
+}

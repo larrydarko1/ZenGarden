@@ -4,21 +4,66 @@
  * Does NOT own: animation selection (Home.vue), session notes saving (Home.vue), auth (Home.vue).
  */
 
-import { ref } from 'vue';
+import { ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface BreathingExercise {
+type BreathingExercise = {
     id: string;
     name: string;
     description: string;
     pattern: { phase: string; duration: number; text: string }[];
-}
+};
+
+type MeditationSession = {
+    // Timer
+    meditationActive: Ref<boolean>;
+    meditationSeconds: Ref<number>;
+    selectedDuration: Ref<number>;
+    isCustomDuration: Ref<boolean>;
+    customDurationValue: Ref<number>;
+    customInput: Ref<HTMLInputElement | null>;
+    // Bell
+    bellEnabled: Ref<boolean>;
+    bellInterval: Ref<number>;
+    bellSound: Ref<string>;
+    showBellConfig: Ref<boolean>;
+    showIntervalDropdown: Ref<boolean>;
+    showSoundDropdown: Ref<boolean>;
+    // Breathing
+    showBreathingPicker: Ref<boolean>;
+    selectedBreathingExercise: Ref<BreathingExercise | null>;
+    breathingActive: Ref<boolean>;
+    breathingPhase: Ref<string>;
+    breathingPhaseText: Ref<string>;
+    breathingPhaseDuration: Ref<number>;
+    breathingCycleCount: Ref<number>;
+    breathingExercises: BreathingExercise[];
+    // Session result
+    completedMeditationDuration: Ref<number>;
+    showNotes: Ref<boolean>;
+    meditationAnimationIdx: Ref<number>;
+    // Methods
+    selectPresetDuration: (duration: number) => void;
+    enableCustomDuration: () => void;
+    applyCustomDuration: () => void;
+    cancelCustomDuration: () => void;
+    selectBellSound: (sound: string) => void;
+    selectBellSoundFromDropdown: (sound: string) => void;
+    startBreathingCycle: () => void;
+    stopBreathingCycle: () => void;
+    toggleBreathingDuringMeditation: () => void;
+    startMeditation: (animationCount: number) => void;
+    stopMeditation: () => void;
+    finishMeditation: () => void;
+    cleanup: () => void;
+    formatTime: (sec: number) => string;
+};
 
 // ─── Composable ───────────────────────────────────────────────────────────────
 
-export function useMeditationSession() {
+export function useMeditationSession(): MeditationSession {
     const { t } = useI18n();
 
     // ── Timer ─────────────────────────────────────────────────────────────────
@@ -101,12 +146,12 @@ export function useMeditationSession() {
 
     // ── Duration selection ────────────────────────────────────────────────────
 
-    function selectPresetDuration(duration: number) {
+    function selectPresetDuration(duration: number): void {
         isCustomDuration.value = false;
         selectedDuration.value = duration;
     }
 
-    function enableCustomDuration() {
+    function enableCustomDuration(): void {
         isCustomDuration.value = true;
         customDurationValue.value = selectedDuration.value;
         setTimeout(() => {
@@ -115,7 +160,7 @@ export function useMeditationSession() {
         }, 50);
     }
 
-    function applyCustomDuration() {
+    function applyCustomDuration(): void {
         if (customDurationValue.value >= 1 && customDurationValue.value <= 180) {
             selectedDuration.value = customDurationValue.value;
             isCustomDuration.value = false;
@@ -124,23 +169,25 @@ export function useMeditationSession() {
         }
     }
 
-    function cancelCustomDuration() {
+    function cancelCustomDuration(): void {
         isCustomDuration.value = false;
         customDurationValue.value = selectedDuration.value;
     }
 
     // ── Audio ─────────────────────────────────────────────────────────────────
 
-    function playAlert() {
-        if (!alertAudio.value) {
+    function playAlert(): void {
+        if (alertAudio.value === null) {
             alertAudio.value = new Audio('./alert.mp3');
         }
         alertAudio.value.currentTime = 0;
-        alertAudio.value.play();
+        alertAudio.value.play().catch(() => {
+            // Alert audio playback failed silently
+        });
     }
 
-    function playBellSound() {
-        if (bellAudioInstance) {
+    function playBellSound(): void {
+        if (bellAudioInstance !== null) {
             bellAudioInstance.pause();
             bellAudioInstance.currentTime = 0;
         }
@@ -151,12 +198,12 @@ export function useMeditationSession() {
         });
     }
 
-    function selectBellSound(sound: string) {
+    function selectBellSound(sound: string): void {
         bellSound.value = sound;
         playBellSound();
     }
 
-    function selectBellSoundFromDropdown(sound: string) {
+    function selectBellSoundFromDropdown(sound: string): void {
         bellSound.value = sound;
         showSoundDropdown.value = false;
         playBellSound();
@@ -164,15 +211,15 @@ export function useMeditationSession() {
 
     // ── Breathing ─────────────────────────────────────────────────────────────
 
-    function startBreathingCycle() {
-        if (!selectedBreathingExercise.value) return;
+    function startBreathingCycle(): void {
+        if (selectedBreathingExercise.value === null) return;
         breathingActive.value = true;
         breathingCycleCount.value = 1;
         let patternIndex = 0;
         const pattern = selectedBreathingExercise.value.pattern;
 
-        function nextPhase() {
-            if (!breathingActive.value || !selectedBreathingExercise.value) return;
+        function nextPhase(): void {
+            if (!breathingActive.value || selectedBreathingExercise.value === null) return;
             const current = pattern[patternIndex];
             breathingPhase.value = current.phase;
             breathingPhaseText.value = current.text;
@@ -191,41 +238,41 @@ export function useMeditationSession() {
         }, breathingPhaseDuration.value * 1000);
     }
 
-    function stopBreathingCycle() {
+    function stopBreathingCycle(): void {
         breathingActive.value = false;
-        if (breathingIntervalId) {
+        if (breathingIntervalId !== undefined) {
             clearInterval(breathingIntervalId);
             breathingIntervalId = undefined;
         }
     }
 
-    function toggleBreathingDuringMeditation() {
+    function toggleBreathingDuringMeditation(): void {
         if (breathingActive.value) {
             stopBreathingCycle();
-        } else if (selectedBreathingExercise.value) {
+        } else if (selectedBreathingExercise.value !== null) {
             startBreathingCycle();
         }
     }
 
     // ── Timer lifecycle ───────────────────────────────────────────────────────
 
-    function finishMeditation() {
+    function finishMeditation(): void {
         meditationActive.value = false;
         stopBreathingCycle();
-        if (meditationIntervalId) clearInterval(meditationIntervalId);
+        if (meditationIntervalId !== undefined) clearInterval(meditationIntervalId);
         playAlert();
         completedMeditationDuration.value = selectedDuration.value * 60 - meditationSeconds.value;
         showNotes.value = true;
     }
 
-    function stopMeditation() {
+    function stopMeditation(): void {
         meditationActive.value = false;
         stopBreathingCycle();
-        if (meditationIntervalId) clearInterval(meditationIntervalId);
+        if (meditationIntervalId !== undefined) clearInterval(meditationIntervalId);
         playAlert();
     }
 
-    function startMeditation(animationCount: number) {
+    function startMeditation(animationCount: number): void {
         if (meditationActive.value) return;
         meditationActive.value = true;
         meditationSeconds.value = selectedDuration.value * 60;
@@ -250,20 +297,20 @@ export function useMeditationSession() {
             }
         }, 1000);
         playAlert();
-        if (selectedBreathingExercise.value) {
+        if (selectedBreathingExercise.value !== null) {
             startBreathingCycle();
         }
     }
 
-    function cleanup() {
-        if (meditationIntervalId) clearInterval(meditationIntervalId);
+    function cleanup(): void {
+        if (meditationIntervalId !== undefined) clearInterval(meditationIntervalId);
         stopBreathingCycle();
     }
 
     function formatTime(sec: number): string {
-        const m = Math.floor(sec / 60);
-        const s = sec % 60;
-        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        const minutes = Math.floor(sec / 60);
+        const seconds = sec % 60;
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
 
     return {

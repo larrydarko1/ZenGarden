@@ -12,9 +12,9 @@ import {
     writeSession,
     generateObjectId,
     initializeStorage,
-} from './capacitor/db';
-import { hashPassword, verifyPassword, upgradeHashIfNeeded } from './capacitor/crypto';
-import type { UserWithPassword } from './capacitor/crypto';
+} from '@/renderer/store/adapters/capacitor/db';
+import { hashPassword, verifyPassword, upgradeHashIfNeeded } from '@/renderer/store/adapters/capacitor/crypto';
+import type { UserWithPassword } from '@/renderer/store/adapters/capacitor/crypto';
 import type {
     IStorageAdapter,
     User,
@@ -22,15 +22,20 @@ import type {
     AuthResponse,
     Meditation,
     MeditationInput,
+    Emotion,
     EmotionLog,
     EmotionLogInput,
     EightfoldPathLog,
     EightfoldPathInput,
+    PathItem,
     EmotionAnalytics,
     EightfoldPathAnalytics,
     DateRangeQuery,
     RecoveryStatus,
-} from '../types';
+} from '@/renderer/store/types';
+
+type RecoveryCode = { hash: string; salt: string; used: boolean };
+type UserRecord = UserWithPassword & { recoveryCodes?: RecoveryCode[] };
 
 export class CapacitorStorageAdapter implements IStorageAdapter {
     private initialized = false;
@@ -42,7 +47,26 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         }
     }
 
-    async isAvailable(): Promise<boolean> {
+    private async getSignedInUsername(): Promise<string> {
+        await this.ensureInitialized();
+
+        const session = await readSession();
+        if (session.currentUser === undefined || session.currentUser === '') throw new Error('Not authenticated');
+
+        return session.currentUser;
+    }
+
+    private async getCurrentUserRecord(): Promise<{ users: UserRecord[]; index: number; username: string }> {
+        const username = await this.getSignedInUsername();
+
+        const users = await readCollection<UserRecord>(DB_FILES.users);
+        const index = users.findIndex((u) => u.username === username);
+        if (index === -1) throw new Error('User not found');
+
+        return { users, index, username };
+    }
+
+    async probeAvailability(): Promise<boolean> {
         try {
             // Check if Capacitor APIs are available
             await Preferences.get({ key: 'test' });
@@ -52,11 +76,9 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         }
     }
 
-    // ─── Auth ─────────────────────────────────────────────────────────────────
     async register(
         credentials: UserCredentials,
-        theme?: 'light' | 'dark',
-        language?: 'en' | 'es' | 'it' | 'fr' | 'de' | 'pt' | 'zh' | 'ja',
+        options: { theme?: 'light' | 'dark'; language?: 'en' | 'es' | 'it' | 'fr' | 'de' | 'pt' | 'zh' | 'ja' } = {},
     ): Promise<AuthResponse> {
         await this.ensureInitialized();
 
@@ -77,8 +99,8 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
             _id: generateObjectId(),
             username: credentials.username,
             password: hashedPassword,
-            theme: theme || 'dark',
-            language: language || 'en',
+            theme: options.theme ?? 'dark',
+            language: options.language ?? 'en',
         };
 
         users.push(newUser);
@@ -101,7 +123,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         const users = await readCollection<UserWithPassword>(DB_FILES.users);
         const user = users.find((u) => u.username === credentials.username);
 
-        if (!user || !(await verifyPassword(credentials.password, user.password))) {
+        if (user === undefined || !(await verifyPassword(credentials.password, user.password))) {
             throw new Error('Invalid username or password');
         }
 
@@ -125,46 +147,27 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     }
 
     async getCurrentUser(): Promise<{ user: User }> {
-        await this.ensureInitialized();
+        const { users, index } = await this.getCurrentUserRecord();
 
-        const session = await readSession();
-        if (!session.currentUser) {
-            throw new Error('Not authenticated');
-        }
-
-        const users = await readCollection<UserWithPassword>(DB_FILES.users);
-        const user = users.find((u) => u.username === session.currentUser);
-
-        if (!user) {
-            throw new Error('User not found');
-        }
-
-        const { password: _, ...userWithoutPassword } = user;
-        return { user: userWithoutPassword as User };
+        const { password: _, ...userWithoutPassword } = users[index];
+        return { user: userWithoutPassword };
     }
 
     async updateUsername(
         newUsername: string,
         password: string,
     ): Promise<{ message: string; username: string; token: string }> {
-        await this.ensureInitialized();
+        const { users, index, username } = await this.getCurrentUserRecord();
 
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
-
-        const users = await readCollection<UserWithPassword>(DB_FILES.users);
-        const userIndex = users.findIndex((u) => u.username === session.currentUser);
-
-        if (userIndex === -1) throw new Error('User not found');
-        if (!(await verifyPassword(password, users[userIndex].password))) {
+        if (!(await verifyPassword(password, users[index].password))) {
             throw new Error('Invalid password');
         }
-        if (users.some((u) => u.username === newUsername && u.username !== session.currentUser)) {
+        if (users.some((u) => u.username === newUsername && u.username !== username)) {
             throw new Error('Username already exists');
         }
 
-        const oldUsername = users[userIndex].username;
-        users[userIndex].username = newUsername;
+        const oldUsername = users[index].username;
+        users[index].username = newUsername;
         await writeCollection(DB_FILES.users, users);
 
         // Update session
@@ -181,16 +184,9 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     }
 
     async updatePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
-        await this.ensureInitialized();
+        const { users, index } = await this.getCurrentUserRecord();
 
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
-
-        const users = await readCollection<UserWithPassword>(DB_FILES.users);
-        const userIndex = users.findIndex((u) => u.username === session.currentUser);
-
-        if (userIndex === -1) throw new Error('User not found');
-        if (!(await verifyPassword(currentPassword, users[userIndex].password))) {
+        if (!(await verifyPassword(currentPassword, users[index].password))) {
             throw new Error('Current password is incorrect');
         }
 
@@ -198,33 +194,26 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
             throw new Error('Password must be at least 8 characters');
         }
 
-        users[userIndex].password = await hashPassword(newPassword);
+        users[index].password = await hashPassword(newPassword);
         await writeCollection(DB_FILES.users, users);
 
         return { message: 'Password updated successfully' };
     }
 
     async deleteAccount(password: string): Promise<{ message: string }> {
-        await this.ensureInitialized();
+        const { users, index, username } = await this.getCurrentUserRecord();
 
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
-
-        const users = await readCollection<UserWithPassword>(DB_FILES.users);
-        const user = users.find((u) => u.username === session.currentUser);
-
-        if (!user) throw new Error('User not found');
-        if (!(await verifyPassword(password, user.password))) {
+        if (!(await verifyPassword(password, users[index].password))) {
             throw new Error('Invalid password');
         }
 
         // Delete user data
-        const filteredUsers = users.filter((u) => u.username !== session.currentUser);
+        const filteredUsers = users.filter((u) => u.username !== username);
         await writeCollection(DB_FILES.users, filteredUsers);
 
         // Delete user's meditation data
         const meditations = await readCollection<Meditation>(DB_FILES.meditations);
-        const filteredMeditations = meditations.filter((m) => m.username !== session.currentUser);
+        const filteredMeditations = meditations.filter((m) => m.username !== username);
         await writeCollection(DB_FILES.meditations, filteredMeditations);
 
         // Clear session
@@ -235,17 +224,9 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
 
     // ─── Settings ────────────────────────────────────────────────────────────
     async updateTheme(theme: 'light' | 'dark'): Promise<{ message: string; theme: 'light' | 'dark' }> {
-        await this.ensureInitialized();
+        const { users, index } = await this.getCurrentUserRecord();
 
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
-
-        const users = await readCollection<UserWithPassword>(DB_FILES.users);
-        const userIndex = users.findIndex((u) => u.username === session.currentUser);
-
-        if (userIndex === -1) throw new Error('User not found');
-
-        users[userIndex].theme = theme;
+        users[index].theme = theme;
         await writeCollection(DB_FILES.users, users);
 
         return { message: 'Theme updated successfully', theme };
@@ -254,17 +235,9 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     async updateLanguage(
         language: 'en' | 'es' | 'it' | 'fr' | 'de' | 'pt' | 'zh' | 'ja',
     ): Promise<{ message: string; language: 'en' | 'es' | 'it' | 'fr' | 'de' | 'pt' | 'zh' | 'ja' }> {
-        await this.ensureInitialized();
+        const { users, index } = await this.getCurrentUserRecord();
 
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
-
-        const users = await readCollection<UserWithPassword>(DB_FILES.users);
-        const userIndex = users.findIndex((u) => u.username === session.currentUser);
-
-        if (userIndex === -1) throw new Error('User not found');
-
-        users[userIndex].language = language;
+        users[index].language = language;
         await writeCollection(DB_FILES.users, users);
 
         return { message: 'Language updated successfully', language };
@@ -272,16 +245,13 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
 
     // ─── Meditations ─────────────────────────────────────────────────────────
     async createMeditation(input: MeditationInput): Promise<{ message: string; meditation: Meditation }> {
-        await this.ensureInitialized();
-
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
+        const currentUser = await this.getSignedInUsername();
 
         const meditations = await readCollection<Meditation>(DB_FILES.meditations);
 
         const newMeditation: Meditation = {
             _id: generateObjectId(),
-            username: session.currentUser,
+            username: currentUser,
             date: input.date,
             duration: input.duration,
             notes: input.notes,
@@ -294,30 +264,22 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     }
 
     async getMeditations(): Promise<{ meditations: Meditation[] }> {
-        await this.ensureInitialized();
-
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
+        const currentUser = await this.getSignedInUsername();
 
         const meditations = await readCollection<Meditation>(DB_FILES.meditations);
-        const userMeditations = meditations.filter((m) => m.username === session.currentUser);
+        const userMeditations = meditations.filter((m) => m.username === currentUser);
 
         return { meditations: userMeditations };
     }
 
     // ─── Emotions ────────────────────────────────────────────────────────────
     async saveEmotionLog(input: EmotionLogInput): Promise<{ message: string; emotionLog: EmotionLog }> {
-        await this.ensureInitialized();
-
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
+        const currentUser = await this.getSignedInUsername();
 
         const emotionLogs = await readCollection<EmotionLog>(DB_FILES.emotionLogs);
 
         // Check if entry exists for this date
-        const existingIndex = emotionLogs.findIndex(
-            (log) => log.username === session.currentUser && log.date === input.date,
-        );
+        const existingIndex = emotionLogs.findIndex((log) => log.username === currentUser && log.date === input.date);
 
         const positiveCount = input.emotions.filter((e) => e.type === 'positive').length;
         const negativeCount = input.emotions.filter((e) => e.type === 'negative').length;
@@ -325,7 +287,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
 
         const emotionLog: EmotionLog = {
             _id: existingIndex >= 0 ? emotionLogs[existingIndex]._id : generateObjectId(),
-            username: session.currentUser,
+            username: currentUser,
             date: input.date,
             emotions: input.emotions,
             positiveCount,
@@ -347,33 +309,29 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     }
 
     async getEmotionLogs(query?: DateRangeQuery): Promise<{ emotionLogs: EmotionLog[] }> {
-        await this.ensureInitialized();
-
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
+        const currentUser = await this.getSignedInUsername();
 
         let emotionLogs = await readCollection<EmotionLog>(DB_FILES.emotionLogs);
-        emotionLogs = emotionLogs.filter((log) => log.username === session.currentUser);
+        emotionLogs = emotionLogs.filter((log) => log.username === currentUser);
 
         // Apply date filters if provided
-        if (query?.startDate) {
-            emotionLogs = emotionLogs.filter((log) => log.date >= query.startDate!);
+        if (query?.startDate !== undefined && query.startDate !== '') {
+            const startDate = query.startDate;
+            emotionLogs = emotionLogs.filter((log) => log.date >= startDate);
         }
-        if (query?.endDate) {
-            emotionLogs = emotionLogs.filter((log) => log.date <= query.endDate!);
+        if (query?.endDate !== undefined && query.endDate !== '') {
+            const endDate = query.endDate;
+            emotionLogs = emotionLogs.filter((log) => log.date <= endDate);
         }
-        if (query?.limit) {
+        if (query?.limit !== undefined && query.limit > 0) {
             emotionLogs = emotionLogs.slice(-query.limit);
         }
 
         return { emotionLogs };
     }
 
-    async getEmotionAnalytics(days: number = 30): Promise<EmotionAnalytics> {
-        await this.ensureInitialized();
-
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
+    async getEmotionAnalytics(days = 30): Promise<EmotionAnalytics> {
+        const currentUser = await this.getSignedInUsername();
 
         const emotionLogs = await readCollection<EmotionLog>(DB_FILES.emotionLogs);
 
@@ -381,7 +339,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         cutoffDate.setDate(cutoffDate.getDate() - days);
         const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
-        const recentLogs = emotionLogs.filter((log) => log.username === session.currentUser && log.date >= cutoffStr);
+        const recentLogs = emotionLogs.filter((log) => log.username === currentUser && log.date >= cutoffStr);
 
         // Calculate emotion frequencies
         const emotionCounts: Record<string, number> = {};
@@ -396,7 +354,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
 
             log.emotions.forEach((emotion) => {
                 uniqueEmotions.add(emotion.name);
-                emotionCounts[emotion.name] = (emotionCounts[emotion.name] || 0) + 1;
+                emotionCounts[emotion.name] = (emotionCounts[emotion.name] ?? 0) + 1;
                 emotionTypes[emotion.name] = emotion.type;
             });
         });
@@ -432,21 +390,18 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
 
     // ─── Eightfold path ──────────────────────────────────────────────────────
     async saveEightfoldPathLog(input: EightfoldPathInput): Promise<{ message: string; pathLog: EightfoldPathLog }> {
-        await this.ensureInitialized();
-
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
+        const currentUser = await this.getSignedInUsername();
 
         const logs = await readCollection<EightfoldPathLog>(DB_FILES.eightfoldPathLogs);
 
-        const existingIndex = logs.findIndex((l) => l.username === session.currentUser && l.date === input.date);
+        const existingIndex = logs.findIndex((l) => l.username === currentUser && l.date === input.date);
 
-        const completedCount = input.paths.filter((p) => p.note && p.note.trim() !== '').length;
+        const completedCount = input.paths.filter((p) => p.note !== undefined && p.note.trim() !== '').length;
         const progressPercentage = (completedCount / 8) * 100;
 
         const log: EightfoldPathLog = {
             _id: existingIndex >= 0 ? logs[existingIndex]._id : generateObjectId(),
-            username: session.currentUser,
+            username: currentUser,
             date: input.date,
             paths: input.paths,
             completedCount,
@@ -466,32 +421,28 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     }
 
     async getEightfoldPathLogs(query?: DateRangeQuery): Promise<{ pathLogs: EightfoldPathLog[] }> {
-        await this.ensureInitialized();
-
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
+        const currentUser = await this.getSignedInUsername();
 
         let logs = await readCollection<EightfoldPathLog>(DB_FILES.eightfoldPathLogs);
-        logs = logs.filter((l) => l.username === session.currentUser);
+        logs = logs.filter((l) => l.username === currentUser);
 
-        if (query?.startDate) {
-            logs = logs.filter((l) => l.date >= query.startDate!);
+        if (query?.startDate !== undefined && query.startDate !== '') {
+            const startDate = query.startDate;
+            logs = logs.filter((l) => l.date >= startDate);
         }
-        if (query?.endDate) {
-            logs = logs.filter((l) => l.date <= query.endDate!);
+        if (query?.endDate !== undefined && query.endDate !== '') {
+            const endDate = query.endDate;
+            logs = logs.filter((l) => l.date <= endDate);
         }
-        if (query?.limit) {
+        if (query?.limit !== undefined && query.limit > 0) {
             logs = logs.slice(-query.limit);
         }
 
         return { pathLogs: logs };
     }
 
-    async getEightfoldPathAnalytics(days: number = 30): Promise<EightfoldPathAnalytics> {
-        await this.ensureInitialized();
-
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
+    async getEightfoldPathAnalytics(days = 30): Promise<EightfoldPathAnalytics> {
+        const currentUser = await this.getSignedInUsername();
 
         const logs = await readCollection<EightfoldPathLog>(DB_FILES.eightfoldPathLogs);
 
@@ -499,7 +450,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         cutoffDate.setDate(cutoffDate.getDate() - days);
         const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
-        const recentLogs = logs.filter((l) => l.username === session.currentUser && l.date >= cutoffStr);
+        const recentLogs = logs.filter((l) => l.username === currentUser && l.date >= cutoffStr);
 
         const totalDays = recentLogs.length;
         const avgCompletion =
@@ -509,8 +460,8 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         const pathCounts: Record<string, number> = {};
         recentLogs.forEach((log) => {
             log.paths.forEach((pathItem) => {
-                if (pathItem.note && pathItem.note.trim() !== '') {
-                    pathCounts[pathItem.path] = (pathCounts[pathItem.path] || 0) + 1;
+                if (pathItem.note !== undefined && pathItem.note.trim() !== '') {
+                    pathCounts[pathItem.path] = (pathCounts[pathItem.path] ?? 0) + 1;
                 }
             });
         });
@@ -535,10 +486,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
 
     // ─── Data export/import ──────────────────────────────────────────────────
     async exportData(): Promise<string> {
-        await this.ensureInitialized();
-
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
+        const currentUser = await this.getSignedInUsername();
 
         const [meditations, emotionLogs, eightfoldPathLogs] = await Promise.all([
             readCollection<Meditation>(DB_FILES.meditations),
@@ -547,9 +495,9 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         ]);
 
         const data = {
-            meditations: meditations.filter((m) => m.username === session.currentUser),
-            emotionLogs: emotionLogs.filter((e) => e.username === session.currentUser),
-            eightfoldPathLogs: eightfoldPathLogs.filter((e) => e.username === session.currentUser),
+            meditations: meditations.filter((m) => m.username === currentUser),
+            emotionLogs: emotionLogs.filter((e) => e.username === currentUser),
+            eightfoldPathLogs: eightfoldPathLogs.filter((e) => e.username === currentUser),
             exportDate: new Date().toISOString(),
             version: '1.0',
         };
@@ -560,10 +508,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     async importData(
         jsonData: string,
     ): Promise<{ message: string; imported: { meditations: number; emotionLogs: number; eightfoldPathLogs: number } }> {
-        await this.ensureInitialized();
-
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
+        const currentUser = await this.getSignedInUsername();
 
         let parsed: unknown;
         try {
@@ -581,6 +526,17 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         const isArrayOfObjects = (val: unknown): val is Record<string, unknown>[] =>
             Array.isArray(val) && val.every((item) => typeof item === 'object' && item !== null);
 
+        const isEmotionArray = (val: unknown): val is Emotion[] =>
+            isArrayOfObjects(val) &&
+            val.every(
+                (item) =>
+                    typeof item['name'] === 'string' && (item['type'] === 'positive' || item['type'] === 'negative'),
+            );
+
+        const isPathItemArray = (val: unknown): val is PathItem[] =>
+            isArrayOfObjects(val) &&
+            val.every((item) => typeof item['path'] === 'string' && typeof item['note'] === 'string');
+
         // Read existing data
         const [meditations, emotionLogs, eightfoldPathLogs] = await Promise.all([
             readCollection<Meditation>(DB_FILES.meditations),
@@ -592,15 +548,15 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
 
         // Import meditations — only accept objects with required fields
         if (isArrayOfObjects(importPayload.meditations)) {
-            for (const m of importPayload.meditations) {
-                if (typeof m['Date'] !== 'string' || typeof m['duration'] !== 'number') continue;
+            for (const meditation of importPayload.meditations) {
+                if (typeof meditation['Date'] !== 'string' || typeof meditation['duration'] !== 'number') continue;
                 meditations.push({
                     _id: generateObjectId(),
-                    username: session.currentUser,
-                    date: m['Date'] as string,
-                    duration: m['duration'] as number,
-                    notes: typeof m['notes'] === 'string' ? (m['notes'] as string) : '',
-                } as Meditation);
+                    username: currentUser,
+                    date: meditation['Date'],
+                    duration: meditation['duration'],
+                    notes: typeof meditation['notes'] === 'string' ? meditation['notes'] : '',
+                });
                 counts.meditations++;
             }
             await writeCollection(DB_FILES.meditations, meditations);
@@ -608,19 +564,20 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
 
         // Import emotion logs — validate required array shapes
         if (isArrayOfObjects(importPayload.emotionLogs)) {
-            for (const e of importPayload.emotionLogs) {
-                if (typeof e['date'] !== 'string' || !Array.isArray(e['emotions'])) continue;
+            for (const entry of importPayload.emotionLogs) {
+                const emotions = entry['emotions'];
+                if (typeof entry['date'] !== 'string' || !isEmotionArray(emotions)) continue;
                 emotionLogs.push({
                     _id: generateObjectId(),
-                    username: session.currentUser,
-                    date: e['date'],
-                    emotions: e['emotions'],
-                    positiveCount: typeof e['positiveCount'] === 'number' ? e['positiveCount'] : 0,
-                    negativeCount: typeof e['negativeCount'] === 'number' ? e['negativeCount'] : 0,
-                    pnRatio: typeof e['pnRatio'] === 'number' ? e['pnRatio'] : 0,
-                    note: typeof e['note'] === 'string' ? e['note'] : undefined,
+                    username: currentUser,
+                    date: entry['date'],
+                    emotions,
+                    positiveCount: typeof entry['positiveCount'] === 'number' ? entry['positiveCount'] : 0,
+                    negativeCount: typeof entry['negativeCount'] === 'number' ? entry['negativeCount'] : 0,
+                    pnRatio: typeof entry['pnRatio'] === 'number' ? entry['pnRatio'] : 0,
+                    note: typeof entry['note'] === 'string' ? entry['note'] : undefined,
                     updatedAt: new Date().toISOString(),
-                } as EmotionLog);
+                });
                 counts.emotionLogs++;
             }
             await writeCollection(DB_FILES.emotionLogs, emotionLogs);
@@ -628,17 +585,19 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
 
         // Import eightfold path logs — validate required fields
         if (isArrayOfObjects(importPayload.eightfoldPathLogs)) {
-            for (const e of importPayload.eightfoldPathLogs) {
-                if (typeof e['date'] !== 'string' || !Array.isArray(e['paths'])) continue;
+            for (const entry of importPayload.eightfoldPathLogs) {
+                const paths = entry['paths'];
+                if (typeof entry['date'] !== 'string' || !isPathItemArray(paths)) continue;
                 eightfoldPathLogs.push({
                     _id: generateObjectId(),
-                    username: session.currentUser,
-                    date: e['date'],
-                    paths: e['paths'],
-                    completedCount: typeof e['completedCount'] === 'number' ? e['completedCount'] : 0,
-                    progressPercentage: typeof e['progressPercentage'] === 'number' ? e['progressPercentage'] : 0,
+                    username: currentUser,
+                    date: entry['date'],
+                    paths,
+                    completedCount: typeof entry['completedCount'] === 'number' ? entry['completedCount'] : 0,
+                    progressPercentage:
+                        typeof entry['progressPercentage'] === 'number' ? entry['progressPercentage'] : 0,
                     updatedAt: new Date().toISOString(),
-                } as EightfoldPathLog);
+                });
                 counts.eightfoldPathLogs++;
             }
             await writeCollection(DB_FILES.eightfoldPathLogs, eightfoldPathLogs);
@@ -649,18 +608,9 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
 
     // ─── Recovery codes ─────────────────────────────────────────────────────
     async getRecoveryStatus(): Promise<RecoveryStatus> {
-        await this.ensureInitialized();
+        const { users, index } = await this.getCurrentUserRecord();
 
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
-
-        const users = await readCollection<
-            UserWithPassword & { recoveryCodes?: Array<{ hash: string; salt: string; used: boolean }> }
-        >(DB_FILES.users);
-        const user = users.find((u) => u.username === session.currentUser);
-        if (!user) throw new Error('User not found');
-
-        const codes = user.recoveryCodes ?? [];
+        const codes = users[index].recoveryCodes ?? [];
         const usedCount = codes.filter((c) => c.used).length;
 
         return {
@@ -672,24 +622,15 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     }
 
     async generateRecoveryCodes(password: string): Promise<{ codes: string[] }> {
-        await this.ensureInitialized();
+        const { users, index } = await this.getCurrentUserRecord();
 
-        const session = await readSession();
-        if (!session.currentUser) throw new Error('Not authenticated');
-
-        const users = await readCollection<
-            UserWithPassword & { recoveryCodes?: Array<{ hash: string; salt: string; used: boolean }> }
-        >(DB_FILES.users);
-        const userIndex = users.findIndex((u) => u.username === session.currentUser);
-        if (userIndex === -1) throw new Error('User not found');
-
-        if (!(await verifyPassword(password, users[userIndex].password))) {
+        if (!(await verifyPassword(password, users[index].password))) {
             throw new Error('Invalid password');
         }
 
         // Generate 10 random codes and hash each one for storage
         const plaintextCodes: string[] = [];
-        const hashedCodes: Array<{ hash: string; salt: string; used: boolean }> = [];
+        const hashedCodes: RecoveryCode[] = [];
 
         for (let i = 0; i < 10; i++) {
             const bytes = new Uint8Array(6);
@@ -707,7 +648,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
             hashedCodes.push({ hash: codeHash, salt: '', used: false });
         }
 
-        users[userIndex].recoveryCodes = hashedCodes;
+        users[index].recoveryCodes = hashedCodes;
         await writeCollection(DB_FILES.users, users);
 
         return { codes: plaintextCodes };
@@ -720,15 +661,13 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     ): Promise<{ message: string }> {
         await this.ensureInitialized();
 
-        if (!newPassword || newPassword.length < 8) {
+        if (newPassword.length < 8) {
             throw new Error('Password must be at least 8 characters');
         }
 
-        const users = await readCollection<
-            UserWithPassword & { recoveryCodes?: Array<{ hash: string; salt: string; used: boolean }> }
-        >(DB_FILES.users);
+        const users = await readCollection<UserRecord>(DB_FILES.users);
         const user = users.find((u) => u.username === username.trim());
-        if (!user) throw new Error('Invalid username or recovery code');
+        if (user === undefined) throw new Error('Invalid username or recovery code');
 
         const codes = user.recoveryCodes ?? [];
         let matchIdx = -1;

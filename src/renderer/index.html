@@ -6,6 +6,31 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!--
+    Content Security Policy (also silences Electron's "Insecure Content-Security-Policy" warning).
+    In a packaged build the renderer loads over file://, so there is no server to send a header
+    and this tag is the entire policy.
+    Allowances beyond 'self':
+      - style-src 'unsafe-inline'   → Vue :style bindings + Vite dev style injection
+      - img-src data:               → the inline SVG data URI in the stylesheet
+      - font-src data:              → data-URI font faces
+      - connect-src ws://localhost:3000 ws://127.0.0.1:3000 → Vite HMR websocket (dev only)
+    No 'unsafe-eval': Vue SFCs are precompiled and vue-i18n v10+ uses the CSP-safe JIT message compiler.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    media-src 'self';
+    font-src 'self' data:;
+    connect-src 'self' ws://localhost:3000 ws://127.0.0.1:3000;
+    frame-src 'none';
+    object-src 'none';
+    base-uri 'none';
+    form-action 'none'
+  " />
+
   <!-- App Meta Tags -->
   <meta name="theme-color" content="#4a7c59" />
   <meta name="description" content="A meditation and mindfulness web app to help you find inner peace" />

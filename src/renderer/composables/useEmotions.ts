@@ -3,22 +3,43 @@
  * Owns: emotion key lists, computed translated lists, toggle, persistence calls, analytics load.
  * Does NOT own: date navigation (EmotionTracker.vue), rendering (EmotionTracker.vue).
  */
-
-import { ref, computed, type Ref } from 'vue';
+import { ref, computed, type ComputedRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { saveEmotionLog, getEmotionLogs, getEmotionAnalytics } from '../store';
-import type { EmotionAnalytics, EmotionStat } from '../store/types';
+import { saveEmotionLog, getEmotionLogs, getEmotionAnalytics } from '@/renderer/store';
+import type { EmotionAnalytics, EmotionStat } from '@/renderer/store/types';
+import { log } from '@/renderer/utils/logger';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface Emotion {
+type Emotion = {
     name: string;
     type: 'positive' | 'negative';
     displayName: string;
     description: string;
-}
+};
 
-// ─── Static keys ──────────────────────────────────────────────────────────────
+type EmotionsState = {
+    // State
+    selectedEmotions: Ref<Emotion[]>;
+    dailyNote: Ref<string>;
+    saveStatus: Ref<'saving' | 'saved' | null>;
+    loadingEmotions: Ref<boolean>;
+    loading: Ref<boolean>;
+    analytics: Ref<EmotionAnalytics | null>;
+    // Computed
+    positiveEmotions: ComputedRef<Emotion[]>;
+    negativeEmotions: ComputedRef<Emotion[]>;
+    positiveCount: ComputedRef<number>;
+    negativeCount: ComputedRef<number>;
+    pnRatio: ComputedRef<string>;
+    topPositiveEmotions: ComputedRef<EmotionStat[]>;
+    topNegativeEmotions: ComputedRef<EmotionStat[]>;
+    // Methods
+    isEmotionSelected: (name: string) => boolean;
+    getTranslatedEmotionName: (englishName: string) => string;
+    toggleEmotion: (emotion: Emotion) => void;
+    handleNoteInput: () => void;
+    loadEmotions: () => Promise<void>;
+    loadAnalytics: () => Promise<void>;
+};
 
 const positiveEmotionKeys = [
     'Joy',
@@ -93,9 +114,7 @@ const negativeEmotionKeys = [
     'Rejection',
 ];
 
-// ─── Composable ───────────────────────────────────────────────────────────────
-
-export function useEmotions(selectedDate: Ref<Date>, activeTab: Ref<string>) {
+export function useEmotions(selectedDate: Ref<Date>, activeTab: Ref<string>): EmotionsState {
     const { t } = useI18n();
 
     // View state
@@ -129,38 +148,40 @@ export function useEmotions(selectedDate: Ref<Date>, activeTab: Ref<string>) {
     );
 
     // Derived counts
-    const positiveCount = computed(() => selectedEmotions.value.filter((e) => e.type === 'positive').length);
-    const negativeCount = computed(() => selectedEmotions.value.filter((e) => e.type === 'negative').length);
+    const positiveCount = computed(
+        () => selectedEmotions.value.filter((emotion) => emotion.type === 'positive').length,
+    );
+    const negativeCount = computed(
+        () => selectedEmotions.value.filter((emotion) => emotion.type === 'negative').length,
+    );
     const pnRatio = computed(() => {
         const total = positiveCount.value + negativeCount.value;
         return total === 0 ? '0.00' : (positiveCount.value / total).toFixed(2);
     });
 
     const topPositiveEmotions = computed(() =>
-        (analytics.value?.topEmotions ?? []).filter((e: EmotionStat) => e.type === 'positive').slice(0, 10),
+        (analytics.value?.topEmotions ?? []).filter((stat: EmotionStat) => stat.type === 'positive').slice(0, 10),
     );
     const topNegativeEmotions = computed(() =>
-        (analytics.value?.topEmotions ?? []).filter((e: EmotionStat) => e.type === 'negative').slice(0, 10),
+        (analytics.value?.topEmotions ?? []).filter((stat: EmotionStat) => stat.type === 'negative').slice(0, 10),
     );
 
     function isEmotionSelected(name: string): boolean {
-        return selectedEmotions.value.some((e) => e.name === name);
+        return selectedEmotions.value.some((emotion) => emotion.name === name);
     }
 
     function getTranslatedEmotionName(englishName: string): string {
         const all = [...positiveEmotions.value, ...negativeEmotions.value];
-        return all.find((e) => e.name === englishName)?.displayName ?? englishName;
+        return all.find((emotion) => emotion.name === englishName)?.displayName ?? englishName;
     }
 
-    // ── Persistence ───────────────────────────────────────────────────────────
-
-    async function saveEmotions() {
+    async function saveEmotions(): Promise<void> {
         saveStatus.value = 'saving';
         try {
             await saveEmotionLog(
                 selectedDate.value.toISOString(),
-                selectedEmotions.value.map((e) => ({ name: e.name, type: e.type })),
-                dailyNote.value || undefined,
+                selectedEmotions.value.map((emotion) => ({ name: emotion.name, type: emotion.type })),
+                dailyNote.value.length > 0 ? dailyNote.value : undefined,
             );
             saveStatus.value = 'saved';
             if (activeTab.value === 'analytics') await loadAnalytics();
@@ -168,12 +189,12 @@ export function useEmotions(selectedDate: Ref<Date>, activeTab: Ref<string>) {
                 saveStatus.value = null;
             }, 2000);
         } catch (err) {
-            console.error('[useEmotions] save failed', err);
+            log.error('Emotions save failed', err);
             saveStatus.value = null;
         }
     }
 
-    async function loadEmotions() {
+    async function loadEmotions(): Promise<void> {
         loadingEmotions.value = true;
         try {
             const start = new Date(selectedDate.value);
@@ -187,7 +208,8 @@ export function useEmotions(selectedDate: Ref<Date>, activeTab: Ref<string>) {
                 const loaded = response.emotionLogs[0].emotions ?? [];
                 const all = [...positiveEmotions.value, ...negativeEmotions.value];
                 selectedEmotions.value = loaded.map(
-                    (e: { name: string; type: string }) => all.find((full) => full.name === e.name) ?? (e as Emotion),
+                    (entry: { name: string; type: string }) =>
+                        all.find((full) => full.name === entry.name) ?? (entry as Emotion),
                 );
                 dailyNote.value = response.emotionLogs[0].note ?? '';
             } else {
@@ -195,36 +217,38 @@ export function useEmotions(selectedDate: Ref<Date>, activeTab: Ref<string>) {
                 dailyNote.value = '';
             }
         } catch (err) {
-            console.error('[useEmotions] load failed', err);
+            log.error('Emotions load failed', err);
             selectedEmotions.value = [];
         } finally {
             loadingEmotions.value = false;
         }
     }
 
-    async function loadAnalytics() {
+    async function loadAnalytics(): Promise<void> {
         loading.value = true;
         try {
             analytics.value = await getEmotionAnalytics(90);
         } catch (err) {
-            console.error('[useEmotions] analytics load failed', err);
+            log.error('Emotion analytics load failed', err);
             analytics.value = null;
         } finally {
             loading.value = false;
         }
     }
 
-    function toggleEmotion(emotion: Emotion) {
-        const idx = selectedEmotions.value.findIndex((e) => e.name === emotion.name);
+    function toggleEmotion(emotion: Emotion): void {
+        const idx = selectedEmotions.value.findIndex((selected) => selected.name === emotion.name);
         if (idx > -1) selectedEmotions.value.splice(idx, 1);
         else selectedEmotions.value.push(emotion);
-        saveEmotions();
+        void saveEmotions();
     }
 
     // Named `handleNoteInput` to match the template binding in EmotionTracker.vue
-    function handleNoteInput() {
+    function handleNoteInput(): void {
         if (noteTimeout !== null) clearTimeout(noteTimeout);
-        noteTimeout = window.setTimeout(() => saveEmotions(), 1500);
+        noteTimeout = window.setTimeout(() => {
+            void saveEmotions();
+        }, 1500);
     }
 
     return {

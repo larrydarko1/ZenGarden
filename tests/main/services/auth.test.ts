@@ -1,14 +1,17 @@
-// @vitest-environment node
-
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { register as registerAuthHandlers, findCurrentSession } from '@/main/services/auth';
 
-// ─── Mocks ────────────────────────────────────────────────────────────────────
+import type { IpcResult } from '@/schemas/storage';
 
-// vi.hoisted runs before vi.mock hoisting, so these are available inside mock factories
+type IpcHandler = (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => unknown;
+
 const state = vi.hoisted(() => ({
     collections: {} as Record<string, unknown[]>,
     savedSession: null as { username: string; token: string } | null,
 }));
+
+// Stub event object for handler calls
+const event = {} as Electron.IpcMainInvokeEvent;
 
 vi.mock('electron', () => ({
     app: { getPath: () => '/tmp/zengarden-test' },
@@ -31,7 +34,7 @@ vi.mock('fs', () => ({
     unlinkSync: vi.fn(),
 }));
 
-vi.mock('../../../src/main/services/db', () => ({
+vi.mock('@/main/services/db', () => ({
     readCollection: (name: string) => state.collections[name] ?? [],
     writeCollection: (name: string, data: unknown[]) => {
         state.collections[name] = data;
@@ -42,12 +45,24 @@ vi.mock('../../../src/main/services/db', () => ({
     },
 }));
 
-// Stub event object for handler calls
-const event = {} as Electron.IpcMainInvokeEvent;
+function makeMockIpc() {
+    const handlers = new Map<string, IpcHandler>();
+    return {
+        handle(channel: string, fn: IpcHandler) {
+            handlers.set(channel, fn);
+        },
+        async invoke(channel: string, ...args: unknown[]) {
+            const fn = handlers.get(channel);
+            if (fn === undefined) throw new Error(`No handler registered for channel '${channel}'`);
+            const result = (await fn(event, ...args)) as IpcResult<unknown>;
+            if (!result.success) throw new Error(result.error);
+            return result.data;
+        },
+    };
+}
 
-import { authHandlers, getCurrentSession } from '../../../src/main/services/auth';
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+const ipc = makeMockIpc();
+registerAuthHandlers(ipc as unknown as Electron.IpcMain);
 
 function resetState(): void {
     state.collections = { users: [], meditations: [], emotionLogs: [], eightfoldPathLogs: [] };
@@ -58,13 +73,11 @@ async function registerUser(
     username = 'testuser',
     password = 'password123',
 ): Promise<{ user: { username: string }; token: string }> {
-    return authHandlers['storage:register'](event, username, password) as Promise<{
+    return ipc.invoke('storage:register', username, password) as Promise<{
         user: { username: string };
         token: string;
     }>;
 }
-
-// ─── Registration ─────────────────────────────────────────────────────────────
 
 describe('storage:register', () => {
     beforeEach(resetState);
@@ -109,8 +122,6 @@ describe('storage:register', () => {
     });
 });
 
-// ─── Login ────────────────────────────────────────────────────────────────────
-
 describe('storage:login', () => {
     beforeEach(async () => {
         resetState();
@@ -119,7 +130,7 @@ describe('storage:login', () => {
 
     it('logs in with correct credentials', async () => {
         state.savedSession = null;
-        const res = (await authHandlers['storage:login'](event, 'testuser', 'password123')) as {
+        const res = (await ipc.invoke('storage:login', 'testuser', 'password123')) as {
             user: { username: string };
             token: string;
         };
@@ -128,19 +139,17 @@ describe('storage:login', () => {
     });
 
     it('rejects incorrect password', async () => {
-        await expect(authHandlers['storage:login'](event, 'testuser', 'wrongpassword')).rejects.toThrow(
+        await expect(ipc.invoke('storage:login', 'testuser', 'wrongpassword')).rejects.toThrow(
             'Invalid username or password',
         );
     });
 
     it('rejects non-existent username', async () => {
-        await expect(authHandlers['storage:login'](event, 'ghost', 'password123')).rejects.toThrow(
+        await expect(ipc.invoke('storage:login', 'ghost', 'password123')).rejects.toThrow(
             'Invalid username or password',
         );
     });
 });
-
-// ─── getCurrentUser ───────────────────────────────────────────────────────────
 
 describe('storage:getCurrentUser', () => {
     beforeEach(async () => {
@@ -149,18 +158,16 @@ describe('storage:getCurrentUser', () => {
     });
 
     it('returns user info when session exists', async () => {
-        const res = (await authHandlers['storage:getCurrentUser'](event)) as { username: string };
+        const res = (await ipc.invoke('storage:getCurrentUser')) as { username: string };
         expect(res.username).toBe('testuser');
     });
 
     it('returns null when no session', async () => {
-        await authHandlers['storage:logout'](event);
-        const res = await authHandlers['storage:getCurrentUser'](event);
+        await ipc.invoke('storage:logout');
+        const res = await ipc.invoke('storage:getCurrentUser');
         expect(res).toBeNull();
     });
 });
-
-// ─── Logout ───────────────────────────────────────────────────────────────────
 
 describe('storage:logout', () => {
     beforeEach(async () => {
@@ -169,45 +176,40 @@ describe('storage:logout', () => {
     });
 
     it('clears the session', async () => {
-        await authHandlers['storage:logout'](event);
+        await ipc.invoke('storage:logout');
         expect(state.savedSession).toBeNull();
-        expect(getCurrentSession()).toBeNull();
+        expect(findCurrentSession()).toBeNull();
     });
 });
-
-// ─── Delete account ───────────────────────────────────────────────────────────
 
 describe('storage:deleteAccount', () => {
     beforeEach(async () => {
         resetState();
         await registerUser();
-        // Add some associated data
         state.collections['meditations'] = [{ _id: '1', username: 'testuser', date: '2025-01-01' }];
         state.collections['emotionLogs'] = [{ _id: '2', username: 'testuser', date: '2025-01-01' }];
     });
 
     it('deletes account with correct password', async () => {
-        await authHandlers['storage:deleteAccount'](event, 'password123');
+        await ipc.invoke('storage:deleteAccount', 'password123');
         expect(state.collections['users']).toHaveLength(0);
     });
 
     it('removes associated data from all collections', async () => {
-        await authHandlers['storage:deleteAccount'](event, 'password123');
+        await ipc.invoke('storage:deleteAccount', 'password123');
         expect(state.collections['meditations']).toHaveLength(0);
         expect(state.collections['emotionLogs']).toHaveLength(0);
     });
 
     it('clears the session after deletion', async () => {
-        await authHandlers['storage:deleteAccount'](event, 'password123');
+        await ipc.invoke('storage:deleteAccount', 'password123');
         expect(state.savedSession).toBeNull();
     });
 
     it('rejects with wrong password', async () => {
-        await expect(authHandlers['storage:deleteAccount'](event, 'wrongpass')).rejects.toThrow('Invalid password');
+        await expect(ipc.invoke('storage:deleteAccount', 'wrongpass')).rejects.toThrow('Invalid password');
     });
 });
-
-// ─── Settings ─────────────────────────────────────────────────────────────────
 
 describe('storage:updateUsername', () => {
     beforeEach(async () => {
@@ -217,25 +219,23 @@ describe('storage:updateUsername', () => {
     });
 
     it('updates username with correct password', async () => {
-        await authHandlers['storage:updateUsername'](event, 'newname', 'password123');
+        await ipc.invoke('storage:updateUsername', 'newname', 'password123');
         const user = state.collections['users'][0] as { username: string };
         expect(user.username).toBe('newname');
     });
 
     it('propagates the rename to data collections', async () => {
-        await authHandlers['storage:updateUsername'](event, 'newname', 'password123');
+        await ipc.invoke('storage:updateUsername', 'newname', 'password123');
         const med = state.collections['meditations'][0] as { username: string };
         expect(med.username).toBe('newname');
     });
 
     it('rejects with wrong password', async () => {
-        await expect(authHandlers['storage:updateUsername'](event, 'newname', 'wrongpass')).rejects.toThrow(
-            'Invalid password',
-        );
+        await expect(ipc.invoke('storage:updateUsername', 'newname', 'wrongpass')).rejects.toThrow('Invalid password');
     });
 
     it('rejects invalid new username', async () => {
-        await expect(authHandlers['storage:updateUsername'](event, 'ab', 'password123')).rejects.toThrow(
+        await expect(ipc.invoke('storage:updateUsername', 'ab', 'password123')).rejects.toThrow(
             'Username must be 3-32 alphanumeric characters',
         );
     });
@@ -248,23 +248,22 @@ describe('storage:updatePassword', () => {
     });
 
     it('updates password with correct current password', async () => {
-        await authHandlers['storage:updatePassword'](event, 'password123', 'newpassword456');
-        // Verify we can now login with the new password
+        await ipc.invoke('storage:updatePassword', 'password123', 'newpassword456');
         state.savedSession = null;
-        const res = (await authHandlers['storage:login'](event, 'testuser', 'newpassword456')) as {
+        const res = (await ipc.invoke('storage:login', 'testuser', 'newpassword456')) as {
             token: string;
         };
         expect(res.token).toBeTruthy();
     });
 
     it('rejects with wrong current password', async () => {
-        await expect(authHandlers['storage:updatePassword'](event, 'wrongpass', 'newpass12')).rejects.toThrow(
+        await expect(ipc.invoke('storage:updatePassword', 'wrongpass', 'newpass12')).rejects.toThrow(
             'Current password is incorrect',
         );
     });
 
     it('rejects short new password', async () => {
-        await expect(authHandlers['storage:updatePassword'](event, 'password123', 'short')).rejects.toThrow(
+        await expect(ipc.invoke('storage:updatePassword', 'password123', 'short')).rejects.toThrow(
             'Password must be at least 8 characters',
         );
     });
@@ -277,14 +276,14 @@ describe('storage:updateTheme', () => {
     });
 
     it('updates the theme', async () => {
-        await authHandlers['storage:updateTheme'](event, 'light');
+        await ipc.invoke('storage:updateTheme', 'light');
         const user = state.collections['users'][0] as { theme: string };
         expect(user.theme).toBe('light');
     });
 
     it('rejects when not authenticated', async () => {
-        await authHandlers['storage:logout'](event);
-        await expect(authHandlers['storage:updateTheme'](event, 'light')).rejects.toThrow('Not authenticated');
+        await ipc.invoke('storage:logout');
+        await expect(ipc.invoke('storage:updateTheme', 'light')).rejects.toThrow('Not authenticated');
     });
 });
 
@@ -295,13 +294,11 @@ describe('storage:updateLanguage', () => {
     });
 
     it('updates the language', async () => {
-        await authHandlers['storage:updateLanguage'](event, 'ja');
+        await ipc.invoke('storage:updateLanguage', 'ja');
         const user = state.collections['users'][0] as { language: string };
         expect(user.language).toBe('ja');
     });
 });
-
-// ─── Recovery codes ───────────────────────────────────────────────────────────
 
 describe('storage:getRecoveryStatus', () => {
     beforeEach(async () => {
@@ -310,7 +307,7 @@ describe('storage:getRecoveryStatus', () => {
     });
 
     it('returns no codes when none have been generated', async () => {
-        const status = (await authHandlers['storage:getRecoveryStatus'](event)) as {
+        const status = (await ipc.invoke('storage:getRecoveryStatus')) as {
             hasRecoveryCodes: boolean;
             totalCodes: number;
         };
@@ -319,8 +316,8 @@ describe('storage:getRecoveryStatus', () => {
     });
 
     it('rejects when not authenticated', async () => {
-        await authHandlers['storage:logout'](event);
-        await expect(authHandlers['storage:getRecoveryStatus'](event)).rejects.toThrow('Not authenticated');
+        await ipc.invoke('storage:logout');
+        await expect(ipc.invoke('storage:getRecoveryStatus')).rejects.toThrow('Not authenticated');
     });
 });
 
@@ -331,16 +328,16 @@ describe('storage:generateRecoveryCodes', () => {
     });
 
     it('returns 10 plaintext codes', async () => {
-        const res = (await authHandlers['storage:generateRecoveryCodes'](event, 'password123')) as {
+        const res = (await ipc.invoke('storage:generateRecoveryCodes', 'password123')) as {
             codes: string[];
         };
         expect(res.codes).toHaveLength(10);
     });
 
     it('stores hashed codes on the user record', async () => {
-        await authHandlers['storage:generateRecoveryCodes'](event, 'password123');
+        await ipc.invoke('storage:generateRecoveryCodes', 'password123');
         const user = state.collections['users'][0] as {
-            recoveryCodes: Array<{ hash: string; salt: string; used: boolean }>;
+            recoveryCodes: { hash: string; salt: string; used: boolean }[];
         };
         expect(user.recoveryCodes).toHaveLength(10);
         user.recoveryCodes.forEach((c) => {
@@ -351,8 +348,8 @@ describe('storage:generateRecoveryCodes', () => {
     });
 
     it('updates recovery status after generation', async () => {
-        await authHandlers['storage:generateRecoveryCodes'](event, 'password123');
-        const status = (await authHandlers['storage:getRecoveryStatus'](event)) as {
+        await ipc.invoke('storage:generateRecoveryCodes', 'password123');
+        const status = (await ipc.invoke('storage:getRecoveryStatus')) as {
             hasRecoveryCodes: boolean;
             remainingCodes: number;
         };
@@ -361,9 +358,7 @@ describe('storage:generateRecoveryCodes', () => {
     });
 
     it('rejects with wrong password', async () => {
-        await expect(authHandlers['storage:generateRecoveryCodes'](event, 'wrongpass')).rejects.toThrow(
-            'Invalid password',
-        );
+        await expect(ipc.invoke('storage:generateRecoveryCodes', 'wrongpass')).rejects.toThrow('Invalid password');
     });
 });
 
@@ -373,52 +368,130 @@ describe('storage:resetPasswordWithRecoveryCode', () => {
     beforeEach(async () => {
         resetState();
         await registerUser();
-        const res = (await authHandlers['storage:generateRecoveryCodes'](event, 'password123')) as {
+        const res = (await ipc.invoke('storage:generateRecoveryCodes', 'password123')) as {
             codes: string[];
         };
         codes = res.codes;
     });
 
     it('resets password with a valid recovery code', async () => {
-        await authHandlers['storage:resetPasswordWithRecoveryCode'](event, 'testuser', codes[0], 'brandnewpass');
-        // Verify login works with the new password
+        await ipc.invoke('storage:resetPasswordWithRecoveryCode', 'testuser', codes[0], 'brandnewpass');
         state.savedSession = null;
-        const res = (await authHandlers['storage:login'](event, 'testuser', 'brandnewpass')) as {
+        const res = (await ipc.invoke('storage:login', 'testuser', 'brandnewpass')) as {
             token: string;
         };
         expect(res.token).toBeTruthy();
     });
 
     it('marks the recovery code as used', async () => {
-        await authHandlers['storage:resetPasswordWithRecoveryCode'](event, 'testuser', codes[0], 'newpass12345');
+        await ipc.invoke('storage:resetPasswordWithRecoveryCode', 'testuser', codes[0], 'newpass12345');
         const user = state.collections['users'][0] as {
-            recoveryCodes: Array<{ used: boolean }>;
+            recoveryCodes: { used: boolean }[];
         };
         expect(user.recoveryCodes[0].used).toBe(true);
     });
 
     it('rejects a used code on second attempt', async () => {
-        await authHandlers['storage:resetPasswordWithRecoveryCode'](event, 'testuser', codes[0], 'newpass12345');
+        await ipc.invoke('storage:resetPasswordWithRecoveryCode', 'testuser', codes[0], 'newpass12345');
         await expect(
-            authHandlers['storage:resetPasswordWithRecoveryCode'](event, 'testuser', codes[0], 'anotherpass1'),
+            ipc.invoke('storage:resetPasswordWithRecoveryCode', 'testuser', codes[0], 'anotherpass1'),
         ).rejects.toThrow('Invalid username or recovery code');
     });
 
     it('rejects an invalid code', async () => {
         await expect(
-            authHandlers['storage:resetPasswordWithRecoveryCode'](event, 'testuser', 'INVALID1', 'newpass12345'),
+            ipc.invoke('storage:resetPasswordWithRecoveryCode', 'testuser', 'INVALID1', 'newpass12345'),
         ).rejects.toThrow('Invalid username or recovery code');
     });
 
     it('rejects a non-existent username', async () => {
         await expect(
-            authHandlers['storage:resetPasswordWithRecoveryCode'](event, 'ghost', codes[0], 'newpass12345'),
+            ipc.invoke('storage:resetPasswordWithRecoveryCode', 'ghost', codes[0], 'newpass12345'),
         ).rejects.toThrow('Invalid username or recovery code');
     });
 
     it('rejects short new password', async () => {
         await expect(
-            authHandlers['storage:resetPasswordWithRecoveryCode'](event, 'testuser', codes[0], 'short'),
+            ipc.invoke('storage:resetPasswordWithRecoveryCode', 'testuser', codes[0], 'short'),
         ).rejects.toThrow('Password must be at least 8 characters');
+    });
+});
+
+describe('argument validation at the IPC boundary', () => {
+    beforeEach(resetState);
+
+    it('rejects a non-string username without reading the user file', async () => {
+        await expect(ipc.invoke('storage:register', 42, 'password123')).rejects.toThrow(
+            'Username must be 3-32 alphanumeric characters',
+        );
+        expect(state.collections['users'] ?? []).toHaveLength(0);
+    });
+
+    it('trims a username before storing it', async () => {
+        const result = await registerUser('  spacey  ');
+        expect(result.user.username).toBe('spacey');
+    });
+
+    it('falls back to defaults when registration preferences are unusable', async () => {
+        const result = (await ipc.invoke('storage:register', 'prefsuser', 'password123', {
+            theme: 'neon',
+            language: 'klingon',
+        })) as { user: { theme: string; language: string } };
+
+        expect(result.user.theme).toBe('dark');
+        expect(result.user.language).toBe('en');
+    });
+
+    it('keeps registration preferences that are valid', async () => {
+        const result = (await ipc.invoke('storage:register', 'prefsuser', 'password123', {
+            theme: 'light',
+            language: 'ja',
+        })) as { user: { theme: string; language: string } };
+
+        expect(result.user.theme).toBe('light');
+        expect(result.user.language).toBe('ja');
+    });
+
+    it('gives a malformed login the same answer as a wrong password', async () => {
+        await registerUser();
+        await expect(ipc.invoke('storage:login', null, 'password123')).rejects.toThrow('Invalid username or password');
+        await expect(ipc.invoke('storage:login', 'ab', 'password123')).rejects.toThrow('Invalid username or password');
+    });
+
+    it('rejects an unknown theme', async () => {
+        await registerUser();
+        await expect(ipc.invoke('storage:updateTheme', 'neon')).rejects.toThrow('Unknown theme');
+    });
+
+    it('rejects an unknown language', async () => {
+        await registerUser();
+        await expect(ipc.invoke('storage:updateLanguage', 'klingon')).rejects.toThrow('Unknown language');
+    });
+
+    it('rejects a non-string password on delete without touching the account', async () => {
+        await registerUser();
+        await expect(ipc.invoke('storage:deleteAccount', { toString: () => 'x' })).rejects.toThrow('Invalid password');
+        expect(state.collections['users']).toHaveLength(1);
+    });
+
+    it('rejects a non-string new username', async () => {
+        await registerUser();
+        await expect(ipc.invoke('storage:updateUsername', 12345, 'password123')).rejects.toThrow(
+            'Username must be 3-32 alphanumeric characters',
+        );
+    });
+
+    it('rejects a non-string current password', async () => {
+        await registerUser();
+        await expect(ipc.invoke('storage:updatePassword', null, 'newpass12345')).rejects.toThrow(
+            'Password must be a string',
+        );
+    });
+
+    it('rejects a non-string recovery code', async () => {
+        await registerUser();
+        await expect(
+            ipc.invoke('storage:resetPasswordWithRecoveryCode', 'testuser', 999, 'newpass12345'),
+        ).rejects.toThrow('Invalid username or recovery code');
     });
 });
