@@ -14,6 +14,7 @@ import {
     initializeStorage,
 } from '@/renderer/store/adapters/capacitor/db';
 import { hashPassword, verifyPassword, upgradeHashIfNeeded } from '@/renderer/store/adapters/capacitor/crypto';
+import { RECOVERY_CODE_COUNT, generateRecoveryCode } from '@/schemas/password';
 import type { UserWithPassword } from '@/renderer/store/adapters/capacitor/crypto';
 import type {
     IStorageAdapter,
@@ -628,24 +629,11 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
             throw new Error('Invalid password');
         }
 
-        // Generate 10 random codes and hash each one for storage
-        const plaintextCodes: string[] = [];
+        const plaintextCodes = Array.from({ length: RECOVERY_CODE_COUNT }, () => generateRecoveryCode());
         const hashedCodes: RecoveryCode[] = [];
 
-        for (let i = 0; i < 10; i++) {
-            const bytes = new Uint8Array(6);
-            crypto.getRandomValues(bytes);
-            const code = Array.from(bytes)
-                .map((b) => b.toString(36).padStart(2, '0'))
-                .join('')
-                .substring(0, 8)
-                .toUpperCase();
-            plaintextCodes.push(code);
-
-            // Hash the code using PBKDF2 via Web Crypto
-            const codeHash = await hashPassword(code);
-            // Store as {hash: fullPbkdf2String, salt: '', used: false}
-            hashedCodes.push({ hash: codeHash, salt: '', used: false });
+        for (const code of plaintextCodes) {
+            hashedCodes.push({ hash: await hashPassword(code), salt: '', used: false });
         }
 
         users[index].recoveryCodes = hashedCodes;

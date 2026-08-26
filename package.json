@@ -123,7 +123,7 @@
     },
     "engines": {
         "node": ">=24",
-        "npm": ">=10"
+        "npm": ">=11"
     },
     "os": [
         "darwin",
@@ -189,7 +189,7 @@
             "category": "Utility",
             "maintainer": "Lorenzo Mazzola",
             "vendor": "Lorenzo Mazzola",
-            "synopsis": "A local-first, privacy-focused note-taking app with on-device AI",
+            "synopsis": "A local-only meditation and mindfulness app built with Vue 3. Runs completely offline with no server required.",
             "syncDesktopName": true
         }
     },

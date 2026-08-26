@@ -89,7 +89,7 @@
         "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
         "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
         "recoveryCodes": "Codes de Récupération",
-        "recoveryCodesDescription": "Les codes de récupération vous permettent de réinitialiser votre mot de passe si vous l'oubliez. Générez 12 codes à usage unique et conservez-les dans un endroit sûr.",
+        "recoveryCodesDescription": "Les codes de récupération vous permettent de réinitialiser votre mot de passe si vous l'oubliez. Générez 10 codes à usage unique et conservez-les dans un endroit sûr.",
         "totalCodes": "Codes totaux",
         "usedCodes": "Codes utilisés",
         "remainingCodes": "Codes restants",

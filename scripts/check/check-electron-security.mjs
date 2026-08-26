@@ -249,7 +249,7 @@ if (protocolHandler !== null) {
     if (!/isInsideBoundary|isInside|withinRoot|startsWith\(\s*root/.test(body)) {
         fail(
             `${MAIN_DIR}/index.ts`,
-            `the \`${scheme}://\` handler does not check that the path is inside the vault`,
+            `the \`${scheme}://\` handler does not check that the path is inside the app's own directory`,
             'It is a file-read primitive any renderer script can call. Without containment it serves any path on the disk, and `..` in the URL is the whole exploit.',
         );
     }
@@ -373,7 +373,7 @@ for (const [rel, code] of mainSource) {
             fail(
                 `${rel}:${line}`,
                 `uses \`${bad}\``,
-                'Leaf makes no network requests, so there is no certificate to have an opinion about. Its appearance means something started talking to a server.',
+                'Zen Garden makes no network requests, so there is no certificate to have an opinion about. Its appearance means something started talking to a server.',
             );
         }
     }

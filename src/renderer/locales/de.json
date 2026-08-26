@@ -89,7 +89,7 @@
         "passwordsDoNotMatch": "Passwörter stimmen nicht überein",
         "passwordTooShort": "Das Passwort muss mindestens 6 Zeichen lang sein",
         "recoveryCodes": "Wiederherstellungscodes",
-        "recoveryCodesDescription": "Mit Wiederherstellungscodes können Sie Ihr Passwort zurücksetzen, wenn Sie es vergessen. Generieren Sie 12 Einmalcodes und bewahren Sie sie an einem sicheren Ort auf.",
+        "recoveryCodesDescription": "Mit Wiederherstellungscodes können Sie Ihr Passwort zurücksetzen, wenn Sie es vergessen. Generieren Sie 10 Einmalcodes und bewahren Sie sie an einem sicheren Ort auf.",
         "totalCodes": "Codes insgesamt",
         "usedCodes": "Verwendete Codes",
         "remainingCodes": "Verbleibende Codes",

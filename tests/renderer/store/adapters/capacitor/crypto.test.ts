@@ -18,9 +18,9 @@ describe('capacitor/crypto', () => {
     });
 
     describe('hashPassword', () => {
-        it('produces a PBKDF2-prefixed hash', async () => {
+        it('produces a record in the shared format', async () => {
             const hash = await hashPassword('testpassword');
-            expect(hash).toMatch(/^pbkdf2:[0-9a-f]+:[0-9a-f]+$/);
+            expect(hash).toMatch(/^pbkdf2\$600000\$[0-9a-f]{32}\$[0-9a-f]{128}$/);
         });
 
         it('produces different hashes for same password (random salt)', async () => {
@@ -32,10 +32,7 @@ describe('capacitor/crypto', () => {
         it('produces different hashes for different passwords', async () => {
             const hash1 = await hashPassword('password1');
             const hash2 = await hashPassword('password2');
-            const parts1 = hash1.split(':');
-            const parts2 = hash2.split(':');
-            // Derived keys should differ
-            expect(parts1[2]).not.toBe(parts2[2]);
+            expect(hash1.split('$')[3]).not.toBe(hash2.split('$')[3]);
         });
     });
 
@@ -50,8 +47,27 @@ describe('capacitor/crypto', () => {
             expect(await verifyPassword('wrong', hash)).toBe(false);
         });
 
-        it('returns false for malformed PBKDF2 hash', async () => {
-            expect(await verifyPassword('test', 'pbkdf2:invalid')).toBe(false);
+        it('returns false for a malformed record', async () => {
+            expect(await verifyPassword('test', 'pbkdf2$invalid')).toBe(false);
+            expect(await verifyPassword('test', '')).toBe(false);
+        });
+
+        // The pre-unification mobile format, written at 100k iterations.
+        it('still accepts a legacy pbkdf2: record', async () => {
+            const salt = new Uint8Array(16).fill(7);
+            const saltHex = Array.from(salt, (b) => b.toString(16).padStart(2, '0')).join('');
+            const key = await crypto.subtle.importKey('raw', new TextEncoder().encode('legacy-pw'), 'PBKDF2', false, [
+                'deriveBits',
+            ]);
+            const bits = await crypto.subtle.deriveBits(
+                { name: 'PBKDF2', salt, iterations: 100_000, hash: 'SHA-256' },
+                key,
+                512,
+            );
+            const hex = Array.from(new Uint8Array(bits), (b) => b.toString(16).padStart(2, '0')).join('');
+
+            expect(await verifyPassword('legacy-pw', `pbkdf2:${saltHex}:${hex}`)).toBe(true);
+            expect(await verifyPassword('wrong', `pbkdf2:${saltHex}:${hex}`)).toBe(false);
         });
 
         it('handles legacy SHA-256 hashes', async () => {
@@ -81,11 +97,11 @@ describe('capacitor/crypto', () => {
 
             await upgradeHashIfNeeded(users, 0, 'oldpass', 'users.json');
 
-            expect(users[0].password).toMatch(/^pbkdf2:/);
+            expect(users[0].password).toMatch(/^pbkdf2\$600000\$/);
             expect(mockWriteCollection).toHaveBeenCalledWith('users.json', users);
         });
 
-        it('does nothing if hash is already PBKDF2', async () => {
+        it('does nothing if the record is already current', async () => {
             const hash = await hashPassword('modern');
             const users: UserWithPassword[] = [
                 { _id: '1', username: 'monk', password: hash, theme: 'dark', language: 'en' },

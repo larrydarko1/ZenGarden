@@ -12,7 +12,7 @@
  *      (`unsafe-eval` and remote script/connect origins must not appear), because
  *      a CSP degrades silently: a directive someone widened still parses, still
  *      loads the app, and reports nothing.
- *   3. NO REMOTE SUBRESOURCES. Leaf's claim is that nothing leaves the device.
+ *   3. NO REMOTE SUBRESOURCES. ZenGarden's claim is that nothing leaves the device.
  *      A single remote `<script>`/`<link>` in the shell breaks that claim, at
  *      the one point where CSP is also the only guard.
  *   4. THE REDUCED-MOTION ESCAPE HATCH. 84 transition/animation declarations are
@@ -143,7 +143,7 @@ if (cspMatch === null) {
             fail(
                 INDEX_HTML,
                 `CSP allows the remote origin \`${m[0]}\``,
-                'Nothing in Leaf may reach the network. Only the dev-server HMR socket on localhost is permitted here.',
+                'Nothing in Zen Garden may reach the network. Only the dev-server HMR socket on localhost is permitted here.',
             );
         }
     }

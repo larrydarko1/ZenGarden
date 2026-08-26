@@ -89,7 +89,7 @@
         "passwordsDoNotMatch": "Le password non corrispondono",
         "passwordTooShort": "La password deve essere di almeno 6 caratteri",
         "recoveryCodes": "Codici di Recupero",
-        "recoveryCodesDescription": "I codici di recupero ti permettono di reimpostare la tua password se la dimentichi. Genera 12 codici monouso e conservali in un posto sicuro.",
+        "recoveryCodesDescription": "I codici di recupero ti permettono di reimpostare la tua password se la dimentichi. Genera 10 codici monouso e conservali in un posto sicuro.",
         "totalCodes": "Codici totali",
         "usedCodes": "Codici utilizzati",
         "remainingCodes": "Codici rimanenti",

@@ -1,7 +1,20 @@
 /**
- * Capacitor Crypto - Password hashing and verification via Web Crypto API.
- * Owns: PBKDF2 hashing, legacy SHA-256 verification, hash upgrade logic.
+ * Capacitor Crypto - Password hashing and verification via the Web Crypto API.
+ * Owns: PBKDF2 derivation on Android, password verification, legacy hash upgrade.
+ * Does NOT own: the record format shared with the desktop (@/schemas/password),
+ * file I/O (capacitor/db.ts).
  */
+import {
+    PBKDF2_ITERATIONS,
+    PBKDF2_KEY_BYTES,
+    PBKDF2_SALT_BYTES,
+    formatPbkdf2Record,
+    fromHex,
+    needsRehash,
+    parsePbkdf2Record,
+    timingSafeEqualHex,
+    toHex,
+} from '@/schemas/password';
 import { writeCollection } from '@/renderer/store/adapters/capacitor/db';
 import type { User } from '@/renderer/store/types';
 
@@ -10,60 +23,59 @@ export type UserWithPassword = {
     password: string;
 } & User;
 
-const PBKDF2_ITERATIONS = 100_000;
-const PBKDF2_PREFIX = 'pbkdf2:';
+/** The pre-unification mobile format: `pbkdf2:<saltHex>:<hashHex>`, always 100k iterations. */
+const LEGACY_PREFIX = 'pbkdf2:';
 
+const LEGACY_ITERATIONS = 100_000;
+
+/** Derives a record in the shared format. The salt is new on every call. */
 export async function hashPassword(password: string): Promise<string> {
-    const salt = crypto.getRandomValues(new Uint8Array(16));
-    const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, [
-        'deriveBits',
-    ]);
-    const derived = await crypto.subtle.deriveBits(
-        { name: 'PBKDF2', salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
-        key,
-        512,
-    );
-    return `${PBKDF2_PREFIX}${hexEncode(salt.buffer)}:${hexEncode(derived)}`;
+    const salt = new Uint8Array(PBKDF2_SALT_BYTES);
+    crypto.getRandomValues(salt);
+    const saltHex = toHex(salt);
+    return formatPbkdf2Record(PBKDF2_ITERATIONS, saltHex, await derive(password, saltHex, PBKDF2_ITERATIONS));
 }
 
 export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
-    if (storedHash.startsWith(PBKDF2_PREFIX)) {
-        const parts = storedHash.slice(PBKDF2_PREFIX.length).split(':');
-        if (parts.length !== 2) return false;
-        const saltHex = parts[0];
-        const expectedHash = parts[1];
-        const saltBytes = saltHex.match(/.{2}/g) ?? [];
-        const salt = new Uint8Array(saltBytes.map((byte) => parseInt(byte, 16)));
-        const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, [
-            'deriveBits',
-        ]);
-        const derived = await crypto.subtle.deriveBits(
-            { name: 'PBKDF2', salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
-            key,
-            512,
-        );
-        return hexEncode(derived) === expectedHash;
+    if (typeof storedHash !== 'string' || storedHash === '') return false;
+
+    const parsed = parsePbkdf2Record(storedHash);
+    if (parsed !== null) {
+        return timingSafeEqualHex(await derive(password, parsed.saltHex, parsed.iterations), parsed.hashHex);
     }
 
-    // Legacy SHA-256 path — kept for backward compatibility with existing users
-    const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
-    return hexEncode(hashBuffer) === storedHash;
+    if (storedHash.startsWith(LEGACY_PREFIX)) {
+        const parts = storedHash.slice(LEGACY_PREFIX.length).split(':');
+        if (parts.length !== 2) return false;
+        return timingSafeEqualHex(await derive(password, parts[0], LEGACY_ITERATIONS), parts[1]);
+    }
+
+    // Legacy: unsalted SHA-256, from builds before PBKDF2.
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
+    return timingSafeEqualHex(toHex(new Uint8Array(digest)), storedHash);
 }
 
+/**
+ * Rewrites a legacy or under-cost record on the next successful login, which is
+ * the only moment the plaintext is available to re-derive from.
+ */
 export async function upgradeHashIfNeeded(
     users: UserWithPassword[],
     userIndex: number,
     password: string,
     usersFilename: string,
 ): Promise<void> {
-    if (!users[userIndex].password.startsWith(PBKDF2_PREFIX)) {
-        users[userIndex].password = await hashPassword(password);
-        await writeCollection(usersFilename, users);
-    }
+    if (!needsRehash(users[userIndex].password)) return;
+    users[userIndex].password = await hashPassword(password);
+    await writeCollection(usersFilename, users);
 }
 
-function hexEncode(buffer: ArrayBuffer): string {
-    return Array.from(new Uint8Array(buffer))
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
+async function derive(secret: string, saltHex: string, iterations: number): Promise<string> {
+    const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), 'PBKDF2', false, ['deriveBits']);
+    const bits = await crypto.subtle.deriveBits(
+        { name: 'PBKDF2', salt: fromHex(saltHex), iterations, hash: 'SHA-256' },
+        key,
+        PBKDF2_KEY_BYTES * 8,
+    );
+    return toHex(new Uint8Array(bits));
 }

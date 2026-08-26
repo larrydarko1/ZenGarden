@@ -29,8 +29,9 @@ import {
 import {
     generateId,
     generateToken,
-    hashPassword,
-    hashPasswordPbkdf2,
+    hashSecret,
+    rehashIfNeeded,
+    setPassword,
     verifyPassword,
     generateRecoveryCodes,
     hashRecoveryCode,
@@ -52,7 +53,7 @@ let currentSession: Session | null = readSession();
 export function register(ipc: IpcMain): void {
     ipc.handle(
         'storage:register',
-        async (_event, username: unknown, password: unknown, options: unknown): Promise<IpcResult<AuthResult>> => {
+        (_event, username: unknown, password: unknown, options: unknown): IpcResult<AuthResult> => {
             const parsed = RegisterArgsSchema.safeParse({ username, password, options });
             if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
             const { username: trimmed, password: pw, options: prefs } = parsed.data;
@@ -63,14 +64,10 @@ export function register(ipc: IpcMain): void {
                     throw new Error('Username already exists');
                 }
 
-                const hashed = await hashPassword(pw);
-
                 const newUser: StoredUser = {
                     _id: generateId(),
                     username: trimmed,
-                    ...(typeof hashed === 'string'
-                        ? { password: hashed }
-                        : { passwordHash: hashed.hash, salt: hashed.salt }),
+                    password: hashSecret(pw),
                     theme: prefs.theme,
                     language: prefs.language,
                     stats: { totalSessions: 0, totalMinutes: 0, currentStreak: 0, longestStreak: 0 },
@@ -111,6 +108,9 @@ export function register(ipc: IpcMain): void {
                 if (user === undefined || !(await verifyPassword(parsed.data.password, user))) {
                     throw new Error('Invalid username or password');
                 }
+
+                // The one moment the plaintext exists to re-derive from.
+                if (rehashIfNeeded(user, parsed.data.password)) writeCollection('users', users);
 
                 const token = generateToken();
                 currentSession = { username: user.username, token };
@@ -165,6 +165,7 @@ export function register(ipc: IpcMain): void {
 
             const users = readCollection<StoredUser>('users');
             const idx = users.findIndex((u) => u.username === session.username);
+            if (idx === -1) throw new Error('User not found');
             const user = users[idx];
 
             if (!(await verifyPassword(parsed.data.password, user))) {
@@ -211,6 +212,10 @@ export function register(ipc: IpcMain): void {
                     throw new Error('Invalid password');
                 }
 
+                if (users.some((u) => u !== user && u.username === trimmed)) {
+                    throw new Error('Username already exists');
+                }
+
                 const oldUsername = session.username;
                 user.username = trimmed;
                 writeCollection('users', users);
@@ -252,11 +257,7 @@ export function register(ipc: IpcMain): void {
                     throw new Error('Current password is incorrect');
                 }
 
-                const { hash, salt } = hashPasswordPbkdf2(pw);
-                user.passwordHash = hash;
-                user.salt = salt;
-                // Clear any lingering Argon2 field so verify always uses PBKDF2 path after a password change
-                delete user.password;
+                setPassword(user, pw);
                 writeCollection('users', users);
                 return { success: true, data: { message: 'Password updated successfully' } };
             } catch (err) {
@@ -351,10 +352,7 @@ export function register(ipc: IpcMain): void {
 
                 // Generate plaintext codes and store only their hashes
                 const plaintextCodes = generateRecoveryCodes();
-                user.recoveryCodes = plaintextCodes.map((code) => {
-                    const { hash, salt } = hashRecoveryCode(code);
-                    return { hash, salt, used: false };
-                });
+                user.recoveryCodes = plaintextCodes.map(hashRecoveryCode);
 
                 writeCollection('users', users);
 
@@ -387,11 +385,7 @@ export function register(ipc: IpcMain): void {
                 codes[matchIdx].used = true;
                 user.recoveryCodes = codes;
 
-                // Update password to PBKDF2
-                const { hash, salt } = hashPasswordPbkdf2(pw);
-                user.passwordHash = hash;
-                user.salt = salt;
-                delete user.password;
+                setPassword(user, pw);
 
                 writeCollection('users', users);
                 return { success: true, data: { message: 'Password reset successfully' } };

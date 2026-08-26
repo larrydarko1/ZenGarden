@@ -89,7 +89,7 @@
         "passwordsDoNotMatch": "パスワードが一致しません",
         "passwordTooShort": "パスワードは少なくとも6文字必要です",
         "recoveryCodes": "リカバリコード",
-        "recoveryCodesDescription": "リカバリコードを使用すると、パスワードを忘れた場合にリセットできます。12個の一度だけ使用できるコードを生成し、安全な場所に保管してください。",
+        "recoveryCodesDescription": "リカバリコードを使用すると、パスワードを忘れた場合にリセットできます。10個の一度だけ使用できるコードを生成し、安全な場所に保管してください。",
         "totalCodes": "総コード数",
         "usedCodes": "使用済みコード",
         "remainingCodes": "残りコード",

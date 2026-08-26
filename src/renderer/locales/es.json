@@ -89,7 +89,7 @@
         "passwordsDoNotMatch": "Las contraseñas no coinciden",
         "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
         "recoveryCodes": "Códigos de Recuperación",
-        "recoveryCodesDescription": "Los códigos de recuperación le permiten restablecer su contraseña si la olvida. Genere 12 códigos de un solo uso y guárdelos en un lugar seguro.",
+        "recoveryCodesDescription": "Los códigos de recuperación le permiten restablecer su contraseña si la olvida. Genere 10 códigos de un solo uso y guárdelos en un lugar seguro.",
         "totalCodes": "Códigos totales",
         "usedCodes": "Códigos usados",
         "remainingCodes": "Códigos restantes",

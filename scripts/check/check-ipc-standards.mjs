@@ -291,7 +291,7 @@ for (const channel of [...handlers.keys(), ...events.keys()]) {
         fail(
             handlers.get(channel) ?? events.get(channel),
             `channel \`${channel}\` has a non-camelCase action`,
-            'Actions are lowercase-initial camelCase (`read`, `openLeafDir`).',
+            'Actions are lowercase-initial camelCase (`login`, `getMeditations`).',
         );
     }
     if (action.toLowerCase().startsWith(domain.toLowerCase()) && action.length > domain.length) {

@@ -89,7 +89,7 @@
         "passwordsDoNotMatch": "密码不匹配",
         "passwordTooShort": "密码必须至少为6个字符",
         "recoveryCodes": "恢复代码",
-        "recoveryCodesDescription": "恢复代码允许您在忘记密码时重置密码。生成12个一次性使用的代码并将其存储在安全的地方。",
+        "recoveryCodesDescription": "恢复代码允许您在忘记密码时重置密码。生成10个一次性使用的代码并将其存储在安全的地方。",
         "totalCodes": "总代码数",
         "usedCodes": "已使用代码",
         "remainingCodes": "剩余代码",

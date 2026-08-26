@@ -58,7 +58,7 @@ const LENGTH_BASELINE = {
     'src/renderer/components/EmotionTracker.vue': 624,
     'src/renderer/components/emotions/EmotionAnalytics.vue': 572,
     'src/renderer/components/MeditationCalendar.vue': 451,
-    'src/main/services/auth.ts': 407,
+    'src/main/services/auth.ts': 402,
 };
 
 /** Ambient declaration files are named after what they declare, not by our casing. */

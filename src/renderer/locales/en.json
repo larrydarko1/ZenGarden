@@ -89,7 +89,7 @@
         "passwordsDoNotMatch": "Passwords do not match",
         "passwordTooShort": "Password must be at least 6 characters",
         "recoveryCodes": "Recovery Codes",
-        "recoveryCodesDescription": "Recovery codes allow you to reset your password if you forget it. Generate 12 one-time use codes and store them in a safe place.",
+        "recoveryCodesDescription": "Recovery codes allow you to reset your password if you forget it. Generate 10 one-time use codes and store them in a safe place.",
         "totalCodes": "Total codes",
         "usedCodes": "Used codes",
         "remainingCodes": "Remaining codes",

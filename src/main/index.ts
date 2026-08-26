@@ -17,11 +17,7 @@ let mainWindow: BrowserWindow | null = null;
 
 function createWindow(): void {
     const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
-    // After electron-vite bundles to out/main/index.js, import.meta.dirname resolves to out/main/
-    const iconPath =
-        process.platform === 'darwin'
-            ? path.join(import.meta.dirname, '../../build/icon.icns')
-            : path.join(import.meta.dirname, '../../build/icon.ico');
+    const iconPath = path.join(import.meta.dirname, '../../build/icon.png');
 
     mainWindow = new BrowserWindow({
         width: Math.round(sw * 0.9),

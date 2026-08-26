@@ -144,6 +144,53 @@ describe('storage:login', () => {
         );
     });
 
+    // The journey every existing desktop account takes: an Argon2 record from an
+    // older build logs in once, and comes out the far side in the shared format
+    // that Android can also read.
+    it('migrates a legacy argon2 record on login', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const argon2 = require('argon2') as { hash: (p: string) => Promise<string> };
+        state.collections['users'] = [
+            {
+                _id: 'legacy',
+                username: 'oldtimer',
+                password: await argon2.hash('password123'),
+                theme: 'dark',
+                language: 'en',
+                stats: { totalSessions: 0, totalMinutes: 0, currentStreak: 0, longestStreak: 0 },
+                createdAt: '',
+            },
+        ];
+        state.savedSession = null;
+
+        await ipc.invoke('storage:login', 'oldtimer', 'password123');
+
+        const user = state.collections['users'][0] as Record<string, unknown>;
+        expect(user['password']).toMatch(/^pbkdf2\$600000\$/);
+    });
+
+    it('still logs the migrated account in afterwards', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const argon2 = require('argon2') as { hash: (p: string) => Promise<string> };
+        state.collections['users'] = [
+            {
+                _id: 'legacy',
+                username: 'oldtimer',
+                password: await argon2.hash('password123'),
+                theme: 'dark',
+                language: 'en',
+                stats: { totalSessions: 0, totalMinutes: 0, currentStreak: 0, longestStreak: 0 },
+                createdAt: '',
+            },
+        ];
+
+        await ipc.invoke('storage:login', 'oldtimer', 'password123');
+        state.savedSession = null;
+        const res = (await ipc.invoke('storage:login', 'oldtimer', 'password123')) as { token: string };
+
+        expect(res.token).toBeTruthy();
+    });
+
     it('rejects non-existent username', async () => {
         await expect(ipc.invoke('storage:login', 'ghost', 'password123')).rejects.toThrow(
             'Invalid username or password',
@@ -209,6 +256,11 @@ describe('storage:deleteAccount', () => {
     it('rejects with wrong password', async () => {
         await expect(ipc.invoke('storage:deleteAccount', 'wrongpass')).rejects.toThrow('Invalid password');
     });
+
+    it('reports a missing user rather than an internal error', async () => {
+        state.collections['users'] = [];
+        await expect(ipc.invoke('storage:deleteAccount', 'password123')).rejects.toThrow('User not found');
+    });
 });
 
 describe('storage:updateUsername', () => {
@@ -239,6 +291,26 @@ describe('storage:updateUsername', () => {
             'Username must be 3-32 alphanumeric characters',
         );
     });
+
+    it('rejects a rename onto a username that already exists', async () => {
+        state.collections['users'].push({ _id: 'other', username: 'taken', stats: {} });
+        await expect(ipc.invoke('storage:updateUsername', 'taken', 'password123')).rejects.toThrow(
+            'Username already exists',
+        );
+    });
+
+    it('leaves the username unchanged when the rename is rejected', async () => {
+        state.collections['users'].push({ _id: 'other', username: 'taken', stats: {} });
+        await expect(ipc.invoke('storage:updateUsername', 'taken', 'password123')).rejects.toThrow();
+        const user = state.collections['users'][0] as { username: string };
+        expect(user.username).toBe('testuser');
+    });
+
+    it('allows a rename to the name the account already has', async () => {
+        await ipc.invoke('storage:updateUsername', 'testuser', 'password123');
+        const user = state.collections['users'][0] as { username: string };
+        expect(user.username).toBe('testuser');
+    });
 });
 
 describe('storage:updatePassword', () => {
@@ -265,6 +337,35 @@ describe('storage:updatePassword', () => {
     it('rejects short new password', async () => {
         await expect(ipc.invoke('storage:updatePassword', 'password123', 'short')).rejects.toThrow(
             'Password must be at least 8 characters',
+        );
+    });
+
+    it('does not weaken the stored hash', async () => {
+        const before = { ...(state.collections['users'][0] as Record<string, unknown>) };
+        await ipc.invoke('storage:updatePassword', 'password123', 'newpassword456');
+        const after = state.collections['users'][0] as Record<string, unknown>;
+
+        const wasArgon2 = typeof before['password'] === 'string';
+        expect(typeof after['password'] === 'string').toBe(wasArgon2);
+    });
+
+    it("clears the previous scheme's fields", async () => {
+        await ipc.invoke('storage:updatePassword', 'password123', 'newpassword456');
+        const user = state.collections['users'][0] as Record<string, unknown>;
+
+        if (typeof user['password'] === 'string') {
+            expect(user['passwordHash']).toBeUndefined();
+            expect(user['salt']).toBeUndefined();
+        } else {
+            expect(user['password']).toBeUndefined();
+        }
+    });
+
+    it('stops accepting the old password', async () => {
+        await ipc.invoke('storage:updatePassword', 'password123', 'newpassword456');
+        state.savedSession = null;
+        await expect(ipc.invoke('storage:login', 'testuser', 'password123')).rejects.toThrow(
+            'Invalid username or password',
         );
     });
 });
@@ -341,8 +442,9 @@ describe('storage:generateRecoveryCodes', () => {
         };
         expect(user.recoveryCodes).toHaveLength(10);
         user.recoveryCodes.forEach((c) => {
-            expect(c.hash).toBeTruthy();
-            expect(c.salt).toBeTruthy();
+            // The record string carries its own salt, so the field stays empty.
+            expect(c.hash).toMatch(/^pbkdf2\$600000\$/);
+            expect(c.salt).toBe('');
             expect(c.used).toBe(false);
         });
     });

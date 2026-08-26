@@ -89,7 +89,7 @@
         "passwordsDoNotMatch": "As senhas não correspondem",
         "passwordTooShort": "A senha deve ter pelo menos 6 caracteres",
         "recoveryCodes": "Códigos de Recuperação",
-        "recoveryCodesDescription": "Os códigos de recuperação permitem redefinir sua senha se você a esquecer. Gere 12 códigos de uso único e guarde-os em um local seguro.",
+        "recoveryCodesDescription": "Os códigos de recuperação permitem redefinir sua senha se você a esquecer. Gere 10 códigos de uso único e guarde-os em um local seguro.",
         "totalCodes": "Códigos totais",
         "usedCodes": "Códigos usados",
         "remainingCodes": "Códigos restantes",
