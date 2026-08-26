@@ -5,3 +5,6 @@ dist-electron
 build
 android
 coverage
+.github
+.git
+.husky
