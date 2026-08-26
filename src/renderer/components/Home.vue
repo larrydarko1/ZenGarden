@@ -20,6 +20,8 @@ import { useMeditationSession } from '@/renderer/composables/useMeditationSessio
 import { log } from '@/renderer/utils/logger';
 import type { User } from '@/renderer/store/types';
 
+defineProps<{ theme: 'light' | 'dark' }>();
+
 const emit = defineEmits<{
     'meditation-active': [active: boolean];
     'theme-changed': [theme: string];
@@ -403,6 +405,7 @@ onUnmounted(() => {
                         class="journal-inline-container"
                         :class="[{ 'has-header': desktopApp }]">
                         <SettingsPopup
+                            :theme="theme"
                             @close="settingsMode = false"
                             @theme-change="handleSettingsThemeChange"
                             @language-change="handleSettingsLanguageChange" />
@@ -431,7 +434,7 @@ onUnmounted(() => {
                                     width="12"
                                     height="2"
                                     rx="1"
-                                    fill="#F0F8FF">
+                                    fill="var(--text1)">
                                     <animateTransform
                                         attributeName="transform"
                                         type="rotate"

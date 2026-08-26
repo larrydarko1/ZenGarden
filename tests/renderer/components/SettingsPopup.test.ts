@@ -7,8 +7,11 @@ const AccountSettingsStub = {
     template: '<div class="account-settings-stub" />',
 };
 
-const mountSettings = () =>
-    mountWithI18n(SettingsPopup, { global: { stubs: { AccountSettings: AccountSettingsStub } } });
+const mountSettings = (theme: 'light' | 'dark' = 'dark') =>
+    mountWithI18n(SettingsPopup, {
+        props: { theme },
+        global: { stubs: { AccountSettings: AccountSettingsStub } },
+    });
 
 beforeEach(() => {
     vi.restoreAllMocks();
@@ -30,19 +33,36 @@ describe('SettingsPopup', () => {
         wrapper.unmount();
     });
 
-    it('starts on dark, which is what a new account is registered with', () => {
-        const wrapper = mountSettings();
+    /**
+     * The popup is mounted behind a v-if and so remounts on every open. It must
+     * take the highlight from the theme it is handed, never from a local default,
+     * or a light-theme user reopening settings sees dark marked as current.
+     */
+    it('highlights the theme it is given, not a hardcoded default', () => {
+        const wrapper = mountSettings('light');
 
-        expect(wrapper.findAll('.theme-option')[0].classes()).toContain('active');
+        expect(wrapper.findAll('.theme-option')[1].classes()).toContain('active');
+        expect(wrapper.findAll('.theme-option')[0].classes()).not.toContain('active');
         wrapper.unmount();
     });
 
-    it('emits theme-change and moves the highlight when a theme is picked', async () => {
-        const wrapper = mountSettings();
+    it('highlights dark when that is the active theme', () => {
+        const wrapper = mountSettings('dark');
+
+        expect(wrapper.findAll('.theme-option')[0].classes()).toContain('active');
+        expect(wrapper.findAll('.theme-option')[1].classes()).not.toContain('active');
+        wrapper.unmount();
+    });
+
+    it('emits theme-change, and the highlight follows once the parent applies it', async () => {
+        const wrapper = mountSettings('dark');
 
         await wrapper.findAll('.theme-option')[1].trigger('click');
 
         expect(wrapper.emitted('theme-change')).toEqual([['light']]);
+
+        await wrapper.setProps({ theme: 'light' });
+
         expect(wrapper.findAll('.theme-option')[1].classes()).toContain('active');
         expect(wrapper.findAll('.theme-option')[0].classes()).not.toContain('active');
         wrapper.unmount();

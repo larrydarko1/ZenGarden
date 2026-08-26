@@ -69,6 +69,7 @@ onMounted(() => {
         id="app"
         :class="[currentTheme, { 'has-desktop-header': isDesktopApp }]">
         <Home
+            :theme="currentTheme"
             @meditation-active="onMeditationActive"
             @theme-changed="setThemeFromLogin"
             @language-changed="setLanguageFromLogin"

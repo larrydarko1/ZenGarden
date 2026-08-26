@@ -3,6 +3,8 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AccountSettings from '@/renderer/components/AccountSettings.vue';
 
+const props = defineProps<{ theme: 'light' | 'dark' }>();
+
 const emit = defineEmits<{
     'close': [];
     'theme-change': [theme: string];
@@ -23,11 +25,11 @@ const languages = {
 
 const { t, locale } = useI18n();
 
-const currentTheme = ref('dark');
+// Theme is owned by App.vue; this popup remounts on every open, so it reads the
+// prop rather than keeping a copy that would reset to a hardcoded default.
 const currentLanguage = ref(locale.value);
 
 function selectTheme(theme: string): void {
-    currentTheme.value = theme;
     emit('theme-change', theme);
 }
 
@@ -53,15 +55,15 @@ function handleAccountDeletion(): void {
             <h3 class="zen-label">{{ t('settings.theme') }}</h3>
             <div class="theme-options">
                 <button
-                    v-for="theme in themes"
-                    :key="theme"
+                    v-for="themeId in themes"
+                    :key="themeId"
                     class="theme-option"
-                    :class="[theme, { active: currentTheme === theme }]"
-                    @click="selectTheme(theme)">
+                    :class="[themeId, { active: props.theme === themeId }]"
+                    @click="selectTheme(themeId)">
                     <div
                         class="theme-preview"
-                        :class="theme"></div>
-                    <span class="theme-name">{{ t(`settings.themes.${theme}`) }}</span>
+                        :class="themeId"></div>
+                    <span class="theme-name">{{ t(`settings.themes.${themeId}`) }}</span>
                 </button>
             </div>
         </div>
