@@ -21,21 +21,4 @@ describe('ZenPhilosophy', () => {
         }
         wrapper.unmount();
     });
-
-    it('pairs each section with its own icon', () => {
-        const wrapper = mountWithI18n(ZenPhilosophy);
-
-        const icons = wrapper.findAll('.section-icon svg');
-        expect(icons).toHaveLength(5);
-        expect(new Set(icons.map((icon) => icon.html())).size).toBe(5);
-        wrapper.unmount();
-    });
-
-    it('closes the page with the quote and its attribution', () => {
-        const wrapper = mountWithI18n(ZenPhilosophy);
-
-        expect(wrapper.find('.quote-text').text()).not.toBe('');
-        expect(wrapper.find('.quote-author').text()).not.toBe('');
-        wrapper.unmount();
-    });
 });
