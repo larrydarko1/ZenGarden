@@ -78,7 +78,7 @@ const showSoundDropdown = ref(false);
                     <button
                         v-if="showIntervalDropdown"
                         type="button"
-                        class="dropdown-backdrop-inline"
+                        class="zen-backdrop dropdown-backdrop-inline"
                         :aria-label="t('meditation.bell.closeIntervals')"
                         @click="showIntervalDropdown = false"></button>
                     <div
@@ -107,7 +107,7 @@ const showSoundDropdown = ref(false);
                     <button
                         v-if="showSoundDropdown"
                         type="button"
-                        class="dropdown-backdrop-inline"
+                        class="zen-backdrop dropdown-backdrop-inline"
                         :aria-label="t('meditation.bell.closeSounds')"
                         @click="showSoundDropdown = false"></button>
                     <div
@@ -200,120 +200,133 @@ const showSoundDropdown = ref(false);
 
 <style scoped lang="scss">
 .zen-meditation-overlay {
+    @include composited-layer;
+
     position: fixed;
     inset: 0;
-    background: $base1;
     z-index: $z-modal-backdrop;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
+    background: $base1;
 }
 
-/* –––––– Timer & Stop –––––– */
+/* ––––– Timer & stop ––––– */
 
 .meditation-timer {
-    margin-top: $space-8;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: $space-7;
+    margin-top: $space-8;
 }
 
 .meditation-timer-overlay {
     position: absolute;
-    bottom: $size-26;
+    bottom: $size-30;
     left: 0;
-    width: 100vw;
+    z-index: $z-popover;
     display: flex;
     flex-direction: column;
     align-items: center;
-    z-index: $z-popover;
+    width: 100%;
 }
 
 .timer-display {
-    font-size: $font-size-xl;
-    color: $text1;
     position: absolute;
-    bottom: $size-32;
+    bottom: $size-35;
+    color: $text1;
+    font-size: $font-size-4xl;
 }
 
 .meditation-btn {
-    background: transparent;
     position: absolute;
-    bottom: $size-17;
+    bottom: $size-29;
+    min-height: $size-24;
+    padding: $space-3 $space-7;
+    background: transparent;
+    border: none;
+    border-radius: $border-radius-round;
     color: $text1;
+    font-size: $font-size-base;
+    letter-spacing: $letter-spacing-1;
     cursor: pointer;
+    outline: none;
+    touch-action: manipulation;
     transition:
-        background $duration-slower $ease-standard,
         color $duration-slower $ease-standard,
+        background $duration-slower $ease-standard,
         box-shadow $duration-slower $ease-standard,
         transform $duration-base $ease-standard;
-    border: none;
-    outline: none;
-    padding: $space-2 $space-6;
-    border-radius: $border-radius-round;
-    font-size: $font-size-lg;
-    letter-spacing: $letter-spacing-1;
+
+    &:hover,
+    &:focus {
+        background: $blur1;
+        box-shadow: $shadow-edge;
+        color: $text2;
+        transform: translateY(-$size-0);
+    }
+
+    &:active {
+        transform: translateY(0) scale($scale-97);
+        transition-duration: $duration-instant;
+    }
 }
 
-.meditation-btn:hover,
-.meditation-btn:focus {
-    background: $blur1;
-    color: $text2;
-    box-shadow: $shadow-edge;
-    transform: translateY(-$size-0);
-}
-
-.meditation-btn:active {
-    transform: translateY(0) scale($scale-97);
-    transition-duration: $duration-instant;
-}
-
-/* –––––– Bell Toolbar –––––– */
+/* ––––– Bell toolbar ––––– */
 
 .bell-settings-toolbar {
-    position: absolute;
-    top: $size-17;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: $space-2;
-    padding: $space-2;
-    background: $blur2;
-    backdrop-filter: blur($blur-base);
-    border: $border-width-thin $input-border;
-    border-radius: $border-radius-lg;
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + $size-23);
+    right: $size-4;
+    left: $size-4;
     z-index: $z-modal;
-}
-
-.bell-toggle-btn {
-    padding: $space-2;
-    background: transparent;
-    border: none;
-    color: $text2;
-    cursor: pointer;
-    border-radius: $border-radius;
-    transition: all $transition-base;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: $space-1;
+    padding: $space-1 $space-2;
+    background: $blur2;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius;
 }
 
-.bell-toggle-btn:hover {
-    background: $input-bg-focus;
-    color: $text1;
-}
+.bell-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: $size-19;
+    min-height: $size-19;
+    padding: $space-2;
+    background: transparent;
+    border: none;
+    border-radius: $border-radius;
+    color: $text2;
+    cursor: pointer;
+    transition:
+        color $transition-base,
+        background $transition-base;
 
-.bell-toggle-btn.active {
-    background: $button-bg;
-    color: $text1;
+    svg {
+        width: $size-9;
+        height: $size-9;
+    }
+
+    &:hover {
+        background: $input-bg-focus;
+        color: $text1;
+    }
+
+    &.active {
+        background: $button-bg;
+        color: $text1;
+    }
 }
 
 .bell-settings {
     display: flex;
-    gap: $space-2;
+    gap: $space-1;
     animation: slide-in $duration-base ease;
 }
 
@@ -322,23 +335,27 @@ const showSoundDropdown = ref(false);
 }
 
 .bell-dropdown-btn {
-    padding: $space-2 $space-3;
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    min-width: $size-23;
+    min-height: $size-19;
+    padding: $space-2;
     background: $input-bg;
     border: $border-width-thin $input-border;
     border-radius: $border-radius;
     color: $text1;
-    font-size: $font-size-sm;
-    cursor: pointer;
-    transition: all $transition-base;
-    display: flex;
-    align-items: center;
-    gap: $space-2;
+    font-size: $font-size-xs;
     white-space: nowrap;
-}
+    cursor: pointer;
+    transition:
+        background $transition-base,
+        border-color $transition-base;
 
-.bell-dropdown-btn:hover {
-    background: $input-bg-focus;
-    border-color: $input-border-focus;
+    &:hover {
+        background: $input-bg-focus;
+        border-color: $input-border-focus;
+    }
 }
 
 .dropdown-arrow {
@@ -347,47 +364,61 @@ const showSoundDropdown = ref(false);
 }
 
 .bell-dropdown-menu {
-    position: absolute;
-    top: calc(100% + $size-3);
-    left: 0;
-    min-width: 100%;
+    @include scrollbar;
+
+    position: fixed;
+    top: $size-29;
+    left: 50%;
+    z-index: $z-modal-top;
+    width: 90vw;
+    min-width: $size-40;
+    max-width: $size-43;
+    max-height: 60vh;
+    padding: $space-4 $space-3;
     background: $blur2;
-    backdrop-filter: blur($blur-md);
     border: $border-width-thin $input-border;
-    border-radius: $border-radius;
-    padding: $space-1;
-    box-shadow: $shadow-md;
-    z-index: $z-modal-raised;
+    border-radius: $border-radius-xl;
+    box-shadow: $shadow-lg-strong;
+    transform: translateX(-50%);
+    overflow-y: auto;
     animation: dropdown-slide $duration-fast ease;
-}
 
-.bell-dropdown-menu button {
-    width: 100%;
-    padding: $space-2 $space-3;
-    background: transparent;
-    border: none;
-    border-radius: $border-radius-sm;
-    color: $text1;
-    font-size: $font-size-sm;
-    cursor: pointer;
-    text-align: left;
-    transition: all $transition-fast;
-    white-space: nowrap;
-}
+    button {
+        width: 100%;
+        min-height: $size-23;
+        margin-bottom: $space-2;
+        padding: $space-3;
+        background: transparent;
+        border: none;
+        border-radius: $border-radius-lg;
+        color: $text1;
+        font-size: $font-size-sm;
+        text-align: left;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background $transition-fast;
 
-.bell-dropdown-menu button:hover {
-    background: $input-bg-focus;
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        &:hover {
+            background: $input-bg-focus;
+        }
+    }
 }
 
 .dropdown-backdrop-inline {
-    display: none;
-    padding: 0;
-    border: none;
+    position: fixed;
+    inset: 0;
+    z-index: $z-modal;
+    display: block;
+    background: transparent;
 }
 
 .toolbar-divider {
     width: $size-0;
-    height: $size-12;
+    height: $size-11;
     background: $input-border;
 }
 
@@ -415,81 +446,85 @@ const showSoundDropdown = ref(false);
     }
 }
 
-/* –––––– Breathing Overlay –––––– */
+/* ––––– Breathing overlay ––––– */
 
 .breathing-toggle-btn {
-    background: transparent;
-    border: none;
-    color: $text2;
-    cursor: pointer;
-    padding: $space-1;
-    border-radius: $border-radius-sm;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all $transition-base;
+    padding: $space-1;
+    background: transparent;
+    border: none;
+    border-radius: $border-radius-sm;
+    color: $text2;
     opacity: $opacity-mid;
-}
+    cursor: pointer;
+    transition:
+        color $transition-base,
+        background $transition-base,
+        opacity $transition-base;
 
-.breathing-toggle-btn:hover {
-    color: $text1;
-    opacity: $opacity-full;
-}
+    &:hover {
+        color: $text1;
+        opacity: $opacity-full;
+    }
 
-.breathing-toggle-btn.active {
-    color: $text1;
-    opacity: $opacity-full;
-    background: color-mix(in srgb, $glass 10%, transparent);
+    &.active {
+        background: color-mix(in srgb, $glass 10%, transparent);
+        color: $text1;
+        opacity: $opacity-full;
+    }
 }
 
 .breathing-overlay {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    z-index: $z-popover;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: $space-6;
-    z-index: $z-popover;
+    transform: translate(-50%, -50%);
     pointer-events: none;
 }
 
 .breathing-sphere {
-    width: $size-37;
-    height: $size-37;
-    border-radius: $border-radius-round;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: $size-34;
+    height: $size-34;
     background: radial-gradient(
         circle at 40% 35%,
         color-mix(in srgb, $glass 15%, transparent),
         color-mix(in srgb, $glass 3%, transparent)
     );
-    border: $border-width-thin color-mix(in srgb, $glass 15%, transparent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     backdrop-filter: blur($blur-base);
+    border: $border-width-thin color-mix(in srgb, $glass 15%, transparent);
+    border-radius: $border-radius-round;
     box-shadow: $shadow-sphere;
     transition: transform $transition-slow;
+    will-change: transform;
+
+    &.breathing-in {
+        animation: sphere-breath ease-in-out forwards;
+    }
+
+    &.breathing-out {
+        animation: sphere-breath ease-in-out forwards reverse;
+    }
+
+    &.breathing-hold {
+        transform: scale($scale-160);
+    }
+
+    &.breathing-hold-out {
+        transform: scale($scale-100);
+    }
 }
 
-.breathing-sphere.breathing-in {
-    animation: sphere-breath-in ease-in-out forwards;
-}
-
-.breathing-sphere.breathing-hold {
-    transform: scale($scale-160);
-}
-
-.breathing-sphere.breathing-out {
-    animation: sphere-breath-out ease-in-out forwards;
-}
-
-.breathing-sphere.breathing-hold-out {
-    transform: scale($scale-100);
-}
-
-@keyframes sphere-breath-in {
+@keyframes sphere-breath {
     from {
         transform: scale($scale-100);
         opacity: $opacity-mid;
@@ -498,28 +533,16 @@ const showSoundDropdown = ref(false);
     to {
         transform: scale($scale-160);
         opacity: $opacity-full;
-    }
-}
-
-@keyframes sphere-breath-out {
-    from {
-        transform: scale($scale-160);
-        opacity: $opacity-full;
-    }
-
-    to {
-        transform: scale($scale-100);
-        opacity: $opacity-mid;
     }
 }
 
 .breathing-sphere-text {
-    font-size: $font-size-xs;
     color: $text1;
+    font-size: $font-size-xs;
     font-weight: $font-weight-normal;
+    text-align: center;
     text-transform: uppercase;
     letter-spacing: $letter-spacing-6;
-    text-align: center;
     opacity: $opacity-almost-opaque;
 }
 
@@ -531,129 +554,46 @@ const showSoundDropdown = ref(false);
 }
 
 .breathing-exercise-name {
-    font-size: $font-size-xs;
     color: $text2;
+    font-size: $font-size-xs;
     text-transform: uppercase;
     letter-spacing: $letter-spacing-4;
     opacity: $opacity-mid-high;
 }
 
 .breathing-cycle {
-    font-size: $font-size-xxs;
     color: $text2;
+    font-size: $font-size-xxs;
     opacity: $opacity-mid-low;
 }
 
-@media (width <= #{$breakpoint-xl}) {
-    .breathing-sphere {
-        width: $size-34;
-        height: $size-34;
-    }
+/* –––––– Responsive –––––– */
 
-    .breathing-sphere-text {
-        font-size: $font-size-xs;
-    }
-
-    .timer-display {
-        font-size: $font-size-5xl;
-        bottom: $size-38;
-    }
-
-    .meditation-btn {
-        bottom: $size-30;
-        font-size: $font-size-lg;
-        padding: $space-3 $space-8;
-        min-height: $size-25;
-        touch-action: manipulation;
-    }
-
+@media (width > #{$breakpoint-md}) {
     .meditation-timer-overlay {
         bottom: $size-31;
     }
 
-    .dropdown-backdrop-inline {
-        display: block;
-        position: fixed;
-        inset: 0;
-        background: transparent;
-        z-index: $z-modal;
+    .timer-display {
+        bottom: $size-38;
+        font-size: $font-size-5xl;
     }
 
-    .bell-dropdown-menu {
-        position: fixed;
-        top: $size-29;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 90vw;
-        max-width: $size-43;
-        min-width: $size-40;
-        border-radius: $border-radius-xl;
-        padding: $space-4 $space-3;
-        max-height: 60vh;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        z-index: $z-modal-top;
-        box-shadow: $shadow-lg-strong;
-    }
-
-    .bell-dropdown-menu button {
-        padding: $space-3;
-        font-size: $font-size-sm;
-        min-height: $size-23;
-        border-radius: $border-radius-lg;
-        margin-bottom: $space-2;
-    }
-
-    .bell-dropdown-menu button:last-child {
-        margin-bottom: 0;
+    .meditation-btn {
+        bottom: $size-30;
+        min-height: $size-25;
+        padding: $space-3 $space-8;
+        font-size: $font-size-lg;
     }
 
     .bell-settings-toolbar {
-        position: fixed;
-        top: calc(env(safe-area-inset-top, 0px) + $size-23);
-        left: $size-5;
         right: $size-5;
-        width: calc(100% - $size-10);
-        max-width: calc(100% - $size-10);
-        padding: $space-1 $space-2;
-        transform: none;
-        flex-wrap: nowrap;
-        gap: $space-1;
+        left: $size-5;
         border-radius: $border-radius-lg;
-        box-sizing: border-box;
-        backdrop-filter: blur($blur-md);
-        justify-content: center;
-    }
-
-    .bell-toggle-btn {
-        min-width: $size-19;
-        min-height: $size-19;
-        padding: $space-2;
-        box-sizing: border-box;
-    }
-
-    .bell-toggle-btn svg {
-        width: $size-9;
-        height: $size-9;
     }
 
     .bell-dropdown-btn {
-        min-height: $size-19;
         padding: $space-1 $space-2;
-        font-size: $font-size-xs;
-        box-sizing: border-box;
-        min-width: $size-23;
-    }
-
-    .bell-settings {
-        gap: $space-1;
-        flex-wrap: nowrap;
-        box-sizing: border-box;
-        display: flex;
-    }
-
-    .bell-dropdown {
-        flex-shrink: 1;
     }
 
     .toolbar-divider {
@@ -661,75 +601,96 @@ const showSoundDropdown = ref(false);
     }
 }
 
-@media (width <= #{$breakpoint-md}) {
+@media (width > #{$breakpoint-xl}) {
+    .meditation-timer-overlay {
+        bottom: $size-26;
+    }
+
     .timer-display {
-        font-size: $font-size-4xl;
-        bottom: $size-35;
+        bottom: $size-32;
+        font-size: $font-size-xl;
     }
 
     .meditation-btn {
-        bottom: $size-29;
-        font-size: $font-size-base;
-        padding: $space-3 $space-7;
-        min-height: $size-24;
-    }
-
-    .meditation-timer-overlay {
-        bottom: $size-30;
+        bottom: $size-17;
+        min-height: auto;
+        padding: $space-2 $space-6;
     }
 
     .bell-settings-toolbar {
-        position: fixed;
-        padding: $space-1 $space-2;
-        gap: $space-1;
-        left: $size-4;
-        right: $size-4;
-        top: calc(env(safe-area-inset-top, 0px) + $size-23);
-        width: calc(100% - $size-8);
-        max-width: calc(100% - $size-8);
-        border-radius: $border-radius;
-    }
-
-    .bell-toggle-btn {
-        min-width: $size-19;
-        min-height: $size-19;
+        position: absolute;
+        top: $size-17;
+        right: auto;
+        left: 50%;
+        gap: $space-2;
         padding: $space-2;
+        transform: translateX(-50%);
     }
 
+    .bell-toggle-btn,
     .bell-dropdown-btn {
-        min-height: $size-19;
-        padding: $space-2 $space-2;
-        font-size: $font-size-xs;
+        min-width: auto;
+        min-height: auto;
+    }
+
+    .bell-toggle-btn svg {
+        width: $size-10;
+        height: $size-10;
     }
 
     .bell-settings {
-        gap: $space-1;
+        gap: $space-2;
     }
 
-    .toolbar-divider {
-        height: $size-11;
+    .bell-dropdown-btn {
+        padding: $space-2 $space-3;
+        font-size: $font-size-sm;
+    }
+
+    .bell-dropdown-menu {
+        position: absolute;
+        top: calc(100% + $size-3);
+        left: 0;
+        z-index: $z-modal-raised;
+        width: auto;
+        min-width: 100%;
+        max-width: none;
+        max-height: none;
+        padding: $space-1;
+        border-radius: $border-radius;
+        box-shadow: $shadow-md;
+        transform: none;
+        overflow-y: visible;
+
+        button {
+            min-height: auto;
+            margin-bottom: 0;
+            padding: $space-2 $space-3;
+            border-radius: $border-radius-sm;
+        }
+    }
+
+    .dropdown-backdrop-inline {
+        display: none;
+    }
+
+    .breathing-sphere {
+        width: $size-37;
+        height: $size-37;
     }
 }
 
 @media (height <= #{$breakpoint-short}) and (width <= #{$breakpoint-2xl}) {
     .timer-display {
+        bottom: $size-28;
         font-size: $font-size-3xl;
-        bottom: $size-28;
     }
 
     .meditation-btn {
         bottom: $size-28;
-        font-size: $font-size-base;
-        padding: $space-2 $space-7;
         min-height: $size-21;
-    }
-}
-
-@media (width <= #{$breakpoint-xs}) {
-    .meditation-btn {
+        padding: $space-2 $space-7;
         font-size: $font-size-base;
-        padding: $space-3 $space-7;
-        min-height: $size-23;
     }
 }
 </style>

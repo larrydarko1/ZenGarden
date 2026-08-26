@@ -98,7 +98,7 @@ onMounted(() => {
             <div class="inline-title-row">
                 <div class="inline-date-selector">
                     <button
-                        class="inline-date-btn"
+                        class="zen-icon-btn inline-date-btn"
                         aria-label="Previous day"
                         @click="changeDate(-1)">
                         <svg
@@ -116,7 +116,7 @@ onMounted(() => {
                     </button>
                     <span class="inline-date-text">{{ formatDate(selectedDate) }}</span>
                     <button
-                        class="inline-date-btn"
+                        class="zen-icon-btn inline-date-btn"
                         :disabled="isToday"
                         aria-label="Next day"
                         @click="changeDate(1)">
@@ -135,7 +135,7 @@ onMounted(() => {
                     </button>
                 </div>
                 <button
-                    class="inline-close-btn"
+                    class="zen-icon-btn inline-close-btn"
                     aria-label="Close"
                     @click="emit('close')">
                     <svg
@@ -273,21 +273,24 @@ onMounted(() => {
 <style scoped lang="scss">
 .emotion-list {
     display: grid;
-    gap: $space-2;
+    gap: $space-3;
 }
 
 .emotion-name {
-    font-weight: $font-weight-semibold;
+    flex: 1;
+    min-width: auto;
     color: $text1;
-    min-width: $size-36;
     font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
 }
+
+/* ––––– Save indicator ––––– */
 
 .save-indicator {
     position: fixed;
     bottom: $size-28;
     left: 50%;
-    transform: translateX(-50%);
+    z-index: $z-overlay-raised;
     display: flex;
     align-items: center;
     gap: $space-2;
@@ -295,42 +298,36 @@ onMounted(() => {
     border-radius: $border-radius-3xl;
     font-size: $font-size-xs;
     letter-spacing: $letter-spacing-2;
-    z-index: $z-overlay-raised;
+    transform: translateX(-50%);
     pointer-events: none;
     backdrop-filter: blur($blur-base);
-}
 
-.save-indicator.saving {
-    background: color-mix(in srgb, $warning 10%, transparent);
-    border: $border-width-thin color-mix(in srgb, $warning 15%, transparent);
-    color: color-mix(in srgb, $warning 80%, transparent);
-}
+    &.saving {
+        background: color-mix(in srgb, $warning 10%, transparent);
+        border: $border-width-thin color-mix(in srgb, $warning 15%, transparent);
+        color: color-mix(in srgb, $warning 80%, transparent);
+    }
 
-.save-indicator.saved {
-    background: color-mix(in srgb, $positive 10%, transparent);
-    border: $border-width-thin color-mix(in srgb, $positive 15%, transparent);
-    color: color-mix(in srgb, $positive 80%, transparent);
+    &.saved {
+        background: color-mix(in srgb, $positive 10%, transparent);
+        border: $border-width-thin color-mix(in srgb, $positive 15%, transparent);
+        color: color-mix(in srgb, $positive 80%, transparent);
+    }
 }
 
 .save-spinner {
+    flex-shrink: 0;
     width: $size-6;
     height: $size-6;
     border: $border-width-medium transparent;
     border-top-color: currentcolor;
     border-radius: $border-radius-round;
     animation: spin $duration-spin linear infinite;
-    flex-shrink: 0;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
 }
 
 .save-label {
-    text-transform: uppercase;
     font-weight: $font-weight-normal;
+    text-transform: uppercase;
 }
 
 .save-indicator-enter-active {
@@ -355,32 +352,20 @@ onMounted(() => {
     transform: translateX(-50%) translateY(-$size-3);
 }
 
-@media (width <= #{$breakpoint-xl}) {
-    .emotion-list {
-        gap: $space-3;
-    }
-
-    .emotion-name {
-        min-width: auto;
-        font-size: $font-size-base;
-        flex: 1;
-    }
-}
-
-/* ––– Inline Mode ––– */
+/* ––––– Inline mode ––––– */
 
 .emotion-inline {
-    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 0;
+    width: 100%;
     -webkit-app-region: no-drag;
 }
 
 .inline-header {
     display: flex;
     flex-direction: column;
-    gap: $space-5;
+    gap: $space-4;
     padding-bottom: $space-5;
     border-bottom: $border-width-thin $input-border;
 }
@@ -393,9 +378,9 @@ onMounted(() => {
 
 .inline-title {
     margin: 0;
-    font-size: $font-size-lg;
-    font-weight: $font-weight-medium;
     color: $text1;
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
     letter-spacing: $letter-spacing-1;
 }
 
@@ -405,55 +390,10 @@ onMounted(() => {
     gap: $space-2;
 }
 
-.inline-date-btn {
-    width: $size-16;
-    height: $size-16;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: $border-width-thin $input-border;
-    border-radius: $border-radius;
-    color: $text2;
-    cursor: pointer;
-    transition: all $transition-fast;
-}
-
-.inline-date-btn:hover:not(:disabled) {
-    background: $input-bg-focus;
-    color: $text1;
-    border-color: $input-border-focus;
-}
-
-.inline-date-btn:disabled {
-    opacity: $opacity-lowest;
-    cursor: default;
-}
-
-.inline-close-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: $size-16;
-    height: $size-16;
-    background: transparent;
-    border: $border-width-thin $input-border;
-    border-radius: $border-radius;
-    color: $text2;
-    cursor: pointer;
-    transition: all $transition-fast;
-}
-
-.inline-close-btn:hover {
-    background: $input-bg-focus;
-    color: $text1;
-    border-color: $input-border-focus;
-}
-
 .inline-date-text {
-    font-size: $font-size-xs;
-    color: $text2;
     min-width: $size-33;
+    color: $text2;
+    font-size: $font-size-xs;
     text-align: center;
     font-variant-numeric: tabular-nums;
 }
@@ -462,7 +402,7 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: $space-6;
+    gap: $space-4;
 }
 
 .inline-stat {
@@ -473,19 +413,19 @@ onMounted(() => {
 }
 
 .inline-stat-value {
-    font-size: $font-size-2xl;
-    font-weight: $font-weight-semibold;
     color: $text1;
-    font-variant-numeric: tabular-nums;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
     line-height: $line-height-none;
+    font-variant-numeric: tabular-nums;
 }
 
 .inline-stat-label {
-    font-size: $font-size-xxs;
     color: $text2;
+    font-size: $font-size-xxs;
+    font-weight: $font-weight-normal;
     text-transform: uppercase;
     letter-spacing: $letter-spacing-5;
-    font-weight: $font-weight-normal;
 }
 
 .inline-stat-divider {
@@ -498,127 +438,132 @@ onMounted(() => {
 .inline-tabs {
     display: flex;
     gap: 0;
-    padding: $space-3 0;
+    padding: $space-2 0;
     border-bottom: $border-width-thin $input-border;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-}
 
-.inline-tabs::-webkit-scrollbar {
-    display: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 .inline-tab {
     flex: 0 0 auto;
-    padding: $space-2 $space-3;
+    padding: $space-2;
     background: transparent;
     border: none;
     border-bottom: $border-width-thick transparent;
     color: $text2;
-    font-size: $font-size-xs;
+    font-size: $font-size-xxs;
     font-weight: $font-weight-normal;
-    cursor: pointer;
-    transition: all $transition-base;
     white-space: nowrap;
     text-transform: uppercase;
     letter-spacing: $letter-spacing-3;
-}
+    cursor: pointer;
+    transition:
+        color $transition-base,
+        border-color $transition-base;
 
-.inline-tab:hover {
-    color: $text1;
-}
+    &:hover {
+        color: $text1;
+    }
 
-.inline-tab.active {
-    color: $text1;
-    border-bottom-color: $text1;
-    font-weight: $font-weight-medium;
+    &.active {
+        border-bottom-color: $text1;
+        color: $text1;
+        font-weight: $font-weight-medium;
+    }
 }
 
 .inline-content {
-    padding: $space-4 0 0;
     min-height: $size-40;
+    padding: $space-3 0 0;
 }
 
 .inline-emotion-item {
     display: grid;
-    grid-template-columns: auto 1fr;
     grid-template-rows: auto auto;
+    grid-template-columns: auto 1fr;
+    align-items: start;
     gap: 0 $space-2;
     padding: $space-2 $space-1;
     border-bottom: $border-width-thin $input-border;
     cursor: pointer;
     transition: background $transition-fast;
-    align-items: start;
-}
 
-.inline-emotion-item:hover {
-    background: $input-bg-focus;
-}
+    &:hover {
+        background: $input-bg-focus;
+    }
 
-.inline-emotion-item:last-child {
-    border-bottom: none;
-}
+    &:last-child {
+        border-bottom: none;
+    }
 
-.inline-emotion-item input[type='checkbox'] {
-    grid-row: 1 / 3;
-    margin: 0;
-    margin-top: $space-0;
-    width: $size-9;
-    height: $size-9;
-    accent-color: $text1;
-    cursor: pointer;
+    input[type='checkbox'] {
+        grid-row: 1 / 3;
+        width: $size-9;
+        height: $size-9;
+        margin: $space-0 0 0;
+        accent-color: $text1;
+        cursor: pointer;
+    }
 }
 
 .inline-emotion-name {
-    font-size: $font-size-xs;
     color: $text1;
+    font-size: $font-size-xs;
     font-weight: $font-weight-normal;
     line-height: $line-height-tight;
 }
 
 .inline-emotion-desc {
     grid-column: 2;
-    font-size: $font-size-xxs;
     color: $text2;
+    font-size: $font-size-xxs;
     line-height: $line-height-snug;
     opacity: $opacity-mid-high;
 }
 
-/* ––– Inline Mode Responsive ––– */
-@media (width <= #{$breakpoint-xl}) {
-    .emotion-inline {
-        width: 100%;
+/* –––––– Responsive –––––– */
+
+@media (width > #{$breakpoint-xl}) {
+    .emotion-list {
+        gap: $space-2;
+    }
+
+    .emotion-name {
+        flex: 0 1 auto;
+        min-width: $size-36;
     }
 
     .inline-header {
-        gap: $space-4;
-    }
-
-    .inline-title {
-        font-size: $font-size-base;
+        gap: $space-5;
     }
 
     .inline-stats {
-        gap: $space-4;
+        gap: $space-6;
+    }
+
+    .inline-title {
+        font-size: $font-size-lg;
     }
 
     .inline-stat-value {
-        font-size: $font-size-xl;
+        font-size: $font-size-2xl;
     }
 
     .inline-tabs {
-        gap: 0;
-        padding: $space-2 0;
+        padding: $space-3 0;
     }
 
     .inline-tab {
-        padding: $space-2 $space-2;
-        font-size: $font-size-xxs;
+        padding: $space-2 $space-3;
+        font-size: $font-size-xs;
     }
 
     .inline-content {
-        padding: $space-3 0 0;
+        padding: $space-4 0 0;
     }
 }
 </style>

@@ -1,0 +1,51 @@
+/** Placeholders shared by 2+ sibling partials in this folder. */
+@use '@/renderer/styles/variables' as *;
+
+/** The app's one surface treatment: faint fill, hairline border. */
+%surface {
+    background: $input-bg;
+    border: $border-width-thin $input-border;
+}
+
+/** Strips the UA button chrome without deciding anything about appearance. */
+%bare-button {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+/** Small caps-and-tracking label used for section headings and button text. */
+%uppercase-label {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-normal;
+    text-transform: uppercase;
+    letter-spacing: $letter-spacing-4;
+}
+
+/**
+ * Focus treatment. `outline: none` alone would strip the only keyboard
+ * affordance on the element, so the border always takes the ring's place.
+ */
+%focus-ring {
+    &:focus-visible {
+        outline: none;
+        border-color: $input-border-focus;
+        background: $input-bg-focus;
+    }
+}
+
+/**
+ * The transition every interactive control shares. Named properties only —
+ * `transition: all` interpolates whatever happened to change, layout
+ * properties included, and forces a style recalc per frame for the privilege.
+ */
+%interactive {
+    transition:
+        color $transition-fast,
+        background $transition-fast,
+        border-color $transition-fast;
+}

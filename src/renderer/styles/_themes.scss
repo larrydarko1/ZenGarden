@@ -1,0 +1,62 @@
+/** Theme palettes — the ONLY part of the design system that emits CSS. */
+
+:root,
+#app.dark {
+    --text1: #e0e0e0;
+    --text2: #b0b0b0;
+    --base1: #181a20;
+    --base2: #23262f;
+    --blur1: #23262f33;
+    --blur2: #181a20e6;
+    --border-subtle: rgb(224 224 224 / 15%);
+    --input-bg: rgb(224 224 224 / 2%);
+    --input-bg-focus: rgb(224 224 224 / 4%);
+    --input-border: rgb(224 224 224 / 8%);
+    --input-border-focus: rgb(224 224 224 / 20%);
+    --button-bg: rgb(224 224 224 / 10%);
+    --button-bg-hover: rgb(224 224 224 / 15%);
+    --button-border-hover: rgb(224 224 224 / 25%);
+    --error-bg: rgb(231 76 60 / 10%);
+    --error-border: rgb(231 76 60 / 20%);
+    --error-text: #e74c3c;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --danger-border: #dc2626;
+    --danger-border-hover: #b91c1c;
+    --text-on-danger: #fff;
+    --positive: #4caf50;
+    --negative: #f44336;
+    --scrim: #000;
+    --glass: #fff;
+}
+
+#app.light {
+    --text1: #222831;
+    --text2: #393e46;
+    --base1: #f2f3f4;
+    --base2: #e3e6ed;
+    --blur1: #e3e6ed33;
+    --blur2: #f7f7fae6;
+    --border-subtle: rgb(57 62 70 / 20%);
+    --input-bg: rgb(57 62 70 / 3%);
+    --input-bg-focus: rgb(57 62 70 / 6%);
+    --input-border: rgb(57 62 70 / 12%);
+    --input-border-focus: rgb(57 62 70 / 25%);
+    --button-bg: rgb(57 62 70 / 10%);
+    --button-bg-hover: rgb(57 62 70 / 15%);
+    --button-border-hover: rgb(57 62 70 / 25%);
+    --error-bg: rgb(231 76 60 / 10%);
+    --error-border: rgb(231 76 60 / 20%);
+    --error-text: #e74c3c;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --danger-border: #dc2626;
+    --danger-border-hover: #b91c1c;
+    --text-on-danger: #fff;
+    --positive: #4caf50;
+    --negative: #f44336;
+    --scrim: #000;
+    --glass: #fff;
+}

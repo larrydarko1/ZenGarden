@@ -17,9 +17,6 @@
  *                                of options per language.
  *   4. createI18n options      — in src/renderer/i18n.ts. No lint rule reads that
  *                                file, and escapeParameter is a security control.
- *
- * assets/locales/*.json are not build artefacts: language.ts seeds them into
- * ~/.leaf/locales/ where users edit them, so `en` is both reference and fallback.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -27,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 
-const LOCALE_DIR = path.resolve(ROOT, 'assets/locales');
+const LOCALE_DIR = path.resolve(ROOT, 'src/renderer/locales');
 const I18N_CONFIG = path.resolve(ROOT, 'src/renderer/i18n.ts');
 const REFERENCE = 'en';
 
@@ -134,11 +131,7 @@ const REQUIRED_OPTIONS = [
         what: 'escapeParameter: true',
         re: /escapeParameter:\s*true/,
         why:
-            'SECURITY. Interpolation params are values from outside the dictionary — model names, file paths, ' +
-            'error text — and the messages themselves are user-editable under ~/.leaf/locales/. escapeParameter ' +
-            'keeps a param containing markup from being interpolated unescaped; the renderer already has v-html ' +
-            'sites (ai/AiMessageList.vue, drawing/DrawingToolbar.vue), so an unescaped param is one refactor away ' +
-            'from an XSS sink.',
+            'SECURITY. missing escapeParameter: true from the i18n config file',
     },
     {
         what: 'legacy: false',
@@ -149,9 +142,7 @@ const REQUIRED_OPTIONS = [
         what: 'fallbackLocale',
         re: /fallbackLocale:/,
         why:
-            'Without a fallback, a key missing from the active locale renders as the raw key path to the user. ' +
-            'Locales are hand-edited in ~/.leaf/locales/, so missing keys are a runtime reality here, not only a ' +
-            'build-time one.',
+            'Without a fallback, a key missing from the active locale renders as the raw key path to the user.'
     },
 ];
 

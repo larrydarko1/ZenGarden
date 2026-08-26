@@ -33,10 +33,8 @@ body,
     overscroll-behavior-y: none;
 }
 
-@media (width <= #{$breakpoint-xl}) {
-    html {
-        text-size-adjust: 100%;
-    }
+html {
+    text-size-adjust: 100%;
 }
 
 /* Smooth scrolling for all devices */

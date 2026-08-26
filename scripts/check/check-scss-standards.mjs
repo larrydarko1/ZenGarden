@@ -1,19 +1,24 @@
 #!/usr/bin/env node
 /**
  * SCSS architecture gate.
- *   1. THE BARREL. index.scss @forwards the token modules and @uses the ones that
- *      emit rules, and main.ts imports it exactly once. Import it twice and every
- *      global rule is emitted twice; drop the @forward and `@use '@/renderer/styles'`
- *      silently stops resolving the tokens.
+ *   1. THE BARREL AND THE ENTRY POINT. These are two files on purpose.
+ *      index.scss is the barrel: it @forwards variables and mixins and NOTHING
+ *      else, because Vite injects it into every SFC and each SFC style block is
+ *      its own sass compilation — so anything reachable from it that emits a
+ *      rule ships once per component instead of once per app. global.scss is the
+ *      entry point: it @uses the modules that emit, and main.ts imports it
+ *      exactly once. Import it twice and every global rule is emitted twice;
+ *      drop a @forward and `@use '@/renderer/styles'` silently stops resolving
+ *      the tokens.
  *   2. THE VITE INJECTION. `css.preprocessorOptions.scss.additionalData` in
  *      electron.vite.config.ts is what makes `$space-*` and the colour aliases
  *      available inside every SFC without an import. Lose it and every component
  *      fails to compile at once — yet nothing in the style files themselves
- *      records that they depend on it. The `index.scss` guard in that function
- *      matters too: without it the barrel @uses itself and sass fails on a
- *      circular load. vite.config.ts carries the same injection for the Capacitor
+ *      records that they depend on it. The styles-directory guard in that
+ *      function matters too: without it the barrel @uses itself and sass fails
+ *      on a circular load. vite.config.ts carries the same injection for the Capacitor
  *      build, which compiles the identical SFCs.
- *   3. THEME TOKEN PARITY. The palettes live in variables.scss as one custom-
+ *   3. THEME TOKEN PARITY. The palettes live in _themes.scss as one custom-
  *      property block per theme, plus a `:root` block for the frame that paints
  *      before App.vue puts the theme class on #app. So a token has three places
  *      it must agree:
@@ -38,8 +43,9 @@ import path from 'node:path';
 import { REPO_ROOT as ROOT } from '../lib/repo-root.mjs';
 
 const STYLES = 'src/renderer/styles';
-const VARIABLES = `${STYLES}/variables.scss`;
+const THEMES = `${STYLES}/_themes.scss`;
 const INDEX = `${STYLES}/index.scss`;
+const GLOBAL = `${STYLES}/global.scss`;
 const MAIN_TS = 'src/renderer/main.ts';
 const VITE_CONFIGS = ['electron.vite.config.ts', 'vite.config.ts'];
 const REFERENCE_THEME = 'dark';
@@ -48,7 +54,10 @@ const REFERENCE_THEME = 'dark';
  * Custom properties a component sets itself through a `:style` binding, so they
  * are deliberately absent from the theme palette. Keep the reason with the name.
  */
-const COMPONENT_LOCAL_VARS = new Map([['i', 'MonkAuth.vue — form field index, staggers the field-in animation delay']]);
+const COMPONENT_LOCAL_VARS = new Map([
+    ['i', 'MonkAuth.vue — form field index, staggers the field-in animation delay'],
+    ['peak-opacity', 'ZenParticlesAnimation.vue — per-band peak opacity, so three keyframe tracks cover all 62 particles'],
+]);
 
 const failures = [];
 const fail = (file, what, why) => failures.push({ file, what, why });
@@ -56,35 +65,104 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 
 // ── 1. The barrel ────────────────────────────────────────────────────────────
 const index = read(INDEX);
+const global = read(GLOBAL);
 const mainTs = read(MAIN_TS);
 
-if (!/@forward\s+['"][^'"]*variables['"]/.test(index)) {
-    fail(
-        INDEX,
-        'does not `@forward` variables',
-        "SFCs reach the tokens through `@use '@/renderer/styles'`, which only resolves what the barrel forwards.",
-    );
+for (const module of ['variables', 'mixins']) {
+    if (!new RegExp(`@forward\\s+['"][^'"]*${module}['"]`).test(index)) {
+        fail(
+            INDEX,
+            `does not \`@forward\` ${module}`,
+            `Every SFC reaches the design system through this barrel and nothing else. Un-forwarded, each \`$\`-name in _${module}.scss is an undefined-variable error in all 20 components at once.`,
+        );
+    }
 }
-if (!/@use\s+['"][^'"]*base['"]/.test(index)) {
-    fail(
-        INDEX,
-        'does not `@use` base',
-        'base.scss is the only module that EMITS global rules — the reset, :root and the reduced-motion override. Un-@used, none of it reaches the bundle.',
-    );
+
+for (const [module, why] of [
+    ['themes', 'The palettes are CSS custom properties. Un-@used, every `var(--token)` in the app resolves to nothing.'],
+    ['base', '_base.scss carries the reset, element defaults and the reduced-motion override. Un-@used, none of it reaches the bundle.'],
+    ['components', 'components/ holds the classes shared across unrelated SFCs. Un-@used, every template that names one of them renders unstyled.'],
+]) {
+    if (!new RegExp(`@use\\s+['"][^'"]*${module}['"]`).test(global)) {
+        fail(GLOBAL, `does not \`@use\` ${module}`, why);
+    }
 }
+
+const EMITTING_AT_RULES = /^\s*@(media|supports|keyframes|font-face|include|extend|at-root|container|layer|page|property|counter-style)\b/;
+const seenBarrelModules = new Set();
+
+const emitsCss = (rel) => {
+    if (seenBarrelModules.has(rel)) return false;
+    seenBarrelModules.add(rel);
+
+    let source;
+    try {
+        source = read(rel);
+    } catch {
+        fail(INDEX, `forwards \`${rel}\`, which does not exist`, 'The barrel names a module Sass cannot resolve; every SFC fails to compile.');
+        return false;
+    }
+
+    // Strip comments and every {…} body, leaving the lines that OPEN a block.
+    const stripped = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+    let offending = false;
+
+    for (const line of stripped.split('\n')) {
+        const opensBlock = line.includes('{');
+        if (!opensBlock) continue;
+        const head = line.slice(0, line.indexOf('{')).trim();
+        if (head === '') continue;
+        // Declarations of things that emit nothing until used.
+        if (/^@(mixin|function|use|forward|if|else|each|for|while|return|debug|warn|error)\b/.test(head)) continue;
+        if (head.startsWith('%')) continue;
+        if (EMITTING_AT_RULES.test(head)) {
+            offending = true;
+            continue;
+        }
+        // Interpolation inside a value, not a selector.
+        if (head.endsWith(':') || /:\s*\S/.test(head)) continue;
+        offending = true;
+    }
+
+    if (offending) {
+        fail(
+            rel,
+            'is reachable from index.scss but emits CSS',
+            'Every SFC @uses the barrel in its own compilation, so these rules ship once per component. Move them behind global.scss, which only main.ts loads.',
+        );
+    }
+
+    // Follow the graph: a forwarded module's own forwards are equally reachable.
+    for (const m of stripped.matchAll(/@(?:use|forward)\s+['"]([^'"]+)['"]/g)) {
+        const spec = m[1];
+        if (spec.startsWith('sass:')) continue;
+        const name = spec.replace('@/renderer/styles/', '').replace(/^\.\//, '');
+        const dir = path.dirname(name) === '.' ? '' : `${path.dirname(name)}/`;
+        const base = path.basename(name);
+        for (const candidate of [`${STYLES}/${dir}_${base}.scss`, `${STYLES}/${dir}${base}.scss`, `${STYLES}/${dir}${base}/_index.scss`]) {
+            if (fs.existsSync(path.join(ROOT, candidate))) {
+                emitsCss(candidate);
+                break;
+            }
+        }
+    }
+    return offending;
+};
+
+emitsCss(INDEX);
 
 const styleImports = [...mainTs.matchAll(/import\s+['"][^'"]*\.scss['"]/g)];
 if (styleImports.length === 0) {
     fail(
         MAIN_TS,
         'imports no stylesheet',
-        `The barrel has exactly one importer, and it is this file: \`import '@/renderer/styles/index.scss'\`.`,
+        `global.scss has exactly one importer, and it is this file: \`import '@/renderer/styles/global.scss'\`.`,
     );
 } else if (styleImports.length > 1) {
     fail(
         MAIN_TS,
         `imports ${styleImports.length} stylesheets`,
-        'The barrel is the single entry point. A second import emits every global rule twice.',
+        'global.scss is the single entry point. A second import emits every global rule twice.',
     );
 }
 
@@ -97,7 +175,7 @@ for (const viteConfigPath of VITE_CONFIGS) {
         fail(
             viteConfigPath,
             'has no `css.preprocessorOptions.scss.additionalData`',
-            'It is what prepends the token @use to every SFC style block. Without it every `$`-variable in every component is an undefined-variable error.',
+            'It is what prepends the barrel @use to every SFC style block. Without it every `$`-variable in every component is an undefined-variable error.',
         );
         continue;
     }
@@ -105,20 +183,20 @@ for (const viteConfigPath of VITE_CONFIGS) {
         fail(
             viteConfigPath,
             "additionalData does not inject `@use '@/renderer/styles' as *`",
-            'The `as *` is what puts the tokens in the SFC’s own namespace; without it every reference needs a prefix.',
+            'It must inject the barrel, never global.scss: global.scss @uses the modules that emit, and injecting it ships every global rule once per SFC. The `as *` is what puts the tokens in the SFC’s own namespace.',
         );
     }
-    if (additionalData !== null && !/index\.scss/.test(additionalData[1])) {
+    if (additionalData !== null && !/renderer.{1,4}styles/.test(additionalData[1])) {
         fail(
             viteConfigPath,
-            'additionalData does not exempt index.scss',
+            'additionalData does not exempt the styles directory',
             'The barrel would be given a @use of itself. Sass fails the whole build on the circular load, and the message points at the wrong file.',
         );
     }
 }
 
 // ── 3. Theme token parity ────────────────────────────────────────────────────
-const variables = read(VARIABLES);
+const variables = read(THEMES);
 
 /**
  * Every custom-property block in variables.scss, keyed by the theme it paints.
@@ -139,7 +217,7 @@ for (const m of variables.matchAll(
 const rootTokens = paletteBlocks.get(':root') ?? new Set();
 if (!paletteBlocks.has(':root')) {
     fail(
-        VARIABLES,
+        THEMES,
         'has no `:root` block declaring custom properties',
         'It is the layer that paints before App.vue puts a theme class on #app — without it the first frame has no palette at all.',
     );
@@ -148,7 +226,7 @@ if (!paletteBlocks.has(':root')) {
 const themeTokens = new Map([...paletteBlocks].filter(([id]) => id !== ':root'));
 if (themeTokens.size < 2) {
     fail(
-        VARIABLES,
+        THEMES,
         `declares ${themeTokens.size} theme block(s), expected at least light and dark`,
         'The theme toggle in SettingsPopup offers both; a missing block means selecting that theme changes nothing.',
     );
@@ -157,7 +235,7 @@ if (themeTokens.size < 2) {
 const reference = themeTokens.get(REFERENCE_THEME);
 if (reference === undefined) {
     fail(
-        VARIABLES,
+        THEMES,
         `has no \`#app.${REFERENCE_THEME}\` block`,
         `${REFERENCE_THEME} is the reference palette and App.vue's initial value — every other theme is compared against its token set.`,
     );
@@ -169,14 +247,14 @@ if (reference === undefined) {
         const extra = [...tokens].filter((k) => !reference.has(k));
         if (missing.length > 0) {
             fail(
-                VARIABLES,
+                THEMES,
                 `\`#app.${id}\` is missing ${missing.length} colour(s): ${missing.join(', ')}`,
                 `Each one falls through to the \`:root\` value, so those elements are off-palette in this theme only — visible solely to whoever selected it.`,
             );
         }
         if (extra.length > 0) {
             fail(
-                VARIABLES,
+                THEMES,
                 `\`#app.${id}\` defines ${extra.length} colour(s) no other theme has: ${extra.join(', ')}`,
                 'Either every theme needs the token, or nothing reads it and it is dead weight.',
             );
@@ -188,14 +266,14 @@ if (reference === undefined) {
     const orphanFallback = [...rootTokens].filter((k) => !reference.has(k));
     if (missingFallback.length > 0) {
         fail(
-            VARIABLES,
+            THEMES,
             `:root has no fallback for ${missingFallback.join(', ')}`,
             'This is the layer that paints before the theme class lands, so a token missing here renders as nothing on the first frame.',
         );
     }
     if (orphanFallback.length > 0) {
         fail(
-            VARIABLES,
+            THEMES,
             `:root defines ${orphanFallback.join(', ')}, which no theme block overrides`,
             'The token is permanently stuck at its fallback — a theme switch cannot change it, which is exactly the bug that is hardest to see.',
         );
@@ -232,7 +310,7 @@ for (const [token, rel] of unresolved) {
 }
 
 // ── 4. Self-hosted everything ────────────────────────────────────────────────
-for (const rel of [...styleFiles, INDEX]) {
+for (const rel of [...styleFiles, INDEX, GLOBAL]) {
     const source = read(rel);
     for (const m of source.matchAll(
         /@import\s+url\(|https?:\/\/fonts\.(googleapis|gstatic)\.com|@font-face[\s\S]{0,300}?url\(\s*['"]?https?:/gi,

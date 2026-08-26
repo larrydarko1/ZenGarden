@@ -1,5 +1,8 @@
 export default {
   extends: ['stylelint-config-standard-scss'],
+  referenceFiles: [
+    { files: ['src/renderer/styles/_themes.scss'], customSyntax: 'postcss-scss' },
+  ],
   plugins: ['stylelint-scss', 'stylelint-declaration-strict-value'],
   rules: {
     // –– COLOR FUNCTIONS –––––––––––––––––––––––––––––––––––––––––––––––

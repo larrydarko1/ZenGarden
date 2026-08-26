@@ -309,7 +309,7 @@ onUnmounted(() => {
             <button
                 v-if="showBreathingPicker && !meditationActive"
                 type="button"
-                class="breathing-picker-backdrop"
+                class="zen-backdrop breathing-picker-backdrop"
                 aria-label="Close breathing picker"
                 @click="showBreathingPicker = false"></button>
             <div
@@ -318,7 +318,7 @@ onUnmounted(() => {
                 <div class="breathing-picker-header">
                     <h3 class="breathing-picker-title">{{ t('breathing.title') }}</h3>
                     <button
-                        class="config-close-btn"
+                        class="zen-icon-btn is-bare config-close-btn"
                         aria-label="Close breathing picker"
                         @click="showBreathingPicker = false">
                         <svg
@@ -554,7 +554,7 @@ onUnmounted(() => {
                 <button
                     v-if="showBellConfig && !meditationActive"
                     type="button"
-                    class="breathing-picker-backdrop"
+                    class="zen-backdrop breathing-picker-backdrop"
                     aria-label="Close bell settings"
                     @click="showBellConfig = false"></button>
                 <div
@@ -563,7 +563,7 @@ onUnmounted(() => {
                     <div class="breathing-picker-header">
                         <h3 class="breathing-picker-title">{{ t('meditation.bell.settings') }}</h3>
                         <button
-                            class="config-close-btn"
+                            class="zen-icon-btn is-bare config-close-btn"
                             aria-label="Close bell settings"
                             @click="showBellConfig = false">
                             <svg
@@ -653,75 +653,85 @@ onUnmounted(() => {
 }
 
 .zen-bg {
-    min-height: 100vh;
-    width: 100vw;
-    background: color-mix(in srgb, $base1 70%, $base2 30%);
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    background: color-mix(in srgb, $base1 70%, $base2 30%);
 }
 
 .zen-main {
+    position: relative;
     display: flex;
-    width: 100%;
-    height: 100vh;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    height: 100vh;
     padding: 0 $space-7;
-    position: relative;
     overflow: hidden;
+
+    &.journal-active {
+        background: color-mix(in srgb, $base2 50%, $base1 50%);
+        border-radius: 0;
+        transition: background $transition-gentle;
+    }
 }
 
 .goals-horizontal {
-    padding: $space-4 $space-7;
     max-width: $size-49;
     margin: 0 auto;
+    padding: $space-4 $space-7;
 }
+
+/* ––––– Centre text ––––– */
 
 .zen-center {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-}
-
-.zen-loader {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity $duration-mellow $ease-standard;
-}
-
-.zen-loader.dimmed {
-    opacity: $opacity-faint;
-    pointer-events: none;
+    width: 100%;
+    padding: 0 $space-4;
 }
 
 .zen-date {
-    font-size: $font-size-lg;
     color: $text1;
+    font-size: $font-size-lg;
 }
 
 .zen-greeting {
-    font-size: $font-size-lg;
     color: $text2;
+    font-size: $font-size-lg;
 }
 
 .zen-phrase {
+    display: none;
+    max-width: 90vw;
     color: $text1;
     text-align: center;
-    cursor: default;
-    max-width: 90vw;
     overflow-wrap: break-word;
+    cursor: default;
     transition: opacity $duration-mellow $ease-standard;
+
+    &.dimmed {
+        opacity: $opacity-subtle;
+        pointer-events: none;
+    }
 }
 
-.zen-phrase.dimmed {
-    opacity: $opacity-subtle;
-    pointer-events: none;
+.zen-loader {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: opacity $duration-mellow $ease-standard;
+
+    &.dimmed {
+        opacity: $opacity-faint;
+        pointer-events: none;
+    }
 }
 
-/* ––– Center Text Transition ––– */
 .center-fade-enter-active {
     animation: center-fade-in $duration-entrance $ease-standard both;
 }
@@ -748,178 +758,183 @@ onUnmounted(() => {
     }
 }
 
-/* ––– Meditation Control Bar ––– */
+/* ––––– Meditation control bar ––––– */
+
 .meditation-control-bar {
     position: absolute;
-    bottom: $size-30;
+    bottom: $size-29;
     left: 50%;
-    transform: translateX(-50%);
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: $space-0;
-    padding: $space-1;
+    justify-content: center;
+    gap: $space-2;
+    width: calc(100% - $size-23);
+    padding: $space-2;
     background: $input-bg;
     border: $border-width-thin $input-border;
     border-radius: $border-radius;
+    transform: translateX(-50%);
 }
 
 .duration-btn {
+    min-width: $size-23;
+    min-height: $size-21;
     padding: $space-2;
     background: transparent;
     border: none;
+    border-radius: $border-radius-sm;
     color: $text2;
     font-size: $font-size-xs;
     font-weight: $font-weight-normal;
     cursor: pointer;
+    touch-action: manipulation;
     transition:
         color $duration-slow $ease-standard,
         background $duration-slow $ease-standard,
         transform $duration-base $ease-standard,
         box-shadow $duration-slow $ease-standard;
-    border-radius: $border-radius-sm;
-    min-width: $size-20;
-}
 
-.duration-btn:hover {
-    background: $input-bg-focus;
-    color: $text1;
-    transform: translateY(-$size-0);
-}
+    &:hover {
+        background: $input-bg-focus;
+        color: $text1;
+    }
 
-.duration-btn:active {
-    transform: translateY(0) scale($scale-96);
-    transition-duration: $duration-instant;
-}
+    &:active {
+        transform: translateY(0) scale($scale-96);
+        transition-duration: $duration-instant;
+    }
 
-.duration-btn.active {
-    background: $button-bg;
-    color: $text1;
-    box-shadow: $shadow-glow-sm;
-}
+    &.active {
+        background: $button-bg;
+        box-shadow: $shadow-glow-sm;
+        color: $text1;
+    }
 
-.duration-btn.custom-btn {
-    font-weight: $font-weight-bold;
-    font-size: $font-size-base;
-    line-height: $line-height-none;
+    &.custom-btn {
+        font-size: $font-size-base;
+        font-weight: $font-weight-bold;
+        line-height: $line-height-none;
+    }
 }
 
 .custom-duration-input {
     display: flex;
     align-items: center;
     gap: $space-0;
-}
 
-.custom-duration-input input {
-    padding: $space-2;
-    background: transparent;
-    border: none;
-    border-radius: $border-radius-sm;
-    color: $text1;
-    font-size: $font-size-xs;
-    text-align: center;
-    appearance: textfield;
-}
+    input {
+        padding: $space-2;
+        background: transparent;
+        border: none;
+        border-radius: $border-radius-sm;
+        color: $text1;
+        font-size: $font-size-xs;
+        text-align: center;
 
-.custom-duration-input input::-webkit-outer-spin-button,
-.custom-duration-input input::-webkit-inner-spin-button {
-    appearance: none;
-    margin: 0;
-}
+        /** A number field whose spinners would overflow this narrow bar. */
+        appearance: textfield;
 
-.custom-duration-input input:focus {
-    outline: none;
-    background: $input-bg-focus;
+        &::-webkit-outer-spin-button,
+        &::-webkit-inner-spin-button {
+            margin: 0;
+            appearance: none;
+        }
+
+        &:focus {
+            background: $input-bg-focus;
+            outline: none;
+        }
+    }
 }
 
 .custom-ok-btn {
-    padding: $space-2;
-    background: transparent;
-    border: none;
-    color: $text2;
-    cursor: pointer;
-    border-radius: $border-radius-sm;
-    transition: all $transition-fast;
-    line-height: $line-height-none;
     display: flex;
     align-items: center;
     justify-content: center;
     min-width: $size-16;
     height: $size-16;
-}
+    padding: $space-2;
+    background: transparent;
+    border: none;
+    border-radius: $border-radius-sm;
+    color: $text2;
+    line-height: $line-height-none;
+    cursor: pointer;
+    transition:
+        color $transition-fast,
+        background $transition-fast;
 
-.custom-ok-btn:hover {
-    background: $input-bg-focus;
-    color: $text1;
+    &:hover {
+        background: $input-bg-focus;
+        color: $text1;
+    }
 }
 
 .start-meditation-btn {
-    padding: $space-2 $space-4;
+    flex: 1 1 100%;
+    min-height: $size-23;
+    margin-top: $space-2;
+    margin-left: 0;
+    padding: $space-3 $space-4;
     background: $button-bg;
     border: none;
-    border-left: $border-width-thin $input-border;
+    border-top: $border-width-thin $input-border;
+    border-radius: $border-radius-sm;
     color: $text1;
-    font-size: $font-size-xs;
+    font-size: $font-size-sm;
     font-weight: $font-weight-normal;
-    cursor: pointer;
-    border-radius: 0 $border-radius-sm $border-radius-sm 0;
-    margin-left: $space-1;
     text-transform: uppercase;
     letter-spacing: $letter-spacing-4;
+    cursor: pointer;
     transition:
         background $duration-slow $ease-standard,
         transform $duration-base $ease-standard,
         box-shadow $duration-slow $ease-standard;
+
+    &:hover {
+        background: $button-bg-hover;
+        box-shadow: $shadow-sm;
+    }
+
+    &:active {
+        transform: scale($scale-97);
+        transition-duration: $duration-instant;
+    }
 }
 
-.start-meditation-btn:hover {
-    background: $button-bg-hover;
-    box-shadow: $shadow-sm;
-}
-
-.start-meditation-btn:active {
-    transform: scale($scale-97);
-    transition-duration: $duration-instant;
-}
-
-/* ––– Journal Mode ––– */
-.zen-main.journal-active {
-    background: color-mix(in srgb, $base2 50%, $base1 50%);
-    border-radius: 0;
-    transition: background $transition-gentle;
-}
+/* ––––– Journal / panel mode ––––– */
 
 .journal-inline-container {
-    width: 100%;
-    height: 100%;
+    @include scrollbar;
+
+    position: relative;
+    z-index: $z-normal;
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding: $space-7;
-    padding-bottom: $space-12;
     box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    padding: env(safe-area-inset-top, $space-4) $space-4 $space-13;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    position: relative;
-    z-index: $z-normal;
+
+    &.has-header {
+        padding-top: calc($space-8 + $space-4);
+    }
 }
 
-.journal-inline-container.has-header {
-    padding-top: calc($space-8 + $space-6);
-}
-
-/* ––– Journal Transition ––– */
 .journal-fade-enter-active {
-    animation: journal-enter $duration-soft $ease-standard;
+    animation: journal-enter $duration-soft $ease-standard both;
     animation-delay: $duration-immediate;
-    animation-fill-mode: both;
 }
 
 .journal-fade-leave-active {
     position: absolute;
     inset: 0;
     z-index: 0;
-    pointer-events: none;
     animation: journal-leave $duration-relaxed $ease-standard forwards;
+    pointer-events: none;
 }
 
 @keyframes journal-enter {
@@ -946,42 +961,31 @@ onUnmounted(() => {
     }
 }
 
-/* ––– Breathing Picker Panel ––– */
+/* ––––– Breathing picker ––––– */
+
 .breathing-picker-backdrop {
     position: fixed;
-    inset: 0;
-    padding: 0;
-    border: none;
-    cursor: default;
-    background: color-mix(in srgb, $scrim 30%, transparent);
     z-index: $z-modal;
-    animation: backdrop-fade-in $duration-slow $ease-standard;
-}
-
-@keyframes backdrop-fade-in {
-    from {
-        opacity: $opacity-faint;
-    }
-
-    to {
-        opacity: $opacity-full;
-    }
+    background: color-mix(in srgb, $scrim 30%, transparent);
+    animation: fade-in $duration-slow $ease-standard;
 }
 
 .breathing-picker-panel {
+    @include scrollbar;
+
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    z-index: $z-modal-raised;
+    width: calc(100% - $size-17);
+    max-width: $size-45;
+    max-height: 80vh;
     background: $input-bg;
     border: $border-width-thin $input-border;
     border-radius: $border-radius-xl;
-    width: $size-44;
-    max-width: 90vw;
-    max-height: 80vh;
-    overflow-y: auto;
-    z-index: $z-modal-raised;
     box-shadow: $shadow-lg;
+    transform: translate(-50%, -50%);
+    overflow-y: auto;
     animation: popup-fade-in $duration-slower $ease-standard;
 }
 
@@ -1009,68 +1013,70 @@ onUnmounted(() => {
 
 .breathing-picker-title {
     margin: 0;
+    color: $text1;
     font-size: $font-size-xs;
     font-weight: $font-weight-normal;
-    color: $text1;
     text-transform: uppercase;
     letter-spacing: $letter-spacing-4;
 }
 
 .breathing-picker-options {
-    padding: $space-2;
     display: flex;
     flex-direction: column;
     gap: $space-1;
+    padding: $space-2;
 }
 
 .breathing-option-btn {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    width: 100%;
     padding: $space-2 $space-3;
     background: transparent;
     border: $border-width-thin transparent;
     border-radius: $border-radius-sm;
     color: $text2;
+    text-align: left;
     cursor: pointer;
     transition:
-        background $duration-slow $ease-standard,
         color $duration-slow $ease-standard,
+        background $duration-slow $ease-standard,
         border-color $duration-slow $ease-standard,
         transform $duration-base $ease-standard;
-    text-align: left;
-    width: 100%;
-}
 
-.breathing-option-btn:hover {
-    background: $input-bg-focus;
-    color: $text1;
-    transform: translateX($size-1);
-}
+    &:hover {
+        background: $input-bg-focus;
+        color: $text1;
+        transform: translateX($size-1);
+    }
 
-.breathing-option-btn:active {
-    transform: translateX($size-1) scale($scale-98);
-    transition-duration: $duration-instant;
-}
+    &:active {
+        transform: translateX($size-1) scale($scale-98);
+        transition-duration: $duration-instant;
+    }
 
-.breathing-option-btn.active {
-    background: $input-bg-focus;
-    border-color: $input-border-focus;
-    color: $text1;
+    &.active {
+        background: $input-bg-focus;
+        border-color: $input-border-focus;
+        color: $text1;
+    }
 }
 
 .breathing-option-name {
+    color: inherit;
     font-size: $font-size-xs;
     font-weight: $font-weight-normal;
-    color: inherit;
 }
 
 .breathing-option-desc {
-    font-size: $font-size-xxs;
-    color: $text2;
     margin-top: $space-0;
+    color: $text2;
+    font-size: $font-size-xxs;
     line-height: $line-height-tight;
 }
+
+/* ––––– Bell config ––––– */
 
 .bell-config-btn {
     display: flex;
@@ -1084,12 +1090,12 @@ onUnmounted(() => {
 }
 
 .bell-sound-section-title {
+    padding: $space-1 $space-1 $space-0;
+    color: $text2;
     font-size: $font-size-xs;
     font-weight: $font-weight-normal;
-    color: $text2;
     text-transform: uppercase;
     letter-spacing: $letter-spacing-4;
-    padding: $space-1 $space-1 $space-0;
 }
 
 .bell-sound-options-inline {
@@ -1099,128 +1105,111 @@ onUnmounted(() => {
 }
 
 .bell-sound-inline-btn {
+    align-items: center;
+    justify-content: center;
+    padding: $space-2;
     text-align: center;
-    align-items: center;
-    justify-content: center;
-    padding: $space-2 $space-2;
 }
 
+/** Sizing only — `.zen-icon-btn.is-bare` carries the interaction states. */
 .config-close-btn {
-    padding: $space-1;
-    background: transparent;
-    border: none;
-    color: $text2;
-    cursor: pointer;
-    border-radius: $border-radius;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all $transition-base;
+    width: auto;
+    height: auto;
+    min-width: $size-20;
+    min-height: $size-20;
+    padding: $space-2;
+    border-radius: $border-radius-lg;
 }
 
-.config-close-btn:hover {
-    background: $input-bg-focus;
-    color: $text1;
-}
+/* –––––– Responsive –––––– */
 
-@keyframes fade-in {
-    from {
-        opacity: $opacity-faint;
-    }
-
-    to {
-        opacity: $opacity-full;
+@media (width > #{$breakpoint-xs}) {
+    .duration-btn {
+        min-width: $size-24;
+        padding: $space-2 $space-3;
+        font-size: $font-size-sm;
     }
 }
 
-/* ––– Mobile Responsive ––– */
-@media (width <= #{$breakpoint-xl}) {
-    // Hide zen phrase and loader on mobile for cleaner layout
-    .zen-phrase,
-    .zen-loader {
-        display: none;
-    }
-
-    .zen-center {
-        width: 100%;
-        padding: 0 $space-4;
-    }
-
-    .journal-inline-container {
-        padding: $space-4;
-        padding-top: env(safe-area-inset-top, $space-4);
-        padding-bottom: $space-13;
-    }
-
-    .journal-inline-container.has-header {
-        padding-top: calc($space-8 + $space-4);
-    }
-
+@media (width > #{$breakpoint-md}) {
     .meditation-control-bar {
         bottom: $size-30;
         width: calc(100% - $size-17);
-        left: 50%;
-        flex-wrap: wrap;
-        justify-content: center;
         padding: $space-3;
-        gap: $space-2;
-    }
-
-    .breathing-picker-panel {
-        width: calc(100% - $size-17);
-        max-width: $size-45;
     }
 
     .duration-btn {
         min-width: $size-27;
-        min-height: $size-21;
         padding: $space-3 $space-4;
-        font-size: $font-size-sm;
-        touch-action: manipulation;
     }
 
     .start-meditation-btn {
-        flex: 1 1 100%;
-        margin-left: 0;
-        margin-top: $space-2;
-        border-left: none;
-        border-top: $border-width-thin $input-border;
-        border-radius: $border-radius-sm;
         padding: $space-3 $space-5;
         font-size: $font-size-base;
-        min-height: $size-23;
     }
 }
 
-@media (width <= #{$breakpoint-md}) {
+@media (width > #{$breakpoint-xl}) {
+    .zen-center {
+        width: auto;
+        padding: 0;
+    }
+
     .zen-phrase {
-        font-size: $font-size-lg;
-        margin-top: $space-15;
-        padding: 0 $space-4;
-        line-height: $line-height-base;
+        display: block;
+    }
+
+    .zen-loader {
+        display: flex;
     }
 
     .meditation-control-bar {
-        width: calc(100% - $size-23);
-        bottom: $size-29;
-        padding: $space-2;
+        flex-wrap: nowrap;
+        gap: $space-0;
+        width: auto;
+        padding: $space-1;
     }
 
     .duration-btn {
-        min-width: $size-24;
-        min-height: $size-21;
-        padding: $space-2 $space-3;
-        font-size: $font-size-sm;
+        min-width: $size-20;
+        min-height: auto;
+        padding: $space-2;
+        font-size: $font-size-xs;
     }
 
     .start-meditation-btn {
-        padding: $space-3 $space-4;
-        font-size: $font-size-sm;
-        min-height: $size-23;
+        flex: 0 1 auto;
+        min-height: auto;
+        margin-top: 0;
+        margin-left: $space-1;
+        padding: $space-2 $space-4;
+        border-top: none;
+        border-left: $border-width-thin $input-border;
+        border-radius: 0 $border-radius-sm $border-radius-sm 0;
+        font-size: $font-size-xs;
+    }
+
+    .journal-inline-container {
+        padding: $space-7 $space-7 $space-12;
+
+        &.has-header {
+            padding-top: calc($space-8 + $space-6);
+        }
+    }
+
+    .breathing-picker-panel {
+        width: $size-44;
+        max-width: 90vw;
+    }
+
+    .config-close-btn {
+        min-width: auto;
+        min-height: auto;
+        padding: $space-1;
+        border-radius: $border-radius;
     }
 }
 
-/* ––– Landscape Orientation ––– */
 @media (height <= #{$breakpoint-short}) and (width <= #{$breakpoint-2xl}) {
     .zen-phrase {
         margin-top: $space-11;
@@ -1235,55 +1224,18 @@ onUnmounted(() => {
     }
 
     .duration-btn {
-        padding: $space-2 $space-3;
-        font-size: $font-size-xs;
         min-width: $size-24;
         min-height: $size-20;
-    }
-
-    .start-meditation-btn {
-        padding: $space-2 $space-4;
-        font-size: $font-size-sm;
-        margin-top: 0;
-        flex: 0 0 auto;
-        min-height: $size-20;
-    }
-}
-
-/* ––– Very Small Screens ––– */
-@media (width <= #{$breakpoint-xs}) {
-    .zen-phrase {
-        font-size: $font-size-base;
-        padding: 0 $space-3;
-    }
-
-    .duration-btn {
-        min-width: $size-23;
-        min-height: $size-21;
-        padding: $space-2 $space-2;
+        padding: $space-2 $space-3;
         font-size: $font-size-xs;
     }
 
     .start-meditation-btn {
-        font-size: $font-size-sm;
-        padding: $space-3 $space-4;
-        min-height: $size-23;
-    }
-}
-
-/* ––– Bell Config Mobile ––– */
-@media (width <= #{$breakpoint-xl}) {
-    .config-close-btn {
-        min-width: $size-20;
+        flex: 0 0 auto;
         min-height: $size-20;
-        padding: $space-2;
-        border-radius: $border-radius-lg;
-    }
-
-    .config-close-btn:hover,
-    .config-close-btn:active {
-        background: $input-bg;
-        color: $text1;
+        margin-top: 0;
+        padding: $space-2 $space-4;
+        font-size: $font-size-sm;
     }
 }
 </style>

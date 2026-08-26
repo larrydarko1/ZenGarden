@@ -65,7 +65,7 @@ const { t } = useI18n();
             <p class="notes-date-label">{{ formatDate(selectedDate) }}</p>
             <textarea
                 :value="dailyNote"
-                class="emotion-note-textarea"
+                class="zen-textarea emotion-note-textarea"
                 :placeholder="t('emotions.notePlaceholder')"
                 :aria-label="t('emotions.notePlaceholder')"
                 maxlength="2000"
@@ -82,7 +82,7 @@ const { t } = useI18n();
 
 <style scoped lang="scss">
 .notes-view {
-    min-height: $size-44;
+    min-height: auto;
 }
 
 .notes-content {
@@ -96,73 +96,52 @@ const { t } = useI18n();
     align-items: center;
     gap: $space-2;
     color: $text1;
-}
 
-.notes-header svg {
-    opacity: $opacity-mid-high;
-    flex-shrink: 0;
-}
+    svg {
+        flex-shrink: 0;
+        opacity: $opacity-mid-high;
+    }
 
-.notes-header h3 {
-    margin: 0;
-    font-size: $font-size-lg;
-    font-weight: $font-weight-semibold;
+    h3 {
+        margin: 0;
+        font-size: $font-size-lg;
+        font-weight: $font-weight-semibold;
+    }
 }
 
 .notes-date-label {
     margin: 0;
-    font-size: $font-size-sm;
     color: $text2;
+    font-size: $font-size-sm;
 }
 
 .emotion-note-textarea {
-    width: 100%;
-    min-height: $size-40;
+    min-height: $size-39;
     padding: $space-4;
-    background: $input-bg;
-    border: $border-width-thin $input-border;
     border-radius: $border-radius-lg;
-    color: $text1;
-    font-family: inherit;
     font-size: $font-size-base;
-    line-height: $line-height-relaxed;
-    resize: vertical;
-    transition:
-        border-color $duration-base,
-        background $duration-base;
-    box-sizing: border-box;
-}
-
-.emotion-note-textarea:focus {
-    outline: none;
-    border-color: $input-border-focus;
-    background: $input-bg-focus;
-}
-
-.emotion-note-textarea::placeholder {
-    color: $text2;
-    opacity: $opacity-mid;
 }
 
 .note-footer {
     display: flex;
     justify-content: flex-end;
+
+    .character-count {
+        color: $text2;
+        font-size: $font-size-xs;
+        opacity: $opacity-mid-high;
+    }
 }
 
-.note-footer .character-count {
-    font-size: $font-size-xs;
-    color: $text2;
-    opacity: $opacity-mid-high;
-}
+/* –––––– Responsive –––––– */
 
-@media (width <= #{$breakpoint-xl}) {
+@media (width > #{$breakpoint-xl}) {
     .notes-view {
-        min-height: auto;
+        min-height: $size-44;
     }
 
     .emotion-note-textarea {
-        min-height: $size-39;
-        font-size: $font-size-base;
+        min-height: $size-40;
     }
 }
 </style>

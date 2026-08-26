@@ -96,7 +96,7 @@ function selectDay(day: CalendarDay): void {
     <div class="calendar-inline">
         <div class="calendar-header">
             <button
-                class="calendar-arrow"
+                class="zen-icon-btn calendar-arrow"
                 :disabled="visibleMonth === 0"
                 aria-label="Previous month"
                 @click="prevMonth">
@@ -115,7 +115,7 @@ function selectDay(day: CalendarDay): void {
             </button>
             <span class="calendar-title">{{ monthNames[visibleMonth] }} {{ year }}</span>
             <button
-                class="calendar-arrow"
+                class="zen-icon-btn calendar-arrow"
                 :disabled="visibleMonth === 11"
                 aria-label="Next month"
                 @click="nextMonth">
@@ -188,10 +188,10 @@ function selectDay(day: CalendarDay): void {
 
 <style scoped lang="scss">
 .calendar-inline {
-    width: 100%;
     display: flex;
     flex-direction: column;
     gap: $space-5;
+    width: 100%;
 }
 
 .calendar-header {
@@ -203,79 +203,55 @@ function selectDay(day: CalendarDay): void {
 }
 
 .calendar-title {
+    min-width: $size-37;
     color: $text1;
-    font-size: $font-size-xs;
+    font-size: $font-size-sm;
     font-weight: $font-weight-medium;
+    text-align: center;
     text-transform: uppercase;
     letter-spacing: $letter-spacing-7;
-    min-width: $size-37;
-    text-align: center;
 }
 
 .calendar-arrow {
-    background: transparent;
-    border: $border-width-thin $input-border;
-    color: $text2;
-    width: $size-17;
-    height: $size-17;
-    border-radius: $border-radius;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all $transition-fast;
-}
-
-.calendar-arrow:hover {
-    color: $text1;
-    border-color: $text2;
-    background: $input-bg;
-}
-
-.calendar-arrow:disabled {
-    opacity: $opacity-lowest;
-    cursor: not-allowed;
-}
-
-.calendar-arrow:disabled:hover {
-    color: $text2;
-    border-color: $input-border;
-    background: transparent;
+    width: $size-20;
+    height: $size-20;
+    touch-action: manipulation;
 }
 
 .calendar-body {
     display: flex;
-    gap: $space-6;
+    flex-direction: column;
     align-items: flex-start;
+    gap: $space-4;
     width: 100%;
 }
 
 .calendar-grid-section {
     flex: 1;
     min-width: 0;
+    padding: $space-3;
     background: $input-bg;
     border: $border-width-thin $input-border;
     border-radius: $border-radius-lg;
-    padding: $space-5;
 }
 
 .calendar-weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: $space-1;
+    margin-bottom: $space-2;
     color: $text2;
-    font-size: $font-size-xxs;
+    font-size: $font-size-xs;
+    text-align: center;
     text-transform: uppercase;
     letter-spacing: $letter-spacing-6;
-    margin-bottom: $space-2;
-    text-align: center;
-}
 
-.calendar-weekdays span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: $size-18;
+    span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: $size-18;
+    }
 }
 
 .calendar-days {
@@ -285,79 +261,85 @@ function selectDay(day: CalendarDay): void {
 }
 
 .calendar-day {
-    aspect-ratio: 1;
-    padding: 0;
-    border: none;
-    background: none;
-    font-family: inherit;
     display: flex;
     align-items: center;
     justify-content: center;
+    aspect-ratio: 1;
+    padding: 0;
+    background: none;
+    border: none;
     border-radius: $border-radius;
     color: $text1;
-    opacity: $opacity-low-mid;
+    font-family: inherit;
     font-size: $font-size-xs;
-    cursor: default;
-    transition: all $transition-fast;
-}
-
-.calendar-day.today {
-    border: $border-width-thin $border-subtle;
-    opacity: $opacity-full;
-    font-weight: $font-weight-medium;
-}
-
-.calendar-day.complete {
-    background: $border-subtle;
-    color: $text1;
-    opacity: $opacity-full;
-    cursor: pointer;
-}
-
-.calendar-day.complete:hover {
-    background: color-mix(in srgb, $border-subtle 80%, $text1 20%);
-}
-
-.calendar-day.selected {
-    outline: $border-width-thick $input-border-focus;
-    outline-offset: -$size-1;
-}
-
-.calendar-day.incomplete {
     opacity: $opacity-low-mid;
+    cursor: default;
+    transition:
+        background $transition-fast,
+        opacity $transition-fast;
+
+    &:hover {
+        opacity: $opacity-higher;
+    }
+
+    &.today {
+        border: $border-width-thin $border-subtle;
+        font-weight: $font-weight-medium;
+        opacity: $opacity-full;
+    }
+
+    &.incomplete {
+        opacity: $opacity-low-mid;
+    }
+
+    &.complete {
+        background: $border-subtle;
+        color: $text1;
+        opacity: $opacity-full;
+        cursor: pointer;
+
+        &:hover {
+            background: color-mix(in srgb, $border-subtle 80%, $text1 20%);
+        }
+    }
+
+    &.selected {
+        outline: $border-width-thick $input-border-focus;
+        outline-offset: -$size-1;
+    }
 }
 
-.calendar-day:hover {
-    opacity: $opacity-higher;
-}
+/* ––––– Meditation details panel ––––– */
 
-/* –––––– Meditation Details Panel –––––– */
 .meditation-details {
-    flex: 0 0 $size-43;
+    @include scrollbar;
+
+    flex: none;
+    width: 100%;
+    max-height: $size-41;
+    padding: $space-4;
     background: $input-bg;
     border: $border-width-thin $input-border;
     border-radius: $border-radius-lg;
-    padding: $space-5;
-    max-height: $size-46;
     overflow-y: auto;
-}
 
-.meditation-details h3 {
-    margin: 0 0 $space-4;
-    font-size: $font-size-xs;
-    color: $text2;
-    font-weight: $font-weight-normal;
-    text-transform: uppercase;
-    letter-spacing: $letter-spacing-6;
+    h3 {
+        margin: 0 0 $space-4;
+        color: $text2;
+        font-size: $font-size-xs;
+        font-weight: $font-weight-normal;
+        text-transform: uppercase;
+        letter-spacing: $letter-spacing-6;
+    }
 }
 
 .meditation-entry {
     padding: $space-3 0;
     border-bottom: $border-width-thin $input-border;
-}
 
-.meditation-entry:last-child {
-    border-bottom: none;
+    &:last-child {
+        border-bottom: none;
+    }
 }
 
 .meditation-info {
@@ -368,44 +350,36 @@ function selectDay(day: CalendarDay): void {
 }
 
 .meditation-duration {
-    font-size: $font-size-xs;
     color: $text1;
+    font-size: $font-size-xs;
     font-weight: $font-weight-normal;
     letter-spacing: $letter-spacing-2;
 }
 
 .meditation-notes {
-    font-size: $font-size-xs;
-    color: $text2;
-    line-height: $line-height-base;
     padding: $space-3;
     background: color-mix(in srgb, $input-bg 50%, $base1 50%);
     border: $border-width-thin $input-border;
     border-radius: $border-radius;
-}
+    color: $text2;
+    font-size: $font-size-xs;
+    line-height: $line-height-base;
 
-.meditation-notes strong {
-    color: $text1;
-    display: block;
-    margin-bottom: $space-1;
-    font-size: $font-size-xxs;
-    text-transform: uppercase;
-    letter-spacing: $letter-spacing-4;
+    strong {
+        display: block;
+        margin-bottom: $space-1;
+        color: $text1;
+        font-size: $font-size-xxs;
+        text-transform: uppercase;
+        letter-spacing: $letter-spacing-4;
+    }
 }
 
 /* –––––– Responsive –––––– */
-@media (width <= #{$breakpoint-xl}) {
-    .calendar-body {
-        flex-direction: column;
-        gap: $space-4;
-    }
 
+@media (width > #{$breakpoint-md}) {
     .calendar-grid-section {
         padding: $space-4;
-    }
-
-    .calendar-weekdays {
-        font-size: $font-size-xs;
     }
 
     .calendar-day {
@@ -413,25 +387,32 @@ function selectDay(day: CalendarDay): void {
     }
 
     .meditation-details {
-        flex: none;
-        width: 100%;
         max-height: $size-42;
-    }
-
-    .calendar-arrow {
-        width: $size-20;
-        height: $size-20;
-        touch-action: manipulation;
-    }
-
-    .calendar-title {
-        font-size: $font-size-sm;
+        padding: $space-5;
     }
 }
 
-@media (width <= #{$breakpoint-md}) {
+@media (width > #{$breakpoint-xl}) {
+    .calendar-title {
+        font-size: $font-size-xs;
+    }
+
+    .calendar-arrow {
+        width: $size-17;
+        height: $size-17;
+    }
+
+    .calendar-body {
+        flex-direction: row;
+        gap: $space-6;
+    }
+
     .calendar-grid-section {
-        padding: $space-3;
+        padding: $space-5;
+    }
+
+    .calendar-weekdays {
+        font-size: $font-size-xxs;
     }
 
     .calendar-day {
@@ -439,8 +420,9 @@ function selectDay(day: CalendarDay): void {
     }
 
     .meditation-details {
-        padding: $space-4;
-        max-height: $size-41;
+        flex: 0 0 $size-43;
+        width: auto;
+        max-height: $size-46;
     }
 }
 </style>

@@ -1,77 +1,4 @@
-/**
- * Design tokens and variables
- * All design system variables (colors, spacing, typography, sizing, etc.)
- * Auto-injected into every Vue SFC via electron.vite.config.ts
- */
-
-/* ––––– Theme palettes ––––– */
-
-:root,
-#app.dark {
-    --text1: #e0e0e0;
-    --text2: #b0b0b0;
-    --base1: #181a20;
-    --base2: #23262f;
-    --blur1: #23262f33;
-    --blur2: #181a20e6;
-    --border-subtle: rgb(224 224 224 / 15%);
-    --input-bg: rgb(224 224 224 / 2%);
-    --input-bg-focus: rgb(224 224 224 / 4%);
-    --input-border: rgb(224 224 224 / 8%);
-    --input-border-focus: rgb(224 224 224 / 20%);
-    --button-bg: rgb(224 224 224 / 10%);
-    --button-bg-hover: rgb(224 224 224 / 15%);
-    --button-border-hover: rgb(224 224 224 / 25%);
-    --error-bg: rgb(231 76 60 / 10%);
-    --error-border: rgb(231 76 60 / 20%);
-    --error-text: #e74c3c;
-    --auth-accent1: rgb(100 80 160 / 12%);
-    --auth-accent2: rgb(60 130 160 / 10%);
-    --auth-accent3: rgb(140 100 80 / 10%);
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --danger-border: #dc2626;
-    --danger-border-hover: #b91c1c;
-    --text-on-danger: #fff;
-    --positive: #4caf50;
-    --negative: #f44336;
-    --scrim: #000;
-    --glass: #fff;
-}
-
-#app.light {
-    --text1: #222831;
-    --text2: #393e46;
-    --base1: #f2f3f4;
-    --base2: #e3e6ed;
-    --blur1: #e3e6ed33;
-    --blur2: #f7f7fae6;
-    --border-subtle: rgb(57 62 70 / 20%);
-    --input-bg: rgb(57 62 70 / 3%);
-    --input-bg-focus: rgb(57 62 70 / 6%);
-    --input-border: rgb(57 62 70 / 12%);
-    --input-border-focus: rgb(57 62 70 / 25%);
-    --button-bg: rgb(57 62 70 / 10%);
-    --button-bg-hover: rgb(57 62 70 / 15%);
-    --button-border-hover: rgb(57 62 70 / 25%);
-    --error-bg: rgb(231 76 60 / 10%);
-    --error-border: rgb(231 76 60 / 20%);
-    --error-text: #e74c3c;
-    --auth-accent1: rgb(160 140 200 / 8%);
-    --auth-accent2: rgb(120 170 190 / 6%);
-    --auth-accent3: rgb(180 160 140 / 7%);
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --danger-border: #dc2626;
-    --danger-border-hover: #b91c1c;
-    --text-on-danger: #fff;
-    --positive: #4caf50;
-    --negative: #f44336;
-    --scrim: #000;
-    --glass: #fff;
-}
+/** Design tokens — SCSS variables only. */
 
 /* ––––– Typography ––––– */
 
@@ -268,7 +195,13 @@ $duration-languid: 0.7s;
 $duration-spin: 0.8s;
 $duration-entrance: 1.2s;
 $duration-fade: 2s;
-$duration-drift: 25s;
+
+$duration-wind: 7s;
+$duration-wave: 18s;
+$duration-wave-slow: 26s;
+$duration-petal: 16s;
+$duration-particle: 14s;
+$duration-blob: 30s;
 
 $transition-instant: $duration-instant ease;
 $transition-fast: $duration-fast ease;
@@ -311,9 +244,6 @@ $button-border-hover: var(--button-border-hover);
 $error-bg: var(--error-bg);
 $error-border: var(--error-border);
 $error-text: var(--error-text);
-$auth-accent1: var(--auth-accent1);
-$auth-accent2: var(--auth-accent2);
-$auth-accent3: var(--auth-accent3);
 $success: var(--success);
 $warning: var(--warning);
 $danger: var(--danger);

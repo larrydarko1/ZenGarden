@@ -203,14 +203,14 @@ const { t } = useI18n();
 
 <style scoped lang="scss">
 .analytics-view {
-    min-height: $size-47;
+    min-height: auto;
 }
 
 .loading {
-    text-align: center;
     padding: $space-7;
     color: $text2;
     font-size: $font-size-base;
+    text-align: center;
 }
 
 .empty-analytics {
@@ -219,8 +219,8 @@ const { t } = useI18n();
     align-items: center;
     justify-content: center;
     padding: $space-10 $space-7;
-    text-align: center;
     color: $text2;
+    text-align: center;
 
     svg {
         margin-bottom: $space-4;
@@ -229,9 +229,9 @@ const { t } = useI18n();
 
     p {
         margin: 0 0 $space-2;
+        color: $text1;
         font-size: $font-size-lg;
         font-weight: $font-weight-medium;
-        color: $text1;
     }
 
     span {
@@ -246,78 +246,84 @@ const { t } = useI18n();
     gap: $space-6;
 }
 
+/* ––––– Summary cards ––––– */
+
 .analytics-summary {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr;
     gap: $space-3;
 }
 
 .analytics-card {
+    min-height: $size-30;
+    padding: $space-4;
     background: $input-bg;
     border: $border-width-thin $input-border;
     border-radius: $border-radius-lg;
-    padding: $space-5;
     text-align: center;
 }
 
 .analytics-label {
-    font-size: $font-size-xs;
-    color: $text2;
     margin-bottom: $space-2;
+    color: $text2;
+    font-size: $font-size-xs;
     text-transform: uppercase;
     letter-spacing: $letter-spacing-2;
 }
 
 .analytics-value {
+    color: $text1;
     font-size: $font-size-3xl;
     font-weight: $font-weight-bold;
-    color: $text1;
 }
 
 .analytics-section {
+    padding: $space-4;
     background: $blur1;
     border: $border-width-thin $input-border;
     border-radius: $border-radius-lg;
-    padding: $space-5;
+
+    h3 {
+        margin: 0 0 $space-4;
+        color: $text1;
+        font-size: $font-size-lg;
+    }
 }
 
-.analytics-section h3 {
-    margin: 0 0 $space-3;
-    color: $text1;
-    font-size: $font-size-base;
-}
+/* ––––– Positive / negative day split ––––– */
 
 .days-bar {
     display: flex;
-    height: $size-19;
+    height: $size-20;
+    margin-bottom: $space-4;
     border-radius: $border-radius;
     overflow: hidden;
-    margin-bottom: $space-3;
 }
 
 .days-bar-segment {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: $font-weight-semibold;
     font-size: $font-size-sm;
-    transition: all $transition-slow;
-}
+    font-weight: $font-weight-semibold;
+    transition: flex-basis $transition-slow;
 
-.days-bar-segment.positive {
-    background: color-mix(in srgb, $positive 30%, transparent);
-    color: $positive;
-}
+    &.positive {
+        background: color-mix(in srgb, $positive 30%, transparent);
+        color: $positive;
+    }
 
-.days-bar-segment.negative {
-    background: color-mix(in srgb, $negative 30%, transparent);
-    color: $negative;
+    &.negative {
+        background: color-mix(in srgb, $negative 30%, transparent);
+        color: $negative;
+    }
 }
 
 .days-legend {
     display: flex;
-    gap: $space-6;
+    flex-wrap: wrap;
     justify-content: center;
+    gap: $space-5;
 }
 
 .legend-item {
@@ -332,15 +338,17 @@ const { t } = useI18n();
     width: $size-7;
     height: $size-7;
     border-radius: $border-radius-round;
+
+    &.positive {
+        background: $positive;
+    }
+
+    &.negative {
+        background: $negative;
+    }
 }
 
-.legend-dot.positive {
-    background: $positive;
-}
-
-.legend-dot.negative {
-    background: $negative;
-}
+/* ––––– Top emotions ––––– */
 
 .top-emotions-list {
     display: flex;
@@ -350,10 +358,16 @@ const { t } = useI18n();
 
 .top-emotion-item {
     display: grid;
-    grid-template-columns: $track-xs $track-md 1fr $track-sm;
-    gap: $space-3;
+    grid-template-columns: $track-xs 1fr $track-sm;
     align-items: center;
+    gap: $space-3;
+    padding: $space-3 0;
+    border-bottom: $border-width-thin $input-border;
     font-size: $font-size-sm;
+
+    &:last-child {
+        border-bottom: none;
+    }
 }
 
 .emotion-rank {
@@ -363,14 +377,16 @@ const { t } = useI18n();
 }
 
 .emotion-name {
-    font-weight: $font-weight-semibold;
     color: $text1;
     font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
 }
 
 .emotion-bar-container {
+    grid-column: 1 / -1;
+    height: $size-14;
+    margin-top: $space-2;
     background: $input-bg;
-    height: $size-13;
     border-radius: $border-radius-sm;
     overflow: hidden;
 }
@@ -380,29 +396,33 @@ const { t } = useI18n();
     height: 100%;
     border-radius: $border-radius-sm;
     transition: width $transition-slow;
-}
 
-.emotion-bar.positive {
-    background: linear-gradient(
-        90deg,
-        color-mix(in srgb, $positive 30%, transparent),
-        color-mix(in srgb, $positive 60%, transparent)
-    );
-}
+    &.positive {
+        background: linear-gradient(
+            90deg,
+            color-mix(in srgb, $positive 30%, transparent),
+            color-mix(in srgb, $positive 60%, transparent)
+        );
+    }
 
-.emotion-bar.negative {
-    background: linear-gradient(
-        90deg,
-        color-mix(in srgb, $negative 30%, transparent),
-        color-mix(in srgb, $negative 60%, transparent)
-    );
+    &.negative {
+        background: linear-gradient(
+            90deg,
+            color-mix(in srgb, $negative 30%, transparent),
+            color-mix(in srgb, $negative 60%, transparent)
+        );
+    }
 }
 
 .emotion-count {
+    grid-row: 1;
+    grid-column: 3;
     color: $text1;
     font-weight: $font-weight-semibold;
     text-align: right;
 }
+
+/* ––––– Trend chart ––––– */
 
 .trend-chart {
     display: flex;
@@ -418,155 +438,92 @@ const { t } = useI18n();
     flex: 1;
     min-height: $size-3;
     border-radius: $border-radius-xs;
-    transition: all $transition-base;
     cursor: pointer;
-}
+    transition:
+        opacity $transition-base,
+        transform $transition-base;
 
-.trend-bar.positive {
-    background: color-mix(in srgb, $positive 60%, transparent);
-}
+    &.positive {
+        background: color-mix(in srgb, $positive 60%, transparent);
+    }
 
-.trend-bar.negative {
-    background: color-mix(in srgb, $negative 60%, transparent);
-}
+    &.negative {
+        background: color-mix(in srgb, $negative 60%, transparent);
+    }
 
-.trend-bar:hover {
-    opacity: $opacity-higher;
-    transform: scaleY($scale-105);
+    &:hover {
+        opacity: $opacity-higher;
+        transform: scaleY($scale-105);
+    }
 }
 
 .no-data-message {
-    text-align: center;
     padding: $space-6;
     color: $text2;
     font-size: $font-size-sm;
+    text-align: center;
     opacity: $opacity-mid-high;
 }
 
 .trend-labels {
-    text-align: center;
+    margin-top: $space-2;
     color: $text2;
     font-size: $font-size-xs;
-    margin-top: $space-2;
+    text-align: center;
 }
 
-@media (width <= #{$breakpoint-xl}) {
+/* –––––– Responsive –––––– */
+
+@media (width > #{$breakpoint-md}) {
+    .analytics-card,
+    .analytics-section {
+        padding: $space-5;
+    }
+}
+
+@media (width > #{$breakpoint-xl}) {
     .analytics-view {
-        min-height: auto;
-    }
-
-    .loading {
-        padding: $space-7;
-        font-size: $font-size-base;
-    }
-
-    .analytics-content {
-        gap: $space-6;
+        min-height: $size-47;
     }
 
     .analytics-summary {
-        grid-template-columns: 1fr;
-        gap: $space-3;
+        grid-template-columns: repeat(3, 1fr);
     }
 
     .analytics-card {
-        padding: $space-5;
-        min-height: $size-30;
-    }
-
-    .analytics-label {
-        font-size: $font-size-xs;
-        margin-bottom: $space-2;
-    }
-
-    .analytics-value {
-        font-size: $font-size-3xl;
-    }
-
-    .analytics-section {
-        padding: $space-5;
+        min-height: auto;
     }
 
     .analytics-section h3 {
-        font-size: $font-size-lg;
-        margin-bottom: $space-4;
+        margin-bottom: $space-3;
+        font-size: $font-size-base;
     }
 
     .days-bar {
-        height: $size-20;
-        margin-bottom: $space-4;
-    }
-
-    .days-bar-segment {
-        font-size: $font-size-sm;
+        height: $size-19;
+        margin-bottom: $space-3;
     }
 
     .days-legend {
-        gap: $space-5;
-        flex-wrap: wrap;
-    }
-
-    .legend-item {
-        gap: $space-2;
-        font-size: $font-size-sm;
-    }
-
-    .legend-dot {
-        width: $size-7;
-        height: $size-7;
-    }
-
-    .top-emotions-list {
-        gap: $space-3;
+        flex-wrap: nowrap;
+        gap: $space-6;
     }
 
     .top-emotion-item {
-        grid-template-columns: $track-xs 1fr $track-sm;
-        gap: $space-3;
-        font-size: $font-size-sm;
-        padding: $space-3 0;
-        border-bottom: $border-width-thin $input-border;
-    }
-
-    .top-emotion-item:last-child {
+        grid-template-columns: $track-xs $track-md 1fr $track-sm;
+        padding: 0;
         border-bottom: none;
     }
 
-    .emotion-rank {
-        font-size: $font-size-sm;
-    }
-
     .emotion-bar-container {
-        grid-column: 1 / -1;
-        height: $size-14;
-        margin-top: $space-2;
+        grid-column: auto;
+        height: $size-13;
+        margin-top: 0;
     }
 
     .emotion-count {
-        grid-column: 3;
-        grid-row: 1;
-        font-size: $font-size-sm;
-    }
-
-    .trend-chart {
-        height: $size-34;
-        padding: $space-3;
-        gap: $space-0;
-    }
-
-    .trend-labels {
-        font-size: $font-size-xs;
-        margin-top: $space-2;
-    }
-}
-
-@media (width <= #{$breakpoint-md}) {
-    .analytics-card {
-        padding: $space-4;
-    }
-
-    .analytics-section {
-        padding: $space-4;
+        grid-row: auto;
+        grid-column: auto;
     }
 }
 </style>

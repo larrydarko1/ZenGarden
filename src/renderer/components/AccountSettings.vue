@@ -192,6 +192,7 @@ onMounted(async () => {
                 @submit.prevent="changeUsername">
                 <input
                     v-model="newUsername"
+                    class="zen-input"
                     :placeholder="t('account.newUsernamePlaceholder')"
                     :disabled="isChangingUsername"
                     required
@@ -207,12 +208,12 @@ onMounted(async () => {
                 </button>
                 <div
                     v-if="usernameSuccess"
-                    class="success-message"
+                    class="zen-success success-message"
                     >{{ usernameSuccess }}</div
                 >
                 <div
                     v-if="usernameError"
-                    class="error-message"
+                    class="zen-error error-message"
                     >{{ usernameError }}</div
                 >
             </form>
@@ -226,6 +227,7 @@ onMounted(async () => {
                 @submit.prevent="changePassword">
                 <input
                     v-model="currentPassword"
+                    class="zen-input"
                     type="password"
                     :placeholder="t('account.currentPasswordPlaceholder')"
                     :aria-label="t('account.currentPasswordPlaceholder')"
@@ -234,6 +236,7 @@ onMounted(async () => {
                     autocomplete="current-password" />
                 <input
                     v-model="newPassword"
+                    class="zen-input"
                     type="password"
                     :placeholder="t('account.newPasswordPlaceholder')"
                     :aria-label="t('account.newPasswordPlaceholder')"
@@ -242,6 +245,7 @@ onMounted(async () => {
                     autocomplete="new-password" />
                 <input
                     v-model="confirmNewPassword"
+                    class="zen-input"
                     type="password"
                     :placeholder="t('account.confirmPasswordPlaceholder')"
                     :aria-label="t('account.confirmPasswordPlaceholder')"
@@ -259,12 +263,12 @@ onMounted(async () => {
                 </button>
                 <div
                     v-if="passwordSuccess"
-                    class="success-message"
+                    class="zen-success success-message"
                     >{{ passwordSuccess }}</div
                 >
                 <div
                     v-if="passwordError"
-                    class="error-message"
+                    class="zen-error error-message"
                     >{{ passwordError }}</div
                 >
             </form>
@@ -311,6 +315,7 @@ onMounted(async () => {
                 <p class="warning-text">{{ t('account.generateCodesWarning') }}</p>
                 <input
                     v-model="recoveryPassword"
+                    class="zen-input"
                     type="password"
                     :placeholder="t('account.confirmPasswordToGenerate')"
                     :aria-label="t('account.confirmPasswordToGenerate')"
@@ -321,7 +326,7 @@ onMounted(async () => {
                     <button
                         type="button"
                         :disabled="isGeneratingCodes"
-                        class="zen-btn cancel-btn"
+                        class="zen-btn is-ghost"
                         @click="cancelGenerateCodes">
                         {{ t('account.cancel') }}
                     </button>
@@ -337,7 +342,7 @@ onMounted(async () => {
                 </div>
                 <div
                     v-if="recoveryError"
-                    class="error-message"
+                    class="zen-error error-message"
                     >{{ recoveryError }}</div
                 >
             </form>
@@ -381,7 +386,7 @@ onMounted(async () => {
 
             <button
                 v-if="!showDeleteConfirm"
-                class="zen-btn danger-btn"
+                class="zen-btn is-danger danger-btn"
                 @click="showDeleteConfirm = true">
                 {{ t('account.deleteAccountButton') }}
             </button>
@@ -392,6 +397,7 @@ onMounted(async () => {
                 @submit.prevent="deleteAccount">
                 <input
                     v-model="deletePassword"
+                    class="zen-input"
                     type="password"
                     :placeholder="t('account.confirmPasswordToDelete')"
                     :aria-label="t('account.confirmPasswordToDelete')"
@@ -402,14 +408,14 @@ onMounted(async () => {
                     <button
                         type="button"
                         :disabled="isDeletingAccount"
-                        class="zen-btn cancel-btn"
+                        class="zen-btn is-ghost"
                         @click="cancelDelete">
                         {{ t('account.cancel') }}
                     </button>
                     <button
                         type="submit"
                         :disabled="isDeletingAccount || !deletePassword"
-                        class="zen-btn danger-btn">
+                        class="zen-btn is-danger danger-btn">
                         <span v-if="!isDeletingAccount">{{ t('account.confirmDelete') }}</span>
                         <ZenSpinner
                             v-else
@@ -418,7 +424,7 @@ onMounted(async () => {
                 </div>
                 <div
                     v-if="deleteError"
-                    class="error-message"
+                    class="zen-error error-message"
                     >{{ deleteError }}</div
                 >
             </form>
@@ -428,31 +434,40 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 .account-settings {
-    padding: 0;
     max-width: 100%;
+    padding: $space-4;
 }
 
 .settings-title {
-    font-size: $font-size-xl;
-    color: $text1;
     margin-bottom: $space-6;
+    color: $text1;
+    font-size: $font-size-xl;
     font-weight: $font-weight-medium;
     text-align: center;
 }
 
 .settings-section {
+    margin-bottom: $space-6;
+    padding: $space-4;
     background: $input-bg;
     border: $border-width-thin $input-border;
     border-radius: $border-radius;
-    padding: $space-6;
-    margin-bottom: $space-6;
+
+    &.danger-section {
+        background: color-mix(in srgb, $danger 5%, transparent);
+        border-color: color-mix(in srgb, $danger 30%, transparent);
+    }
 }
 
 .section-title {
-    font-size: $font-size-base;
-    color: $text1;
     margin-bottom: $space-4;
+    color: $text1;
+    font-size: $font-size-base;
     font-weight: $font-weight-medium;
+
+    &.danger-title {
+        color: $danger;
+    }
 }
 
 .settings-form {
@@ -461,108 +476,22 @@ onMounted(async () => {
     gap: $space-3;
 }
 
-input {
-    padding: $space-2 $space-3;
-    border-radius: $border-radius-sm;
-    border: $border-width-thin $input-border;
-    background: $input-bg;
-    color: $text1;
-    font-size: $font-size-sm;
-    outline: none;
-    transition:
-        border $duration-fast,
-        background $duration-fast;
-}
-
-input:focus {
-    border: $border-width-thin $input-border-focus;
-    background: $input-bg-focus;
-}
-
-input::placeholder {
-    color: $text2;
-    opacity: $opacity-mid;
-}
-
-.zen-btn {
-    background: $button-bg;
-    color: $text1;
-    border: $border-width-thin $border-subtle;
-    border-radius: $border-radius-sm;
-    padding: $space-2 $space-4;
-    cursor: pointer;
-    font-weight: $font-weight-normal;
-    font-size: $font-size-sm;
-    text-transform: uppercase;
-    letter-spacing: $letter-spacing-4;
-    transition: all $transition-fast;
-    outline: none;
-    min-height: $size-20;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.zen-btn:hover:not(:disabled) {
-    background: $button-bg-hover;
-    border-color: $button-border-hover;
-}
-
-.zen-btn:disabled {
-    opacity: $opacity-mid-low;
-    cursor: not-allowed;
-}
-
-.success-message {
-    color: $success;
-    background: color-mix(in srgb, $success 10%, transparent);
-    border: $border-width-thin color-mix(in srgb, $success 30%, transparent);
-    padding: $space-2;
-    border-radius: $border-radius-sm;
-    font-size: $font-size-sm;
-    text-align: center;
-}
-
-.error-message {
-    color: $error-text;
-    background: $error-bg;
-    border: $border-width-thin $error-border;
-    padding: $space-2;
-    border-radius: $border-radius-sm;
-    font-size: $font-size-sm;
-    text-align: center;
-}
-
-/* ––– Danger Section ––– */
-.danger-section {
-    border-color: color-mix(in srgb, $danger 30%, transparent);
-    background: color-mix(in srgb, $danger 5%, transparent);
-}
-
-.danger-title {
-    color: $danger;
-}
-
-.warning-text {
-    color: $text2;
-    font-size: $font-size-sm;
-    margin-bottom: $space-4;
-    line-height: $line-height-base;
-}
-
+.warning-text,
 .info-text {
+    margin-bottom: $space-4;
     color: $text2;
     font-size: $font-size-sm;
-    margin-bottom: $space-4;
     line-height: $line-height-base;
 }
+
+/* ––––– Recovery codes ––––– */
 
 .recovery-status {
+    margin-bottom: $space-4;
+    padding: $space-4;
     background: $base1;
     border: $border-width-thin $border-subtle;
     border-radius: $border-radius-sm;
-    padding: $space-4;
-    margin-bottom: $space-4;
 }
 
 .status-item {
@@ -570,10 +499,10 @@ input::placeholder {
     justify-content: space-between;
     padding: $space-2 0;
     border-bottom: $border-width-thin $border-subtle;
-}
 
-.status-item:last-child {
-    border-bottom: none;
+    &:last-child {
+        border-bottom: none;
+    }
 }
 
 .status-label {
@@ -583,8 +512,8 @@ input::placeholder {
 
 .status-value {
     color: $text1;
-    font-weight: $font-weight-medium;
     font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
 }
 
 .button-container {
@@ -597,29 +526,29 @@ input::placeholder {
 }
 
 .warning-banner {
+    margin-bottom: $space-4;
+    padding: $space-4;
     background: color-mix(in srgb, $warning 10%, transparent);
     border: $border-width-thin color-mix(in srgb, $warning 30%, transparent);
     border-radius: $border-radius-sm;
-    padding: $space-4;
-    margin-bottom: $space-4;
-}
 
-.warning-banner strong {
-    color: $warning;
-    display: block;
-    margin-bottom: $space-2;
-}
+    strong {
+        display: block;
+        margin-bottom: $space-2;
+        color: $warning;
+    }
 
-.warning-banner p {
-    color: $text2;
-    font-size: $font-size-sm;
-    margin: 0;
-    line-height: $line-height-base;
+    p {
+        margin: 0;
+        color: $text2;
+        font-size: $font-size-sm;
+        line-height: $line-height-base;
+    }
 }
 
 .codes-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: $space-3;
     margin-bottom: $space-4;
 }
@@ -628,36 +557,27 @@ input::placeholder {
     display: flex;
     align-items: center;
     gap: $space-2;
+    padding: $space-3;
     background: $base1;
     border: $border-width-thin $border-subtle;
     border-radius: $border-radius-sm;
-    padding: $space-3;
 }
 
 .code-number {
+    min-width: $size-14;
     color: $text2;
     font-size: $font-size-xs;
-    min-width: $size-14;
 }
 
 .code-value {
+    color: $text1;
     font-family: 'Courier New', monospace;
     font-size: $font-size-sm;
-    color: $text1;
     font-weight: $font-weight-semibold;
     letter-spacing: $letter-spacing-4;
 }
 
-.danger-btn {
-    background: $danger;
-    border-color: $danger-border;
-    color: $text-on-danger;
-}
-
-.danger-btn:hover:not(:disabled) {
-    background: $danger-border;
-    border-color: $danger-border-hover;
-}
+/* ––––– Delete account ––––– */
 
 .delete-form {
     margin-top: $space-4;
@@ -665,32 +585,32 @@ input::placeholder {
 
 .button-row {
     display: flex;
+    flex-direction: column;
     gap: $space-3;
+
+    /** Both buttons share the row evenly, whichever variant they carry. */
+    > .zen-btn {
+        flex: 1;
+    }
 }
 
-.cancel-btn {
-    flex: 1;
-}
+/* –––––– Responsive –––––– */
 
-.danger-btn {
-    flex: 1;
-}
-
-@media (width <= #{$breakpoint-lg}) {
+@media (width > #{$breakpoint-lg}) {
     .account-settings {
-        padding: $space-4;
+        padding: 0;
     }
 
     .settings-section {
-        padding: $space-4;
-    }
-
-    .button-row {
-        flex-direction: column;
+        padding: $space-6;
     }
 
     .codes-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .button-row {
+        flex-direction: row;
     }
 }
 </style>

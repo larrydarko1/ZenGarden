@@ -1,19 +1,25 @@
 /**
- * Global stylesheet — imported once in main.ts.
- *
- * Barrel file that imports all style partials.
- * Variables are auto-injected into every Vue SFC via
- * electron.vite.config.ts (css.preprocessorOptions.scss.additionalData).
+ * Style barrel — auto-injected into every Vue SFC via electron.vite.config.ts
+ * (css.preprocessorOptions.scss.additionalData), so every component can reach
+ * `$space-4`, `$accent`, `@include scrollbar` and friends with no import line.
  *
  * ── Style Architecture ────────────────────────────────────────────────────────
- * variables.scss  → Design tokens, theme fallback, SCSS aliases
- * base.scss       → Resets, global styles, window dragging, reduced motion
- * components.scss → Shared mixins/patterns reused across 2+ unrelated components
+ * index.scss      → this barrel; @forward only, emits nothing
+ *   _variables.scss  → design tokens and the SCSS colour aliases
+ *   _mixins.scss     → mixins SFCs call from their own scoped blocks
+ * global.scss     → the rules that EMIT, imported once in main.ts
+ *   _themes.scss     → theme palettes, as CSS custom properties
+ *   _base.scss       → resets, element defaults, reduced motion, window dragging
+ *   components/      → global classes shared by 2+ unrelated components
+ *
+ * ── Why the split ─────────────────────────────────────────────────────────────
+ * The barrel is injected into every SFC, and each SFC `<style>` block is its own
+ * Sass compilation — so anything reachable from here is emitted once PER
+ * COMPONENT, not once per app. Keeping the barrel to `@forward`s of variables
+ * and mixins is what makes that harmless: neither emits a byte until something
+ * uses it. The rules that do emit live behind global.scss, which has exactly one
+ * importer.
  */
 
-/* Re-export variables and mixins so they're available to SFCs via @use '@/renderer/styles' */
 @forward '@/renderer/styles/variables';
-@forward '@/renderer/styles/components';
-
-/* Import and output styles */
-@use '@/renderer/styles/base' as *;
+@forward '@/renderer/styles/mixins';

@@ -22,8 +22,9 @@ export default defineConfig({
         preprocessorOptions: {
             scss: {
                 loadPaths: [fileURLToPath(new URL('./src/renderer/styles', import.meta.url))],
+                // Files under styles/ are exempt: the barrel would @use itself.
                 additionalData: (source: string, filename: string) =>
-                    filename.endsWith('index.scss')
+                    /[\\/]renderer[\\/]styles[\\/]/.test(filename)
                         ? source
                         : `@use 'sass:color';\n@use '@/renderer/styles' as *;\n${source}`,
             },

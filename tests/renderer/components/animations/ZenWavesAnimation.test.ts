@@ -11,11 +11,11 @@ describe('ZenWavesAnimation', () => {
         wrapper.unmount();
     });
 
-    it('draws both wave paths', () => {
+    it('draws both wave bands', () => {
         const wrapper = mountWithI18n(ZenWavesAnimation);
 
-        expect(wrapper.find('path#wave1').exists()).toBe(true);
-        expect(wrapper.find('path#wave2').exists()).toBe(true);
+        expect(wrapper.find('path.wave-front').exists()).toBe(true);
+        expect(wrapper.find('path.wave-back').exists()).toBe(true);
         wrapper.unmount();
     });
 
@@ -23,7 +23,9 @@ describe('ZenWavesAnimation', () => {
         const wrapper = mountWithI18n(ZenWavesAnimation);
 
         expect(wrapper.find('linearGradient#zenWaveGradient').exists()).toBe(true);
-        expect(wrapper.find('path#wave1').attributes('fill')).toBe('url(#zenWaveGradient)');
+        for (const wave of wrapper.findAll('path.wave')) {
+            expect(wave.attributes('fill')).toBe('url(#zenWaveGradient)');
+        }
         wrapper.unmount();
     });
 
@@ -32,6 +34,24 @@ describe('ZenWavesAnimation', () => {
 
         expect(wrapper.attributes('preserveAspectRatio')).toBe('none');
         expect(wrapper.attributes('viewBox')).toBe('0 0 1920 1080');
+        wrapper.unmount();
+    });
+
+    it('draws each wave two viewBox periods wide, so the scroll loop has no seam', () => {
+        const wrapper = mountWithI18n(ZenWavesAnimation);
+
+        for (const wave of wrapper.findAll('path.wave')) {
+            const d = wave.attributes('d') ?? '';
+            expect(d).toContain('T3840,');
+            expect(d.endsWith('H0 Z')).toBe(true);
+        }
+        wrapper.unmount();
+    });
+
+    it('drives its motion from CSS, never SMIL', () => {
+        const wrapper = mountWithI18n(ZenWavesAnimation);
+
+        expect(wrapper.findAll('animate')).toHaveLength(0);
         wrapper.unmount();
     });
 });

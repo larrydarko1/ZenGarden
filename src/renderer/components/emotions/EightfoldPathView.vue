@@ -69,6 +69,7 @@ const { t } = useI18n();
                     v-if="isPathFollowed(path.key)"
                     class="eightfold-path-note">
                     <textarea
+                        class="zen-textarea"
                         :value="pathNotes[path.key]"
                         :placeholder="t('eightfold.notesPlaceholder')"
                         :aria-label="t('eightfold.notesPlaceholder')"
@@ -94,10 +95,10 @@ const { t } = useI18n();
 }
 
 .loading {
-    text-align: center;
     padding: $space-7;
     color: $text2;
     font-size: $font-size-base;
+    text-align: center;
 }
 
 .eightfold-inline-stats {
@@ -107,25 +108,25 @@ const { t } = useI18n();
 }
 
 .eightfold-stat {
+    display: flex;
     flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    padding: $space-2 $space-3;
     background: $input-bg;
     border: $border-width-thin $input-border;
     border-radius: $border-radius-lg;
-    padding: $space-2 $space-3;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
 }
 
 .eightfold-stat-label {
-    font-size: $font-size-xs;
     color: $text2;
+    font-size: $font-size-xs;
 }
 
 .eightfold-stat-value {
+    color: $text1;
     font-size: $font-size-lg;
     font-weight: $font-weight-semibold;
-    color: $text1;
 }
 
 .eightfold-path-list {
@@ -135,16 +136,18 @@ const { t } = useI18n();
 }
 
 .eightfold-path-item {
+    padding: $space-3;
     background: $input-bg;
     border: $border-width-thin $input-border;
     border-radius: $border-radius-lg;
-    padding: $space-3;
-    transition: all $transition-base;
-}
+    transition:
+        background $transition-base,
+        border-color $transition-base;
 
-.eightfold-path-item:hover {
-    background: $input-bg-focus;
-    border-color: $input-border-focus;
+    &:hover {
+        background: $input-bg-focus;
+        border-color: $input-border-focus;
+    }
 }
 
 .eightfold-checkbox-row {
@@ -152,14 +155,14 @@ const { t } = useI18n();
     align-items: center;
     gap: $space-2;
     margin-bottom: $space-1;
-}
 
-.eightfold-checkbox-row input[type='checkbox'] {
-    width: $size-11;
-    height: $size-11;
-    cursor: pointer;
-    accent-color: $text1;
-    flex-shrink: 0;
+    input[type='checkbox'] {
+        flex-shrink: 0;
+        width: $size-11;
+        height: $size-11;
+        accent-color: $text1;
+        cursor: pointer;
+    }
 }
 
 .eightfold-path-name {
@@ -169,51 +172,33 @@ const { t } = useI18n();
     cursor: pointer;
 }
 
+/** The left inset aligns these under the label, clear of the checkbox. */
 .eightfold-path-desc {
+    margin-bottom: $space-1;
+    margin-left: $space-6;
     color: $text2;
     font-size: $font-size-xs;
-    margin-left: $space-6;
-    margin-bottom: $space-1;
     line-height: $line-height-snug;
 }
 
 .eightfold-path-question {
+    margin-left: $space-6;
     color: $text2;
     font-size: $font-size-xs;
     font-style: italic;
-    margin-left: $space-6;
-    opacity: $opacity-mid-high;
     line-height: $line-height-snug;
+    opacity: $opacity-mid-high;
 }
 
 .eightfold-path-note {
-    margin-left: $space-6;
     margin-top: $space-2;
-}
+    margin-left: $space-6;
 
-.eightfold-path-note textarea {
-    width: 100%;
-    box-sizing: border-box;
-    background: $input-bg;
-    border: $border-width-thin $input-border;
-    border-radius: $border-radius;
-    padding: $space-2 $space-3;
-    color: $text1;
-    font-family: inherit;
-    font-size: $font-size-sm;
-    resize: vertical;
-    transition: all $transition-base;
-    line-height: $line-height-base;
-}
-
-.eightfold-path-note textarea:focus {
-    outline: none;
-    border-color: $input-border-focus;
-    background: $input-bg-focus;
-}
-
-.eightfold-path-note textarea::placeholder {
-    color: $text2;
-    opacity: $opacity-mid-low;
+    /** Size only — `.zen-textarea` carries the field treatment. */
+    .zen-textarea {
+        min-height: auto;
+        border-radius: $border-radius;
+        line-height: $line-height-base;
+    }
 }
 </style>

@@ -50,7 +50,7 @@ function handleAccountDeletion(): void {
 <template>
     <div class="settings-inline">
         <div class="settings-section">
-            <h3 class="section-label">{{ t('settings.theme') }}</h3>
+            <h3 class="zen-label">{{ t('settings.theme') }}</h3>
             <div class="theme-options">
                 <button
                     v-for="theme in themes"
@@ -67,7 +67,7 @@ function handleAccountDeletion(): void {
         </div>
 
         <div class="settings-section">
-            <h3 class="section-label">{{ t('settings.language') }}</h3>
+            <h3 class="zen-label">{{ t('settings.language') }}</h3>
             <div class="language-options">
                 <button
                     v-for="(langName, langCode) in languages"
@@ -80,7 +80,7 @@ function handleAccountDeletion(): void {
             </div>
         </div>
 
-        <div class="settings-divider"></div>
+        <div class="zen-divider settings-divider"></div>
 
         <AccountSettings
             @username-changed="handleUsernameChange"
@@ -90,35 +90,29 @@ function handleAccountDeletion(): void {
 
 <style scoped lang="scss">
 .settings-inline {
-    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 0;
+    width: 100%;
 }
 
 .settings-section {
-    margin-bottom: $space-5;
+    margin-bottom: $space-6;
+
+    &:last-of-type {
+        margin-bottom: 0;
+    }
 }
 
-.settings-section:last-of-type {
-    margin-bottom: 0;
-}
-
-.section-label {
-    color: $text2;
-    font-size: $font-size-xs;
-    font-weight: $font-weight-normal;
-    text-transform: uppercase;
-    letter-spacing: $letter-spacing-5;
-    margin: 0 0 $space-2;
+.zen-label {
+    margin-bottom: $space-3;
 }
 
 .settings-divider {
-    height: $size-0;
-    background: $input-border;
     margin: $space-2 0 $space-5;
-    opacity: $opacity-mid-low;
 }
+
+/* ––––– Theme ––––– */
 
 .theme-options {
     display: flex;
@@ -126,47 +120,55 @@ function handleAccountDeletion(): void {
 }
 
 .theme-option {
-    background: $input-bg;
-    border: $border-width-thin $input-border;
-    border-radius: $border-radius-lg;
-    padding: $space-3;
-    cursor: pointer;
-    transition: all $transition-fast;
     display: flex;
+    flex: 1;
     flex-direction: column;
     align-items: center;
     gap: $space-2;
-    flex: 1;
-}
+    padding: $space-3;
+    background: $input-bg;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius-lg;
+    cursor: pointer;
+    min-height: $size-28;
+    touch-action: manipulation;
+    transition:
+        background $transition-fast,
+        border-color $transition-fast;
 
-.theme-option:hover {
-    background: $input-bg-focus;
-    border-color: $border-subtle;
-}
+    &:hover {
+        background: $input-bg-focus;
+        border-color: $border-subtle;
 
-.theme-option.active {
-    background: $border-subtle;
-    border-color: $border-subtle;
+        .theme-preview {
+            transform: scale($scale-105);
+        }
+    }
+
+    &:active {
+        transform: scale($scale-98);
+    }
+
+    &.active {
+        background: $border-subtle;
+        border-color: $border-subtle;
+    }
 }
 
 .theme-preview {
     width: $size-20;
     height: $size-20;
-    border-radius: $border-radius;
     border: $border-width-thin $input-border;
+    border-radius: $border-radius;
     transition: transform $transition-fast;
-}
 
-.theme-option:hover .theme-preview {
-    transform: scale($scale-105);
-}
+    &.light {
+        background: $swatch-light;
+    }
 
-.theme-preview.light {
-    background: $swatch-light;
-}
-
-.theme-preview.dark {
-    background: $swatch-dark;
+    &.dark {
+        background: $swatch-dark;
+    }
 }
 
 .theme-name {
@@ -175,73 +177,70 @@ function handleAccountDeletion(): void {
     font-weight: $font-weight-normal;
 }
 
+/* ––––– Language ––––– */
+
 .language-options {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: $space-2;
 }
 
 .language-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: $size-21;
+    padding: $space-3;
     background: $input-bg;
     border: $border-width-thin $input-border;
     border-radius: $border-radius;
-    padding: $space-2 $space-1;
     color: $text2;
     font-size: $font-size-xs;
-    cursor: pointer;
-    transition: all $transition-fast;
+    font-weight: $font-weight-normal;
     text-align: center;
-    font-weight: $font-weight-normal;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+        color $transition-fast,
+        background $transition-fast,
+        border-color $transition-fast;
+
+    &:hover {
+        background: $input-bg-focus;
+        border-color: $border-subtle;
+        color: $text1;
+    }
+
+    &:active {
+        transform: scale($scale-98);
+    }
+
+    &.active {
+        background: $border-subtle;
+        border-color: $border-subtle;
+        color: $text1;
+    }
 }
 
-.language-option:hover {
-    background: $input-bg-focus;
-    border-color: $border-subtle;
-    color: $text1;
-}
+/* –––––– Responsive –––––– */
 
-.language-option.active {
-    background: $border-subtle;
-    border-color: $border-subtle;
-    color: $text1;
-    font-weight: $font-weight-normal;
-}
-
-@media (width <= #{$breakpoint-xl}) {
+@media (width > #{$breakpoint-xl}) {
     .settings-section {
-        margin-bottom: $space-6;
+        margin-bottom: $space-5;
     }
 
-    .section-label {
-        font-size: $font-size-xs;
-        margin-bottom: $space-3;
-    }
-
-    .theme-option {
-        padding: $space-3;
-        min-height: $size-28;
-        touch-action: manipulation;
+    .zen-label {
+        margin-bottom: $space-2;
     }
 
     .language-options {
-        grid-template-columns: repeat(2, 1fr);
-        gap: $space-2;
+        grid-template-columns: repeat(4, 1fr);
     }
 
     .language-option {
-        padding: $space-3;
-        font-size: $font-size-xs;
-        min-height: $size-21;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        touch-action: manipulation;
-    }
-}
-
-@media (width <= #{$breakpoint-md}) {
-    .language-options {
-        grid-template-columns: 1fr 1fr;
+        display: block;
+        min-height: auto;
+        padding: $space-2 $space-1;
     }
 }
 </style>

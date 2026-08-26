@@ -116,10 +116,6 @@ getCurrentUser()
     <div
         class="monk-auth"
         :class="{ 'is-ready': isReady }">
-        <!-- Animated gradient mesh background -->
-        <div class="auth-bg-mesh"></div>
-        <div class="auth-bg-grain"></div>
-
         <transition
             name="auth-fade"
             mode="out-in">
@@ -428,114 +424,72 @@ getCurrentUser()
 
 <style scoped lang="scss">
 /* –––––– Layout –––––– */
+
 .monk-auth {
-    min-height: 100vh;
-    min-width: 100vw;
-    width: 100vw;
-    height: 100vh;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100vw;
+    min-width: 100vw;
+    height: 100vh;
+    min-height: 100vh;
     background: $base1;
-    position: relative;
     overflow: hidden;
 }
 
-/* –––––– Animated Gradient Mesh –––––– */
-.auth-bg-mesh {
-    position: absolute;
-    inset: -50%;
-    width: 200%;
-    height: 200%;
-    background:
-        radial-gradient(ellipse 40% 50% at 20% 30%, $auth-accent1 0%, transparent 60%),
-        radial-gradient(ellipse 50% 40% at 80% 20%, $auth-accent2 0%, transparent 60%),
-        radial-gradient(ellipse 45% 55% at 60% 80%, $auth-accent3 0%, transparent 55%),
-        radial-gradient(ellipse 35% 45% at 30% 75%, $auth-accent2 0%, transparent 55%);
-    opacity: $opacity-faint;
-    pointer-events: none;
-    z-index: 0;
-    animation: mesh-drift $duration-drift ease-in-out infinite alternate;
-    transition: opacity $duration-fade $ease-out-expo;
-}
+/* –––––– Form card –––––– */
 
-.monk-auth.is-ready .auth-bg-mesh {
-    opacity: $opacity-full;
-}
-
-@keyframes mesh-drift {
-    0% {
-        transform: translate(0, 0) rotate(0deg) scale($scale-100);
-    }
-
-    33% {
-        transform: translate(3%, -2%) rotate(3deg) scale($scale-102);
-    }
-
-    66% {
-        transform: translate(-2%, 3%) rotate(-2deg) scale($scale-98);
-    }
-
-    100% {
-        transform: translate(1%, -1%) rotate(1deg) scale($scale-101);
-    }
-}
-
-/* –––––– Noise Grain Overlay –––––– */
-.auth-bg-grain {
-    position: absolute;
-    inset: 0;
-    opacity: $opacity-lowest;
-    pointer-events: none;
-    z-index: 0;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-}
-
-/* –––––– Form Card –––––– */
 .zen-form {
     position: relative;
     z-index: $z-normal;
-    background: $input-bg;
-    backdrop-filter: blur($blur-xl);
-    border: $border-width-thin $input-border;
-    border-radius: $border-radius-2xl;
-    padding: $space-8 $space-7 $space-7;
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     gap: $space-3;
+    width: 90%;
     min-width: $size-44;
     max-width: $size-46;
-    width: 90%;
     margin: $space-6;
-    align-items: stretch;
+    padding: $space-8 $space-7 $space-7;
+    background: $input-bg;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius-2xl;
     box-shadow: $shadow-float;
     opacity: $opacity-faint;
     transform: translateY($size-7) scale($scale-98);
     transition:
         opacity $duration-languid $ease-out-expo,
         transform $duration-languid $ease-out-expo;
-}
 
-.monk-auth.is-ready .zen-form {
-    opacity: $opacity-full;
-    transform: translateY(0) scale($scale-100);
+    .monk-auth.is-ready & {
+        opacity: $opacity-full;
+        transform: translateY(0) scale($scale-100);
+    }
+
+    &.recovery-success {
+        padding: $space-8 $space-7;
+        text-align: center;
+    }
 }
 
 /* –––––– Typography –––––– */
+
 .zen-heading {
-    font-size: $font-size-xs;
+    margin-bottom: $space-2;
     color: $text2;
+    font-size: $font-size-xs;
     font-weight: $font-weight-medium;
+    line-height: $line-height-tight;
+    text-align: center;
     text-transform: uppercase;
     letter-spacing: $letter-spacing-8;
-    text-align: center;
-    margin-bottom: $space-2;
-    line-height: $line-height-tight;
 }
 
-/* –––––– Field Groups –––––– */
-.field-group {
+/* –––––– Field groups –––––– */
+
+.field-group,
+.zen-link-row {
     animation: field-in $duration-calm $ease-out-expo both;
     animation-delay: calc(var(--i, 0) * $duration-stagger + $duration-fast);
 }
@@ -553,159 +507,164 @@ getCurrentUser()
 }
 
 /* –––––– Inputs –––––– */
+
 input {
+    width: 100%;
+    min-height: $size-21;
+    box-sizing: border-box;
     padding: $space-3 $space-4;
-    border-radius: $border-radius-lg;
-    border: $border-width-thin $input-border;
     background: $input-bg;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius-lg;
     color: $text1;
     font-size: $font-size-sm;
-    width: 100%;
-    box-sizing: border-box;
     outline: none;
     transition:
         border-color $duration-slow $ease-out-expo,
         background $duration-slow $ease-out-expo,
         box-shadow $duration-slow $ease-out-expo;
-    min-height: $size-21;
+
+    &:focus {
+        background: $input-bg-focus;
+        border-color: $input-border-focus;
+        box-shadow: $shadow-ring;
+
+        &::placeholder {
+            opacity: $opacity-lowest;
+        }
+    }
+
+    &::placeholder {
+        color: $text2;
+        opacity: $opacity-low-mid;
+        transition: opacity $transition-slow;
+    }
 }
 
-input:focus {
-    border-color: $input-border-focus;
-    background: $input-bg-focus;
-    box-shadow: $shadow-ring;
-}
+/* –––––– Buttons –––––– */
 
-input::placeholder {
-    color: $text2;
-    opacity: $opacity-low-mid;
-    transition: opacity $transition-slow;
-}
-
-input:focus::placeholder {
-    opacity: $opacity-lowest;
-}
-
-/* –––––– Button –––––– */
 button {
+    position: relative;
+    min-height: $size-22;
+    margin-top: $space-1;
+    padding: $space-3 $space-4;
     background: $button-bg;
-    color: $text1;
     border: $border-width-thin $border-subtle;
     border-radius: $border-radius-lg;
-    padding: $space-3 $space-4;
-    cursor: pointer;
-    font-weight: $font-weight-medium;
+    color: $text1;
     font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
     text-transform: uppercase;
     letter-spacing: $letter-spacing-6;
-    margin-top: $space-1;
-    transition: all $duration-slow $ease-out-expo;
+    cursor: pointer;
     outline: none;
-    min-height: $size-22;
-    position: relative;
     overflow: hidden;
     animation: field-in $duration-calm $ease-out-expo both;
     animation-delay: calc(var(--i, 0) * $duration-stagger + $duration-fast);
-}
+    transition:
+        color $duration-slow $ease-out-expo,
+        background $duration-slow $ease-out-expo,
+        border-color $duration-slow $ease-out-expo,
+        transform $duration-slow $ease-out-expo,
+        box-shadow $duration-slow $ease-out-expo;
 
-button:hover:not(:disabled) {
-    background: $button-bg-hover;
-    border-color: $button-border-hover;
-    transform: translateY(-$size-0);
-    box-shadow: $shadow-md-soft;
-}
+    &:hover:not(:disabled) {
+        background: $button-bg-hover;
+        border-color: $button-border-hover;
+        box-shadow: $shadow-md-soft;
+        transform: translateY(-$size-0);
+    }
 
-button:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: none;
-}
+    &:active:not(:disabled) {
+        box-shadow: none;
+        transform: translateY(0);
+    }
 
-button:focus-visible {
-    box-shadow: $shadow-ring-strong;
-}
+    &:focus-visible {
+        box-shadow: $shadow-ring-strong;
+    }
 
-button:disabled {
-    opacity: $opacity-mid-low;
-    cursor: not-allowed;
+    &:disabled {
+        opacity: $opacity-mid-low;
+        cursor: not-allowed;
+    }
 }
 
 .auth-btn {
-    width: 100%;
-    min-height: $size-22;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    min-height: $size-22;
 }
 
 /* –––––– Links –––––– */
+
 .zen-link-row {
     display: flex;
-    gap: $space-1;
-    font-size: $font-size-xs;
-    color: $text2;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    gap: $space-1;
     margin-top: $space-1;
-    animation: field-in $duration-calm $ease-out-expo both;
-    animation-delay: calc(var(--i, 0) * $duration-stagger + $duration-fast);
-}
-
-.zen-link-row a {
     color: $text2;
-    text-decoration: none;
-    cursor: pointer;
-    font-weight: $font-weight-normal;
-    transition:
-        color $duration-slow,
-        opacity $duration-slow;
-    padding-bottom: $space-0;
-    border-bottom: $border-width-thin transparent;
+    font-size: $font-size-xs;
+
+    a {
+        padding-bottom: $space-0;
+        border-bottom: $border-width-thin transparent;
+        color: $text2;
+        font-weight: $font-weight-normal;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            color $duration-slow,
+            border-color $duration-slow;
+
+        &:hover {
+            border-bottom-color: $border-subtle;
+            color: $text1;
+        }
+    }
 }
 
-.zen-link-row a:hover {
-    color: $text1;
-    border-bottom-color: $border-subtle;
-}
+/* –––––– Messages –––––– */
 
 .error {
+    padding: $space-2 $space-3;
+    background: $error-bg;
+    border: $border-width-thin $error-border;
+    border-radius: $border-radius-lg;
     color: $error-text;
     font-size: $font-size-xs;
-    text-align: center;
-    background: $error-bg;
-    border-radius: $border-radius-lg;
-    padding: $space-2 $space-3;
-    border: $border-width-thin $error-border;
     line-height: $line-height-snug;
+    text-align: center;
 }
 
 .recovery-info {
-    font-size: $font-size-xs;
-    color: $text2;
-    text-align: center;
     margin-bottom: $space-2;
-    opacity: $opacity-mid-high;
+    color: $text2;
+    font-size: $font-size-xs;
     line-height: $line-height-base;
-}
-
-.recovery-success {
     text-align: center;
-    padding: $space-8 $space-7;
+    opacity: $opacity-mid-high;
 }
 
 .success-icon {
-    color: $text1;
-    margin-bottom: $space-4;
-    opacity: $opacity-higher;
     display: flex;
     justify-content: center;
+    margin-bottom: $space-4;
+    color: $text1;
+    opacity: $opacity-higher;
 }
 
 .success-message {
-    font-size: $font-size-xs;
-    color: $text2;
     margin-bottom: $space-6;
+    color: $text2;
+    font-size: $font-size-xs;
     line-height: $line-height-base;
 }
+
+/* –––––– Transitions –––––– */
 
 .auth-fade-enter-active {
     transition:
@@ -774,59 +733,5 @@ button:disabled {
     opacity: $opacity-faint;
     transform: translateY(-$size-3);
     max-height: 0;
-}
-
-@media (width <= #{$breakpoint-xl}) {
-    .zen-form {
-        padding: $space-7 $space-6 $space-6;
-        gap: $space-3;
-        max-width: 95%;
-        margin: $space-4;
-        border-radius: $border-radius-xl;
-    }
-
-    input {
-        font-size: $font-size-base;
-        padding: $space-4 $space-4;
-        min-height: $size-23;
-    }
-
-    button {
-        font-size: $font-size-sm;
-        padding: $space-4 $space-4;
-        min-height: $size-23;
-    }
-
-    .auth-btn {
-        min-height: $size-23;
-    }
-
-    .zen-title {
-        font-size: $font-size-lg;
-    }
-}
-
-@media (width <= #{$breakpoint-sm}) {
-    .zen-form {
-        padding: $space-6 $space-5 $space-5;
-        min-width: $size-43;
-        max-width: 100%;
-        margin: $space-3;
-        gap: $space-3;
-        border-radius: $border-radius-xl;
-    }
-
-    input {
-        font-size: $font-size-base;
-        border-radius: $border-radius-lg;
-    }
-
-    button {
-        border-radius: $border-radius-lg;
-    }
-
-    .zen-link-row {
-        font-size: $font-size-xs;
-    }
 }
 </style>
