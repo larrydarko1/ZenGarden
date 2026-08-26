@@ -5,8 +5,7 @@ contributions**, and pull requests from outside the repository will be closed un
 
 This is not a comment on the quality of anyone's work. It is that a meditation app in a saturated
 market does not need a second maintainer, and review time spent on it is time not spent on the thing
-it exists to demonstrate. The only account with write access is
-[Dependabot](dependabot.yml), which keeps dependencies and pinned GitHub Actions current.
+it exists to demonstrate.
 
 The code is MIT licensed. Forking it, learning from it, and shipping your own version are all
 explicitly fine — that is what the license is for.
