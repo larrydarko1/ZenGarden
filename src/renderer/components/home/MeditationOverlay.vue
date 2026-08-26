@@ -2,9 +2,9 @@
 import { ref, type Component } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-interface BreathingExercise {
+type BreathingExercise = {
     name: string;
-}
+};
 
 defineProps<{
     animationComponent: Component;
@@ -22,12 +22,15 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-    stop: [];
+    'stop': [];
     'update:bellEnabled': [value: boolean];
     'update:bellInterval': [value: number];
     'select-bell-sound': [sound: string];
     'toggle-breathing': [];
 }>();
+
+const BELL_INTERVALS = [5, 10, 15, 20];
+const BELL_SOUNDS = ['1', '2', '3', '4'];
 
 const { t } = useI18n();
 
@@ -43,130 +46,124 @@ const showSoundDropdown = ref(false);
         <!-- Bell Settings Toolbar -->
         <div class="bell-settings-toolbar">
             <button
-                :class="['bell-toggle-btn', { active: bellEnabled }]"
+                class="bell-toggle-btn"
+                :class="[{ active: bellEnabled }]"
                 :aria-label="bellEnabled ? 'Disable interval bells' : 'Enable interval bells'"
-                @click="emit('update:bellEnabled', !bellEnabled)"
-            >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                @click="emit('update:bellEnabled', !bellEnabled)">
+                <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M12 2C10.9 2 10 2.9 10 4C10 4.6 10.2 5.1 10.6 5.5C8 6.1 6 8.3 6 11V16L4 18V19H20V18L18 16V11C18 8.3 16 6.1 13.4 5.5C13.8 5.1 14 4.6 14 4C14 2.9 13.1 2 12 2ZM10 20C10 21.1 10.9 22 12 22C13.1 22 14 21.1 14 20"
                         stroke="currentColor"
                         stroke-width="2"
                         stroke-linecap="round"
-                        stroke-linejoin="round"
-                    />
+                        stroke-linejoin="round" />
                 </svg>
             </button>
 
-            <div v-if="bellEnabled" class="bell-settings">
+            <div
+                v-if="bellEnabled"
+                class="bell-settings">
                 <div class="bell-dropdown">
-                    <button class="bell-dropdown-btn" @click="showIntervalDropdown = !showIntervalDropdown">
-                        {{ bellInterval }} min <span class="dropdown-arrow">▾</span>
+                    <button
+                        class="bell-dropdown-btn"
+                        @click="showIntervalDropdown = !showIntervalDropdown">
+                        {{ t('meditation.bell.minutes', { minutes: bellInterval }) }}
+                        <span class="dropdown-arrow">▾</span>
                     </button>
+                    <button
+                        v-if="showIntervalDropdown"
+                        type="button"
+                        class="zen-backdrop dropdown-backdrop-inline"
+                        :aria-label="t('meditation.bell.closeIntervals')"
+                        @click="showIntervalDropdown = false"></button>
                     <div
                         v-if="showIntervalDropdown"
-                        class="dropdown-backdrop-inline"
-                        @click="showIntervalDropdown = false"
-                    ></div>
-                    <div v-if="showIntervalDropdown" class="bell-dropdown-menu">
+                        class="bell-dropdown-menu">
                         <button
+                            v-for="interval in BELL_INTERVALS"
+                            :key="interval"
+                            type="button"
                             @click="
-                                emit('update:bellInterval', 5);
+                                emit('update:bellInterval', interval);
                                 showIntervalDropdown = false;
-                            "
-                        >
-                            5 min
-                        </button>
-                        <button
-                            @click="
-                                emit('update:bellInterval', 10);
-                                showIntervalDropdown = false;
-                            "
-                        >
-                            10 min
-                        </button>
-                        <button
-                            @click="
-                                emit('update:bellInterval', 15);
-                                showIntervalDropdown = false;
-                            "
-                        >
-                            15 min
-                        </button>
-                        <button
-                            @click="
-                                emit('update:bellInterval', 20);
-                                showIntervalDropdown = false;
-                            "
-                        >
-                            20 min
+                            ">
+                            {{ t('meditation.bell.minutes', { minutes: interval }) }}
                         </button>
                     </div>
                 </div>
 
                 <div class="bell-dropdown">
-                    <button class="bell-dropdown-btn" @click="showSoundDropdown = !showSoundDropdown">
-                        Bell {{ bellSound }} <span class="dropdown-arrow">▾</span>
+                    <button
+                        class="bell-dropdown-btn"
+                        @click="showSoundDropdown = !showSoundDropdown">
+                        {{ t('meditation.bell.option', { number: bellSound }) }}
+                        <span class="dropdown-arrow">▾</span>
                     </button>
+                    <button
+                        v-if="showSoundDropdown"
+                        type="button"
+                        class="zen-backdrop dropdown-backdrop-inline"
+                        :aria-label="t('meditation.bell.closeSounds')"
+                        @click="showSoundDropdown = false"></button>
                     <div
                         v-if="showSoundDropdown"
-                        class="dropdown-backdrop-inline"
-                        @click="showSoundDropdown = false"
-                    ></div>
-                    <div v-if="showSoundDropdown" class="bell-dropdown-menu">
+                        class="bell-dropdown-menu">
                         <button
+                            v-for="sound in BELL_SOUNDS"
+                            :key="sound"
+                            type="button"
                             @click="
-                                emit('select-bell-sound', '1');
+                                emit('select-bell-sound', sound);
                                 showSoundDropdown = false;
-                            "
-                        >
-                            Bell 1
-                        </button>
-                        <button
-                            @click="
-                                emit('select-bell-sound', '2');
-                                showSoundDropdown = false;
-                            "
-                        >
-                            Bell 2
-                        </button>
-                        <button
-                            @click="
-                                emit('select-bell-sound', '3');
-                                showSoundDropdown = false;
-                            "
-                        >
-                            Bell 3
-                        </button>
-                        <button
-                            @click="
-                                emit('select-bell-sound', '4');
-                                showSoundDropdown = false;
-                            "
-                        >
-                            Bell 4
+                            ">
+                            {{ t('meditation.bell.option', { number: sound }) }}
                         </button>
                     </div>
                 </div>
             </div>
 
             <!-- Breathing toggle -->
-            <div v-if="selectedBreathingExercise" class="toolbar-divider"></div>
+            <div
+                v-if="selectedBreathingExercise"
+                class="toolbar-divider"></div>
             <button
                 v-if="selectedBreathingExercise"
-                :class="['breathing-toggle-btn', { active: breathingActive }]"
+                class="breathing-toggle-btn"
+                :class="[{ active: breathingActive }]"
                 :aria-label="breathingActive ? 'Stop breathing guide' : 'Start breathing guide'"
-                @click="emit('toggle-breathing')"
-            >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
-                    <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2" opacity="0.5" />
+                @click="emit('toggle-breathing')">
+                <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="9"
+                        stroke="currentColor"
+                        stroke-width="2" />
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="4"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        opacity="0.5" />
                 </svg>
             </button>
         </div>
 
         <!-- Breathing Sphere Overlay -->
-        <div v-if="breathingActive && selectedBreathingExercise" class="breathing-overlay">
+        <div
+            v-if="breathingActive && selectedBreathingExercise"
+            class="breathing-overlay">
             <div
                 class="breathing-sphere"
                 :class="{
@@ -175,8 +172,7 @@ const showSoundDropdown = ref(false);
                     'breathing-out': breathingPhase === 'out',
                     'breathing-hold-out': breathingPhase === 'holdOut',
                 }"
-                :style="{ animationDuration: `${breathingPhaseDuration}s` }"
-            >
+                :style="{ animationDuration: `${breathingPhaseDuration}s` }">
                 <span class="breathing-sphere-text">{{ breathingPhaseText }}</span>
             </div>
             <div class="breathing-info">
@@ -186,133 +182,152 @@ const showSoundDropdown = ref(false);
         </div>
 
         <div class="meditation-timer meditation-timer-overlay">
-            <div class="timer-display" aria-live="polite" aria-label="Meditation timer">
+            <div
+                class="timer-display"
+                aria-live="polite"
+                aria-label="Meditation timer">
                 {{ formatTime(meditationSeconds) }}
             </div>
-            <button class="meditation-btn" aria-label="Stop the current meditation session" @click="emit('stop')">
+            <button
+                class="meditation-btn"
+                aria-label="Stop the current meditation session"
+                @click="emit('stop')">
                 {{ t('meditation.stop') }}
             </button>
         </div>
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .zen-meditation-overlay {
+    @include composited-layer;
+
     position: fixed;
     inset: 0;
-    background: var(--base1);
-    z-index: 1000;
+    z-index: $z-modal-backdrop;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
+    background: $base1;
 }
 
-/* ─── Timer & stop ─────────────────────────────────────────────────────────── */
+/* ––––– Timer & stop ––––– */
 
 .meditation-timer {
-    margin-top: 2.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2rem;
+    gap: $space-7;
+    margin-top: $space-8;
 }
 
 .meditation-timer-overlay {
     position: absolute;
-    bottom: 3.5rem;
+    bottom: $size-30;
     left: 0;
-    width: 100vw;
+    z-index: $z-popover;
     display: flex;
     flex-direction: column;
     align-items: center;
-    z-index: 1010;
+    width: 100%;
 }
 
 .timer-display {
-    font-size: 1.3rem;
-    color: var(--text1);
     position: absolute;
-    bottom: 6rem;
+    bottom: $size-35;
+    color: $text1;
+    font-size: $font-size-4xl;
 }
 
 .meditation-btn {
-    background: transparent;
     position: absolute;
-    bottom: 2rem;
-    color: var(--text1);
-    cursor: pointer;
-    transition:
-        background 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-        color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-        box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-        transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    bottom: $size-29;
+    min-height: $size-24;
+    padding: $space-3 $space-7;
+    background: transparent;
     border: none;
+    border-radius: $border-radius-round;
+    color: $text1;
+    font-size: $font-size-base;
+    letter-spacing: $letter-spacing-1;
+    cursor: pointer;
     outline: none;
-    padding: 0.6em 1.6em;
-    border-radius: 999px;
-    font-size: 1.1rem;
-    letter-spacing: 0.02em;
+    touch-action: manipulation;
+    transition:
+        color $duration-slower $ease-standard,
+        background $duration-slower $ease-standard,
+        box-shadow $duration-slower $ease-standard,
+        transform $duration-base $ease-standard;
+
+    &:hover,
+    &:focus {
+        background: $blur1;
+        box-shadow: $shadow-edge;
+        color: $text2;
+        transform: translateY(-$size-0);
+    }
+
+    &:active {
+        transform: translateY(0) scale($scale-97);
+        transition-duration: $duration-instant;
+    }
 }
 
-.meditation-btn:hover,
-.meditation-btn:focus {
-    background: var(--blur1);
-    color: var(--text2);
-    box-shadow: 0 2px 16px 0 var(--input-border);
-    transform: translateY(-1px);
-}
-
-.meditation-btn:active {
-    transform: translateY(0) scale(0.97);
-    transition-duration: 0.08s;
-}
-
-/* ─── Bell toolbar ─────────────────────────────────────────────────────────── */
+/* ––––– Bell toolbar ––––– */
 
 .bell-settings-toolbar {
-    position: absolute;
-    top: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    background: var(--blur2);
-    backdrop-filter: blur(8px);
-    border: 1px solid var(--input-border);
-    border-radius: 8px;
-    z-index: 1001;
-}
-
-.bell-toggle-btn {
-    padding: 0.5rem;
-    background: transparent;
-    border: none;
-    color: var(--text2);
-    cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.2s;
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + $size-23);
+    right: $size-4;
+    left: $size-4;
+    z-index: $z-modal;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: $space-1;
+    padding: $space-1 $space-2;
+    background: $blur2;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius;
 }
 
-.bell-toggle-btn:hover {
-    background: var(--input-bg-focus);
-    color: var(--text1);
-}
+.bell-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: $size-19;
+    min-height: $size-19;
+    padding: $space-2;
+    background: transparent;
+    border: none;
+    border-radius: $border-radius;
+    color: $text2;
+    cursor: pointer;
+    transition:
+        color $transition-base,
+        background $transition-base;
 
-.bell-toggle-btn.active {
-    background: var(--button-bg);
-    color: var(--text1);
+    svg {
+        width: $size-9;
+        height: $size-9;
+    }
+
+    &:hover {
+        background: $input-bg-focus;
+        color: $text1;
+    }
+
+    &.active {
+        background: $button-bg;
+        color: $text1;
+    }
 }
 
 .bell-settings {
     display: flex;
-    gap: 0.5rem;
-    animation: slideIn 0.2s ease;
+    gap: $space-1;
+    animation: slide-in $duration-base ease;
 }
 
 .bell-dropdown {
@@ -320,409 +335,362 @@ const showSoundDropdown = ref(false);
 }
 
 .bell-dropdown-btn {
-    padding: 0.4rem 0.8rem;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 6px;
-    color: var(--text1);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: $space-2;
+    min-width: $size-23;
+    min-height: $size-19;
+    padding: $space-2;
+    background: $input-bg;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius;
+    color: $text1;
+    font-size: $font-size-xs;
     white-space: nowrap;
-}
+    cursor: pointer;
+    transition:
+        background $transition-base,
+        border-color $transition-base;
 
-.bell-dropdown-btn:hover {
-    background: var(--input-bg-focus);
-    border-color: var(--input-border-focus);
+    &:hover {
+        background: $input-bg-focus;
+        border-color: $input-border-focus;
+    }
 }
 
 .dropdown-arrow {
-    font-size: 0.7rem;
-    opacity: 0.7;
+    font-size: $font-size-xs;
+    opacity: $opacity-mid-high;
 }
 
 .bell-dropdown-menu {
-    position: absolute;
-    top: calc(100% + 0.25rem);
-    left: 0;
-    min-width: 100%;
-    background: var(--blur2);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--input-border);
-    border-radius: 6px;
-    padding: 0.25rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    z-index: 1002;
-    animation: dropdownSlide 0.15s ease;
-}
+    @include scrollbar;
 
-.bell-dropdown-menu button {
-    width: 100%;
-    padding: 0.4rem 0.8rem;
-    background: transparent;
-    border: none;
-    border-radius: 4px;
-    color: var(--text1);
-    font-size: 0.85rem;
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.15s;
-    white-space: nowrap;
-}
+    position: fixed;
+    top: $size-29;
+    left: 50%;
+    z-index: $z-modal-top;
+    width: 90vw;
+    min-width: $size-40;
+    max-width: $size-43;
+    max-height: 60vh;
+    padding: $space-4 $space-3;
+    background: $blur2;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius-xl;
+    box-shadow: $shadow-lg-strong;
+    transform: translateX(-50%);
+    overflow-y: auto;
+    animation: dropdown-slide $duration-fast ease;
 
-.bell-dropdown-menu button:hover {
-    background: var(--input-bg-focus);
+    button {
+        width: 100%;
+        min-height: $size-23;
+        margin-bottom: $space-2;
+        padding: $space-3;
+        background: transparent;
+        border: none;
+        border-radius: $border-radius-lg;
+        color: $text1;
+        font-size: $font-size-sm;
+        text-align: left;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background $transition-fast;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        &:hover {
+            background: $input-bg-focus;
+        }
+    }
 }
 
 .dropdown-backdrop-inline {
-    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: $z-modal;
+    display: block;
+    background: transparent;
 }
 
 .toolbar-divider {
-    width: 1px;
-    height: 20px;
-    background: var(--input-border);
+    width: $size-0;
+    height: $size-11;
+    background: $input-border;
 }
 
-@keyframes dropdownSlide {
+@keyframes dropdown-slide {
     from {
-        opacity: 0;
-        transform: translateY(-4px);
+        opacity: $opacity-faint;
+        transform: translateY(-$size-3);
     }
+
     to {
-        opacity: 1;
+        opacity: $opacity-full;
         transform: translateY(0);
     }
 }
 
-@keyframes slideIn {
+@keyframes slide-in {
     from {
-        opacity: 0;
-        transform: translateX(-10px);
+        opacity: $opacity-faint;
+        transform: translateX(-$size-6);
     }
+
     to {
-        opacity: 1;
+        opacity: $opacity-full;
         transform: translateX(0);
     }
 }
 
-/* ─── Breathing overlay ────────────────────────────────────────────────────── */
+/* ––––– Breathing overlay ––––– */
 
 .breathing-toggle-btn {
-    background: transparent;
-    border: none;
-    color: var(--text2);
-    cursor: pointer;
-    padding: 0.35rem;
-    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
-    opacity: 0.6;
-}
+    padding: $space-1;
+    background: transparent;
+    border: none;
+    border-radius: $border-radius-sm;
+    color: $text2;
+    opacity: $opacity-mid;
+    cursor: pointer;
+    transition:
+        color $transition-base,
+        background $transition-base,
+        opacity $transition-base;
 
-.breathing-toggle-btn:hover {
-    color: var(--text1);
-    opacity: 1;
-}
+    &:hover {
+        color: $text1;
+        opacity: $opacity-full;
+    }
 
-.breathing-toggle-btn.active {
-    color: var(--text1);
-    opacity: 1;
-    background: rgba(255, 255, 255, 0.1);
+    &.active {
+        background: color-mix(in srgb, $glass 10%, transparent);
+        color: $text1;
+        opacity: $opacity-full;
+    }
 }
 
 .breathing-overlay {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    z-index: $z-popover;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
-    z-index: 1010;
+    gap: $space-6;
+    transform: translate(-50%, -50%);
     pointer-events: none;
 }
 
 .breathing-sphere {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.03));
-    border: 1px solid rgba(255, 255, 255, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    box-shadow:
-        0 0 40px rgba(255, 255, 255, 0.05),
-        inset 0 0 30px rgba(255, 255, 255, 0.03);
-    transition: transform 0.3s ease;
+    width: $size-34;
+    height: $size-34;
+    background: radial-gradient(
+        circle at 40% 35%,
+        color-mix(in srgb, $glass 15%, transparent),
+        color-mix(in srgb, $glass 3%, transparent)
+    );
+    backdrop-filter: blur($blur-base);
+    border: $border-width-thin color-mix(in srgb, $glass 15%, transparent);
+    border-radius: $border-radius-round;
+    box-shadow: $shadow-sphere;
+    transition: transform $transition-slow;
+    will-change: transform;
+
+    &.breathing-in {
+        animation: sphere-breath ease-in-out forwards;
+    }
+
+    &.breathing-out {
+        animation: sphere-breath ease-in-out forwards reverse;
+    }
+
+    &.breathing-hold {
+        transform: scale($scale-160);
+    }
+
+    &.breathing-hold-out {
+        transform: scale($scale-100);
+    }
 }
 
-.breathing-sphere.breathing-in {
-    animation: sphereBreathIn ease-in-out forwards;
-}
-
-.breathing-sphere.breathing-hold {
-    transform: scale(1.6);
-}
-
-.breathing-sphere.breathing-out {
-    animation: sphereBreathOut ease-in-out forwards;
-}
-
-.breathing-sphere.breathing-hold-out {
-    transform: scale(1);
-}
-
-@keyframes sphereBreathIn {
+@keyframes sphere-breath {
     from {
-        transform: scale(1);
-        opacity: 0.6;
+        transform: scale($scale-100);
+        opacity: $opacity-mid;
     }
-    to {
-        transform: scale(1.6);
-        opacity: 1;
-    }
-}
 
-@keyframes sphereBreathOut {
-    from {
-        transform: scale(1.6);
-        opacity: 1;
-    }
     to {
-        transform: scale(1);
-        opacity: 0.6;
+        transform: scale($scale-160);
+        opacity: $opacity-full;
     }
 }
 
 .breathing-sphere-text {
-    font-size: 0.75rem;
-    color: var(--text1);
-    font-weight: 400;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    color: $text1;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-normal;
     text-align: center;
-    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: $letter-spacing-6;
+    opacity: $opacity-almost-opaque;
 }
 
 .breathing-info {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
+    gap: $space-1;
 }
 
 .breathing-exercise-name {
-    font-size: 0.7rem;
-    color: var(--text2);
+    color: $text2;
+    font-size: $font-size-xs;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    opacity: 0.7;
+    letter-spacing: $letter-spacing-4;
+    opacity: $opacity-mid-high;
 }
 
 .breathing-cycle {
-    font-size: 0.65rem;
-    color: var(--text2);
-    opacity: 0.5;
+    color: $text2;
+    font-size: $font-size-xxs;
+    opacity: $opacity-mid-low;
 }
 
-/* ─── Responsive ───────────────────────────────────────────────────────────── */
+/* –––––– Responsive –––––– */
 
-@media (max-width: 768px) {
-    .breathing-sphere {
-        width: 120px;
-        height: 120px;
-    }
-
-    .breathing-sphere-text {
-        font-size: 0.7rem;
+@media (width > #{$breakpoint-md}) {
+    .meditation-timer-overlay {
+        bottom: $size-31;
     }
 
     .timer-display {
-        font-size: 3rem;
-        bottom: 9rem;
+        bottom: $size-38;
+        font-size: $font-size-5xl;
     }
 
     .meditation-btn {
-        bottom: 5rem;
-        font-size: 1.1rem;
-        padding: 0.85em 2.5em;
-        min-height: 52px;
-        touch-action: manipulation;
-    }
-
-    .meditation-timer-overlay {
-        bottom: 5.5rem;
-    }
-
-    .dropdown-backdrop-inline {
-        display: block;
-        position: fixed;
-        inset: 0;
-        background: transparent;
-        z-index: 1001;
-    }
-
-    .bell-dropdown-menu {
-        position: fixed;
-        top: 4.5rem;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 90vw;
-        max-width: 280px;
-        min-width: 200px;
-        border-radius: 12px;
-        padding: 1rem 0.75rem;
-        max-height: 60vh;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        z-index: 1003;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    }
-
-    .bell-dropdown-menu button {
-        padding: 0.75rem;
-        font-size: 0.9rem;
-        min-height: 48px;
-        border-radius: 8px;
-        margin-bottom: 0.5rem;
-    }
-
-    .bell-dropdown-menu button:last-child {
-        margin-bottom: 0;
+        bottom: $size-30;
+        min-height: $size-25;
+        padding: $space-3 $space-8;
+        font-size: $font-size-lg;
     }
 
     .bell-settings-toolbar {
-        position: fixed;
-        top: calc(env(safe-area-inset-top, 0px) + 3rem);
-        left: 0.5rem;
-        right: 0.5rem;
-        width: calc(100% - 1rem);
-        max-width: calc(100% - 1rem);
-        padding: 0.35rem 0.5rem;
-        transform: none;
-        flex-wrap: nowrap;
-        gap: 0.35rem;
-        border-radius: 8px;
-        box-sizing: border-box;
-        backdrop-filter: blur(12px);
-        justify-content: center;
+        right: $size-5;
+        left: $size-5;
+        border-radius: $border-radius-lg;
     }
 
-    .bell-toggle-btn {
-        min-width: 36px;
-        min-height: 36px;
-        padding: 0.4rem;
-        box-sizing: border-box;
+    .bell-dropdown-btn {
+        padding: $space-1 $space-2;
+    }
+
+    .toolbar-divider {
+        height: $size-12;
+    }
+}
+
+@media (width > #{$breakpoint-xl}) {
+    .meditation-timer-overlay {
+        bottom: $size-26;
+    }
+
+    .timer-display {
+        bottom: $size-32;
+        font-size: $font-size-xl;
+    }
+
+    .meditation-btn {
+        bottom: $size-17;
+        min-height: auto;
+        padding: $space-2 $space-6;
+    }
+
+    .bell-settings-toolbar {
+        position: absolute;
+        top: $size-17;
+        right: auto;
+        left: 50%;
+        gap: $space-2;
+        padding: $space-2;
+        transform: translateX(-50%);
+    }
+
+    .bell-toggle-btn,
+    .bell-dropdown-btn {
+        min-width: auto;
+        min-height: auto;
     }
 
     .bell-toggle-btn svg {
-        width: 14px;
-        height: 14px;
-    }
-
-    .bell-dropdown-btn {
-        min-height: 36px;
-        padding: 0.35rem 0.6rem;
-        font-size: 0.75rem;
-        box-sizing: border-box;
-        min-width: 48px;
+        width: $size-10;
+        height: $size-10;
     }
 
     .bell-settings {
-        gap: 0.35rem;
-        flex-wrap: nowrap;
-        box-sizing: border-box;
-        display: flex;
-    }
-
-    .bell-dropdown {
-        flex-shrink: 1;
-    }
-
-    .toolbar-divider {
-        height: 20px;
-    }
-}
-
-@media (max-width: 480px) {
-    .timer-display {
-        font-size: 2.5rem;
-        bottom: 8rem;
-    }
-
-    .meditation-btn {
-        bottom: 4.5rem;
-        font-size: 1rem;
-        padding: 0.75em 2em;
-        min-height: 50px;
-    }
-
-    .meditation-timer-overlay {
-        bottom: 5rem;
-    }
-
-    .bell-settings-toolbar {
-        position: fixed;
-        padding: 0.3rem 0.4rem;
-        gap: 0.3rem;
-        left: 0.4rem;
-        right: 0.4rem;
-        top: calc(env(safe-area-inset-top, 0px) + 3rem);
-        width: calc(100% - 0.8rem);
-        max-width: calc(100% - 0.8rem);
-        border-radius: 6px;
-    }
-
-    .bell-toggle-btn {
-        min-width: 36px;
-        min-height: 36px;
-        padding: 0.4rem;
+        gap: $space-2;
     }
 
     .bell-dropdown-btn {
-        min-height: 36px;
-        padding: 0.4rem 0.6rem;
-        font-size: 0.8rem;
+        padding: $space-2 $space-3;
+        font-size: $font-size-sm;
     }
 
-    .bell-settings {
-        gap: 0.3rem;
+    .bell-dropdown-menu {
+        position: absolute;
+        top: calc(100% + $size-3);
+        left: 0;
+        z-index: $z-modal-raised;
+        width: auto;
+        min-width: 100%;
+        max-width: none;
+        max-height: none;
+        padding: $space-1;
+        border-radius: $border-radius;
+        box-shadow: $shadow-md;
+        transform: none;
+        overflow-y: visible;
+
+        button {
+            min-height: auto;
+            margin-bottom: 0;
+            padding: $space-2 $space-3;
+            border-radius: $border-radius-sm;
+        }
     }
 
-    .toolbar-divider {
-        height: 18px;
+    .dropdown-backdrop-inline {
+        display: none;
+    }
+
+    .breathing-sphere {
+        width: $size-37;
+        height: $size-37;
     }
 }
 
-@media (max-height: 500px) and (max-width: 900px) {
+@media (height <= #{$breakpoint-short}) and (width <= #{$breakpoint-2xl}) {
     .timer-display {
-        font-size: 2rem;
-        bottom: 4rem;
+        bottom: $size-28;
+        font-size: $font-size-3xl;
     }
 
     .meditation-btn {
-        bottom: 4rem;
-        font-size: 0.95rem;
-        padding: 0.6em 2em;
-        min-height: 44px;
-    }
-}
-
-@media (max-width: 360px) {
-    .meditation-btn {
-        font-size: 0.95rem;
-        padding: 0.7em 2em;
-        min-height: 48px;
+        bottom: $size-28;
+        min-height: $size-21;
+        padding: $space-2 $space-7;
+        font-size: $font-size-base;
     }
 }
 </style>

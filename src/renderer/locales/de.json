@@ -1,42 +1,33 @@
 {
     "settings": {
-        "title": "Einstellungen",
         "theme": "Thema",
         "language": "Sprache",
         "themes": {
             "light": "Hell",
             "dark": "Dunkel"
-        },
-        "languages": {
-            "en": "English",
-            "es": "Español",
-            "it": "Italiano",
-            "fr": "Français",
-            "de": "Deutsch",
-            "pt": "Português",
-            "zh": "中文",
-            "ja": "日本語"
         }
     },
     "header": {
-        "greeting": "Hallo",
-        "breathe": "Atmen",
         "emotions": "Tagebuch",
-        "eightfoldPath": "Achtfacher Pfad",
         "calendar": "Kalender",
         "philosophy": "Philosophie",
+        "settings": "Einstellungen",
         "logout": "Abmelden"
     },
     "meditation": {
         "begin": "Beginnen",
         "stop": "Stoppen",
         "bell": {
-            "settings": "Glocken-Einstellungen"
+            "settings": "Glocken-Einstellungen",
+            "every": "Alle {minutes} Min.",
+            "sound": "Klang",
+            "option": "Glocke {number}",
+            "minutes": "{minutes} Min.",
+            "closeIntervals": "Intervallmenü schließen",
+            "closeSounds": "Klangmenü schließen"
         }
     },
     "philosophy": {
-        "title": "Unsere Zen-Philosophie",
-        "subtitle": "Die Designentscheidungen hinter ZenGarden verstehen",
         "practice": {
             "title": "Die Praxis ist der Weg",
             "body": "Im Zen ist Meditation kein Mittel zum Zweck—sie ist der Zweck selbst. Jeder Moment der Praxis ist vollständig und ganz. Es gibt nirgendwo hinzugehen, nichts zu erreichen. Wenn du sitzt, bist du bereits dort."
@@ -63,7 +54,6 @@
         }
     },
     "auth": {
-        "welcome": "Willkommen bei ZenGarden",
         "username": "Benutzername",
         "password": "Passwort",
         "login": "Anmelden",
@@ -80,10 +70,10 @@
         "backToLogin": "Zurück zur Anmeldung",
         "passwordResetSuccess": "Passwort Zurückgesetzt!",
         "passwordResetMessage": "Ihr Passwort wurde erfolgreich zurückgesetzt. Sie können sich jetzt mit Ihrem neuen Passwort anmelden.",
-        "goToLogin": "Zur Anmeldung"
+        "goToLogin": "Zur Anmeldung",
+        "passwordsDoNotMatch": "Passwörter stimmen nicht überein"
     },
     "account": {
-        "title": "Kontoeinstellungen",
         "changeUsername": "Benutzername Ändern",
         "newUsernamePlaceholder": "Neuer Benutzername",
         "updateUsername": "Benutzername Aktualisieren",
@@ -99,7 +89,7 @@
         "passwordsDoNotMatch": "Passwörter stimmen nicht überein",
         "passwordTooShort": "Das Passwort muss mindestens 6 Zeichen lang sein",
         "recoveryCodes": "Wiederherstellungscodes",
-        "recoveryCodesDescription": "Mit Wiederherstellungscodes können Sie Ihr Passwort zurücksetzen, wenn Sie es vergessen. Generieren Sie 12 Einmalcodes und bewahren Sie sie an einem sicheren Ort auf.",
+        "recoveryCodesDescription": "Mit Wiederherstellungscodes können Sie Ihr Passwort zurücksetzen, wenn Sie es vergessen. Generieren Sie 10 Einmalcodes und bewahren Sie sie an einem sicheren Ort auf.",
         "totalCodes": "Codes insgesamt",
         "usedCodes": "Verwendete Codes",
         "remainingCodes": "Verbleibende Codes",
@@ -108,7 +98,6 @@
         "generateCodesWarning": "Warnung: Das Generieren neuer Codes macht alle vorherigen Codes ungültig.",
         "confirmPasswordToGenerate": "Geben Sie Ihr Passwort ein, um Codes zu generieren",
         "confirm": "Bestätigen",
-        "recoveryCodesFailed": "Fehler beim Generieren der Wiederherstellungscodes",
         "saveCodesWarning": "Wichtig: Speichern Sie diese Codes jetzt!",
         "saveCodesDescription": "Sie können diese Codes nicht erneut sehen. Bewahren Sie sie an einem sicheren Ort auf, z. B. in einem Passwort-Manager.",
         "copyAll": "Alles Kopieren",
@@ -120,13 +109,7 @@
         "confirmPasswordToDelete": "Geben Sie Ihr Passwort zur Bestätigung ein",
         "confirmDelete": "Ja, Mein Konto Löschen",
         "cancel": "Abbrechen",
-        "deleteFailed": "Fehler beim Löschen des Kontos",
-        "exportData": "Daten Exportieren",
-        "exportDescription": "Laden Sie alle Ihre Meditations- und Emotionsdaten herunter.",
-        "exportJSON": "Als JSON Exportieren",
-        "exportCSV": "Als CSV Exportieren",
-        "exportSuccess": "Daten erfolgreich exportiert",
-        "exportFailed": "Datenexport fehlgeschlagen"
+        "deleteFailed": "Fehler beim Löschen des Kontos"
     },
     "notes": {
         "title": "Sitzung Abgeschlossen",
@@ -140,12 +123,8 @@
         "none": "Keine",
         "box": "Box-Atmung",
         "deep": "Tiefe Atmung",
-        "calm": "Beruhigende Atmung",
         "fourSevenEight": "4-7-8 Atmung",
         "energizing": "Energetisierende Atmung",
-        "start": "Starten",
-        "stop": "Stoppen",
-        "close": "Schließen",
         "cycle": "Zyklus",
         "breatheIn": "Einatmen",
         "hold": "Halten",
@@ -158,9 +137,7 @@
         }
     },
     "calendar": {
-        "title": "Meditationskalender",
         "minutes": "Min",
-        "close": "Schließen",
         "notes": "Notizen",
         "months": [
             "Januar",
@@ -179,7 +156,6 @@
         "weekdays": ["S", "M", "D", "M", "D", "F", "S"]
     },
     "emotions": {
-        "title": "Tagebuch",
         "positive": "Positiv",
         "negative": "Negativ",
         "pnRatio": "P/N-Verhältnis",
@@ -204,7 +180,6 @@
         "noPositiveEmotionsYet": "Noch keine positiven Emotionen erfasst",
         "noNegativeEmotionsYet": "Noch keine negativen Emotionen erfasst",
         "trendChart": "P/N-Verhältnis-Trend",
-        "past30Days": "Letzte 30 Tage",
         "past90Days": "Letzte 90 Tage",
         "dailyNote": "Tägliche Notiz",
         "notePlaceholder": "Wie fühlst du dich heute? Schreibe deine Gedanken hier...",
@@ -484,8 +459,6 @@
         "completed": "Abgeschlossen",
         "progress": "Fortschritt",
         "loading": "Lädt",
-        "saving": "Speichern...",
-        "saved": "Gespeichert",
         "notesPlaceholder": "Fügen Sie Notizen hinzu, wie Sie heute diesem Pfad gefolgt sind...",
         "paths": {
             "rightView": {

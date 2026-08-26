@@ -4,12 +4,13 @@
  */
 
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { log } from '@/renderer/utils/logger';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export interface SessionData {
+export type SessionData = {
     currentUser?: string;
-}
+};
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -31,7 +32,8 @@ export async function readCollection<T>(filename: string): Promise<T[]> {
             encoding: Encoding.UTF8,
         });
         const data = typeof result.data === 'string' ? result.data : '';
-        return JSON.parse(data) || [];
+        const parsed: unknown = JSON.parse(data);
+        return Array.isArray(parsed) ? (parsed as T[]) : [];
     } catch {
         return [];
     }
@@ -56,7 +58,8 @@ export async function readSession(): Promise<SessionData> {
             encoding: Encoding.UTF8,
         });
         const data = typeof result.data === 'string' ? result.data : '{}';
-        return (JSON.parse(data) as SessionData) || {};
+        const parsed = JSON.parse(data) as SessionData | null;
+        return parsed ?? {};
     } catch {
         return {};
     }
@@ -103,10 +106,10 @@ export async function initializeStorage(): Promise<void> {
                     directory: Directory.Documents,
                     encoding: Encoding.UTF8,
                 });
-                console.log(`Created: ${filename}`);
+                log.info('Created collection file', { filename });
             }
         }
     } catch (error) {
-        console.error('Storage initialization error:', error);
+        log.error('Storage initialization failed', error);
     }
 }

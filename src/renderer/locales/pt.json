@@ -1,42 +1,33 @@
 {
     "settings": {
-        "title": "Configurações",
         "theme": "Tema",
         "language": "Idioma",
         "themes": {
             "light": "Claro",
             "dark": "Escuro"
-        },
-        "languages": {
-            "en": "English",
-            "es": "Español",
-            "it": "Italiano",
-            "fr": "Français",
-            "de": "Deutsch",
-            "pt": "Português",
-            "zh": "中文",
-            "ja": "日本語"
         }
     },
     "header": {
-        "greeting": "Olá",
-        "breathe": "Respirar",
         "emotions": "Diário",
-        "eightfoldPath": "Caminho Óctuplo",
         "calendar": "Calendário",
         "philosophy": "Filosofia",
+        "settings": "Configurações",
         "logout": "Sair"
     },
     "meditation": {
         "begin": "Começar",
         "stop": "Parar",
         "bell": {
-            "settings": "Configurações de Sino"
+            "settings": "Configurações de Sino",
+            "every": "A cada {minutes} min",
+            "sound": "Som",
+            "option": "Sino {number}",
+            "minutes": "{minutes} min",
+            "closeIntervals": "Fechar menu de intervalos",
+            "closeSounds": "Fechar menu de sons"
         }
     },
     "philosophy": {
-        "title": "Nossa Filosofia Zen",
-        "subtitle": "Compreendendo as escolhas de design por trás do ZenGarden",
         "practice": {
             "title": "A prática é o caminho",
             "body": "No Zen, a meditação não é um meio para um fim—é o próprio fim. Cada momento de prática é completo e inteiro. Não há lugar para ir, nada a alcançar. Quando você se senta, você já está lá."
@@ -63,7 +54,6 @@
         }
     },
     "auth": {
-        "welcome": "Bem-vindo ao ZenGarden",
         "username": "Nome de usuário",
         "password": "Senha",
         "login": "Entrar",
@@ -80,10 +70,10 @@
         "backToLogin": "Voltar ao login",
         "passwordResetSuccess": "Senha Redefinida!",
         "passwordResetMessage": "Sua senha foi redefinida com sucesso. Agora você pode entrar com sua nova senha.",
-        "goToLogin": "Ir para Login"
+        "goToLogin": "Ir para Login",
+        "passwordsDoNotMatch": "As senhas não correspondem"
     },
     "account": {
-        "title": "Configurações da Conta",
         "changeUsername": "Alterar Nome de Usuário",
         "newUsernamePlaceholder": "Novo nome de usuário",
         "updateUsername": "Atualizar Nome de Usuário",
@@ -99,7 +89,7 @@
         "passwordsDoNotMatch": "As senhas não correspondem",
         "passwordTooShort": "A senha deve ter pelo menos 6 caracteres",
         "recoveryCodes": "Códigos de Recuperação",
-        "recoveryCodesDescription": "Os códigos de recuperação permitem redefinir sua senha se você a esquecer. Gere 12 códigos de uso único e guarde-os em um local seguro.",
+        "recoveryCodesDescription": "Os códigos de recuperação permitem redefinir sua senha se você a esquecer. Gere 10 códigos de uso único e guarde-os em um local seguro.",
         "totalCodes": "Códigos totais",
         "usedCodes": "Códigos usados",
         "remainingCodes": "Códigos restantes",
@@ -108,7 +98,6 @@
         "generateCodesWarning": "Aviso: Gerar novos códigos invalidará todos os códigos anteriores.",
         "confirmPasswordToGenerate": "Digite sua senha para gerar códigos",
         "confirm": "Confirmar",
-        "recoveryCodesFailed": "Falha ao gerar códigos de recuperação",
         "saveCodesWarning": "Importante: Salve esses códigos agora!",
         "saveCodesDescription": "Você não poderá ver esses códigos novamente. Guarde-os em um local seguro como um gerenciador de senhas.",
         "copyAll": "Copiar Tudo",
@@ -120,13 +109,7 @@
         "confirmPasswordToDelete": "Digite sua senha para confirmar",
         "confirmDelete": "Sim, Excluir Minha Conta",
         "cancel": "Cancelar",
-        "deleteFailed": "Falha ao excluir conta",
-        "exportData": "Exportar Dados",
-        "exportDescription": "Baixe todos os seus dados de meditação e emoções.",
-        "exportJSON": "Exportar como JSON",
-        "exportCSV": "Exportar como CSV",
-        "exportSuccess": "Dados exportados com sucesso",
-        "exportFailed": "Falha ao exportar dados"
+        "deleteFailed": "Falha ao excluir conta"
     },
     "notes": {
         "title": "Sessão Completa",
@@ -140,12 +123,8 @@
         "none": "Nenhum",
         "box": "Respiração em Caixa",
         "deep": "Respiração Profunda",
-        "calm": "Respiração Calmante",
         "fourSevenEight": "Respiração 4-7-8",
         "energizing": "Respiração Energizante",
-        "start": "Iniciar",
-        "stop": "Parar",
-        "close": "Fechar",
         "cycle": "Ciclo",
         "breatheIn": "Inspirar",
         "hold": "Segurar",
@@ -158,9 +137,7 @@
         }
     },
     "calendar": {
-        "title": "Calendário de Meditação",
         "minutes": "min",
-        "close": "Fechar",
         "notes": "Notas",
         "months": [
             "Janeiro",
@@ -179,7 +156,6 @@
         "weekdays": ["D", "S", "T", "Q", "Q", "S", "S"]
     },
     "emotions": {
-        "title": "Diário",
         "positive": "Positivas",
         "negative": "Negativas",
         "pnRatio": "Relação P/N",
@@ -204,7 +180,6 @@
         "noPositiveEmotionsYet": "Nenhuma emoção positiva registrada ainda",
         "noNegativeEmotionsYet": "Nenhuma emoção negativa registrada ainda",
         "trendChart": "Tendência da Relação P/N",
-        "past30Days": "Últimos 30 Dias",
         "past90Days": "Últimos 90 Dias",
         "dailyNote": "Nota do dia",
         "notePlaceholder": "Como você está se sentindo hoje? Escreva seus pensamentos aqui...",
@@ -484,8 +459,6 @@
         "completed": "Completado",
         "progress": "Progresso",
         "loading": "Carregando",
-        "saving": "Salvando...",
-        "saved": "Salvo",
         "notesPlaceholder": "Adicione notas sobre como você seguiu este caminho hoje...",
         "paths": {
             "rightView": {

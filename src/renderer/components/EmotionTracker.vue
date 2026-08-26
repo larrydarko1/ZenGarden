@@ -1,19 +1,18 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useEmotions } from '../composables/useEmotions';
-import { useEightfoldPath } from '../composables/useEightfoldPath';
-import EmotionAnalytics from './emotions/EmotionAnalytics.vue';
-import EightfoldPathView from './emotions/EightfoldPathView.vue';
-import DailyNotes from './emotions/DailyNotes.vue';
+import { useEmotions } from '@/renderer/composables/useEmotions';
+import { useEightfoldPath } from '@/renderer/composables/useEightfoldPath';
+import EmotionAnalytics from '@/renderer/components/emotions/EmotionAnalytics.vue';
+import EightfoldPathView from '@/renderer/components/emotions/EightfoldPathView.vue';
+import DailyNotes from '@/renderer/components/emotions/DailyNotes.vue';
+
+const emit = defineEmits<{ close: [] }>();
 
 const { t } = useI18n();
-const emit = defineEmits(['close']);
 
-// Date state
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-const selectedDate = ref(today);
+// Date state — every comparison here is day-granular, so the time is zeroed.
+const selectedDate = ref(new Date(new Date().setHours(0, 0, 0, 0)));
 const activeTab = ref('positive');
 
 const isToday = computed(() => {
@@ -60,12 +59,12 @@ const {
     loadPathData,
 } = useEightfoldPath(selectedDate, saveStatus);
 
-function formatDate(date: Date | string) {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+function formatDate(date: Date | string): string {
+    const parsed = typeof date === 'string' ? new Date(date) : date;
+    return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-function changeDate(delta: number) {
+function changeDate(delta: number): void {
     const newDate = new Date(selectedDate.value);
     newDate.setDate(newDate.getDate() + delta);
     newDate.setHours(0, 0, 0, 0);
@@ -78,8 +77,8 @@ function changeDate(delta: number) {
 
 // Orchestration
 watch(selectedDate, () => {
-    loadEmotions();
-    loadPathData();
+    void loadEmotions();
+    void loadPathData();
 });
 
 watch(activeTab, async (newTab) => {
@@ -88,8 +87,8 @@ watch(activeTab, async (newTab) => {
 });
 
 onMounted(() => {
-    loadEmotions();
-    loadPathData();
+    void loadEmotions();
+    void loadPathData();
 });
 </script>
 
@@ -98,33 +97,57 @@ onMounted(() => {
         <div class="inline-header">
             <div class="inline-title-row">
                 <div class="inline-date-selector">
-                    <button class="inline-date-btn" aria-label="Previous day" @click="changeDate(-1)">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <button
+                        class="zen-icon-btn inline-date-btn"
+                        aria-label="Previous day"
+                        @click="changeDate(-1)">
+                        <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none">
                             <path
                                 d="M15 18l-6-6 6-6"
                                 stroke="currentColor"
                                 stroke-width="2"
                                 stroke-linecap="round"
-                                stroke-linejoin="round"
-                            />
+                                stroke-linejoin="round" />
                         </svg>
                     </button>
                     <span class="inline-date-text">{{ formatDate(selectedDate) }}</span>
-                    <button class="inline-date-btn" :disabled="isToday" aria-label="Next day" @click="changeDate(1)">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <button
+                        class="zen-icon-btn inline-date-btn"
+                        :disabled="isToday"
+                        aria-label="Next day"
+                        @click="changeDate(1)">
+                        <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none">
                             <path
                                 d="M9 18l6-6-6-6"
                                 stroke="currentColor"
                                 stroke-width="2"
                                 stroke-linecap="round"
-                                stroke-linejoin="round"
-                            />
+                                stroke-linejoin="round" />
                         </svg>
                     </button>
                 </div>
-                <button class="inline-close-btn" aria-label="Close" @click="emit('close')">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <button
+                    class="zen-icon-btn inline-close-btn"
+                    aria-label="Close"
+                    @click="emit('close')">
+                    <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none">
+                        <path
+                            d="M18 6L6 18M6 6l12 12"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round" />
                     </svg>
                 </button>
             </div>
@@ -157,9 +180,9 @@ onMounted(() => {
                     { key: 'notes', label: t('emotions.dailyNote') },
                 ]"
                 :key="tab.key"
-                :class="['inline-tab', { active: activeTab === tab.key }]"
-                @click="activeTab = tab.key"
-            >
+                class="inline-tab"
+                :class="[{ active: activeTab === tab.key }]"
+                @click="activeTab = tab.key">
                 {{ tab.label }}
             </button>
         </div>
@@ -168,20 +191,21 @@ onMounted(() => {
             <div
                 v-if="activeTab === 'positive' || activeTab === 'negative'"
                 :key="`${selectedDate.getTime()}-${selectedEmotions.length}`"
-                class="emotion-list"
-            >
-                <div v-if="loadingEmotions" class="loading">{{ t('emotions.loading') || 'Loading' }}...</div>
+                class="emotion-list">
+                <div
+                    v-if="loadingEmotions"
+                    class="loading"
+                    >{{ t('emotions.loading') || 'Loading' }}...</div
+                >
                 <label
                     v-for="emotion in activeTab === 'positive' ? positiveEmotions : negativeEmotions"
                     v-else
                     :key="emotion.name"
-                    class="inline-emotion-item"
-                >
+                    class="inline-emotion-item">
                     <input
                         type="checkbox"
                         :checked="isEmotionSelected(emotion.name)"
-                        @change="toggleEmotion(emotion)"
-                    />
+                        @change="toggleEmotion(emotion)" />
                     <span class="inline-emotion-name">{{ emotion.displayName }}</span>
                     <span class="inline-emotion-desc">{{ emotion.description }}</span>
                 </label>
@@ -194,8 +218,7 @@ onMounted(() => {
                 :top-positive-emotions="topPositiveEmotions"
                 :top-negative-emotions="topNegativeEmotions"
                 :get-translated-emotion-name="getTranslatedEmotionName"
-                :format-date="formatDate"
-            />
+                :format-date="formatDate" />
 
             <DailyNotes
                 v-if="activeTab === 'notes'"
@@ -203,8 +226,7 @@ onMounted(() => {
                 :selected-date="selectedDate"
                 :format-date="formatDate"
                 @update:daily-note="dailyNote = $event"
-                @note-input="handleNoteInput"
-            />
+                @note-input="handleNoteInput" />
 
             <EightfoldPathView
                 v-if="activeTab === 'eightfold'"
@@ -216,21 +238,29 @@ onMounted(() => {
                 :progress-percentage="efProgressPercentage"
                 :is-path-followed="isPathFollowed"
                 @toggle-path="togglePath"
-                @save-path="debouncedSavePath"
-            />
+                @save-path="debouncedSavePath" />
         </div>
 
         <transition name="save-indicator">
-            <div v-if="saveStatus" class="save-indicator" :class="saveStatus">
-                <span v-if="saveStatus === 'saving'" class="save-spinner"></span>
-                <svg v-else width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <div
+                v-if="saveStatus"
+                class="save-indicator"
+                :class="saveStatus">
+                <span
+                    v-if="saveStatus === 'saving'"
+                    class="save-spinner"></span>
+                <svg
+                    v-else
+                    width="12"
+                    height="12"
+                    viewBox="0 0 12 12"
+                    fill="none">
                     <path
                         d="M2 6l3 3 5-5"
                         stroke="currentColor"
                         stroke-width="1.5"
                         stroke-linecap="round"
-                        stroke-linejoin="round"
-                    />
+                        stroke-linejoin="round" />
                 </svg>
                 <span class="save-label">{{
                     saveStatus === 'saving' ? t('emotions.saving') : t('emotions.saved')
@@ -240,120 +270,104 @@ onMounted(() => {
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .emotion-list {
     display: grid;
-    gap: 0.6rem;
+    gap: $space-3;
 }
 
 .emotion-name {
-    font-weight: 600;
-    color: var(--text1);
-    min-width: 130px;
-    font-size: 0.95rem;
+    flex: 1;
+    min-width: auto;
+    color: $text1;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
 }
+
+/* ––––– Save indicator ––––– */
 
 .save-indicator {
     position: fixed;
-    bottom: 4rem;
+    bottom: $size-28;
     left: 50%;
-    transform: translateX(-50%);
+    z-index: $z-overlay-raised;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.3rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    letter-spacing: 0.03em;
-    z-index: 200;
+    gap: $space-2;
+    padding: $space-1 $space-3;
+    border-radius: $border-radius-3xl;
+    font-size: $font-size-xs;
+    letter-spacing: $letter-spacing-2;
+    transform: translateX(-50%);
     pointer-events: none;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
+    backdrop-filter: blur($blur-base);
 
-.save-indicator.saving {
-    background: rgba(255, 193, 7, 0.1);
-    border: 1px solid rgba(255, 193, 7, 0.15);
-    color: rgba(255, 193, 7, 0.8);
-}
+    &.saving {
+        background: color-mix(in srgb, $warning 10%, transparent);
+        border: $border-width-thin color-mix(in srgb, $warning 15%, transparent);
+        color: color-mix(in srgb, $warning 80%, transparent);
+    }
 
-.save-indicator.saved {
-    background: rgba(76, 175, 80, 0.1);
-    border: 1px solid rgba(76, 175, 80, 0.15);
-    color: rgba(76, 175, 80, 0.8);
-}
-
-.save-spinner {
-    width: 10px;
-    height: 10px;
-    border: 1.5px solid transparent;
-    border-top-color: currentColor;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    flex-shrink: 0;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
+    &.saved {
+        background: color-mix(in srgb, $positive 10%, transparent);
+        border: $border-width-thin color-mix(in srgb, $positive 15%, transparent);
+        color: color-mix(in srgb, $positive 80%, transparent);
     }
 }
 
+.save-spinner {
+    flex-shrink: 0;
+    width: $size-6;
+    height: $size-6;
+    border: $border-width-medium transparent;
+    border-top-color: currentcolor;
+    border-radius: $border-radius-round;
+    animation: spin $duration-spin linear infinite;
+}
+
 .save-label {
+    font-weight: $font-weight-normal;
     text-transform: uppercase;
-    font-weight: 400;
 }
 
 .save-indicator-enter-active {
     transition:
-        opacity 0.3s ease,
-        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity $transition-slow,
+        transform $duration-slow $ease-standard;
 }
 
 .save-indicator-leave-active {
     transition:
-        opacity 0.4s ease,
-        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity $transition-gentle,
+        transform $duration-gentle $ease-standard;
 }
 
 .save-indicator-enter-from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(6px);
+    opacity: $opacity-faint;
+    transform: translateX(-50%) translateY($size-4);
 }
 
 .save-indicator-leave-to {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-4px);
+    opacity: $opacity-faint;
+    transform: translateX(-50%) translateY(-$size-3);
 }
 
-@media (max-width: 768px) {
-    .emotion-list {
-        gap: 0.75rem;
-    }
-
-    .emotion-name {
-        min-width: auto;
-        font-size: 1rem;
-        flex: 1;
-    }
-}
-
-/* Inline styles */
+/* ––––– Inline mode ––––– */
 
 .emotion-inline {
-    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 0;
+    width: 100%;
     -webkit-app-region: no-drag;
 }
 
 .inline-header {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
-    padding-bottom: 1.25rem;
-    border-bottom: 1px solid var(--input-border);
+    gap: $space-4;
+    padding-bottom: $space-5;
+    border-bottom: $border-width-thin $input-border;
 }
 
 .inline-title-row {
@@ -364,67 +378,22 @@ onMounted(() => {
 
 .inline-title {
     margin: 0;
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: var(--text1);
-    letter-spacing: 0.02em;
+    color: $text1;
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
+    letter-spacing: $letter-spacing-1;
 }
 
 .inline-date-selector {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-}
-
-.inline-date-btn {
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: 1px solid var(--input-border);
-    border-radius: 6px;
-    color: var(--text2);
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.inline-date-btn:hover:not(:disabled) {
-    background: var(--input-bg-focus);
-    color: var(--text1);
-    border-color: var(--input-border-focus);
-}
-
-.inline-date-btn:disabled {
-    opacity: 0.3;
-    cursor: default;
-}
-
-.inline-close-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    background: transparent;
-    border: 1px solid var(--input-border);
-    border-radius: 6px;
-    color: var(--text2);
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.inline-close-btn:hover {
-    background: var(--input-bg-focus);
-    color: var(--text1);
-    border-color: var(--input-border-focus);
+    gap: $space-2;
 }
 
 .inline-date-text {
-    font-size: 0.8rem;
-    color: var(--text2);
-    min-width: 100px;
+    min-width: $size-33;
+    color: $text2;
+    font-size: $font-size-xs;
     text-align: center;
     font-variant-numeric: tabular-nums;
 }
@@ -433,163 +402,168 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1.5rem;
+    gap: $space-4;
 }
 
 .inline-stat {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.2rem;
+    gap: $space-1;
 }
 
 .inline-stat-value {
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: var(--text1);
+    color: $text1;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    line-height: $line-height-none;
     font-variant-numeric: tabular-nums;
-    line-height: 1;
 }
 
 .inline-stat-label {
-    font-size: 0.65rem;
-    color: var(--text2);
+    color: $text2;
+    font-size: $font-size-xxs;
+    font-weight: $font-weight-normal;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-weight: 400;
+    letter-spacing: $letter-spacing-5;
 }
 
 .inline-stat-divider {
-    width: 1px;
-    height: 28px;
-    background: var(--input-border);
-    opacity: 0.5;
+    width: $size-0;
+    height: $size-16;
+    background: $input-border;
+    opacity: $opacity-mid-low;
 }
 
 .inline-tabs {
     display: flex;
     gap: 0;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--input-border);
+    padding: $space-2 0;
+    border-bottom: $border-width-thin $input-border;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-}
 
-.inline-tabs::-webkit-scrollbar {
-    display: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 .inline-tab {
     flex: 0 0 auto;
-    padding: 0.4rem 0.75rem;
+    padding: $space-2;
     background: transparent;
     border: none;
-    border-bottom: 2px solid transparent;
-    color: var(--text2);
-    font-size: 0.72rem;
-    font-weight: 400;
-    cursor: pointer;
-    transition: all 0.2s;
+    border-bottom: $border-width-thick transparent;
+    color: $text2;
+    font-size: $font-size-xxs;
+    font-weight: $font-weight-normal;
     white-space: nowrap;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
+    letter-spacing: $letter-spacing-3;
+    cursor: pointer;
+    transition:
+        color $transition-base,
+        border-color $transition-base;
 
-.inline-tab:hover {
-    color: var(--text1);
-}
+    &:hover {
+        color: $text1;
+    }
 
-.inline-tab.active {
-    color: var(--text1);
-    border-bottom-color: var(--text1);
-    font-weight: 500;
+    &.active {
+        border-bottom-color: $text1;
+        color: $text1;
+        font-weight: $font-weight-medium;
+    }
 }
 
 .inline-content {
-    padding: 1rem 0 0;
-    min-height: 200px;
+    min-height: $size-40;
+    padding: $space-3 0 0;
 }
 
 .inline-emotion-item {
     display: grid;
-    grid-template-columns: auto 1fr;
     grid-template-rows: auto auto;
-    gap: 0 0.6rem;
-    padding: 0.5rem 0.25rem;
-    border-bottom: 1px solid var(--input-border);
-    cursor: pointer;
-    transition: background 0.15s;
+    grid-template-columns: auto 1fr;
     align-items: start;
-}
-
-.inline-emotion-item:hover {
-    background: var(--input-bg-focus);
-}
-
-.inline-emotion-item:last-child {
-    border-bottom: none;
-}
-
-.inline-emotion-item input[type='checkbox'] {
-    grid-row: 1 / 3;
-    margin: 0;
-    margin-top: 0.15rem;
-    width: 14px;
-    height: 14px;
-    accent-color: var(--text1);
+    gap: 0 $space-2;
+    padding: $space-2 $space-1;
+    border-bottom: $border-width-thin $input-border;
     cursor: pointer;
+    transition: background $transition-fast;
+
+    &:hover {
+        background: $input-bg-focus;
+    }
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    input[type='checkbox'] {
+        grid-row: 1 / 3;
+        width: $size-9;
+        height: $size-9;
+        margin: $space-0 0 0;
+        accent-color: $text1;
+        cursor: pointer;
+    }
 }
 
 .inline-emotion-name {
-    font-size: 0.8rem;
-    color: var(--text1);
-    font-weight: 400;
-    line-height: 1.3;
+    color: $text1;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-normal;
+    line-height: $line-height-tight;
 }
 
 .inline-emotion-desc {
     grid-column: 2;
-    font-size: 0.68rem;
-    color: var(--text2);
-    line-height: 1.4;
-    opacity: 0.7;
+    color: $text2;
+    font-size: $font-size-xxs;
+    line-height: $line-height-snug;
+    opacity: $opacity-mid-high;
 }
 
-/* Inline mode responsive */
-@media (max-width: 768px) {
-    .emotion-inline {
-        width: 100%;
+/* –––––– Responsive –––––– */
+
+@media (width > #{$breakpoint-xl}) {
+    .emotion-list {
+        gap: $space-2;
+    }
+
+    .emotion-name {
+        flex: 0 1 auto;
+        min-width: $size-36;
     }
 
     .inline-header {
-        gap: 1rem;
-    }
-
-    .inline-title {
-        font-size: 1rem;
+        gap: $space-5;
     }
 
     .inline-stats {
-        gap: 1rem;
+        gap: $space-6;
+    }
+
+    .inline-title {
+        font-size: $font-size-lg;
     }
 
     .inline-stat-value {
-        font-size: 1.2rem;
+        font-size: $font-size-2xl;
     }
 
     .inline-tabs {
-        gap: 0;
-        padding: 0.5rem 0;
+        padding: $space-3 0;
     }
 
     .inline-tab {
-        padding: 0.4rem 0.5rem;
-        font-size: 0.68rem;
+        padding: $space-2 $space-3;
+        font-size: $font-size-xs;
     }
 
     .inline-content {
-        padding: 0.75rem 0 0;
+        padding: $space-4 0 0;
     }
 }
 </style>

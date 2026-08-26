@@ -1,8 +1,8 @@
-// @vitest-environment node
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { normalizeDoc, readCollection, readSession } from '@/main/services/db';
 
-// Mock the 'electron' module before importing db.ts — db.ts calls app.getPath()
-// and creates directories at module load time, which would fail without Electron.
-import { vi, describe, it, expect } from 'vitest';
+/** What the next fs.readFileSync returns, keyed by the file the module asks for. */
+const state = vi.hoisted(() => ({ files: {} as Record<string, string> }));
 
 vi.mock('electron', () => ({
     app: {
@@ -10,27 +10,80 @@ vi.mock('electron', () => ({
     },
 }));
 
-// Also mock fs to prevent real file operations during module init
-vi.mock('fs', () => ({
-    default: {
+vi.mock('fs', () => {
+    const readFileSync = (filePath: string): string => {
+        const name = String(filePath).split('/').pop() ?? '';
+        const contents = state.files[name];
+        if (contents === undefined) throw new Error('ENOENT');
+        return contents;
+    };
+    const api = {
         existsSync: () => true,
-        readFileSync: () => '[]',
+        readFileSync,
         writeFileSync: vi.fn(),
         renameSync: vi.fn(),
         mkdirSync: vi.fn(),
         unlinkSync: vi.fn(),
-    },
-    existsSync: () => true,
-    readFileSync: () => '[]',
-    writeFileSync: vi.fn(),
-    renameSync: vi.fn(),
-    mkdirSync: vi.fn(),
-    unlinkSync: vi.fn(),
-}));
+    };
+    return { default: api, ...api };
+});
 
-import { normalizeDoc } from '../../../src/main/services/db';
+beforeEach(() => {
+    state.files = {};
+});
 
-// ─── normalizeDoc ─────────────────────────────────────────────────────────────
+describe('readSession', () => {
+    it('returns the stored session when both halves are present', () => {
+        state.files['session.json'] = JSON.stringify({ username: 'alice', token: 'tok' });
+        expect(readSession()).toEqual({ username: 'alice', token: 'tok' });
+    });
+
+    it('reads a half-written session as signed out', () => {
+        state.files['session.json'] = JSON.stringify({ username: 'alice' });
+        expect(readSession()).toBeNull();
+    });
+
+    it('reads an empty username as signed out rather than as a user named ""', () => {
+        state.files['session.json'] = JSON.stringify({ username: '', token: 'tok' });
+        expect(readSession()).toBeNull();
+    });
+
+    it('reads a session file of the wrong shape as signed out', () => {
+        state.files['session.json'] = JSON.stringify(['alice', 'tok']);
+        expect(readSession()).toBeNull();
+    });
+
+    it('reads unparseable JSON as signed out', () => {
+        state.files['session.json'] = '{not json';
+        expect(readSession()).toBeNull();
+    });
+
+    it('reads a missing file as signed out', () => {
+        expect(readSession()).toBeNull();
+    });
+});
+
+describe('readCollection', () => {
+    it('normalises every document it returns', () => {
+        state.files['users.json'] = JSON.stringify([{ _id: { $oid: 'abc' }, Username: 'Legacy' }]);
+        const users = readCollection<{ _id: string; username: string }>('users');
+        expect(users).toEqual([{ _id: 'abc', username: 'Legacy', Username: 'Legacy' }]);
+    });
+
+    it('returns nothing for a collection file that is not an array', () => {
+        state.files['users.json'] = JSON.stringify({ users: [] });
+        expect(readCollection('users')).toEqual([]);
+    });
+
+    it('returns nothing for unparseable JSON', () => {
+        state.files['users.json'] = '[[[';
+        expect(readCollection('users')).toEqual([]);
+    });
+
+    it('returns nothing for a missing file', () => {
+        expect(readCollection('meditations')).toEqual([]);
+    });
+});
 
 describe('normalizeDoc', () => {
     it('passes through a plain document unchanged', () => {

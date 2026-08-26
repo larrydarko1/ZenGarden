@@ -39,3 +39,5 @@ android/local.properties
 
 prompts/
 out/
+coverage
+todo.md

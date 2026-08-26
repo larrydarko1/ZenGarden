@@ -1,0 +1,291 @@
+/** Design tokens — SCSS variables only. */
+
+/* ––––– Typography ––––– */
+
+$font-family: system-ui, avenir, helvetica, arial, sans-serif;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+/* –––––– Font size scale –––––– */
+
+$font-size-xxs: 0.625rem;
+$font-size-xs: 0.75rem;
+$font-size-sm: 0.875rem;
+$font-size-base: 1rem;
+$font-size-lg: 1.125rem;
+$font-size-xl: 1.25rem;
+$font-size-2xl: 1.5rem;
+$font-size-3xl: 2rem;
+$font-size-4xl: 2.5rem;
+$font-size-5xl: 3rem;
+
+/* –––––– Line height scale –––––– */
+
+$line-height-none: 1;
+$line-height-tight: 1.3;
+$line-height-snug: 1.4;
+$line-height-base: 1.5;
+$line-height-relaxed: 1.6;
+$line-height-loose: 1.65;
+
+/* –––––– Letter spacing scale –––––– */
+
+$letter-spacing-tight: -0.02em;
+$letter-spacing-1: 0.02em;
+$letter-spacing-2: 0.03em;
+$letter-spacing-3: 0.04em;
+$letter-spacing-4: 0.05em;
+$letter-spacing-5: 0.06em;
+$letter-spacing-6: 0.08em;
+$letter-spacing-7: 0.1em;
+$letter-spacing-8: 0.12em;
+
+/* ––––– Spacing ––––– */
+
+$space-0: 0.125em;
+$space-1: 0.25em;
+$space-2: 0.5em;
+$space-3: 0.75em;
+$space-4: 1em;
+$space-5: 1.25em;
+$space-6: 1.5em;
+$space-7: 2em;
+$space-8: 2.5em;
+$space-9: 3em;
+$space-10: 4em;
+$space-11: 4.5em;
+$space-12: 5em;
+$space-13: 6em;
+$space-14: 8em;
+$space-15: 10em;
+
+/* –––––– Border widths –––––– */
+
+$border-width-thin: 1px solid;
+$border-width-medium: 1.5px solid;
+$border-width-thick: 2px solid;
+$border-width-thicker: 3px solid;
+
+/* –––––– Backdrop effects –––––– */
+
+$blur-xs: 2px;
+$blur-sm: 4px;
+$blur-base: 8px;
+$blur-md: 12px;
+$blur-lg: 20px;
+$blur-xl: 24px;
+
+/* –––––– Component sizes –––––– */
+
+$size-0: 1px;
+$size-1: 2px;
+$size-2: 3px;
+$size-3: 4px;
+$size-4: 6px;
+$size-5: 8px;
+$size-6: 10px;
+$size-7: 12px;
+$size-8: 13px;
+$size-9: 14px;
+$size-10: 16px;
+$size-11: 18px;
+$size-12: 20px;
+$size-13: 22px;
+$size-14: 24px;
+$size-15: 26px;
+$size-16: 28px;
+$size-17: 32px;
+$size-18: 35px;
+$size-19: 36px;
+$size-20: 40px;
+$size-21: 44px;
+$size-22: 46px;
+$size-23: 48px;
+$size-24: 50px;
+$size-25: 52px;
+$size-26: 56px;
+$size-27: 60px;
+$size-28: 64px;
+$size-29: 72px;
+$size-30: 80px;
+$size-31: 88px;
+$size-32: 96px;
+$size-33: 100px;
+$size-34: 120px;
+$size-35: 128px;
+$size-36: 130px;
+$size-37: 140px;
+$size-38: 144px;
+$size-39: 180px;
+$size-40: 200px;
+$size-41: 220px;
+$size-42: 260px;
+$size-43: 280px;
+$size-44: 300px;
+$size-45: 320px;
+$size-46: 380px;
+$size-47: 400px;
+$size-48: 450px;
+$size-49: 1200px;
+
+/* –––––– Grid track sizes –––––– */
+
+$track-xs: 1.75rem;
+$track-sm: 3rem;
+$track-md: 8.75rem;
+
+/* –––––– Opacity scale –––––– */
+
+$opacity-faint: 0.05;
+$opacity-subtle: 0.15;
+$opacity-lowest: 0.3;
+$opacity-low: 0.4;
+$opacity-low-mid: 0.45;
+$opacity-mid-low: 0.5;
+$opacity-mid: 0.6;
+$opacity-mid-high: 0.7;
+$opacity-higher: 0.8;
+$opacity-highest: 0.85;
+$opacity-almost-opaque: 0.9;
+$opacity-full: 1;
+
+/* –––––– Transform scale factors –––––– */
+
+$scale-90: 0.9;
+$scale-93: 0.93;
+$scale-96: 0.96;
+$scale-97: 0.97;
+$scale-98: 0.98;
+$scale-100: 1;
+$scale-101: 1.01;
+$scale-102: 1.02;
+$scale-105: 1.05;
+$scale-160: 1.6;
+
+/* ––––– Layout ––––– */
+
+$border-radius-xs: 0.1875em;
+$border-radius-sm: 0.25em;
+$border-radius: 0.375em;
+$border-radius-lg: 0.5em;
+$border-radius-xl: 0.75em;
+$border-radius-2xl: 1em;
+$border-radius-3xl: 1.25em;
+$border-radius-round: 9999em;
+
+/* –––––– Motion –––––– */
+
+$duration-none: 0.01ms;
+$duration-immediate: 0.05s;
+$duration-stagger: 0.07s;
+$duration-instant: 0.08s;
+$duration-quick: 0.1s;
+$duration-fast: 0.15s;
+$duration-base: 0.2s;
+$duration-relaxed: 0.25s;
+$duration-slow: 0.3s;
+$duration-slower: 0.35s;
+$duration-gentle: 0.4s;
+$duration-soft: 0.45s;
+$duration-calm: 0.5s;
+$duration-mellow: 0.6s;
+$duration-languid: 0.7s;
+$duration-spin: 0.8s;
+$duration-entrance: 1.2s;
+$duration-fade: 2s;
+
+$duration-wind: 7s;
+$duration-wave: 18s;
+$duration-wave-slow: 26s;
+$duration-petal: 16s;
+$duration-particle: 14s;
+$duration-blob: 30s;
+
+$transition-instant: $duration-instant ease;
+$transition-fast: $duration-fast ease;
+$transition-base: $duration-base ease;
+$transition-slow: $duration-slow ease;
+$transition-gentle: $duration-gentle ease;
+$transition-mellow: $duration-mellow ease;
+
+$ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+$ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+
+/* –––––– Z-index scale –––––– */
+
+$z-normal: 1;
+$z-overlay: 100;
+$z-overlay-raised: 200;
+$z-modal-backdrop: 1000;
+$z-modal: 1001;
+$z-modal-raised: 1002;
+$z-modal-top: 1003;
+$z-popover: 1010;
+$z-toast: 2000;
+
+/* –––––– SCSS ALIASES –––––– */
+
+$text1: var(--text1);
+$text2: var(--text2);
+$base1: var(--base1);
+$base2: var(--base2);
+$blur1: var(--blur1);
+$blur2: var(--blur2);
+$border-subtle: var(--border-subtle);
+$input-bg: var(--input-bg);
+$input-bg-focus: var(--input-bg-focus);
+$input-border: var(--input-border);
+$input-border-focus: var(--input-border-focus);
+$button-bg: var(--button-bg);
+$button-bg-hover: var(--button-bg-hover);
+$button-border-hover: var(--button-border-hover);
+$error-bg: var(--error-bg);
+$error-border: var(--error-border);
+$error-text: var(--error-text);
+$success: var(--success);
+$warning: var(--warning);
+$danger: var(--danger);
+$danger-border: var(--danger-border);
+$danger-border-hover: var(--danger-border-hover);
+$text-on-danger: var(--text-on-danger);
+$positive: var(--positive);
+$negative: var(--negative);
+$scrim: var(--scrim);
+$glass: var(--glass);
+
+/* ––––––– Shadows ––––––– */
+
+$shadow-glow-sm: 0 0 $size-5 rgb(255 255 255 / 4%);
+$shadow-glow: 0 0 $size-7 rgb(255 255 255 / 5%);
+$shadow-ring: 0 0 0 $size-2 rgb(128 128 128 / 6%);
+$shadow-ring-strong: 0 0 0 $size-2 rgb(128 128 128 / 12%);
+$shadow-sm: 0 $size-1 $size-7 rgb(255 255 255 / 6%);
+$shadow-edge: 0 $size-1 $size-10 0 $input-border;
+$shadow-md: 0 $size-3 $size-7 rgb(0 0 0 / 30%);
+$shadow-md-soft: 0 $size-3 $size-10 rgb(0 0 0 / 6%);
+$shadow-md-strong: 0 $size-3 $size-10 rgb(0 0 0 / 30%);
+$shadow-lg: 0 $size-5 $size-17 rgb(0 0 0 / 40%);
+$shadow-lg-strong: 0 $size-5 $size-17 rgb(0 0 0 / 50%);
+$shadow-float:
+    0 $size-5 $size-20 rgb(0 0 0 / 8%),
+    0 $size-0 $size-2 rgb(0 0 0 / 4%);
+$shadow-sphere:
+    0 0 $size-20 rgb(255 255 255 / 5%),
+    inset 0 0 $size-17 rgb(255 255 255 / 3%);
+
+/* –––––– Breakpoints –––––– */
+
+$breakpoint-xs: 360px;
+$breakpoint-sm: 420px;
+$breakpoint-md: 480px;
+$breakpoint-lg: 640px;
+$breakpoint-xl: 768px;
+$breakpoint-2xl: 900px;
+$breakpoint-short: 500px;
+
+/* –––––– Theme swatches –––––– */
+
+$swatch-light: linear-gradient(135deg, #f2f3f4 0%, #e3e6ed 100%);
+$swatch-dark: linear-gradient(135deg, #181a20 0%, #23262f 100%);

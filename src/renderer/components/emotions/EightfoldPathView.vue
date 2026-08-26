@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-interface EightfoldPath {
+type EightfoldPath = {
     key: string;
     displayName: string;
     description: string;
     questions: string;
-}
+};
 
 defineProps<{
     loading: boolean;
@@ -39,24 +39,40 @@ const { t } = useI18n();
                 <span class="eightfold-stat-value">{{ progressPercentage }}%</span>
             </div>
         </div>
-        <div v-if="loading" class="loading">{{ t('eightfold.loading') }}...</div>
-        <div v-else class="eightfold-path-list">
-            <div v-for="path in paths" :key="path.key" class="eightfold-path-item">
+        <div
+            v-if="loading"
+            class="loading"
+            >{{ t('eightfold.loading') }}...</div
+        >
+        <div
+            v-else
+            class="eightfold-path-list">
+            <div
+                v-for="path in paths"
+                :key="path.key"
+                class="eightfold-path-item">
                 <div class="eightfold-checkbox-row">
                     <input
                         :id="`ef-${path.key}`"
                         type="checkbox"
                         :checked="isPathFollowed(path.key)"
-                        @change="emit('toggle-path', path.key)"
-                    />
-                    <label :for="`ef-${path.key}`" class="eightfold-path-name">{{ path.displayName }}</label>
+                        @change="emit('toggle-path', path.key)" />
+                    <label
+                        :for="`ef-${path.key}`"
+                        class="eightfold-path-name"
+                        >{{ path.displayName }}</label
+                    >
                 </div>
                 <div class="eightfold-path-desc">{{ path.description }}</div>
                 <div class="eightfold-path-question">{{ path.questions }}</div>
-                <div v-if="isPathFollowed(path.key)" class="eightfold-path-note">
+                <div
+                    v-if="isPathFollowed(path.key)"
+                    class="eightfold-path-note">
                     <textarea
+                        class="zen-textarea"
                         :value="pathNotes[path.key]"
                         :placeholder="t('eightfold.notesPlaceholder')"
+                        :aria-label="t('eightfold.notesPlaceholder')"
                         rows="2"
                         @input="
                             (e) => {
@@ -66,140 +82,123 @@ const { t } = useI18n();
                                 });
                                 emit('save-path');
                             }
-                        "
-                    ></textarea>
+                        "></textarea>
                 </div>
             </div>
         </div>
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .eightfold-view {
-    min-height: 300px;
+    min-height: $size-44;
 }
 
 .loading {
+    padding: $space-7;
+    color: $text2;
+    font-size: $font-size-base;
     text-align: center;
-    padding: 2rem;
-    color: var(--text2);
-    font-size: 1rem;
 }
 
 .eightfold-inline-stats {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    gap: $space-4;
+    margin-bottom: $space-4;
 }
 
 .eightfold-stat {
-    flex: 1;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 8px;
-    padding: 0.6rem 0.75rem;
     display: flex;
+    flex: 1;
     align-items: center;
     justify-content: space-between;
+    padding: $space-2 $space-3;
+    background: $input-bg;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius-lg;
 }
 
 .eightfold-stat-label {
-    font-size: 0.8rem;
-    color: var(--text2);
+    color: $text2;
+    font-size: $font-size-xs;
 }
 
 .eightfold-stat-value {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text1);
+    color: $text1;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
 }
 
 .eightfold-path-list {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: $space-2;
 }
 
 .eightfold-path-item {
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 8px;
-    padding: 0.75rem;
-    transition: all 0.2s;
-}
+    padding: $space-3;
+    background: $input-bg;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius-lg;
+    transition:
+        background $transition-base,
+        border-color $transition-base;
 
-.eightfold-path-item:hover {
-    background: var(--input-bg-focus);
-    border-color: var(--input-border-focus);
+    &:hover {
+        background: $input-bg-focus;
+        border-color: $input-border-focus;
+    }
 }
 
 .eightfold-checkbox-row {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    margin-bottom: 0.35rem;
-}
+    gap: $space-2;
+    margin-bottom: $space-1;
 
-.eightfold-checkbox-row input[type='checkbox'] {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-    accent-color: var(--text1);
-    flex-shrink: 0;
+    input[type='checkbox'] {
+        flex-shrink: 0;
+        width: $size-11;
+        height: $size-11;
+        accent-color: $text1;
+        cursor: pointer;
+    }
 }
 
 .eightfold-path-name {
-    color: var(--text1);
-    font-size: 0.95rem;
-    font-weight: 500;
+    color: $text1;
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
     cursor: pointer;
 }
 
+/** The left inset aligns these under the label, clear of the checkbox. */
 .eightfold-path-desc {
-    color: var(--text2);
-    font-size: 0.8rem;
-    margin-left: 1.65rem;
-    margin-bottom: 0.25rem;
-    line-height: 1.4;
+    margin-bottom: $space-1;
+    margin-left: $space-6;
+    color: $text2;
+    font-size: $font-size-xs;
+    line-height: $line-height-snug;
 }
 
 .eightfold-path-question {
-    color: var(--text2);
-    font-size: 0.75rem;
+    margin-left: $space-6;
+    color: $text2;
+    font-size: $font-size-xs;
     font-style: italic;
-    margin-left: 1.65rem;
-    opacity: 0.7;
-    line-height: 1.4;
+    line-height: $line-height-snug;
+    opacity: $opacity-mid-high;
 }
 
 .eightfold-path-note {
-    margin-left: 1.65rem;
-    margin-top: 0.5rem;
-}
+    margin-top: $space-2;
+    margin-left: $space-6;
 
-.eightfold-path-note textarea {
-    width: 100%;
-    box-sizing: border-box;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 6px;
-    padding: 0.5rem 0.65rem;
-    color: var(--text1);
-    font-family: inherit;
-    font-size: 0.85rem;
-    resize: vertical;
-    transition: all 0.2s;
-    line-height: 1.5;
-}
-
-.eightfold-path-note textarea:focus {
-    outline: none;
-    border-color: var(--input-border-focus);
-    background: var(--input-bg-focus);
-}
-
-.eightfold-path-note textarea::placeholder {
-    color: var(--text2);
-    opacity: 0.5;
+    /** Size only — `.zen-textarea` carries the field treatment. */
+    .zen-textarea {
+        min-height: auto;
+        border-radius: $border-radius;
+        line-height: $line-height-base;
+    }
 }
 </style>

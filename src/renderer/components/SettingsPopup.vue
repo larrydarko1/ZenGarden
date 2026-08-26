@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import AccountSettings from './AccountSettings.vue';
+import AccountSettings from '@/renderer/components/AccountSettings.vue';
 
-const { t, locale } = useI18n();
+const props = defineProps<{ theme: 'light' | 'dark' }>();
 
 const emit = defineEmits<{
-    (e: 'close'): void;
-    (e: 'theme-change', theme: string): void;
-    (e: 'language-change', language: string): void;
+    'close': [];
+    'theme-change': [theme: string];
+    'language-change': [language: string];
 }>();
 
 const themes = ['dark', 'light'];
@@ -23,24 +23,26 @@ const languages = {
     ja: '日本語',
 };
 
-const currentTheme = ref('dark'); // Will be set from user data
+const { t, locale } = useI18n();
+
+// Theme is owned by App.vue; this popup remounts on every open, so it reads the
+// prop rather than keeping a copy that would reset to a hardcoded default.
 const currentLanguage = ref(locale.value);
 
-function selectTheme(theme: string) {
-    currentTheme.value = theme;
+function selectTheme(theme: string): void {
     emit('theme-change', theme);
 }
 
-function selectLanguage(lang: string) {
+function selectLanguage(lang: string): void {
     currentLanguage.value = lang;
     emit('language-change', lang);
 }
 
-function handleUsernameChange(_newUsername: string) {
+function handleUsernameChange(_newUsername: string): void {
     window.location.reload();
 }
 
-function handleAccountDeletion() {
+function handleAccountDeletion(): void {
     // Account deleted, redirect to login
     emit('close');
     window.location.reload();
@@ -50,195 +52,197 @@ function handleAccountDeletion() {
 <template>
     <div class="settings-inline">
         <div class="settings-section">
-            <h3 class="section-label">{{ t('settings.theme') }}</h3>
+            <h3 class="zen-label">{{ t('settings.theme') }}</h3>
             <div class="theme-options">
                 <button
-                    v-for="theme in themes"
-                    :key="theme"
-                    :class="['theme-option', theme, { active: currentTheme === theme }]"
-                    @click="selectTheme(theme)"
-                >
-                    <div class="theme-preview" :class="theme"></div>
-                    <span class="theme-name">{{ t(`settings.themes.${theme}`) }}</span>
+                    v-for="themeId in themes"
+                    :key="themeId"
+                    class="theme-option"
+                    :class="[themeId, { active: props.theme === themeId }]"
+                    @click="selectTheme(themeId)">
+                    <div
+                        class="theme-preview"
+                        :class="themeId"></div>
+                    <span class="theme-name">{{ t(`settings.themes.${themeId}`) }}</span>
                 </button>
             </div>
         </div>
 
         <div class="settings-section">
-            <h3 class="section-label">{{ t('settings.language') }}</h3>
+            <h3 class="zen-label">{{ t('settings.language') }}</h3>
             <div class="language-options">
                 <button
                     v-for="(langName, langCode) in languages"
                     :key="langCode"
-                    :class="['language-option', { active: currentLanguage === langCode }]"
-                    @click="selectLanguage(langCode)"
-                >
+                    class="language-option"
+                    :class="[{ active: currentLanguage === langCode }]"
+                    @click="selectLanguage(langCode)">
                     {{ langName }}
                 </button>
             </div>
         </div>
 
-        <div class="settings-divider"></div>
+        <div class="zen-divider settings-divider"></div>
 
-        <AccountSettings @username-changed="handleUsernameChange" @account-deleted="handleAccountDeletion" />
+        <AccountSettings
+            @username-changed="handleUsernameChange"
+            @account-deleted="handleAccountDeletion" />
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .settings-inline {
-    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 0;
+    width: 100%;
 }
 
 .settings-section {
-    margin-bottom: 1.25rem;
+    margin-bottom: $space-6;
+
+    &:last-of-type {
+        margin-bottom: 0;
+    }
 }
 
-.settings-section:last-of-type {
-    margin-bottom: 0;
-}
-
-.section-label {
-    color: var(--text2);
-    font-size: 0.7rem;
-    font-weight: 400;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin: 0 0 0.6rem 0;
+.zen-label {
+    margin-bottom: $space-3;
 }
 
 .settings-divider {
-    height: 1px;
-    background: var(--input-border);
-    margin: 0.5rem 0 1.25rem;
-    opacity: 0.5;
+    margin: $space-2 0 $space-5;
 }
+
+/* ––––– Theme ––––– */
 
 .theme-options {
     display: flex;
-    gap: 0.75rem;
+    gap: $space-3;
 }
 
 .theme-option {
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 8px;
-    padding: 0.75rem;
-    cursor: pointer;
-    transition: all 0.15s;
     display: flex;
+    flex: 1;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
-    flex: 1;
-}
+    gap: $space-2;
+    padding: $space-3;
+    background: $input-bg;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius-lg;
+    cursor: pointer;
+    min-height: $size-28;
+    touch-action: manipulation;
+    transition:
+        background $transition-fast,
+        border-color $transition-fast;
 
-.theme-option:hover {
-    background: var(--input-bg-focus);
-    border-color: var(--border-subtle);
-}
+    &:hover {
+        background: $input-bg-focus;
+        border-color: $border-subtle;
 
-.theme-option.active {
-    background: var(--border-subtle);
-    border-color: var(--border-subtle);
+        .theme-preview {
+            transform: scale($scale-105);
+        }
+    }
+
+    &:active {
+        transform: scale($scale-98);
+    }
+
+    &.active {
+        background: $border-subtle;
+        border-color: $border-subtle;
+    }
 }
 
 .theme-preview {
-    width: 40px;
-    height: 40px;
-    border-radius: 6px;
-    border: 1px solid var(--input-border);
-    transition: transform 0.15s;
-}
+    width: $size-20;
+    height: $size-20;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius;
+    transition: transform $transition-fast;
 
-.theme-option:hover .theme-preview {
-    transform: scale(1.05);
-}
+    &.light {
+        background: $swatch-light;
+    }
 
-.theme-preview.light {
-    background: linear-gradient(135deg, #f2f3f4 0%, #e3e6ed 100%);
-}
-
-.theme-preview.dark {
-    background: linear-gradient(135deg, #181a20 0%, #23262f 100%);
+    &.dark {
+        background: $swatch-dark;
+    }
 }
 
 .theme-name {
-    color: var(--text1);
-    font-size: 0.7rem;
-    font-weight: 400;
+    color: $text1;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-normal;
 }
+
+/* ––––– Language ––––– */
 
 .language-options {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $space-2;
 }
 
 .language-option {
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 6px;
-    padding: 0.5rem 0.35rem;
-    color: var(--text2);
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: $size-21;
+    padding: $space-3;
+    background: $input-bg;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius;
+    color: $text2;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-normal;
     text-align: center;
-    font-weight: 400;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+        color $transition-fast,
+        background $transition-fast,
+        border-color $transition-fast;
+
+    &:hover {
+        background: $input-bg-focus;
+        border-color: $border-subtle;
+        color: $text1;
+    }
+
+    &:active {
+        transform: scale($scale-98);
+    }
+
+    &.active {
+        background: $border-subtle;
+        border-color: $border-subtle;
+        color: $text1;
+    }
 }
 
-.language-option:hover {
-    background: var(--input-bg-focus);
-    border-color: var(--border-subtle);
-    color: var(--text1);
-}
+/* –––––– Responsive –––––– */
 
-.language-option.active {
-    background: var(--border-subtle);
-    border-color: var(--border-subtle);
-    color: var(--text1);
-    font-weight: 400;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
+@media (width > #{$breakpoint-xl}) {
     .settings-section {
-        margin-bottom: 1.5rem;
+        margin-bottom: $space-5;
     }
 
-    .section-label {
-        font-size: 0.75rem;
-        margin-bottom: 0.75rem;
-    }
-
-    .theme-option {
-        padding: 0.875rem;
-        min-height: 64px;
-        touch-action: manipulation;
+    .zen-label {
+        margin-bottom: $space-2;
     }
 
     .language-options {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.6rem;
+        grid-template-columns: repeat(4, 1fr);
     }
 
     .language-option {
-        padding: 0.75rem;
-        font-size: 0.8rem;
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        touch-action: manipulation;
-    }
-}
-
-@media (max-width: 480px) {
-    .language-options {
-        grid-template-columns: 1fr 1fr;
+        display: block;
+        min-height: auto;
+        padding: $space-2 $space-1;
     }
 }
 </style>

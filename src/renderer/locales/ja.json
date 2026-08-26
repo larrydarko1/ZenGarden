@@ -1,42 +1,33 @@
 {
     "settings": {
-        "title": "設定",
         "theme": "テーマ",
         "language": "言語",
         "themes": {
             "light": "ライト",
             "dark": "ダーク"
-        },
-        "languages": {
-            "en": "English",
-            "es": "Español",
-            "it": "Italiano",
-            "fr": "Français",
-            "de": "Deutsch",
-            "pt": "Português",
-            "zh": "中文",
-            "ja": "日本語"
         }
     },
     "header": {
-        "greeting": "こんにちは",
-        "breathe": "呼吸",
         "emotions": "日記",
-        "eightfoldPath": "八正道",
         "calendar": "カレンダー",
         "philosophy": "哲学",
+        "settings": "設定",
         "logout": "ログアウト"
     },
     "meditation": {
         "begin": "開始",
         "stop": "停止",
         "bell": {
-            "settings": "ベルの設定"
+            "settings": "ベルの設定",
+            "every": "{minutes}分ごと",
+            "sound": "音",
+            "option": "ベル {number}",
+            "minutes": "{minutes}分",
+            "closeIntervals": "間隔メニューを閉じる",
+            "closeSounds": "ベル音メニューを閉じる"
         }
     },
     "philosophy": {
-        "title": "私たちの禅の哲学",
-        "subtitle": "ZenGardenのデザイン哲学を理解する",
         "practice": {
             "title": "修行が道である",
             "body": "禪において、瑁想は目的への手段ではありません—それ自体が目的です。修行の一瞬一瞬が完全で全体です。行くべき場所はなく、達成すべきことはありません。座るとき、あなたはすでにそこにいるのです。"
@@ -63,7 +54,6 @@
         }
     },
     "auth": {
-        "welcome": "ZenGardenへようこそ",
         "username": "ユーザー名",
         "password": "パスワード",
         "login": "ログイン",
@@ -80,10 +70,10 @@
         "backToLogin": "ログインに戻る",
         "passwordResetSuccess": "パスワードリセット完了！",
         "passwordResetMessage": "パスワードが正常にリセットされました。新しいパスワードでログインできます。",
-        "goToLogin": "ログインへ"
+        "goToLogin": "ログインへ",
+        "passwordsDoNotMatch": "パスワードが一致しません"
     },
     "account": {
-        "title": "アカウント設定",
         "changeUsername": "ユーザー名を変更",
         "newUsernamePlaceholder": "新しいユーザー名",
         "updateUsername": "ユーザー名を更新",
@@ -99,7 +89,7 @@
         "passwordsDoNotMatch": "パスワードが一致しません",
         "passwordTooShort": "パスワードは少なくとも6文字必要です",
         "recoveryCodes": "リカバリコード",
-        "recoveryCodesDescription": "リカバリコードを使用すると、パスワードを忘れた場合にリセットできます。12個の一度だけ使用できるコードを生成し、安全な場所に保管してください。",
+        "recoveryCodesDescription": "リカバリコードを使用すると、パスワードを忘れた場合にリセットできます。10個の一度だけ使用できるコードを生成し、安全な場所に保管してください。",
         "totalCodes": "総コード数",
         "usedCodes": "使用済みコード",
         "remainingCodes": "残りコード",
@@ -108,7 +98,6 @@
         "generateCodesWarning": "警告：新しいコードを生成すると、以前のすべてのコードが無効になります。",
         "confirmPasswordToGenerate": "コードを生成するにはパスワードを入力してください",
         "confirm": "確認",
-        "recoveryCodesFailed": "リカバリコードの生成に失敗しました",
         "saveCodesWarning": "重要：今すぐこれらのコードを保存してください！",
         "saveCodesDescription": "これらのコードを再度表示することはできません。パスワードマネージャーなどの安全な場所に保管してください。",
         "copyAll": "すべてコピー",
@@ -120,13 +109,7 @@
         "confirmPasswordToDelete": "確認のためパスワードを入力してください",
         "confirmDelete": "はい、アカウントを削除します",
         "cancel": "キャンセル",
-        "deleteFailed": "アカウントの削除に失敗しました",
-        "exportData": "データのエクスポート",
-        "exportDescription": "すべての瞑想と感情のデータをダウンロードします。",
-        "exportJSON": "JSONとしてエクスポート",
-        "exportCSV": "CSVとしてエクスポート",
-        "exportSuccess": "データが正常にエクスポートされました",
-        "exportFailed": "データのエクスポートに失敗しました"
+        "deleteFailed": "アカウントの削除に失敗しました"
     },
     "notes": {
         "title": "セッション完了",
@@ -140,12 +123,8 @@
         "none": "なし",
         "box": "ボックス呼吸",
         "deep": "深呼吸",
-        "calm": "穏やかな呼吸",
         "fourSevenEight": "4-7-8呼吸",
         "energizing": "活力呼吸",
-        "start": "開始",
-        "stop": "停止",
-        "close": "閉じる",
         "cycle": "サイクル",
         "breatheIn": "吸う",
         "hold": "止める",
@@ -158,15 +137,12 @@
         }
     },
     "calendar": {
-        "title": "瞑想カレンダー",
         "minutes": "分",
-        "close": "閉じる",
         "notes": "メモ",
         "months": ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
         "weekdays": ["日", "月", "火", "水", "木", "金", "土"]
     },
     "emotions": {
-        "title": "日記",
         "positive": "ポジティブ",
         "negative": "ネガティブ",
         "pnRatio": "P/N比率",
@@ -191,7 +167,6 @@
         "noPositiveEmotionsYet": "ポジティブな感情はまだ記録されていません",
         "noNegativeEmotionsYet": "ネガティブな感情はまだ記録されていません",
         "trendChart": "P/N比率のトレンド",
-        "past30Days": "過去30日",
         "past90Days": "過去90日",
         "dailyNote": "今日のメモ",
         "notePlaceholder": "今日の気分はどうですか？ここに考えを書いてください...",
@@ -471,8 +446,6 @@
         "completed": "完了",
         "progress": "進捗",
         "loading": "読み込み中",
-        "saving": "保存中...",
-        "saved": "保存済み",
         "notesPlaceholder": "今日この道をどのように歩んだかメモを追加...",
         "paths": {
             "rightView": {

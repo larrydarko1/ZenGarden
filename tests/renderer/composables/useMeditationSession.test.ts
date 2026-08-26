@@ -1,8 +1,5 @@
-// @vitest-environment jsdom
-
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-
-// ─── Mocks ────────────────────────────────────────────────────────────────────
+import { useMeditationSession } from '@/renderer/composables/useMeditationSession';
 
 vi.mock('vue-i18n', () => ({
     useI18n: () => ({
@@ -23,10 +20,6 @@ class MockAudio {
 }
 vi.stubGlobal('Audio', MockAudio);
 
-import { useMeditationSession } from '../../../src/renderer/composables/useMeditationSession';
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
-
 describe('useMeditationSession', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -40,8 +33,6 @@ describe('useMeditationSession', () => {
     function setup() {
         return useMeditationSession();
     }
-
-    // ── Initial state ─────────────────────────────────────────────────────
 
     describe('initial state', () => {
         it('starts inactive', () => {
@@ -71,8 +62,6 @@ describe('useMeditationSession', () => {
             expect(breathingExercises.map((e) => e.id)).toEqual(['box', '478', 'deep', 'energizing']);
         });
     });
-
-    // ── Duration selection ────────────────────────────────────────────────
 
     describe('duration selection', () => {
         it('selectPresetDuration sets duration and disables custom mode', () => {
@@ -122,8 +111,6 @@ describe('useMeditationSession', () => {
         });
     });
 
-    // ── formatTime ────────────────────────────────────────────────────────
-
     describe('formatTime', () => {
         it('formats 0 seconds as 00:00', () => {
             const { formatTime } = setup();
@@ -145,8 +132,6 @@ describe('useMeditationSession', () => {
             expect(formatTime(3599)).toBe('59:59');
         });
     });
-
-    // ── Meditation lifecycle ──────────────────────────────────────────────
 
     describe('startMeditation', () => {
         it('activates meditation and sets seconds', () => {
@@ -237,8 +222,6 @@ describe('useMeditationSession', () => {
         });
     });
 
-    // ── Breathing ─────────────────────────────────────────────────────────
-
     describe('breathing exercises', () => {
         it('startBreathingCycle does nothing without an exercise selected', () => {
             const { startBreathingCycle, breathingActive } = setup();
@@ -311,8 +294,6 @@ describe('useMeditationSession', () => {
         });
     });
 
-    // ── Bell ──────────────────────────────────────────────────────────────
-
     describe('bell sound', () => {
         it('selectBellSound updates the sound id', () => {
             const { selectBellSound, bellSound } = setup();
@@ -328,8 +309,6 @@ describe('useMeditationSession', () => {
             expect(showSoundDropdown.value).toBe(false);
         });
     });
-
-    // ── Cleanup ───────────────────────────────────────────────────────────
 
     describe('cleanup', () => {
         it('clears meditation and breathing intervals', () => {

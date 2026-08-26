@@ -1,0 +1,101 @@
+/** Buttons — the shapes that recur across unrelated screens. */
+
+@use '@/renderer/styles/variables' as *;
+@use '@/renderer/styles/components/placeholders' as *;
+
+/* ––––– Labelled action button ––––– */
+
+.zen-btn {
+    @extend %bare-button;
+    @extend %uppercase-label;
+    @extend %interactive;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: $size-20;
+    padding: $space-2 $space-4;
+    background: $button-bg;
+    border: $border-width-thin $border-subtle;
+    border-radius: $border-radius-sm;
+    color: $text1;
+
+    &:hover:not(:disabled) {
+        background: $button-bg-hover;
+        border-color: $button-border-hover;
+    }
+
+    &:active:not(:disabled) {
+        transform: scale($scale-98);
+    }
+
+    &:disabled {
+        opacity: $opacity-mid-low;
+        cursor: not-allowed;
+    }
+
+    /* Quieter sibling: reads as a link until you reach for it. */
+    &.is-ghost {
+        background: transparent;
+        color: $text2;
+
+        &:hover:not(:disabled) {
+            background: $input-bg-focus;
+            border-color: $button-border-hover;
+            color: $text1;
+        }
+    }
+
+    /* Destructive sibling: carries its own palette, not an opacity tweak. */
+    &.is-danger {
+        background: $danger;
+        border-color: $danger-border;
+        color: $text-on-danger;
+
+        &:hover:not(:disabled) {
+            background: $danger-border;
+            border-color: $danger-border-hover;
+        }
+    }
+}
+
+/* ––––– Square glyph button ––––– */
+
+.zen-icon-btn {
+    @extend %bare-button;
+    @extend %interactive;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: $size-16;
+    height: $size-16;
+    background: transparent;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius;
+    color: $text2;
+
+    &:hover:not(:disabled) {
+        background: $input-bg-focus;
+        border-color: $input-border-focus;
+        color: $text1;
+    }
+
+    &:active:not(:disabled) {
+        transform: scale($scale-93);
+    }
+
+    &:disabled {
+        opacity: $opacity-lowest;
+        cursor: default;
+    }
+
+    /* Borderless variant for controls that sit inside an existing frame. */
+    &.is-bare {
+        border-color: transparent;
+
+        &:hover:not(:disabled) {
+            border-color: transparent;
+        }
+    }
+}

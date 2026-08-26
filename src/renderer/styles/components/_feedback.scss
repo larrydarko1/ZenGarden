@@ -1,0 +1,26 @@
+/** Inline result banners — the same shape in auth and account settings. */
+
+@use '@/renderer/styles/variables' as *;
+
+%banner {
+    padding: $space-2;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-sm;
+    text-align: center;
+}
+
+.zen-error {
+    @extend %banner;
+
+    background: $error-bg;
+    border: $border-width-thin $error-border;
+    color: $error-text;
+}
+
+.zen-success {
+    @extend %banner;
+
+    background: color-mix(in srgb, $success 10%, transparent);
+    border: $border-width-thin color-mix(in srgb, $success 30%, transparent);
+    color: $success;
+}

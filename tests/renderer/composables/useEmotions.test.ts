@@ -1,29 +1,22 @@
-// @vitest-environment jsdom
-
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ref } from 'vue';
+import { useEmotions } from '@/renderer/composables/useEmotions';
 
-// ─── Mocks ────────────────────────────────────────────────────────────────────
+const mockSaveEmotionLog = vi.fn().mockResolvedValue({ message: 'ok', emotionLog: {} });
+const mockGetEmotionLogs = vi.fn().mockResolvedValue({ emotionLogs: [] });
+const mockGetEmotionAnalytics = vi.fn().mockResolvedValue({ totalDays: 0, topEmotions: [] });
+
+vi.mock('@/renderer/store', () => ({
+    saveEmotionLog: (...args: unknown[]) => mockSaveEmotionLog(...args),
+    getEmotionLogs: (...args: unknown[]) => mockGetEmotionLogs(...args),
+    getEmotionAnalytics: (...args: unknown[]) => mockGetEmotionAnalytics(...args),
+}));
 
 vi.mock('vue-i18n', () => ({
     useI18n: () => ({
         t: (key: string) => key,
     }),
 }));
-
-const mockSaveEmotionLog = vi.fn().mockResolvedValue({ message: 'ok', emotionLog: {} });
-const mockGetEmotionLogs = vi.fn().mockResolvedValue({ emotionLogs: [] });
-const mockGetEmotionAnalytics = vi.fn().mockResolvedValue({ totalDays: 0, topEmotions: [] });
-
-vi.mock('../../../src/renderer/store', () => ({
-    saveEmotionLog: (...args: unknown[]) => mockSaveEmotionLog(...args),
-    getEmotionLogs: (...args: unknown[]) => mockGetEmotionLogs(...args),
-    getEmotionAnalytics: (...args: unknown[]) => mockGetEmotionAnalytics(...args),
-}));
-
-import { useEmotions } from '../../../src/renderer/composables/useEmotions';
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('useEmotions', () => {
     const selectedDate = ref(new Date('2025-01-15'));
@@ -44,8 +37,6 @@ describe('useEmotions', () => {
         return useEmotions(selectedDate, activeTab);
     }
 
-    // ── Static lists ──────────────────────────────────────────────────────
-
     describe('emotion lists', () => {
         it('provides positive emotions', () => {
             const { positiveEmotions } = setup();
@@ -64,8 +55,6 @@ describe('useEmotions', () => {
             expect(positiveEmotions.value[0].displayName).toContain('emotions.list.');
         });
     });
-
-    // ── Selection state ───────────────────────────────────────────────────
 
     describe('toggleEmotion', () => {
         it('adds an emotion when toggled on', () => {
@@ -106,8 +95,6 @@ describe('useEmotions', () => {
         });
     });
 
-    // ── Computed counters ─────────────────────────────────────────────────
-
     describe('computed counts', () => {
         it('counts positive and negative separately', () => {
             const { toggleEmotion, positiveCount, negativeCount, positiveEmotions, negativeEmotions } = setup();
@@ -131,8 +118,6 @@ describe('useEmotions', () => {
             expect(pnRatio.value).toBe('0.00');
         });
     });
-
-    // ── Analytics computed ────────────────────────────────────────────────
 
     describe('analytics computed', () => {
         it('filters top positive from analytics', () => {
@@ -176,8 +161,6 @@ describe('useEmotions', () => {
         });
     });
 
-    // ── getTranslatedEmotionName ──────────────────────────────────────────
-
     describe('getTranslatedEmotionName', () => {
         it('returns translated displayName for known emotion', () => {
             const { getTranslatedEmotionName } = setup();
@@ -190,8 +173,6 @@ describe('useEmotions', () => {
             expect(getTranslatedEmotionName('UnknownEmotion')).toBe('UnknownEmotion');
         });
     });
-
-    // ── Persistence ───────────────────────────────────────────────────────
 
     describe('loadEmotions', () => {
         it('loads emotions from store for selected date', async () => {

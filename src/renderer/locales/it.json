@@ -1,42 +1,33 @@
 {
     "settings": {
-        "title": "Impostazioni",
         "theme": "Tema",
         "language": "Lingua",
         "themes": {
             "light": "Chiaro",
             "dark": "Scuro"
-        },
-        "languages": {
-            "en": "English",
-            "es": "Español",
-            "it": "Italiano",
-            "fr": "Français",
-            "de": "Deutsch",
-            "pt": "Português",
-            "zh": "中文",
-            "ja": "日本語"
         }
     },
     "header": {
-        "greeting": "Ciao",
-        "breathe": "Respira",
         "emotions": "Diario",
-        "eightfoldPath": "Nobile Ottuplice",
         "calendar": "Calendario",
         "philosophy": "Filosofia",
+        "settings": "Impostazioni",
         "logout": "Esci"
     },
     "meditation": {
         "begin": "Inizia",
         "stop": "Ferma",
         "bell": {
-            "settings": "Impostazioni Campana"
+            "settings": "Impostazioni Campana",
+            "every": "Ogni {minutes} min",
+            "sound": "Suono",
+            "option": "Campana {number}",
+            "minutes": "{minutes} min",
+            "closeIntervals": "Chiudi menu intervalli",
+            "closeSounds": "Chiudi menu suoni"
         }
     },
     "philosophy": {
-        "title": "La Nostra Filosofia Zen",
-        "subtitle": "Comprendere le scelte di design dietro ZenGarden",
         "practice": {
             "title": "La pratica è il percorso",
             "body": "Nello Zen, la meditazione non è un mezzo per raggiungere un fine—è il fine stesso. Ogni momento di pratica è completo e intero. Non c'è nessun posto dove andare, nulla da raggiungere. Quando ti siedi, sei già lì."
@@ -63,7 +54,6 @@
         }
     },
     "auth": {
-        "welcome": "Benvenuto in ZenGarden",
         "username": "Nome utente",
         "password": "Password",
         "login": "Accedi",
@@ -80,10 +70,10 @@
         "backToLogin": "Torna al login",
         "passwordResetSuccess": "Password Reimpostata!",
         "passwordResetMessage": "La tua password è stata reimpostata con successo. Ora puoi accedere con la tua nuova password.",
-        "goToLogin": "Vai al Login"
+        "goToLogin": "Vai al Login",
+        "passwordsDoNotMatch": "Le password non corrispondono"
     },
     "account": {
-        "title": "Impostazioni Account",
         "changeUsername": "Cambia Nome Utente",
         "newUsernamePlaceholder": "Nuovo nome utente",
         "updateUsername": "Aggiorna Nome Utente",
@@ -99,7 +89,7 @@
         "passwordsDoNotMatch": "Le password non corrispondono",
         "passwordTooShort": "La password deve essere di almeno 6 caratteri",
         "recoveryCodes": "Codici di Recupero",
-        "recoveryCodesDescription": "I codici di recupero ti permettono di reimpostare la tua password se la dimentichi. Genera 12 codici monouso e conservali in un posto sicuro.",
+        "recoveryCodesDescription": "I codici di recupero ti permettono di reimpostare la tua password se la dimentichi. Genera 10 codici monouso e conservali in un posto sicuro.",
         "totalCodes": "Codici totali",
         "usedCodes": "Codici utilizzati",
         "remainingCodes": "Codici rimanenti",
@@ -108,7 +98,6 @@
         "generateCodesWarning": "Attenzione: la generazione di nuovi codici invaliderà tutti i codici precedenti.",
         "confirmPasswordToGenerate": "Inserisci la tua password per generare i codici",
         "confirm": "Conferma",
-        "recoveryCodesFailed": "Impossibile generare i codici di recupero",
         "saveCodesWarning": "Importante: Salva questi codici ora!",
         "saveCodesDescription": "Non potrai vedere questi codici di nuovo. Conservali in un posto sicuro come un gestore di password.",
         "copyAll": "Copia Tutto",
@@ -120,13 +109,7 @@
         "confirmPasswordToDelete": "Inserisci la tua password per confermare",
         "confirmDelete": "Sì, Elimina Il Mio Account",
         "cancel": "Annulla",
-        "deleteFailed": "Impossibile eliminare l'account",
-        "exportData": "Esporta Dati",
-        "exportDescription": "Scarica tutti i tuoi dati di meditazione ed emozioni.",
-        "exportJSON": "Esporta come JSON",
-        "exportCSV": "Esporta come CSV",
-        "exportSuccess": "Dati esportati con successo",
-        "exportFailed": "Esportazione dati fallita"
+        "deleteFailed": "Impossibile eliminare l'account"
     },
     "notes": {
         "title": "Sessione Completata",
@@ -140,12 +123,8 @@
         "none": "Nessuno",
         "box": "Respirazione a Scatola",
         "deep": "Respirazione Profonda",
-        "calm": "Respiro Calmante",
         "fourSevenEight": "Respirazione 4-7-8",
         "energizing": "Respiro Energizzante",
-        "start": "Inizia",
-        "stop": "Ferma",
-        "close": "Chiudi",
         "cycle": "Ciclo",
         "breatheIn": "Inspira",
         "hold": "Trattieni",
@@ -158,9 +137,7 @@
         }
     },
     "calendar": {
-        "title": "Calendario di Meditazione",
         "minutes": "min",
-        "close": "Chiudi",
         "notes": "Note",
         "months": [
             "Gennaio",
@@ -179,7 +156,6 @@
         "weekdays": ["D", "L", "M", "M", "G", "V", "S"]
     },
     "emotions": {
-        "title": "Diario",
         "positive": "Positive",
         "negative": "Negative",
         "pnRatio": "Rapporto P/N",
@@ -204,7 +180,6 @@
         "noPositiveEmotionsYet": "Nessuna emozione positiva registrata",
         "noNegativeEmotionsYet": "Nessuna emozione negativa registrata",
         "trendChart": "Tendenza Rapporto P/N",
-        "past30Days": "Ultimi 30 Giorni",
         "past90Days": "Ultimi 90 Giorni",
         "dailyNote": "Nota giornaliera",
         "notePlaceholder": "Come ti senti oggi? Scrivi qui i tuoi pensieri...",
@@ -484,8 +459,6 @@
         "completed": "Completato",
         "progress": "Progresso",
         "loading": "Caricamento",
-        "saving": "Salvataggio...",
-        "saved": "Salvato",
         "notesPlaceholder": "Aggiungi note su come hai seguito questo sentiero oggi...",
         "paths": {
             "rightView": {

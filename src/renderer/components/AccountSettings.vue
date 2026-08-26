@@ -7,20 +7,23 @@ import {
     deleteAccount as deleteAccountStorage,
     getRecoveryStatus as getRecoveryStatusStorage,
     generateRecoveryCodes as generateRecoveryCodesStorage,
-} from '../store';
-import type { RecoveryStatus } from '../store';
+} from '@/renderer/store';
+import type { RecoveryStatus } from '@/renderer/store';
+import { log } from '@/renderer/utils/logger';
+import ZenSpinner from '@/renderer/components/common/ZenSpinner.vue';
+
+const emit = defineEmits<{
+    usernameChanged: [username: string];
+    accountDeleted: [];
+}>();
 
 const { t } = useI18n();
 
-const emit = defineEmits(['usernameChanged', 'accountDeleted']);
-
-// Change Username
 const newUsername = ref('');
 const isChangingUsername = ref(false);
 const usernameSuccess = ref('');
 const usernameError = ref('');
 
-// Change Password
 const currentPassword = ref('');
 const newPassword = ref('');
 const confirmNewPassword = ref('');
@@ -28,7 +31,6 @@ const isChangingPassword = ref(false);
 const passwordSuccess = ref('');
 const passwordError = ref('');
 
-// Recovery Codes
 const recoveryStatus = ref<RecoveryStatus | null>(null);
 const showGenerateForm = ref(false);
 const showRecoveryCodes = ref(false);
@@ -38,21 +40,12 @@ const isGeneratingCodes = ref(false);
 const recoveryError = ref('');
 const codesCopied = ref(false);
 
-// Delete Account
 const showDeleteConfirm = ref(false);
 const deletePassword = ref('');
 const isDeletingAccount = ref(false);
 const deleteError = ref('');
 
-onMounted(async () => {
-    try {
-        recoveryStatus.value = await getRecoveryStatusStorage();
-    } catch {
-        recoveryStatus.value = { hasRecoveryCodes: false, totalCodes: 0, usedCodes: 0, remainingCodes: 0 };
-    }
-});
-
-async function generateRecoveryCodes() {
+async function generateRecoveryCodes(): Promise<void> {
     recoveryError.value = '';
     isGeneratingCodes.value = true;
     try {
@@ -69,19 +62,19 @@ async function generateRecoveryCodes() {
     }
 }
 
-function cancelGenerateCodes() {
+function cancelGenerateCodes(): void {
     showGenerateForm.value = false;
     recoveryPassword.value = '';
     recoveryError.value = '';
 }
 
-function closeRecoveryCodes() {
+function closeRecoveryCodes(): void {
     showRecoveryCodes.value = false;
     recoveryCodes.value = [];
     codesCopied.value = false;
 }
 
-async function copyAllCodes() {
+async function copyAllCodes(): Promise<void> {
     const codesText = recoveryCodes.value.map((code, index) => `${index + 1}. ${code}`).join('\n');
     try {
         await navigator.clipboard.writeText(codesText);
@@ -90,11 +83,11 @@ async function copyAllCodes() {
             codesCopied.value = false;
         }, 2000);
     } catch (error) {
-        console.error('Failed to copy codes:', error);
+        log.error('Failed to copy recovery codes', error);
     }
 }
 
-async function changeUsername() {
+async function changeUsername(): Promise<void> {
     usernameError.value = '';
     usernameSuccess.value = '';
     isChangingUsername.value = true;
@@ -106,7 +99,7 @@ async function changeUsername() {
         newUsername.value = '';
 
         // Update username and notify parent
-        if (result.username) {
+        if (result.username.length > 0) {
             emit('usernameChanged', result.username);
         }
 
@@ -121,7 +114,7 @@ async function changeUsername() {
     }
 }
 
-async function changePassword() {
+async function changePassword(): Promise<void> {
     passwordError.value = '';
     passwordSuccess.value = '';
 
@@ -159,7 +152,7 @@ async function changePassword() {
     }
 }
 
-async function deleteAccount() {
+async function deleteAccount(): Promise<void> {
     deleteError.value = '';
     isDeletingAccount.value = true;
 
@@ -174,11 +167,19 @@ async function deleteAccount() {
     }
 }
 
-function cancelDelete() {
+function cancelDelete(): void {
     showDeleteConfirm.value = false;
     deletePassword.value = '';
     deleteError.value = '';
 }
+
+onMounted(async () => {
+    try {
+        recoveryStatus.value = await getRecoveryStatusStorage();
+    } catch {
+        recoveryStatus.value = { hasRecoveryCodes: false, totalCodes: 0, usedCodes: 0, remainingCodes: 0 };
+    }
+});
 </script>
 
 <template>
@@ -186,87 +187,90 @@ function cancelDelete() {
         <!-- Change Username Section -->
         <div class="settings-section">
             <h3 class="section-title">{{ t('account.changeUsername') }}</h3>
-            <form class="settings-form" @submit.prevent="changeUsername">
+            <form
+                class="settings-form"
+                @submit.prevent="changeUsername">
                 <input
                     v-model="newUsername"
+                    class="zen-input"
                     :placeholder="t('account.newUsernamePlaceholder')"
                     :disabled="isChangingUsername"
                     required
-                    autocomplete="username"
-                />
-                <button type="submit" :disabled="isChangingUsername || !newUsername" class="zen-btn">
+                    autocomplete="username" />
+                <button
+                    type="submit"
+                    :disabled="isChangingUsername || !newUsername"
+                    class="zen-btn">
                     <span v-if="!isChangingUsername">{{ t('account.updateUsername') }}</span>
-                    <span v-else class="zen-loader">
-                        <svg width="20" height="20" viewBox="0 0 32 32">
-                            <rect x="10" y="15" width="12" height="2" rx="1">
-                                <animateTransform
-                                    attributeName="transform"
-                                    type="rotate"
-                                    from="0 16 16"
-                                    to="360 16 16"
-                                    dur="2.5s"
-                                    repeatCount="indefinite"
-                                />
-                            </rect>
-                        </svg>
-                    </span>
+                    <ZenSpinner
+                        v-else
+                        variant="bar" />
                 </button>
-                <div v-if="usernameSuccess" class="success-message">{{ usernameSuccess }}</div>
-                <div v-if="usernameError" class="error-message">{{ usernameError }}</div>
+                <div
+                    v-if="usernameSuccess"
+                    class="zen-success success-message"
+                    >{{ usernameSuccess }}</div
+                >
+                <div
+                    v-if="usernameError"
+                    class="zen-error error-message"
+                    >{{ usernameError }}</div
+                >
             </form>
         </div>
 
         <!-- Change Password Section -->
         <div class="settings-section">
             <h3 class="section-title">{{ t('account.changePassword') }}</h3>
-            <form class="settings-form" @submit.prevent="changePassword">
+            <form
+                class="settings-form"
+                @submit.prevent="changePassword">
                 <input
                     v-model="currentPassword"
+                    class="zen-input"
                     type="password"
                     :placeholder="t('account.currentPasswordPlaceholder')"
+                    :aria-label="t('account.currentPasswordPlaceholder')"
                     :disabled="isChangingPassword"
                     required
-                    autocomplete="current-password"
-                />
+                    autocomplete="current-password" />
                 <input
                     v-model="newPassword"
+                    class="zen-input"
                     type="password"
                     :placeholder="t('account.newPasswordPlaceholder')"
+                    :aria-label="t('account.newPasswordPlaceholder')"
                     :disabled="isChangingPassword"
                     required
-                    autocomplete="new-password"
-                />
+                    autocomplete="new-password" />
                 <input
                     v-model="confirmNewPassword"
+                    class="zen-input"
                     type="password"
                     :placeholder="t('account.confirmPasswordPlaceholder')"
+                    :aria-label="t('account.confirmPasswordPlaceholder')"
                     :disabled="isChangingPassword"
                     required
-                    autocomplete="new-password"
-                />
+                    autocomplete="new-password" />
                 <button
                     type="submit"
                     :disabled="isChangingPassword || !currentPassword || !newPassword || !confirmNewPassword"
-                    class="zen-btn"
-                >
+                    class="zen-btn">
                     <span v-if="!isChangingPassword">{{ t('account.updatePassword') }}</span>
-                    <span v-else class="zen-loader">
-                        <svg width="20" height="20" viewBox="0 0 32 32">
-                            <rect x="10" y="15" width="12" height="2" rx="1">
-                                <animateTransform
-                                    attributeName="transform"
-                                    type="rotate"
-                                    from="0 16 16"
-                                    to="360 16 16"
-                                    dur="2.5s"
-                                    repeatCount="indefinite"
-                                />
-                            </rect>
-                        </svg>
-                    </span>
+                    <ZenSpinner
+                        v-else
+                        variant="bar" />
                 </button>
-                <div v-if="passwordSuccess" class="success-message">{{ passwordSuccess }}</div>
-                <div v-if="passwordError" class="error-message">{{ passwordError }}</div>
+                <div
+                    v-if="passwordSuccess"
+                    class="zen-success success-message"
+                    >{{ passwordSuccess }}</div
+                >
+                <div
+                    v-if="passwordError"
+                    class="zen-error error-message"
+                    >{{ passwordError }}</div
+                >
             </form>
         </div>
 
@@ -276,7 +280,9 @@ function cancelDelete() {
             <p class="info-text">{{ t('account.recoveryCodesDescription') }}</p>
 
             <!-- Status display -->
-            <div v-if="recoveryStatus && recoveryStatus.hasRecoveryCodes" class="recovery-status">
+            <div
+                v-if="recoveryStatus && recoveryStatus.hasRecoveryCodes"
+                class="recovery-status">
                 <div class="status-item">
                     <span class="status-label">{{ t('account.totalCodes') }}:</span>
                     <span class="status-value">{{ recoveryStatus.totalCodes }}</span>
@@ -292,8 +298,12 @@ function cancelDelete() {
             </div>
 
             <!-- Generate codes form -->
-            <div v-if="!showRecoveryCodes && !showGenerateForm" class="button-container">
-                <button class="zen-btn" @click="showGenerateForm = true">
+            <div
+                v-if="!showRecoveryCodes && !showGenerateForm"
+                class="button-container">
+                <button
+                    class="zen-btn"
+                    @click="showGenerateForm = true">
                     {{ recoveryStatus?.hasRecoveryCodes ? t('account.regenerateCodes') : t('account.generateCodes') }}
                 </button>
             </div>
@@ -301,64 +311,68 @@ function cancelDelete() {
             <form
                 v-if="showGenerateForm && !showRecoveryCodes"
                 class="settings-form"
-                @submit.prevent="generateRecoveryCodes"
-            >
+                @submit.prevent="generateRecoveryCodes">
                 <p class="warning-text">{{ t('account.generateCodesWarning') }}</p>
                 <input
                     v-model="recoveryPassword"
+                    class="zen-input"
                     type="password"
                     :placeholder="t('account.confirmPasswordToGenerate')"
+                    :aria-label="t('account.confirmPasswordToGenerate')"
                     :disabled="isGeneratingCodes"
                     required
-                    autocomplete="current-password"
-                />
+                    autocomplete="current-password" />
                 <div class="button-row">
                     <button
                         type="button"
                         :disabled="isGeneratingCodes"
-                        class="zen-btn cancel-btn"
-                        @click="cancelGenerateCodes"
-                    >
+                        class="zen-btn is-ghost"
+                        @click="cancelGenerateCodes">
                         {{ t('account.cancel') }}
                     </button>
-                    <button type="submit" :disabled="isGeneratingCodes || !recoveryPassword" class="zen-btn">
+                    <button
+                        type="submit"
+                        :disabled="isGeneratingCodes || !recoveryPassword"
+                        class="zen-btn">
                         <span v-if="!isGeneratingCodes">{{ t('account.confirm') }}</span>
-                        <span v-else class="zen-loader">
-                            <svg width="20" height="20" viewBox="0 0 32 32">
-                                <rect x="10" y="15" width="12" height="2" rx="1">
-                                    <animateTransform
-                                        attributeName="transform"
-                                        type="rotate"
-                                        from="0 16 16"
-                                        to="360 16 16"
-                                        dur="2.5s"
-                                        repeatCount="indefinite"
-                                    />
-                                </rect>
-                            </svg>
-                        </span>
+                        <ZenSpinner
+                            v-else
+                            variant="bar" />
                     </button>
                 </div>
-                <div v-if="recoveryError" class="error-message">{{ recoveryError }}</div>
+                <div
+                    v-if="recoveryError"
+                    class="zen-error error-message"
+                    >{{ recoveryError }}</div
+                >
             </form>
 
             <!-- Display generated codes -->
-            <div v-if="showRecoveryCodes && recoveryCodes.length > 0" class="recovery-codes-display">
+            <div
+                v-if="showRecoveryCodes && recoveryCodes.length > 0"
+                class="recovery-codes-display">
                 <div class="warning-banner">
                     <strong>{{ t('account.saveCodesWarning') }}</strong>
                     <p>{{ t('account.saveCodesDescription') }}</p>
                 </div>
                 <div class="codes-grid">
-                    <div v-for="(code, index) in recoveryCodes" :key="index" class="code-item">
+                    <div
+                        v-for="(code, index) in recoveryCodes"
+                        :key="index"
+                        class="code-item">
                         <span class="code-number">{{ index + 1 }}.</span>
                         <code class="code-value">{{ code }}</code>
                     </div>
                 </div>
                 <div class="button-row">
-                    <button class="zen-btn" @click="copyAllCodes">
+                    <button
+                        class="zen-btn"
+                        @click="copyAllCodes">
                         {{ codesCopied ? t('account.copied') : t('account.copyAll') }}
                     </button>
-                    <button class="zen-btn" @click="closeRecoveryCodes">
+                    <button
+                        class="zen-btn"
+                        @click="closeRecoveryCodes">
                         {{ t('account.iHaveSavedCodes') }}
                     </button>
                 </div>
@@ -370,221 +384,136 @@ function cancelDelete() {
             <h3 class="section-title danger-title">{{ t('account.deleteAccount') }}</h3>
             <p class="warning-text">{{ t('account.deleteWarning') }}</p>
 
-            <button v-if="!showDeleteConfirm" class="zen-btn danger-btn" @click="showDeleteConfirm = true">
+            <button
+                v-if="!showDeleteConfirm"
+                class="zen-btn is-danger danger-btn"
+                @click="showDeleteConfirm = true">
                 {{ t('account.deleteAccountButton') }}
             </button>
 
-            <form v-else class="settings-form delete-form" @submit.prevent="deleteAccount">
+            <form
+                v-else
+                class="settings-form delete-form"
+                @submit.prevent="deleteAccount">
                 <input
                     v-model="deletePassword"
+                    class="zen-input"
                     type="password"
                     :placeholder="t('account.confirmPasswordToDelete')"
+                    :aria-label="t('account.confirmPasswordToDelete')"
                     :disabled="isDeletingAccount"
                     required
-                    autocomplete="current-password"
-                />
+                    autocomplete="current-password" />
                 <div class="button-row">
                     <button
                         type="button"
                         :disabled="isDeletingAccount"
-                        class="zen-btn cancel-btn"
-                        @click="cancelDelete"
-                    >
+                        class="zen-btn is-ghost"
+                        @click="cancelDelete">
                         {{ t('account.cancel') }}
                     </button>
-                    <button type="submit" :disabled="isDeletingAccount || !deletePassword" class="zen-btn danger-btn">
+                    <button
+                        type="submit"
+                        :disabled="isDeletingAccount || !deletePassword"
+                        class="zen-btn is-danger danger-btn">
                         <span v-if="!isDeletingAccount">{{ t('account.confirmDelete') }}</span>
-                        <span v-else class="zen-loader">
-                            <svg width="20" height="20" viewBox="0 0 32 32">
-                                <rect x="10" y="15" width="12" height="2" rx="1">
-                                    <animateTransform
-                                        attributeName="transform"
-                                        type="rotate"
-                                        from="0 16 16"
-                                        to="360 16 16"
-                                        dur="2.5s"
-                                        repeatCount="indefinite"
-                                    />
-                                </rect>
-                            </svg>
-                        </span>
+                        <ZenSpinner
+                            v-else
+                            variant="bar" />
                     </button>
                 </div>
-                <div v-if="deleteError" class="error-message">{{ deleteError }}</div>
+                <div
+                    v-if="deleteError"
+                    class="zen-error error-message"
+                    >{{ deleteError }}</div
+                >
             </form>
         </div>
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .account-settings {
-    padding: 0;
     max-width: 100%;
+    padding: $space-4;
 }
 
 .settings-title {
-    font-size: 1.25rem;
-    color: var(--text1);
-    margin-bottom: 1.5rem;
-    font-weight: 500;
+    margin-bottom: $space-6;
+    color: $text1;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-medium;
     text-align: center;
 }
 
 .settings-section {
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 6px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: $space-6;
+    padding: $space-4;
+    background: $input-bg;
+    border: $border-width-thin $input-border;
+    border-radius: $border-radius;
+
+    &.danger-section {
+        background: color-mix(in srgb, $danger 5%, transparent);
+        border-color: color-mix(in srgb, $danger 30%, transparent);
+    }
 }
 
 .section-title {
-    font-size: 1rem;
-    color: var(--text1);
-    margin-bottom: 1rem;
-    font-weight: 500;
+    margin-bottom: $space-4;
+    color: $text1;
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
+
+    &.danger-title {
+        color: $danger;
+    }
 }
 
 .settings-form {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: $space-3;
 }
 
-input {
-    padding: 0.625rem 0.75rem;
-    border-radius: 4px;
-    border: 1px solid var(--input-border);
-    background: var(--input-bg);
-    color: var(--text1);
-    font-size: 0.875rem;
-    outline: none;
-    transition:
-        border 0.15s,
-        background 0.15s;
-}
-
-input:focus {
-    border: 1px solid var(--input-border-focus);
-    background: var(--input-bg-focus);
-}
-
-input::placeholder {
-    color: var(--text2);
-    opacity: 0.6;
-}
-
-.zen-btn {
-    background: var(--button-bg);
-    color: var(--text1);
-    border: 1px solid var(--border-subtle);
-    border-radius: 4px;
-    padding: 0.625rem 1rem;
-    cursor: pointer;
-    font-weight: 400;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: all 0.15s;
-    outline: none;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.zen-btn:hover:not(:disabled) {
-    background: var(--button-bg-hover);
-    border-color: var(--button-border-hover);
-}
-
-.zen-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.zen-loader {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.zen-loader svg rect {
-    fill: var(--text1);
-}
-
-.success-message {
-    color: #10b981;
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    padding: 0.625rem;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    text-align: center;
-}
-
-.error-message {
-    color: var(--error-text);
-    background: var(--error-bg);
-    border: 1px solid var(--error-border);
-    padding: 0.625rem;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    text-align: center;
-}
-
-/* Danger Section Styles */
-.danger-section {
-    border-color: rgba(239, 68, 68, 0.3);
-    background: rgba(239, 68, 68, 0.05);
-}
-
-.danger-title {
-    color: #ef4444;
-}
-
-.warning-text {
-    color: var(--text2);
-    font-size: 0.875rem;
-    margin-bottom: 1rem;
-    line-height: 1.5;
-}
-
+.warning-text,
 .info-text {
-    color: var(--text2);
-    font-size: 0.875rem;
-    margin-bottom: 1rem;
-    line-height: 1.5;
+    margin-bottom: $space-4;
+    color: $text2;
+    font-size: $font-size-sm;
+    line-height: $line-height-base;
 }
+
+/* ––––– Recovery codes ––––– */
 
 .recovery-status {
-    background: var(--base1);
-    border: 1px solid var(--border-subtle);
-    border-radius: 4px;
-    padding: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: $space-4;
+    padding: $space-4;
+    background: $base1;
+    border: $border-width-thin $border-subtle;
+    border-radius: $border-radius-sm;
 }
 
 .status-item {
     display: flex;
     justify-content: space-between;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border-subtle);
-}
+    padding: $space-2 0;
+    border-bottom: $border-width-thin $border-subtle;
 
-.status-item:last-child {
-    border-bottom: none;
+    &:last-child {
+        border-bottom: none;
+    }
 }
 
 .status-label {
-    color: var(--text2);
-    font-size: 0.875rem;
+    color: $text2;
+    font-size: $font-size-sm;
 }
 
 .status-value {
-    color: var(--text1);
-    font-weight: 500;
-    font-size: 0.875rem;
+    color: $text1;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
 }
 
 .button-container {
@@ -593,104 +522,95 @@ input::placeholder {
 }
 
 .recovery-codes-display {
-    margin-top: 1rem;
+    margin-top: $space-4;
 }
 
 .warning-banner {
-    background: rgba(251, 191, 36, 0.1);
-    border: 1px solid rgba(251, 191, 36, 0.3);
-    border-radius: 4px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-}
+    margin-bottom: $space-4;
+    padding: $space-4;
+    background: color-mix(in srgb, $warning 10%, transparent);
+    border: $border-width-thin color-mix(in srgb, $warning 30%, transparent);
+    border-radius: $border-radius-sm;
 
-.warning-banner strong {
-    color: #f59e0b;
-    display: block;
-    margin-bottom: 0.5rem;
-}
+    strong {
+        display: block;
+        margin-bottom: $space-2;
+        color: $warning;
+    }
 
-.warning-banner p {
-    color: var(--text2);
-    font-size: 0.875rem;
-    margin: 0;
-    line-height: 1.5;
+    p {
+        margin: 0;
+        color: $text2;
+        font-size: $font-size-sm;
+        line-height: $line-height-base;
+    }
 }
 
 .codes-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+    grid-template-columns: 1fr;
+    gap: $space-3;
+    margin-bottom: $space-4;
 }
 
 .code-item {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    background: var(--base1);
-    border: 1px solid var(--border-subtle);
-    border-radius: 4px;
-    padding: 0.75rem;
+    gap: $space-2;
+    padding: $space-3;
+    background: $base1;
+    border: $border-width-thin $border-subtle;
+    border-radius: $border-radius-sm;
 }
 
 .code-number {
-    color: var(--text2);
-    font-size: 0.75rem;
-    min-width: 1.5rem;
+    min-width: $size-14;
+    color: $text2;
+    font-size: $font-size-xs;
 }
 
 .code-value {
+    color: $text1;
     font-family: 'Courier New', monospace;
-    font-size: 0.875rem;
-    color: var(--text1);
-    font-weight: 600;
-    letter-spacing: 0.05em;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    letter-spacing: $letter-spacing-4;
 }
 
-.danger-btn {
-    background: #ef4444;
-    border-color: #dc2626;
-    color: white;
-}
-
-.danger-btn:hover:not(:disabled) {
-    background: #dc2626;
-    border-color: #b91c1c;
-}
+/* ––––– Delete account ––––– */
 
 .delete-form {
-    margin-top: 1rem;
+    margin-top: $space-4;
 }
 
 .button-row {
     display: flex;
-    gap: 0.75rem;
+    flex-direction: column;
+    gap: $space-3;
+
+    /** Both buttons share the row evenly, whichever variant they carry. */
+    > .zen-btn {
+        flex: 1;
+    }
 }
 
-.cancel-btn {
-    flex: 1;
-}
+/* –––––– Responsive –––––– */
 
-.danger-btn {
-    flex: 1;
-}
-
-@media (max-width: 640px) {
+@media (width > #{$breakpoint-lg}) {
     .account-settings {
-        padding: 1rem;
+        padding: 0;
     }
 
     .settings-section {
-        padding: 1rem;
-    }
-
-    .button-row {
-        flex-direction: column;
+        padding: $space-6;
     }
 
     .codes-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .button-row {
+        flex-direction: row;
     }
 }
 </style>

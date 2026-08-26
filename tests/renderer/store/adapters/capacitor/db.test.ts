@@ -1,8 +1,13 @@
-// @vitest-environment jsdom
-
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-
-// ─── Mocks ────────────────────────────────────────────────────────────────────
+import {
+    readCollection,
+    writeCollection,
+    readSession,
+    writeSession,
+    generateObjectId,
+    initializeStorage,
+    DB_FILES,
+} from '@/renderer/store/adapters/capacitor/db';
 
 const mockReadFile = vi.fn();
 const mockWriteFile = vi.fn().mockResolvedValue(undefined);
@@ -18,24 +23,10 @@ vi.mock('@capacitor/filesystem', () => ({
     Encoding: { UTF8: 'utf8' },
 }));
 
-import {
-    readCollection,
-    writeCollection,
-    readSession,
-    writeSession,
-    generateObjectId,
-    initializeStorage,
-    DB_FILES,
-} from '../../../../../src/renderer/store/adapters/capacitor/db';
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
-
 describe('capacitor/db', () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
-
-    // ── readCollection ────────────────────────────────────────────────────
 
     describe('readCollection', () => {
         it('reads and parses JSON array from file', async () => {
@@ -63,8 +54,6 @@ describe('capacitor/db', () => {
         });
     });
 
-    // ── writeCollection ───────────────────────────────────────────────────
-
     describe('writeCollection', () => {
         it('writes JSON with indentation', async () => {
             await writeCollection('test.json', [{ a: 1 }]);
@@ -76,8 +65,6 @@ describe('capacitor/db', () => {
             );
         });
     });
-
-    // ── readSession ───────────────────────────────────────────────────────
 
     describe('readSession', () => {
         it('reads session data from file', async () => {
@@ -99,8 +86,6 @@ describe('capacitor/db', () => {
         });
     });
 
-    // ── writeSession ──────────────────────────────────────────────────────
-
     describe('writeSession', () => {
         it('writes session data to the correct file', async () => {
             await writeSession({ currentUser: 'monk' });
@@ -112,8 +97,6 @@ describe('capacitor/db', () => {
             );
         });
     });
-
-    // ── generateObjectId ──────────────────────────────────────────────────
 
     describe('generateObjectId', () => {
         it('returns a hex string', () => {
@@ -136,8 +119,6 @@ describe('capacitor/db', () => {
             expect(timestamp).toBeLessThanOrEqual(after);
         });
     });
-
-    // ── initializeStorage ─────────────────────────────────────────────────
 
     describe('initializeStorage', () => {
         it('creates directory and initializes missing files', async () => {

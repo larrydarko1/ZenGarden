@@ -1,6 +1,10 @@
-out
 node_modules
+out
+dist
+dist-electron
+build
+android
+coverage
 .github
 .git
 .husky
-build

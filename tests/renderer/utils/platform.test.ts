@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { isElectron, isDesktop, isWeb, isMobile, getPlatform } from '../../../src/renderer/utils/platform';
+import { isElectron, isDesktop, isWeb, isMobile, getPlatform } from '@/renderer/utils/platform';
 
 // Helper to set/delete properties on window in tests
 const win = window as unknown as Record<string, unknown>;
@@ -9,8 +9,6 @@ describe('platform utilities', () => {
         // Reset electronAPI on window between tests
         delete win['electronAPI'];
     });
-
-    // ─── isElectron ───────────────────────────────────────────────────────
 
     describe('isElectron', () => {
         it('returns false when electronAPI is not on window', () => {
@@ -33,8 +31,6 @@ describe('platform utilities', () => {
         });
     });
 
-    // ─── isDesktop ────────────────────────────────────────────────────────
-
     describe('isDesktop', () => {
         it('delegates to isElectron', () => {
             expect(isDesktop()).toBe(false);
@@ -42,8 +38,6 @@ describe('platform utilities', () => {
             expect(isDesktop()).toBe(true);
         });
     });
-
-    // ─── isWeb ────────────────────────────────────────────────────────────
 
     describe('isWeb', () => {
         it('returns true when not in Electron', () => {
@@ -56,8 +50,6 @@ describe('platform utilities', () => {
         });
     });
 
-    // ─── isMobile ─────────────────────────────────────────────────────────
-
     describe('isMobile', () => {
         it('returns false for a standard desktop user-agent', () => {
             vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)');
@@ -69,8 +61,6 @@ describe('platform utilities', () => {
             expect(isMobile()).toBe(true);
         });
     });
-
-    // ─── getPlatform ──────────────────────────────────────────────────────
 
     describe('getPlatform', () => {
         it('returns "web" when not Electron and not mobile', () => {

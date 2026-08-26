@@ -4,14 +4,14 @@
  * Does NOT own: adapter selection (store/adapters/factory.ts).
  */
 
-interface ElectronWindow {
+type ElectronWindow = {
     electronAPI?: {
         isElectron?: () => boolean;
     };
-}
+};
 
 export function isElectron(): boolean {
-    return !!(window as unknown as ElectronWindow).electronAPI?.isElectron?.();
+    return (window as unknown as ElectronWindow).electronAPI?.isElectron?.() === true;
 }
 
 export function isDesktop(): boolean {

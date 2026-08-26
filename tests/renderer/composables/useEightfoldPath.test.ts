@@ -2,8 +2,7 @@
 
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ref, nextTick } from 'vue';
-
-// ─── Mocks ────────────────────────────────────────────────────────────────────
+import { useEightfoldPath } from '@/renderer/composables/useEightfoldPath';
 
 vi.mock('vue-i18n', () => ({
     useI18n: () => ({
@@ -14,15 +13,10 @@ vi.mock('vue-i18n', () => ({
 const mockSaveEightfoldPathLog = vi.fn().mockResolvedValue({ message: 'ok' });
 const mockGetEightfoldPathLogs = vi.fn().mockResolvedValue({ pathLogs: [] });
 
-vi.mock('../../../src/renderer/store', () => ({
+vi.mock('@/renderer/store', () => ({
     saveEightfoldPathLog: (...args: unknown[]) => mockSaveEightfoldPathLog(...args),
     getEightfoldPathLogs: (...args: unknown[]) => mockGetEightfoldPathLogs(...args),
 }));
-
-import { useEightfoldPath } from '../../../src/renderer/composables/useEightfoldPath';
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
-
 describe('useEightfoldPath', () => {
     const selectedDate = ref(new Date('2025-01-15'));
     const saveStatus = ref<'saving' | 'saved' | null>(null);

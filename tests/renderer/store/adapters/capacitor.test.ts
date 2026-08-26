@@ -1,22 +1,18 @@
-// @vitest-environment jsdom
-
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-
-// ─── Mocks ────────────────────────────────────────────────────────────────────
+import { CapacitorStorageAdapter } from '@/renderer/store/adapters/capacitor';
 
 const mockPreferences = vi.hoisted(() => ({ get: vi.fn().mockResolvedValue({ value: null }) }));
-
-vi.mock('@capacitor/preferences', () => ({
-    Preferences: mockPreferences,
-}));
-
 // Shared mock state for db sub-module — hoisted so vi.mock can reference it
 const state = vi.hoisted(() => ({
     collections: {} as Record<string, unknown[]>,
     session: {} as Record<string, string | undefined>,
 }));
 
-vi.mock('../../../../src/renderer/store/adapters/capacitor/db', () => ({
+vi.mock('@capacitor/preferences', () => ({
+    Preferences: mockPreferences,
+}));
+
+vi.mock('@/renderer/store/adapters/capacitor/db', () => ({
     DB_FILES: {
         users: 'users.json',
         meditations: 'meditations.json',
@@ -38,15 +34,11 @@ vi.mock('../../../../src/renderer/store/adapters/capacitor/db', () => ({
     initializeStorage: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('../../../../src/renderer/store/adapters/capacitor/crypto', () => ({
+vi.mock('@/renderer/store/adapters/capacitor/crypto', () => ({
     hashPassword: vi.fn(async (password: string) => `hashed:${password}`),
     verifyPassword: vi.fn(async (password: string, stored: string) => stored === `hashed:${password}`),
     upgradeHashIfNeeded: vi.fn().mockResolvedValue(undefined),
 }));
-
-import { CapacitorStorageAdapter } from '../../../../src/renderer/store/adapters/capacitor';
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('CapacitorStorageAdapter', () => {
     let adapter: CapacitorStorageAdapter;
@@ -58,20 +50,16 @@ describe('CapacitorStorageAdapter', () => {
         adapter = new CapacitorStorageAdapter();
     });
 
-    // ── isAvailable ───────────────────────────────────────────────────────
-
-    describe('isAvailable', () => {
+    describe('probeAvailability', () => {
         it('returns true when Preferences API works', async () => {
-            expect(await adapter.isAvailable()).toBe(true);
+            expect(await adapter.probeAvailability()).toBe(true);
         });
 
         it('returns false when Preferences API throws', async () => {
             mockPreferences.get.mockRejectedValueOnce(new Error('not available'));
-            expect(await adapter.isAvailable()).toBe(false);
+            expect(await adapter.probeAvailability()).toBe(false);
         });
     });
-
-    // ── Auth ──────────────────────────────────────────────────────────────
 
     describe('register', () => {
         it('creates a new user and sets session', async () => {
@@ -137,8 +125,6 @@ describe('CapacitorStorageAdapter', () => {
             await expect(adapter.getCurrentUser()).rejects.toThrow('Not authenticated');
         });
     });
-
-    // ── Settings ──────────────────────────────────────────────────────────
 
     describe('updateTheme', () => {
         it('updates theme for current user', async () => {
@@ -213,8 +199,6 @@ describe('CapacitorStorageAdapter', () => {
         });
     });
 
-    // ── Meditations ───────────────────────────────────────────────────────
-
     describe('createMeditation', () => {
         it('creates a meditation record', async () => {
             await adapter.register({ username: 'monk', password: 'password123' });
@@ -241,8 +225,6 @@ describe('CapacitorStorageAdapter', () => {
             expect(result.meditations[0].username).toBe('other');
         });
     });
-
-    // ── Emotions ──────────────────────────────────────────────────────────
 
     describe('saveEmotionLog', () => {
         it('creates a new emotion log', async () => {
@@ -304,8 +286,6 @@ describe('CapacitorStorageAdapter', () => {
         });
     });
 
-    // ── Eightfold path ────────────────────────────────────────────────────
-
     describe('saveEightfoldPathLog', () => {
         it('creates a new path log', async () => {
             await adapter.register({ username: 'monk', password: 'password123' });
@@ -341,8 +321,6 @@ describe('CapacitorStorageAdapter', () => {
             expect(analytics).toHaveProperty('trends');
         });
     });
-
-    // ── Data export/import ────────────────────────────────────────────────
 
     describe('exportData', () => {
         it('exports user data as JSON', async () => {
@@ -380,8 +358,6 @@ describe('CapacitorStorageAdapter', () => {
             await expect(adapter.importData('"just a string"')).rejects.toThrow('must be a JSON object');
         });
     });
-
-    // ── Recovery codes ────────────────────────────────────────────────────
 
     describe('getRecoveryStatus', () => {
         it('returns no codes when none generated', async () => {

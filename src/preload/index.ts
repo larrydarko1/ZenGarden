@@ -5,13 +5,16 @@
  */
 
 import { contextBridge, ipcRenderer } from 'electron';
+import type { ElectronAPI } from '@/schemas/electron';
 
-contextBridge.exposeInMainWorld('electronAPI', {
+// Annotated, not inferred: the annotation is what makes a renamed or
+// mistyped method fail the build instead of at the first click.
+const api: ElectronAPI = {
     isElectron: (): boolean => true,
 
     // Auth
-    register: (username: string, password: string, theme: string, language: string) =>
-        ipcRenderer.invoke('storage:register', username, password, theme, language),
+    register: (username: string, password: string, options?: { theme?: string; language?: string }) =>
+        ipcRenderer.invoke('storage:register', username, password, options),
     login: (username: string, password: string) => ipcRenderer.invoke('storage:login', username, password),
     logout: () => ipcRenderer.invoke('storage:logout'),
     getCurrentUser: () => ipcRenderer.invoke('storage:getCurrentUser'),
@@ -31,20 +34,22 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getMeditations: () => ipcRenderer.invoke('storage:getMeditations'),
 
     // Emotion logs
-    saveEmotionLog: (date: string, emotions: unknown[], note: string) =>
+    saveEmotionLog: (date: string, emotions: unknown[], note?: string) =>
         ipcRenderer.invoke('storage:saveEmotionLog', date, emotions, note),
-    getEmotionLogs: (query: unknown) => ipcRenderer.invoke('storage:getEmotionLogs', query),
-    getEmotionAnalytics: (days: number) => ipcRenderer.invoke('storage:getEmotionAnalytics', days),
+    getEmotionLogs: (query?: unknown) => ipcRenderer.invoke('storage:getEmotionLogs', query),
+    getEmotionAnalytics: (days?: number) => ipcRenderer.invoke('storage:getEmotionAnalytics', days),
 
     // Eightfold path
     saveEightfoldPathLog: (date: string, paths: unknown[]) =>
         ipcRenderer.invoke('storage:saveEightfoldPathLog', date, paths),
-    getEightfoldPathLogs: (query: unknown) => ipcRenderer.invoke('storage:getEightfoldPathLogs', query),
-    getEightfoldPathAnalytics: (days: number) => ipcRenderer.invoke('storage:getEightfoldPathAnalytics', days),
+    getEightfoldPathLogs: (query?: unknown) => ipcRenderer.invoke('storage:getEightfoldPathLogs', query),
+    getEightfoldPathAnalytics: (days?: number) => ipcRenderer.invoke('storage:getEightfoldPathAnalytics', days),
 
     // Recovery codes
     getRecoveryStatus: () => ipcRenderer.invoke('storage:getRecoveryStatus'),
     generateRecoveryCodes: (password: string) => ipcRenderer.invoke('storage:generateRecoveryCodes', password),
     resetPasswordWithRecoveryCode: (username: string, code: string, newPassword: string) =>
         ipcRenderer.invoke('storage:resetPasswordWithRecoveryCode', username, code, newPassword),
-});
+};
+
+contextBridge.exposeInMainWorld('electronAPI', api);

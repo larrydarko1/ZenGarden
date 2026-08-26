@@ -1,0 +1,44 @@
+/** Overlay furniture and the keyframes the whole app shares. */
+
+@use '@/renderer/styles/variables' as *;
+@use '@/renderer/styles/components/placeholders' as *;
+
+/* ––––– Click-away backdrop ––––– */
+
+.zen-backdrop {
+    @extend %bare-button;
+
+    position: absolute;
+    inset: 0;
+    cursor: default;
+}
+
+/* ––––– Shared keyframes ––––– */
+
+@keyframes fade-in {
+    from {
+        opacity: $opacity-faint;
+    }
+
+    to {
+        opacity: $opacity-full;
+    }
+}
+
+@keyframes slide-up {
+    from {
+        transform: translateY($size-12);
+        opacity: $opacity-faint;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: $opacity-full;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

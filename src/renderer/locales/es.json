@@ -1,42 +1,33 @@
 {
     "settings": {
-        "title": "Configuración",
         "theme": "Tema",
         "language": "Idioma",
         "themes": {
             "light": "Claro",
             "dark": "Oscuro"
-        },
-        "languages": {
-            "en": "English",
-            "es": "Español",
-            "it": "Italiano",
-            "fr": "Français",
-            "de": "Deutsch",
-            "pt": "Português",
-            "zh": "中文",
-            "ja": "日本語"
         }
     },
     "header": {
-        "greeting": "Hola",
-        "breathe": "Respirar",
         "emotions": "Diario",
-        "eightfoldPath": "Óctuple Sendero",
         "calendar": "Calendario",
         "philosophy": "Filosofía",
+        "settings": "Ajustes",
         "logout": "Cerrar Sesión"
     },
     "meditation": {
         "begin": "Comenzar",
         "stop": "Detener",
         "bell": {
-            "settings": "Configuración de Campana"
+            "settings": "Configuración de Campana",
+            "every": "Cada {minutes} min",
+            "sound": "Sonido",
+            "option": "Campana {number}",
+            "minutes": "{minutes} min",
+            "closeIntervals": "Cerrar menú de intervalos",
+            "closeSounds": "Cerrar menú de sonidos"
         }
     },
     "philosophy": {
-        "title": "Nuestra Filosofía Zen",
-        "subtitle": "Comprendiendo las decisiones de diseño detrás de ZenGarden",
         "practice": {
             "title": "La práctica es el camino",
             "body": "En el Zen, la meditación no es un medio para un fin, es el fin en sí mismo. Cada momento de práctica es completo y entero. No hay ningún lugar al que ir, nada que lograr. Cuando te sientas, ya estás ahí."
@@ -63,7 +54,6 @@
         }
     },
     "auth": {
-        "welcome": "Bienvenido a ZenGarden",
         "username": "Usuario",
         "password": "Contraseña",
         "login": "Iniciar Sesión",
@@ -80,10 +70,10 @@
         "backToLogin": "Volver al inicio de sesión",
         "passwordResetSuccess": "¡Contraseña Restablecida!",
         "passwordResetMessage": "Tu contraseña ha sido restablecida exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña.",
-        "goToLogin": "Ir al Inicio de Sesión"
+        "goToLogin": "Ir al Inicio de Sesión",
+        "passwordsDoNotMatch": "Las contraseñas no coinciden"
     },
     "account": {
-        "title": "Configuración de Cuenta",
         "changeUsername": "Cambiar Nombre de Usuario",
         "newUsernamePlaceholder": "Nuevo nombre de usuario",
         "updateUsername": "Actualizar Nombre de Usuario",
@@ -99,7 +89,7 @@
         "passwordsDoNotMatch": "Las contraseñas no coinciden",
         "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
         "recoveryCodes": "Códigos de Recuperación",
-        "recoveryCodesDescription": "Los códigos de recuperación le permiten restablecer su contraseña si la olvida. Genere 12 códigos de un solo uso y guárdelos en un lugar seguro.",
+        "recoveryCodesDescription": "Los códigos de recuperación le permiten restablecer su contraseña si la olvida. Genere 10 códigos de un solo uso y guárdelos en un lugar seguro.",
         "totalCodes": "Códigos totales",
         "usedCodes": "Códigos usados",
         "remainingCodes": "Códigos restantes",
@@ -108,7 +98,6 @@
         "generateCodesWarning": "Advertencia: Generar nuevos códigos invalidará todos los códigos anteriores.",
         "confirmPasswordToGenerate": "Ingrese su contraseña para generar códigos",
         "confirm": "Confirmar",
-        "recoveryCodesFailed": "Error al generar códigos de recuperación",
         "saveCodesWarning": "Importante: ¡Guarde estos códigos ahora!",
         "saveCodesDescription": "No podrá ver estos códigos nuevamente. Guárdelos en un lugar seguro como un administrador de contraseñas.",
         "copyAll": "Copiar Todo",
@@ -120,13 +109,7 @@
         "confirmPasswordToDelete": "Ingresa tu contraseña para confirmar",
         "confirmDelete": "Sí, Eliminar Mi Cuenta",
         "cancel": "Cancelar",
-        "deleteFailed": "No se pudo eliminar la cuenta",
-        "exportData": "Exportar Datos",
-        "exportDescription": "Descarga todos tus datos de meditación y emociones.",
-        "exportJSON": "Exportar como JSON",
-        "exportCSV": "Exportar como CSV",
-        "exportSuccess": "Datos exportados exitosamente",
-        "exportFailed": "Error al exportar datos"
+        "deleteFailed": "No se pudo eliminar la cuenta"
     },
     "notes": {
         "title": "Sesión Completa",
@@ -140,12 +123,8 @@
         "none": "Ninguno",
         "box": "Respiración en Caja",
         "deep": "Respiración Profunda",
-        "calm": "Respiración Calmante",
         "fourSevenEight": "Respiración 4-7-8",
         "energizing": "Respiración Energizante",
-        "start": "Iniciar",
-        "stop": "Detener",
-        "close": "Cerrar",
         "cycle": "Ciclo",
         "breatheIn": "Inhalar",
         "hold": "Mantener",
@@ -158,9 +137,7 @@
         }
     },
     "calendar": {
-        "title": "Calendario de Meditación",
         "minutes": "min",
-        "close": "Cerrar",
         "notes": "Notas",
         "months": [
             "Enero",
@@ -179,7 +156,6 @@
         "weekdays": ["D", "L", "M", "X", "J", "V", "S"]
     },
     "emotions": {
-        "title": "Diario",
         "positive": "Positivas",
         "negative": "Negativas",
         "pnRatio": "Ratio P/N",
@@ -204,7 +180,6 @@
         "noPositiveEmotionsYet": "Aún no se han registrado emociones positivas",
         "noNegativeEmotionsYet": "Aún no se han registrado emociones negativas",
         "trendChart": "Tendencia del Ratio P/N",
-        "past30Days": "Últimos 30 Días",
         "past90Days": "Últimos 90 Días",
         "dailyNote": "Nota del día",
         "notePlaceholder": "¿Cómo te sientes hoy? Escribe tus pensamientos aquí...",
@@ -484,8 +459,6 @@
         "completed": "Completado",
         "progress": "Progreso",
         "loading": "Cargando",
-        "saving": "Guardando...",
-        "saved": "Guardado",
         "notesPlaceholder": "Añade notas sobre cómo seguiste este camino hoy...",
         "paths": {
             "rightView": {

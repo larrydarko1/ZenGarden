@@ -3,12 +3,26 @@
  * Owns: path key list, translated path objects, follow/unfollow, note debounce, persistence.
  * Does NOT own: date navigation (EmotionTracker.vue), save indicator display (EmotionTracker.vue).
  */
-
-import { ref, computed, type Ref } from 'vue';
+import { ref, computed, type ComputedRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { saveEightfoldPathLog, getEightfoldPathLogs } from '../store';
+import { saveEightfoldPathLog, getEightfoldPathLogs } from '@/renderer/store';
+import { log } from '@/renderer/utils/logger';
 
-// ─── Static keys ──────────────────────────────────────────────────────────────
+type TranslatedPath = { key: string; displayName: string; description: string; questions: string };
+
+type EightfoldPathState = {
+    followedPaths: Ref<string[]>;
+    pathNotes: Ref<Record<string, string>>;
+    loadingPath: Ref<boolean>;
+    eightfoldPaths: ComputedRef<TranslatedPath[]>;
+    efCompletedCount: ComputedRef<number>;
+    efProgressPercentage: ComputedRef<number>;
+    isPathFollowed: (pathKey: string) => boolean;
+    togglePath: (pathKey: string) => void;
+    savePathData: () => Promise<void>;
+    debouncedSavePath: () => void;
+    loadPathData: () => Promise<void>;
+};
 
 const eightfoldPathKeys = [
     'rightView',
@@ -21,9 +35,10 @@ const eightfoldPathKeys = [
     'rightConcentration',
 ];
 
-// ─── Composable ───────────────────────────────────────────────────────────────
-
-export function useEightfoldPath(selectedDate: Ref<Date>, saveStatus: Ref<'saving' | 'saved' | null>) {
+export function useEightfoldPath(
+    selectedDate: Ref<Date>,
+    saveStatus: Ref<'saving' | 'saved' | null>,
+): EightfoldPathState {
     const { t } = useI18n();
 
     const followedPaths = ref<string[]>([]);
@@ -47,17 +62,17 @@ export function useEightfoldPath(selectedDate: Ref<Date>, saveStatus: Ref<'savin
         return followedPaths.value.includes(pathKey);
     }
 
-    function togglePath(pathKey: string) {
+    function togglePath(pathKey: string): void {
         if (isPathFollowed(pathKey)) {
-            followedPaths.value = followedPaths.value.filter((p) => p !== pathKey);
-            delete pathNotes.value[pathKey];
+            followedPaths.value = followedPaths.value.filter((key) => key !== pathKey);
+            pathNotes.value = Object.fromEntries(Object.entries(pathNotes.value).filter(([key]) => key !== pathKey));
         } else {
             followedPaths.value.push(pathKey);
         }
-        savePathData();
+        void savePathData();
     }
 
-    async function savePathData() {
+    async function savePathData(): Promise<void> {
         saveStatus.value = 'saving';
         try {
             const pathData = followedPaths.value.map((key) => ({
@@ -70,17 +85,19 @@ export function useEightfoldPath(selectedDate: Ref<Date>, saveStatus: Ref<'savin
                 saveStatus.value = null;
             }, 2000);
         } catch (err) {
-            console.error('[useEightfoldPath] save failed', err);
+            log.error('Eightfold path save failed', err);
             saveStatus.value = null;
         }
     }
 
-    function debouncedSavePath() {
+    function debouncedSavePath(): void {
         if (pathSaveTimeout !== null) clearTimeout(pathSaveTimeout);
-        pathSaveTimeout = window.setTimeout(() => savePathData(), 1000);
+        pathSaveTimeout = window.setTimeout(() => {
+            void savePathData();
+        }, 1000);
     }
 
-    async function loadPathData() {
+    async function loadPathData(): Promise<void> {
         loadingPath.value = true;
         try {
             const start = new Date(selectedDate.value);
@@ -94,18 +111,18 @@ export function useEightfoldPath(selectedDate: Ref<Date>, saveStatus: Ref<'savin
             });
 
             if (response.pathLogs?.length > 0) {
-                const log = response.pathLogs[0];
-                followedPaths.value = log.paths.map((p: { path: string }) => p.path);
+                const pathLog = response.pathLogs[0];
+                followedPaths.value = pathLog.paths.map((entry: { path: string }) => entry.path);
                 pathNotes.value = {};
-                log.paths.forEach((p: { path: string; note?: string }) => {
-                    if (p.note) pathNotes.value[p.path] = p.note;
+                pathLog.paths.forEach((entry: { path: string; note?: string }) => {
+                    if (entry.note !== undefined && entry.note.length > 0) pathNotes.value[entry.path] = entry.note;
                 });
             } else {
                 followedPaths.value = [];
                 pathNotes.value = {};
             }
         } catch (err) {
-            console.error('[useEightfoldPath] load failed', err);
+            log.error('Eightfold path load failed', err);
             followedPaths.value = [];
             pathNotes.value = {};
         } finally {

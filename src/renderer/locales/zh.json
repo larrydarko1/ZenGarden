@@ -1,42 +1,33 @@
 {
     "settings": {
-        "title": "设置",
         "theme": "主题",
         "language": "语言",
         "themes": {
             "light": "浅色",
             "dark": "深色"
-        },
-        "languages": {
-            "en": "English",
-            "es": "Español",
-            "it": "Italiano",
-            "fr": "Français",
-            "de": "Deutsch",
-            "pt": "Português",
-            "zh": "中文",
-            "ja": "日本語"
         }
     },
     "header": {
-        "greeting": "你好",
-        "breathe": "呼吸",
         "emotions": "日记",
-        "eightfoldPath": "八正道",
         "calendar": "日历",
         "philosophy": "哲学",
+        "settings": "设置",
         "logout": "登出"
     },
     "meditation": {
         "begin": "开始",
         "stop": "停止",
         "bell": {
-            "settings": "钟声设置"
+            "settings": "钟声设置",
+            "every": "每 {minutes} 分钟",
+            "sound": "音效",
+            "option": "钟声 {number}",
+            "minutes": "{minutes} 分钟",
+            "closeIntervals": "关闭间隔菜单",
+            "closeSounds": "关闭钟声菜单"
         }
     },
     "philosophy": {
-        "title": "我们的禅宗哲学",
-        "subtitle": "理解ZenGarden背后的设计理念",
         "practice": {
             "title": "修行即是道路",
             "body": "在禅宗中，禅修不是达到目的的手段—它本身就是目的。每一个修行的片刻都是完整的。没有要去的地方，没有要实现的目标。当你坐下时，你已经在那里了。"
@@ -63,7 +54,6 @@
         }
     },
     "auth": {
-        "welcome": "欢迎来到ZenGarden",
         "username": "用户名",
         "password": "密码",
         "login": "登录",
@@ -80,10 +70,10 @@
         "backToLogin": "返回登录",
         "passwordResetSuccess": "密码重置成功！",
         "passwordResetMessage": "您的密码已成功重置。现在您可以使用新密码登录。",
-        "goToLogin": "去登录"
+        "goToLogin": "去登录",
+        "passwordsDoNotMatch": "密码不匹配"
     },
     "account": {
-        "title": "账户设置",
         "changeUsername": "更改用户名",
         "newUsernamePlaceholder": "新用户名",
         "updateUsername": "更新用户名",
@@ -99,7 +89,7 @@
         "passwordsDoNotMatch": "密码不匹配",
         "passwordTooShort": "密码必须至少为6个字符",
         "recoveryCodes": "恢复代码",
-        "recoveryCodesDescription": "恢复代码允许您在忘记密码时重置密码。生成12个一次性使用的代码并将其存储在安全的地方。",
+        "recoveryCodesDescription": "恢复代码允许您在忘记密码时重置密码。生成10个一次性使用的代码并将其存储在安全的地方。",
         "totalCodes": "总代码数",
         "usedCodes": "已使用代码",
         "remainingCodes": "剩余代码",
@@ -108,7 +98,6 @@
         "generateCodesWarning": "警告：生成新代码将使所有以前的代码无效。",
         "confirmPasswordToGenerate": "输入您的密码以生成代码",
         "confirm": "确认",
-        "recoveryCodesFailed": "生成恢复代码失败",
         "saveCodesWarning": "重要：现在保存这些代码！",
         "saveCodesDescription": "您将无法再次查看这些代码。请将它们存储在安全的地方，如密码管理器。",
         "copyAll": "全部复制",
@@ -120,13 +109,7 @@
         "confirmPasswordToDelete": "输入您的密码以确认",
         "confirmDelete": "是的，删除我的账户",
         "cancel": "取消",
-        "deleteFailed": "删除账户失败",
-        "exportData": "导出数据",
-        "exportDescription": "下载您的所有冥想和情绪数据。",
-        "exportJSON": "导出为JSON",
-        "exportCSV": "导出为CSV",
-        "exportSuccess": "数据导出成功",
-        "exportFailed": "数据导出失败"
+        "deleteFailed": "删除账户失败"
     },
     "notes": {
         "title": "会话完成",
@@ -140,12 +123,8 @@
         "none": "无",
         "box": "方框呼吸",
         "deep": "深呼吸",
-        "calm": "平静呼吸",
         "fourSevenEight": "4-7-8呼吸",
         "energizing": "活力呼吸",
-        "start": "开始",
-        "stop": "停止",
-        "close": "关闭",
         "cycle": "循环",
         "breatheIn": "吸气",
         "hold": "屏住",
@@ -158,15 +137,12 @@
         }
     },
     "calendar": {
-        "title": "冥想日历",
         "minutes": "分钟",
-        "close": "关闭",
         "notes": "笔记",
         "months": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
         "weekdays": ["日", "一", "二", "三", "四", "五", "六"]
     },
     "emotions": {
-        "title": "日记",
         "positive": "积极",
         "negative": "消极",
         "pnRatio": "P/N 比率",
@@ -191,7 +167,6 @@
         "noPositiveEmotionsYet": "尚未记录积极情绪",
         "noNegativeEmotionsYet": "尚未记录消极情绪",
         "trendChart": "P/N 比率趋势",
-        "past30Days": "过去30天",
         "past90Days": "过去90天",
         "dailyNote": "每日笔记",
         "notePlaceholder": "你今天感觉如何？在这里写下你的想法...",
@@ -471,8 +446,6 @@
         "completed": "已完成",
         "progress": "进度",
         "loading": "加载中",
-        "saving": "保存中...",
-        "saved": "已保存",
         "notesPlaceholder": "添加关于您今天如何遵循此道路的笔记...",
         "paths": {
             "rightView": {

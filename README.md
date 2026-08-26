@@ -1,13 +1,6 @@
-# ZenGarden
-
-![License](https://img.shields.io/github/license/larrydarko1/ZenGarden)
-![Issues](https://img.shields.io/github/issues/larrydarko1/ZenGarden)
-![Pull Requests](https://img.shields.io/github/issues-pr/larrydarko1/ZenGarden)
-![Contributors](https://img.shields.io/github/contributors/larrydarko1/ZenGarden)
+<img src="public/banner.png">
 
 Zen Garden is a **local-first, cross-platform meditation app** built with **Electron** (desktop), **Capacitor** (mobile), **Vue 3**, and TypeScript. All your data stays on your device in MongoDB-compatible JSON files - no server, no cloud, completely private. Features a meditation timer with bell sounds, breathing exercises, a meditation calendar, and relaxing Zen animations.
-
-> **IMPORTANT:** This app runs natively on **Desktop** (macOS, Windows, Linux) and **Mobile** (Android). All data is stored in JSON files on your device and never leaves it.
 
 ## Demo
 
@@ -43,11 +36,11 @@ Zen Garden is a **local-first, cross-platform meditation app** built with **Elec
 
 ### Technical Features
 
-- **Cross-Platform** - Native apps for macOS, Windows, Linux, and Android
+- **Cross-Platform** - Native apps for macOS, Linux, and Android
 - **100% Offline** - works completely without internet connection
 - **User-Accessible Storage** - JSON files you can view, backup, and control
 - **Privacy-first** - no server, no tracking, no data collection, no telemetry
-- **Secure** - Argon2 (desktop) / PBKDF2 (mobile) password hashing, recovery codes, atomic file writes
+- **Secure** - PBKDF2-SHA256 password hashing at 600k iterations, recovery codes, atomic file writes
 - **MongoDB-compatible** - data structure matches MEVN stack for easy migration
 
 > **Privacy Note:** This app runs entirely on your device. Your meditation data, emotions, and notes are stored in JSON files on your local file system and never leave your device.
@@ -65,17 +58,20 @@ Zen Garden is built with privacy and security as core principles:
 
 ### Security Architecture
 
-- ✅ **Electron hardening** - Context isolation and disabled Node.js integration in the renderer
+- ✅ **Electron hardening** - Renderer runs sandboxed with context isolation and Node.js integration disabled
 - ✅ **Typed preload bridge** - Narrow IPC API; no raw Node or Electron APIs leak to the frontend
-- ✅ **Password hashing** - Argon2 (desktop) with PBKDF2 fallback; PBKDF2 via Web Crypto (mobile)
+- ✅ **Password hashing** - PBKDF2-SHA256 at 600,000 iterations (OWASP's current figure), one record format on every platform
 - ✅ **Recovery codes** - Stored as PBKDF2 hashes, never in plaintext
 - ✅ **Atomic writes** - Data written to `.tmp` then renamed, preventing corruption on crash
-- ✅ **Input validation** - Username and password validated at the IPC boundary before any processing
+- ✅ **Input validation** - Every IPC argument is parsed with a Zod schema in the main process before use
+- ✅ **Content Security Policy** - `default-src 'self'`, no `unsafe-eval`; `object-src`/`frame-src`/`base-uri`/`form-action` all denied
+- ✅ **Navigation containment** - External links open in the system browser; in-app navigation away from the app origin is blocked
+- ✅ **Deny-all permissions** - Camera, microphone, geolocation and every other web permission are refused at the session level
 - ✅ **Open source** - Full transparency — audit the code yourself
 
 ### Reporting Security Issues
 
-If you discover a security vulnerability, please see [SECURITY.md](SECURITY.md) for reporting instructions.
+If you discover a security vulnerability, please see [SECURITY.md](.github/SECURITY.md) for reporting instructions.
 
 ## Data Storage
 
@@ -84,7 +80,6 @@ Your data is stored in MongoDB-compatible JSON files:
 ### Desktop
 
 - **macOS:** `~/Library/Application Support/zen-garden/data/`
-- **Windows:** `%APPDATA%/zen-garden/data/`
 - **Linux:** `~/.config/zen-garden/data/`
 
 ### Mobile
@@ -105,7 +100,7 @@ Your data is stored in MongoDB-compatible JSON files:
 
 ### Prerequisites
 
-- Node.js (v22+ recommended)
+- Node.js 24+ (enforced by `engines` in [package.json](package.json))
 - npm
 - **For Android development:** [Android Studio](https://developer.android.com/studio) installed (provides the JDK and Android SDK)
 
@@ -150,7 +145,7 @@ Requires **Android Studio** to be installed at the default location. The npm scr
 | `JAVA_HOME`    | `/Applications/Android Studio.app/Contents/jbr/Contents/Home` |
 | `ANDROID_HOME` | `~/Library/Android/sdk`                                       |
 
-> **Note:** If Android Studio is installed in a non-default location, or you're on Linux/Windows, update the paths in the `cap:run:android` script in [package.json](package.json).
+> **Note:** If Android Studio is installed in a non-default location, or you're on Linux, update the paths in the `cap:run:android` script in [package.json](package.json).
 
 **Quick Start:**
 
@@ -187,7 +182,29 @@ npm run format:check
 npm run format
 ```
 
-Tests live in the `tests/` directory and mirror the `src/` structure. The CI pipeline runs lint, format check, type-check, build, and all tests on every push and pull request.
+Tests live in the `tests/` directory and mirror the `src/` structure.
+
+Beyond the standard lint/format/test steps, the repo enforces its own conventions through a set of
+check scripts under [scripts/check/](scripts/check/). `npm run ci:check` runs the whole gate locally —
+the same list, in the same order, that [CI](.github/workflows/ci.yml) runs on every push and pull request:
+
+| Script            | Enforces                                                                        |
+| ----------------- | ------------------------------------------------------------------------------- |
+| `audit:check`     | No high-severity vulnerabilities in production dependencies                     |
+| `pkg:check`       | `package.json` field order, metadata, and script conventions                    |
+| `pipeline:check`  | The CI workflow and `ci:check` do not drift apart                               |
+| `code:check`      | General code-style rules not covered by ESLint                                  |
+| `declorder:check` | Declaration order within modules                                                |
+| `html:check`      | Template/HTML standards                                                         |
+| `scss:check`      | SCSS structure, token usage, and nesting depth                                  |
+| `refactor:check`  | Module size and complexity ceilings                                             |
+| `ipc:check`       | Every IPC channel is declared, typed, and validated on both ends                |
+| `security:check`  | Electron process model, navigation containment, permission handlers, HTML sinks |
+| `error:check`     | Error-handling conventions                                                      |
+| `dup:check`       | Copy-paste duplication ([jscpd](https://github.com/kucherenko/jscpd))           |
+| `dead:check`      | Unused files, exports, and dependencies ([knip](https://knip.dev))              |
+| `i18n:check`      | Every user-facing string is translated across all 8 locales                     |
+| `test:check`      | Test-suite structure and coverage conventions                                   |
 
 ### Building Desktop Apps
 
@@ -198,9 +215,6 @@ npm run build:electron
 # Build specifically for macOS
 npm run build:mac
 
-# Build for Windows (requires Windows or cross-compilation setup)
-npm run build:win
-
 # Build for Linux
 npm run build:linux
 ```
@@ -208,8 +222,7 @@ npm run build:linux
 The built installers will be in the `dist-electron/` directory:
 
 - **macOS:** `.dmg` installer
-- **Windows:** `.exe` installer
-- **Linux:** `.AppImage` file
+- **Linux:** `.AppImage`, `.deb`, `.rpm` and `.tar.gz` packages
 
 ### Installing the App
 
@@ -231,15 +244,15 @@ To share the app with others:
 
 ## Tech Stack
 
-- **Desktop:** Electron 40, electron-vite 5 (Native macOS, Windows, Linux app)
+- **Desktop:** Electron 44, electron-vite 5 (Native macOS, Linux app)
 - **Mobile:** Capacitor 8 (Native Android app)
 - **Frontend:** Vue 3, TypeScript (strict), Vite, SCSS, vue-i18n
 - **Storage:** JSON files with atomic writes (MongoDB-compatible document structure)
-- **Security:** Argon2 / PBKDF2 password hashing, recovery codes, context-isolated preload bridge
-- **Testing:** [Vitest](https://vitest.dev) + jsdom (298 tests across 14 test files)
-- **Code Quality:** [ESLint](https://eslint.org) flat config, [Prettier](https://prettier.io), husky + lint-staged + commitlint
+- **Security:** PBKDF2-SHA256 password hashing, recovery codes, sandboxed renderer + context-isolated preload bridge
+- **Testing:** [Vitest](https://vitest.dev) + jsdom (585 tests across 38 test files, 80% coverage enforced)
+- **Code Quality:** [ESLint](https://eslint.org) flat config (modular, under [eslint/](eslint/)), [Prettier](https://prettier.io), [Stylelint](https://stylelint.io), husky + lint-staged + commitlint
 - **Build Tools:** [electron-vite](https://electron-vite.org) + Electron Builder + Capacitor CLI
-- **CI:** GitHub Actions (lint → format → type-check → build → test)
+- **CI:** GitHub Actions — 16 convention checks → type-check → build → tests at 80% coverage
 
 ## Project Structure
 
@@ -247,37 +260,50 @@ To share the app with others:
 src/
 ├── main/                        → Electron main process (Node.js)
 │   ├── index.ts                 → BrowserWindow setup, IPC registration, app lifecycle
+│   ├── lib/
+│   │   ├── config.ts            → The only module that reads process.env, Zod-validated
+│   │   └── logger.ts            → Main-process logging (electron-log)
 │   └── services/
-│       ├── storage.ts           → IPC handler registration entry point
-│       ├── auth.ts              → Auth handlers (register, login, recovery codes)
+│       ├── auth.ts              → Auth handlers (register, login, settings, recovery codes)
 │       ├── data.ts              → Data handlers (meditations, emotions, eightfold path)
+│       ├── analytics.ts         → Emotion + eightfold path analytics computation
 │       ├── db.ts                → JSON file persistence, atomic writes, normalisation
-│       └── crypto.ts            → Argon2/PBKDF2 hashing, token generation
+│       └── crypto.ts            → PBKDF2 derivation, verification, token generation
 ├── preload/
 │   └── index.ts                 → contextBridge — narrow typed API exposed to renderer
+├── schemas/                     → Shared across main, preload and renderer
+│   ├── storage.ts               → Wire types + the Zod schemas IPC arguments are validated against
+│   ├── password.ts              → The hashed-password record format shared by desktop and Android
+│   └── electron.d.ts            → The contextBridge contract, declared once for both ends
 └── renderer/                    → Vue 3 SPA
     ├── components/              → Decomposed UI components
     │   ├── Home.vue             → Main dashboard orchestrator
     │   ├── home/                → MeditationOverlay, BottomNav
     │   ├── emotions/            → EmotionAnalytics, EightfoldPathView, DailyNotes
-    │   └── animations/          → Zen background SVG animations
+    │   ├── animations/          → Zen background SVG animations
+    │   └── common/              → Shared primitives (ZenSpinner)
     ├── composables/             → Reactive state + side-effect management
     │   ├── useMeditationSession.ts
     │   ├── useEmotions.ts
     │   └── useEightfoldPath.ts
     ├── store/                   → Storage adapter layer
-    │   ├── types.ts             → All shared TypeScript interfaces
+    │   ├── types.ts             → IStorageAdapter + re-export of the shared wire types
     │   ├── index.ts             → Thin wrappers delegating to active adapter
     │   └── adapters/
     │       ├── factory.ts       → Auto-detects Electron or Capacitor, caches adapter
     │       ├── electron.ts      → IPC bridge to main process
-    │       └── capacitor.ts     → Capacitor Filesystem + Web Crypto
-    │           └── capacitor/
-    │               ├── db.ts    → Mobile JSON file I/O
-    │               └── crypto.ts → PBKDF2 via Web Crypto API
-    ├── utils/platform.ts        → Runtime platform detection
+    │       ├── capacitor.ts     → Capacitor Filesystem + Web Crypto
+    │       └── capacitor/
+    │           ├── db.ts        → Mobile JSON file I/O
+    │           └── crypto.ts    → PBKDF2 via Web Crypto API
+    ├── styles/                  → SCSS design system (variables, mixins, themes, components)
+    ├── utils/
+    │   ├── platform.ts          → Runtime platform detection
+    │   └── logger.ts            → Renderer-side logging
     └── locales/                 → 8 language bundles (en, es, it, fr, de, pt, zh, ja)
-tests/                           → Mirrors src/ — 14 test files, 298 tests
+eslint/                          → Modular ESLint flat-config fragments
+scripts/check/                   → Repo convention checks run by `npm run ci:check`
+tests/                           → Mirrors src/ — 38 test files, 585 tests
 ```
 
 ## Architecture
@@ -288,13 +314,14 @@ tests/                           → Mirrors src/ — 14 test files, 298 tests
 Desktop App
 ├── Electron (Native shell)
 │   ├── Main Process (Node.js)
-│   │   ├── services/auth.ts       → Authentication + recovery codes
+│   │   ├── services/auth.ts       → Authentication + settings + recovery codes
 │   │   ├── services/data.ts       → Meditation, emotion, eightfold path CRUD
+│   │   ├── services/analytics.ts  → Analytics computation
 │   │   ├── services/db.ts         → JSON persistence with atomic writes
-│   │   └── services/crypto.ts     → Argon2 / PBKDF2 hashing
-│   ├── Preload (contextBridge)
+│   │   └── services/crypto.ts     → PBKDF2 derivation and verification
+│   ├── Preload (contextBridge, CommonJS — required by the sandbox)
 │   │   └── Typed IPC API — no Node.js exposure to renderer
-│   └── Renderer Process (Chromium)
+│   └── Renderer Process (Chromium, sandboxed)
 │       └── Vue 3 App → store/adapters/electron.ts → IPC calls
 └── Data Storage
     └── JSON Files (~/Library/Application Support/zen-garden/data/)
@@ -317,11 +344,17 @@ Mobile App
 
 ### Storage Adapter Pattern
 
-The app uses an `IStorageAdapter` interface implemented by two adapters. A `StorageFactory` auto-detects the platform at runtime and caches the result:
+The app uses an `IStorageAdapter` interface implemented by two adapters. `getAdapter()` in
+[factory.ts](src/renderer/store/adapters/factory.ts) probes the platform at runtime and caches the result:
 
-- **ElectronStorageAdapter** — bridges Vue to Node.js JSON backend via IPC
+- **ElectronStorageAdapter** — bridges Vue to the Node.js JSON backend via IPC
 - **CapacitorStorageAdapter** — uses Capacitor Filesystem + Web Crypto API
 - **Same interface, same JSON structure** — both use MongoDB-compatible documents
+
+Every argument crossing the Electron IPC boundary is re-validated in the main process against a Zod
+schema in [schemas/storage.ts](src/schemas/storage.ts). Handlers answer with a discriminated
+`IpcResult` — success or error as data — rather than throwing across the bridge; the renderer's
+adapter is where a failure becomes a thrown error again.
 
 ## Data Format
 
@@ -352,7 +385,6 @@ This makes it easy to:
 **Desktop:** Simply copy the entire data folder:
 
 - **macOS:** `~/Library/Application Support/zen-garden/data/`
-- **Windows:** `%APPDATA%/zen-garden/data/`
 - **Linux:** `~/.config/zen-garden/data/`
 
 **Mobile:** Access files through your device:
@@ -365,6 +397,10 @@ This makes it easy to:
 2. Replace the data folder with your backup
 3. Restart the app (or reinstall on mobile)
 
+Desktop and Android write the same password record format, so an account copied between them keeps
+working. A record written by an older version is re-hashed to the current format the next time you
+log in.
+
 ### Migrating to MongoDB (Future)
 
 Since data is already in MongoDB format:
@@ -375,12 +411,13 @@ Since data is already in MongoDB format:
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Zen Garden is a personal portfolio project and is **not open to outside contributions** — see
+[CONTRIBUTING.md](.github/CONTRIBUTING.md). Bug reports are welcome, and the code is MIT licensed,
+so forking it is explicitly fine.
+
+Found a security vulnerability? Do not open a public issue — email <hello@larrydarko.dev>. See
+[SECURITY.md](.github/SECURITY.md).
 
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
----
-
-**Made with Vue 3, Electron, Capacitor, and a passion for mindful, local-first software.**

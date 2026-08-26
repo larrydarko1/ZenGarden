@@ -1,77 +1,80 @@
 <script setup lang="ts">
-// App — root shell managing theme/language state, desktop header, and auth gating. // Owns: global theme/language persistence, meditation-active flag, desktop detection. // Does NOT own: UI content (Home.vue), data persistence(store/).
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import Home from './components/Home.vue';
-import { updateTheme, updateLanguage } from './store';
-import { isDesktop } from './utils/platform';
-import type { User } from './store/types';
+import Home from '@/renderer/components/Home.vue';
+import { updateTheme, updateLanguage } from '@/renderer/store';
+import { isDesktop } from '@/renderer/utils/platform';
+import type { User } from '@/renderer/store/types';
+import { log } from '@/renderer/utils/logger';
 
 const { locale } = useI18n();
 
-// Theme starts as dark, will be set from user data after login
-const currentTheme = ref('dark');
+const currentTheme = ref<'light' | 'dark'>('dark');
 const meditationActive = ref(false); // controlled by Home.vue
 const isAuthenticated = ref(false);
 const isDesktopApp = ref(false);
 
-// Check if running on desktop
-onMounted(() => {
-    isDesktopApp.value = isDesktop();
-});
-
-function onMeditationActive(val: boolean) {
+function onMeditationActive(val: boolean): void {
     meditationActive.value = val;
 }
 
-function onUserChanged(user: User | null) {
-    isAuthenticated.value = !!user;
+function onUserChanged(user: User | null): void {
+    isAuthenticated.value = user !== null;
 }
 
-function setThemeFromLogin(theme: string) {
-    const themes = ['light', 'dark'];
-    if (themes.includes(theme)) {
+function isThemeId(value: string): value is 'light' | 'dark' {
+    return value === 'light' || value === 'dark';
+}
+
+function setThemeFromLogin(theme: string): void {
+    if (isThemeId(theme)) {
         currentTheme.value = theme;
     }
 }
 
-function setLanguageFromLogin(language: string) {
+function setLanguageFromLogin(language: string): void {
     const languages = ['en', 'es', 'it', 'fr', 'de', 'pt', 'zh', 'ja'];
     if (languages.includes(language)) {
         locale.value = language;
     }
 }
 
-async function setTheme(theme: string) {
-    const validTheme = theme as 'light' | 'dark';
-    currentTheme.value = validTheme;
+async function setTheme(theme: string): Promise<void> {
+    if (!isThemeId(theme)) return;
+    currentTheme.value = theme;
     try {
-        await updateTheme(validTheme);
+        await updateTheme(theme);
     } catch (err) {
-        console.error('Failed to update theme:', err);
+        log.error('Failed to update theme', err);
     }
 }
 
-async function setLanguage(language: string) {
+async function setLanguage(language: string): Promise<void> {
     const validLanguage = language as 'en' | 'es' | 'it' | 'fr' | 'de' | 'pt' | 'zh' | 'ja';
     locale.value = validLanguage;
     try {
         await updateLanguage(validLanguage);
     } catch (err) {
-        console.error('Failed to update language:', err);
+        log.error('Failed to update language', err);
     }
 }
+
+onMounted(() => {
+    isDesktopApp.value = isDesktop();
+});
 </script>
 
 <template>
-    <div id="app" :class="[currentTheme, { 'has-desktop-header': isDesktopApp }]">
+    <div
+        id="app"
+        :class="[currentTheme, { 'has-desktop-header': isDesktopApp }]">
         <Home
+            :theme="currentTheme"
             @meditation-active="onMeditationActive"
             @theme-changed="setThemeFromLogin"
             @language-changed="setLanguageFromLogin"
             @user-changed="onUserChanged"
             @theme-change="setTheme"
-            @language-change="setLanguage"
-        />
+            @language-change="setLanguage" />
     </div>
 </template>

@@ -1,8 +1,12 @@
-// @vitest-environment node
-
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { register as registerDataHandlers } from '@/main/services/data';
 
-// ─── Mocks ────────────────────────────────────────────────────────────────────
+import type { IpcResult } from '@/schemas/storage';
+
+type IpcHandler = (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => unknown;
+
+const event = {} as Electron.IpcMainInvokeEvent;
+const ipc = makeMockIpc();
 
 let collections: Record<string, unknown[]> = {};
 let mockSession: { username: string; token: string } | null = null;
@@ -28,7 +32,7 @@ vi.mock('fs', () => ({
     unlinkSync: vi.fn(),
 }));
 
-vi.mock('../../../src/main/services/db', () => ({
+vi.mock('@/main/services/db', () => ({
     readCollection: (name: string) => collections[name] ?? [],
     writeCollection: (name: string, data: unknown[]) => {
         collections[name] = data;
@@ -37,33 +41,40 @@ vi.mock('../../../src/main/services/db', () => ({
     saveSession: vi.fn(),
 }));
 
-vi.mock('../../../src/main/services/auth', () => ({
-    getCurrentSession: () => mockSession,
+vi.mock('@/main/services/auth', () => ({
+    findCurrentSession: () => mockSession,
 }));
 
-const event = {} as Electron.IpcMainInvokeEvent;
-
-import { dataHandlers } from '../../../src/main/services/data';
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+function makeMockIpc() {
+    const handlers = new Map<string, IpcHandler>();
+    return {
+        handle(channel: string, fn: IpcHandler) {
+            handlers.set(channel, fn);
+        },
+        async invoke(channel: string, ...args: unknown[]) {
+            const fn = handlers.get(channel);
+            if (fn === undefined) throw new Error(`No handler registered for channel '${channel}'`);
+            const result = (await fn(event, ...args)) as IpcResult<unknown>;
+            if (!result.success) throw new Error(result.error);
+            return result.data;
+        },
+    };
+}
 
 function resetState(): void {
     collections = { users: [], meditations: [], emotionLogs: [], eightfoldPathLogs: [] };
     mockSession = { username: 'testuser', token: 'tok' };
 }
-
-// ─── Meditations ──────────────────────────────────────────────────────────────
+registerDataHandlers(ipc as unknown as Electron.IpcMain);
 
 describe('storage:createMeditation', () => {
     beforeEach(resetState);
 
     it('creates a meditation record with correct fields', async () => {
-        const res = (await dataHandlers['storage:createMeditation'](
-            event,
-            '2025-01-15',
-            10,
-            'Peaceful session',
-        )) as Record<string, unknown>;
+        const res = (await ipc.invoke('storage:createMeditation', '2025-01-15', 10, 'Peaceful session')) as Record<
+            string,
+            unknown
+        >;
         expect(res.username).toBe('testuser');
         expect(res.date).toBe('2025-01-15');
         expect(res.duration).toBe(10);
@@ -72,15 +83,13 @@ describe('storage:createMeditation', () => {
     });
 
     it('persists to the meditations collection', async () => {
-        await dataHandlers['storage:createMeditation'](event, '2025-01-15', 10, '');
+        await ipc.invoke('storage:createMeditation', '2025-01-15', 10, '');
         expect(collections['meditations']).toHaveLength(1);
     });
 
     it('rejects when not authenticated', async () => {
         mockSession = null;
-        await expect(dataHandlers['storage:createMeditation'](event, '2025-01-15', 10, '')).rejects.toThrow(
-            'Not authenticated',
-        );
+        await expect(ipc.invoke('storage:createMeditation', '2025-01-15', 10, '')).rejects.toThrow('Not authenticated');
     });
 });
 
@@ -95,23 +104,21 @@ describe('storage:getMeditations', () => {
     });
 
     it('returns only the current user meditations', async () => {
-        const res = (await dataHandlers['storage:getMeditations'](event)) as unknown[];
+        const res = (await ipc.invoke('storage:getMeditations')) as unknown[];
         expect(res).toHaveLength(2);
     });
 
     it('returns meditations sorted by date descending', async () => {
-        const res = (await dataHandlers['storage:getMeditations'](event)) as Array<{ date: string }>;
+        const res = (await ipc.invoke('storage:getMeditations')) as { date: string }[];
         expect(res[0].date).toBe('2025-01-15');
         expect(res[1].date).toBe('2025-01-01');
     });
 
     it('rejects when not authenticated', async () => {
         mockSession = null;
-        await expect(dataHandlers['storage:getMeditations'](event)).rejects.toThrow('Not authenticated');
+        await expect(ipc.invoke('storage:getMeditations')).rejects.toThrow('Not authenticated');
     });
 });
-
-// ─── Emotion logs ─────────────────────────────────────────────────────────────
 
 describe('storage:saveEmotionLog', () => {
     beforeEach(resetState);
@@ -121,12 +128,10 @@ describe('storage:saveEmotionLog', () => {
             { type: 'positive', name: 'joy' },
             { type: 'negative', name: 'anxiety' },
         ];
-        const res = (await dataHandlers['storage:saveEmotionLog'](
-            event,
-            '2025-01-15',
-            emotions,
-            'A mixed day',
-        )) as Record<string, unknown>;
+        const res = (await ipc.invoke('storage:saveEmotionLog', '2025-01-15', emotions, 'A mixed day')) as Record<
+            string,
+            unknown
+        >;
         expect(res.username).toBe('testuser');
         expect(res.positiveCount).toBe(1);
         expect(res.negativeCount).toBe(1);
@@ -136,8 +141,8 @@ describe('storage:saveEmotionLog', () => {
     it('upserts on the same date', async () => {
         const emotions1 = [{ type: 'positive', name: 'joy' }];
         const emotions2 = [{ type: 'negative', name: 'fear' }];
-        await dataHandlers['storage:saveEmotionLog'](event, '2025-01-15', emotions1);
-        await dataHandlers['storage:saveEmotionLog'](event, '2025-01-15', emotions2);
+        await ipc.invoke('storage:saveEmotionLog', '2025-01-15', emotions1);
+        await ipc.invoke('storage:saveEmotionLog', '2025-01-15', emotions2);
         expect(collections['emotionLogs']).toHaveLength(1);
         const log = collections['emotionLogs'][0] as { negativeCount: number };
         expect(log.negativeCount).toBe(1);
@@ -156,12 +161,12 @@ describe('storage:getEmotionLogs', () => {
     });
 
     it('returns only current user logs', async () => {
-        const res = (await dataHandlers['storage:getEmotionLogs'](event)) as unknown[];
+        const res = (await ipc.invoke('storage:getEmotionLogs')) as unknown[];
         expect(res).toHaveLength(3);
     });
 
     it('filters by date range', async () => {
-        const res = (await dataHandlers['storage:getEmotionLogs'](event, {
+        const res = (await ipc.invoke('storage:getEmotionLogs', {
             startDate: '2025-01-05',
             endDate: '2025-01-12',
         })) as unknown[];
@@ -169,7 +174,7 @@ describe('storage:getEmotionLogs', () => {
     });
 
     it('respects the limit parameter', async () => {
-        const res = (await dataHandlers['storage:getEmotionLogs'](event, { limit: 2 })) as unknown[];
+        const res = (await ipc.invoke('storage:getEmotionLogs', { limit: 2 })) as unknown[];
         expect(res).toHaveLength(2);
     });
 });
@@ -197,7 +202,7 @@ describe('storage:getEmotionAnalytics', () => {
     });
 
     it('returns analytics for the period', async () => {
-        const res = (await dataHandlers['storage:getEmotionAnalytics'](event, 30)) as {
+        const res = (await ipc.invoke('storage:getEmotionAnalytics', 30)) as {
             totalDays: number;
             averagePNRatio: number;
             positiveDays: number;
@@ -209,12 +214,10 @@ describe('storage:getEmotionAnalytics', () => {
 
     it('returns empty analytics when no data', async () => {
         collections['emotionLogs'] = [];
-        const res = (await dataHandlers['storage:getEmotionAnalytics'](event, 30)) as { totalDays: number };
+        const res = (await ipc.invoke('storage:getEmotionAnalytics', 30)) as { totalDays: number };
         expect(res.totalDays).toBe(0);
     });
 });
-
-// ─── Eightfold path ──────────────────────────────────────────────────────────
 
 describe('storage:saveEightfoldPathLog', () => {
     beforeEach(resetState);
@@ -224,10 +227,7 @@ describe('storage:saveEightfoldPathLog', () => {
             { path: 'Right View', note: 'Reflected today' },
             { path: 'Right Intention', note: '' },
         ];
-        const res = (await dataHandlers['storage:saveEightfoldPathLog'](event, '2025-01-15', paths)) as Record<
-            string,
-            unknown
-        >;
+        const res = (await ipc.invoke('storage:saveEightfoldPathLog', '2025-01-15', paths)) as Record<string, unknown>;
         expect(res.completedCount).toBe(1);
         expect(res.progressPercentage).toBe(12.5);
     });
@@ -235,8 +235,8 @@ describe('storage:saveEightfoldPathLog', () => {
     it('upserts on the same date', async () => {
         const paths1 = [{ path: 'Right View', note: 'v1' }];
         const paths2 = [{ path: 'Right View', note: 'v2' }];
-        await dataHandlers['storage:saveEightfoldPathLog'](event, '2025-01-15', paths1);
-        await dataHandlers['storage:saveEightfoldPathLog'](event, '2025-01-15', paths2);
+        await ipc.invoke('storage:saveEightfoldPathLog', '2025-01-15', paths1);
+        await ipc.invoke('storage:saveEightfoldPathLog', '2025-01-15', paths2);
         expect(collections['eightfoldPathLogs']).toHaveLength(1);
     });
 });
@@ -252,12 +252,12 @@ describe('storage:getEightfoldPathLogs', () => {
     });
 
     it('returns only current user logs', async () => {
-        const res = (await dataHandlers['storage:getEightfoldPathLogs'](event)) as unknown[];
+        const res = (await ipc.invoke('storage:getEightfoldPathLogs')) as unknown[];
         expect(res).toHaveLength(2);
     });
 
     it('filters by date range', async () => {
-        const res = (await dataHandlers['storage:getEightfoldPathLogs'](event, {
+        const res = (await ipc.invoke('storage:getEightfoldPathLogs', {
             startDate: '2025-01-10',
         })) as unknown[];
         expect(res).toHaveLength(1);
@@ -301,12 +301,12 @@ describe('storage:getEightfoldPathAnalytics', () => {
     });
 
     it('returns analytics with correct shape', async () => {
-        const res = (await dataHandlers['storage:getEightfoldPathAnalytics'](event, 30)) as {
+        const res = (await ipc.invoke('storage:getEightfoldPathAnalytics', 30)) as {
             totalDays: number;
             averageCompletion: number;
             perfectDays: number;
-            mostFollowedPaths: Array<{ path: string; count: number }>;
-            trends: Array<{ date: string; completedCount: number }>;
+            mostFollowedPaths: { path: string; count: number }[];
+            trends: { date: string; completedCount: number }[];
         };
         expect(res.totalDays).toBe(2);
         expect(res.averageCompletion).toBe(5.5);
@@ -316,28 +316,87 @@ describe('storage:getEightfoldPathAnalytics', () => {
     });
 
     it('identifies the most followed paths', async () => {
-        const res = (await dataHandlers['storage:getEightfoldPathAnalytics'](event, 30)) as {
-            mostFollowedPaths: Array<{ path: string; count: number }>;
+        const res = (await ipc.invoke('storage:getEightfoldPathAnalytics', 30)) as {
+            mostFollowedPaths: { path: string; count: number }[];
         };
-        // Right View, Right Speech, Right Mindfulness appear in both days
         const topPath = res.mostFollowedPaths[0];
         expect(topPath.count).toBe(2);
     });
 
     it('returns trends sorted by date ascending', async () => {
-        const res = (await dataHandlers['storage:getEightfoldPathAnalytics'](event, 30)) as {
-            trends: Array<{ date: string; completedCount: number }>;
+        const res = (await ipc.invoke('storage:getEightfoldPathAnalytics', 30)) as {
+            trends: { date: string; completedCount: number }[];
         };
         expect(res.trends[0].date < res.trends[1].date).toBe(true);
     });
 
     it('returns empty analytics when no data', async () => {
         collections['eightfoldPathLogs'] = [];
-        const res = (await dataHandlers['storage:getEightfoldPathAnalytics'](event, 30)) as {
+        const res = (await ipc.invoke('storage:getEightfoldPathAnalytics', 30)) as {
             totalDays: number;
             perfectDays: number;
         };
         expect(res.totalDays).toBe(0);
         expect(res.perfectDays).toBe(0);
+    });
+});
+
+describe('argument validation at the IPC boundary', () => {
+    beforeEach(() => {
+        collections = { meditations: [], emotionLogs: [], eightfoldPathLogs: [] };
+        mockSession = { username: 'testuser', token: 'tok' };
+    });
+
+    it('rejects a meditation with a non-numeric duration without writing it', async () => {
+        await expect(ipc.invoke('storage:createMeditation', '2025-01-15', '10', '')).rejects.toThrow(
+            'Invalid meditation',
+        );
+        expect(collections.meditations).toHaveLength(0);
+    });
+
+    it('rejects a meditation missing its notes', async () => {
+        await expect(ipc.invoke('storage:createMeditation', '2025-01-15', 10, undefined)).rejects.toThrow(
+            'Invalid meditation',
+        );
+    });
+
+    it('rejects an emotion log whose emotions are not an array', async () => {
+        await expect(ipc.invoke('storage:saveEmotionLog', '2025-01-15', 'happy')).rejects.toThrow(
+            'Invalid emotion log',
+        );
+        expect(collections.emotionLogs).toHaveLength(0);
+    });
+
+    it('rejects an emotion carrying an unknown type', async () => {
+        await expect(
+            ipc.invoke('storage:saveEmotionLog', '2025-01-15', [{ name: 'calm', type: 'neutral' }]),
+        ).rejects.toThrow('Invalid emotion log');
+    });
+
+    it('rejects an eightfold entry missing its note field', async () => {
+        await expect(ipc.invoke('storage:saveEightfoldPathLog', '2025-01-15', [{ path: 'view' }])).rejects.toThrow(
+            'Invalid eightfold path log',
+        );
+    });
+
+    it('rejects a query whose limit is not a positive integer', async () => {
+        await expect(ipc.invoke('storage:getEmotionLogs', { limit: -1 })).rejects.toThrow('Invalid query');
+        await expect(ipc.invoke('storage:getEightfoldPathLogs', { limit: 2.5 })).rejects.toThrow('Invalid query');
+    });
+
+    it('accepts an omitted query as "everything"', async () => {
+        collections.emotionLogs = [{ _id: '1', username: 'testuser', date: '2025-01-15' }];
+        await expect(ipc.invoke('storage:getEmotionLogs')).resolves.toHaveLength(1);
+    });
+
+    it('rejects an analytics window that is not a positive integer', async () => {
+        await expect(ipc.invoke('storage:getEmotionAnalytics', 0)).rejects.toThrow('Invalid day count');
+        await expect(ipc.invoke('storage:getEmotionAnalytics', '30')).rejects.toThrow('Invalid day count');
+        await expect(ipc.invoke('storage:getEightfoldPathAnalytics', -5)).rejects.toThrow('Invalid day count');
+    });
+
+    it('defaults an omitted analytics window to 30 days', async () => {
+        await expect(ipc.invoke('storage:getEmotionAnalytics')).resolves.toMatchObject({ totalDays: 0 });
+        await expect(ipc.invoke('storage:getEightfoldPathAnalytics')).resolves.toMatchObject({ totalDays: 0 });
     });
 });

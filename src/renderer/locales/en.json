@@ -1,34 +1,14 @@
 {
     "settings": {
-        "title": "Settings",
         "theme": "Theme",
         "language": "Language",
-        "storage_mode": "Storage Mode",
-        "local_mode": "Local Mode",
-        "server_mode": "Server Mode",
-        "storage_local_desc": "All data stored on your device. Works completely offline.",
-        "storage_server_desc": "Data synced to server. Accessible from any device.",
         "themes": {
             "light": "Light",
             "dark": "Dark"
-        },
-        "languages": {
-            "en": "English",
-            "es": "Español",
-            "it": "Italiano",
-            "fr": "Français",
-            "de": "Deutsch",
-            "pt": "Português",
-            "zh": "中文",
-            "ja": "日本語"
         }
     },
     "header": {
-        "greeting": "Hello",
-        "menu": "Menu",
-        "breathe": "Breathe",
         "emotions": "Journal",
-        "eightfoldPath": "Eightfold Path",
         "calendar": "Calendar",
         "philosophy": "Philosophy",
         "settings": "Settings",
@@ -38,12 +18,16 @@
         "begin": "Begin",
         "stop": "Stop",
         "bell": {
-            "settings": "Bell Settings"
+            "settings": "Bell Settings",
+            "every": "Every {minutes} min",
+            "sound": "Sound",
+            "option": "Bell {number}",
+            "minutes": "{minutes} min",
+            "closeIntervals": "Close interval menu",
+            "closeSounds": "Close bell sound menu"
         }
     },
     "philosophy": {
-        "title": "Our Zen Philosophy",
-        "subtitle": "Understanding the design choices behind ZenGarden",
         "practice": {
             "title": "The Practice Is the Path",
             "body": "In Zen, meditation is not a means to an end—it is the end itself. Each moment of practice is complete and whole. There is nowhere to go, nothing to achieve. When you sit, you are already there."
@@ -70,7 +54,6 @@
         }
     },
     "auth": {
-        "welcome": "Welcome to ZenGarden",
         "username": "Username",
         "password": "Password",
         "login": "Login",
@@ -87,10 +70,10 @@
         "backToLogin": "Back to login",
         "passwordResetSuccess": "Password Reset!",
         "passwordResetMessage": "Your password has been successfully reset. You can now login with your new password.",
-        "goToLogin": "Go to Login"
+        "goToLogin": "Go to Login",
+        "passwordsDoNotMatch": "Passwords do not match"
     },
     "account": {
-        "title": "Account Settings",
         "changeUsername": "Change Username",
         "newUsernamePlaceholder": "New username",
         "updateUsername": "Update Username",
@@ -106,7 +89,7 @@
         "passwordsDoNotMatch": "Passwords do not match",
         "passwordTooShort": "Password must be at least 6 characters",
         "recoveryCodes": "Recovery Codes",
-        "recoveryCodesDescription": "Recovery codes allow you to reset your password if you forget it. Generate 12 one-time use codes and store them in a safe place.",
+        "recoveryCodesDescription": "Recovery codes allow you to reset your password if you forget it. Generate 10 one-time use codes and store them in a safe place.",
         "totalCodes": "Total codes",
         "usedCodes": "Used codes",
         "remainingCodes": "Remaining codes",
@@ -115,7 +98,6 @@
         "generateCodesWarning": "Warning: Generating new recovery codes will invalidate all previous codes.",
         "confirmPasswordToGenerate": "Enter your password to generate codes",
         "confirm": "Confirm",
-        "recoveryCodesFailed": "Failed to generate recovery codes",
         "saveCodesWarning": "Important: Save these codes now!",
         "saveCodesDescription": "You will not be able to see these codes again. Store them somewhere safe like a password manager.",
         "copyAll": "Copy All",
@@ -127,13 +109,7 @@
         "confirmPasswordToDelete": "Enter your password to confirm",
         "confirmDelete": "Yes, Delete My Account",
         "cancel": "Cancel",
-        "deleteFailed": "Failed to delete account",
-        "exportData": "Export Data",
-        "exportDescription": "Download all your meditation and emotion data.",
-        "exportJSON": "Export as JSON",
-        "exportCSV": "Export as CSV",
-        "exportSuccess": "Data exported successfully",
-        "exportFailed": "Failed to export data"
+        "deleteFailed": "Failed to delete account"
     },
     "notes": {
         "title": "Session Complete",
@@ -147,12 +123,8 @@
         "none": "None",
         "box": "Box Breathing",
         "deep": "Deep Breathing",
-        "calm": "Calming Breath",
         "fourSevenEight": "4-7-8 Breathing",
         "energizing": "Energizing Breath",
-        "start": "Start",
-        "stop": "Stop",
-        "close": "Close",
         "cycle": "Cycle",
         "breatheIn": "Breathe In",
         "hold": "Hold",
@@ -165,9 +137,7 @@
         }
     },
     "calendar": {
-        "title": "Meditation Calendar",
         "minutes": "min",
-        "close": "Close",
         "notes": "Notes",
         "months": [
             "January",
@@ -186,7 +156,6 @@
         "weekdays": ["S", "M", "T", "W", "T", "F", "S"]
     },
     "emotions": {
-        "title": "Journal",
         "positive": "Positive",
         "negative": "Negative",
         "pnRatio": "P/N Ratio",
@@ -211,7 +180,6 @@
         "noPositiveEmotionsYet": "No positive emotions tracked yet",
         "noNegativeEmotionsYet": "No negative emotions tracked yet",
         "trendChart": "P/N Ratio Trend",
-        "past30Days": "Last 30 Days",
         "past90Days": "Last 90 Days",
         "dailyNote": "Daily Note",
         "notePlaceholder": "How are you feeling today? Write your thoughts here...",
@@ -491,8 +459,6 @@
         "completed": "Completed",
         "progress": "Progress",
         "loading": "Loading",
-        "saving": "Saving...",
-        "saved": "Saved",
         "notesPlaceholder": "Add notes about how you followed this path today...",
         "paths": {
             "rightView": {

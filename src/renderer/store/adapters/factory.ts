@@ -4,66 +4,63 @@
  * Does NOT own: adapter implementations (electron.ts, capacitor.ts), types (types.ts).
  */
 
-import type { IStorageAdapter } from '../types';
-import { ElectronStorageAdapter } from './electron';
-import { CapacitorStorageAdapter } from './capacitor';
+import type { IStorageAdapter } from '@/renderer/store/types';
+import { ElectronStorageAdapter } from '@/renderer/store/adapters/electron';
+import { CapacitorStorageAdapter } from '@/renderer/store/adapters/capacitor';
 
-export class StorageFactory {
-    private static instance: IStorageAdapter | null = null;
+let instance: IStorageAdapter | null = null;
 
-    // Return the appropriate adapter (Electron for desktop, Capacitor for mobile)
-    static async getAdapter(): Promise<IStorageAdapter> {
-        // Return cached instance if available
-        if (this.instance) {
-            return this.instance;
+/** Returns the adapter for the current platform, instantiating and caching it on first call. */
+export async function getAdapter(): Promise<IStorageAdapter> {
+    if (instance !== null) {
+        return instance;
+    }
+
+    // Try Electron first (desktop app)
+    try {
+        const electronAdapter = new ElectronStorageAdapter();
+        if (await electronAdapter.probeAvailability()) {
+            instance = electronAdapter;
+            return electronAdapter;
         }
+    } catch {
+        // Electron not available (e.g., running on mobile)
+    }
 
-        // Try Electron first (desktop app)
-        try {
-            const electronAdapter = new ElectronStorageAdapter();
-            if (await electronAdapter.isAvailable()) {
-                this.instance = electronAdapter;
-                return electronAdapter;
-            }
-        } catch {
-            // Electron not available (e.g., running on mobile)
+    // Fall back to Capacitor (mobile app)
+    try {
+        const capacitorAdapter = new CapacitorStorageAdapter();
+        if (await capacitorAdapter.probeAvailability()) {
+            instance = capacitorAdapter;
+            return capacitorAdapter;
         }
+    } catch {
+        // Capacitor not available
+    }
 
-        // Fall back to Capacitor (mobile app)
+    throw new Error('No storage adapter available. This app requires Electron (desktop) or Capacitor (mobile).');
+}
+
+/** Probes both adapters without caching — `server` is always false, the app is local-only. */
+export async function checkAvailability(): Promise<{ server: boolean; local: boolean }> {
+    let local = false;
+    try {
+        const electronAdapter = new ElectronStorageAdapter();
+        local = await electronAdapter.probeAvailability();
+    } catch {
+        // Electron not available, try Capacitor
         try {
             const capacitorAdapter = new CapacitorStorageAdapter();
-            if (await capacitorAdapter.isAvailable()) {
-                this.instance = capacitorAdapter;
-                return capacitorAdapter;
-            }
+            local = await capacitorAdapter.probeAvailability();
         } catch {
-            // Capacitor not available
+            // Neither available
         }
-
-        throw new Error('No storage adapter available. This app requires Electron (desktop) or Capacitor (mobile).');
     }
 
-    // Check availability (always returns local: true, server: false)
-    static async checkAvailability(): Promise<{ server: boolean; local: boolean }> {
-        let local = false;
-        try {
-            const electronAdapter = new ElectronStorageAdapter();
-            local = await electronAdapter.isAvailable();
-        } catch {
-            // Electron not available, try Capacitor
-            try {
-                const capacitorAdapter = new CapacitorStorageAdapter();
-                local = await capacitorAdapter.isAvailable();
-            } catch {
-                // Neither available
-            }
-        }
+    return { server: false, local };
+}
 
-        return { server: false, local };
-    }
-
-    // Reset factory (useful for testing)
-    static reset(): void {
-        this.instance = null;
-    }
+/** Drops the cached adapter so the next getAdapter() re-probes — used by tests. */
+export function resetAdapter(): void {
+    instance = null;
 }
