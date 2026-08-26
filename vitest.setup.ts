@@ -1,6 +1,6 @@
 import { createApp } from 'vue';
 import { i18n } from './src/renderer/i18n';
-import en from './assets/locales/en.json';
+import en from './src/renderer/locales/en.json';
 
 // Create a minimal Vue app instance with i18n plugin installed
 // This makes the plugin available to all components during testing

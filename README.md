@@ -1,8 +1,6 @@
-# ZenGarden
+<img src="public/banner.png">
 
 Zen Garden is a **local-first, cross-platform meditation app** built with **Electron** (desktop), **Capacitor** (mobile), **Vue 3**, and TypeScript. All your data stays on your device in MongoDB-compatible JSON files - no server, no cloud, completely private. Features a meditation timer with bell sounds, breathing exercises, a meditation calendar, and relaxing Zen animations.
-
-> **IMPORTANT:** This app runs natively on **Desktop** (macOS, Linux) and **Mobile** (Android). All data is stored in JSON files on your device and never leaves it.
 
 ## Demo
 
@@ -221,7 +219,7 @@ To share the app with others:
 
 ## Tech Stack
 
-- **Desktop:** Electron 40, electron-vite 5 (Native macOS, Linux app)
+- **Desktop:** Electron 44, electron-vite 5 (Native macOS, Linux app)
 - **Mobile:** Capacitor 8 (Native Android app)
 - **Frontend:** Vue 3, TypeScript (strict), Vite, SCSS, vue-i18n
 - **Storage:** JSON files with atomic writes (MongoDB-compatible document structure)
@@ -369,7 +367,3 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
----
-
-**Made with Vue 3, Electron, Capacitor, and a passion for mindful, local-first software.**
