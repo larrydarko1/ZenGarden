@@ -83,7 +83,7 @@ const petals: Petal[] = Array.from({ length: PETALS }, (_, idx) => {
 }
 
 .petal {
-    /** Rotation has to pivot on the petal, not the viewBox origin. */
+    // Rotation has to pivot on the petal, not the viewBox origin.
     transform-box: fill-box;
     transform-origin: center;
     opacity: 0;
@@ -92,11 +92,6 @@ const petals: Petal[] = Array.from({ length: PETALS }, (_, idx) => {
     animation-iteration-count: infinite;
 }
 
-/**
- * Three sway signatures. The vertical travel is identical in all of them — it
- * is what makes a petal read as falling — so only the horizontal offsets and
- * the spin direction differ.
- */
 @keyframes petal-drift-a {
     0% {
         transform: translate(0, 0) rotate(0deg);

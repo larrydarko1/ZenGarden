@@ -92,7 +92,7 @@ const particles: Particle[] = BANDS.flatMap((band, bandIdx) =>
 }
 
 .particle {
-    /** Overridden per band by an inline style; this is the fallback. */
+    // Overridden per band by an inline style; this is the fallback.
     --peak-opacity: 0.4;
 
     opacity: 0;
@@ -101,11 +101,6 @@ const particles: Particle[] = BANDS.flatMap((band, bandIdx) =>
     animation-iteration-count: infinite;
 }
 
-/**
- * Three bob signatures over a shared left-to-right sweep. The sweep distance
- * (2100 user units) clears the 1920 viewBox from any starting column, so a
- * particle is always off-screen when its cycle restarts.
- */
 @keyframes particle-bob-a {
     0% {
         transform: translate(0, 0);

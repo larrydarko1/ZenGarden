@@ -1,4 +1,4 @@
-/** Text entry — single-line and multi-line. */
+// Text entry — single-line and multi-line.
 
 @use '@/renderer/styles/variables' as *;
 @use '@/renderer/styles/components/placeholders' as *;
@@ -18,7 +18,7 @@
         background $transition-fast,
         border-color $transition-fast;
 
-    /* Mouse users get the same affordance; :focus-visible alone skips them. */
+    // Mouse users get the same affordance; :focus-visible alone skips them.
     &:focus {
         outline: none;
         border-color: $input-border-focus;

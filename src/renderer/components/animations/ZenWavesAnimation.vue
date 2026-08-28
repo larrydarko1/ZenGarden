@@ -59,7 +59,7 @@
     will-change: transform;
 }
 
-/** Opposite directions, unequal periods — the two bands never phase-lock. */
+// Opposite directions, unequal periods — the two bands never phase-lock.
 .wave-front {
     animation: wave-drift-left $duration-wave linear infinite;
 }

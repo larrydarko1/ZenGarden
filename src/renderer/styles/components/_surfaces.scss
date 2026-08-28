@@ -1,10 +1,8 @@
-/**
- * Panels, cards and the rules between them.
- */
+// Panels, cards and the rules between them.
 @use '@/renderer/styles/variables' as *;
 @use '@/renderer/styles/components/placeholders' as *;
 
-/* ––––– Panel ––––– */
+// –– Panel –––––––––––––––––––––
 
 .zen-panel {
     @extend %surface;
@@ -13,7 +11,7 @@
     border-radius: $border-radius-lg;
 }
 
-/* ––––– Hairline rule ––––– */
+// –– Hairline rule –––––––––––––––––––––
 
 .zen-divider {
     height: $size-0;
@@ -21,7 +19,7 @@
     opacity: $opacity-mid-low;
 }
 
-/* ––––– Section label ––––– */
+// –– Section label –––––––––––––––––––––
 
 .zen-label {
     @extend %uppercase-label;

@@ -129,7 +129,7 @@ const blobs: Blob[] = BANDS.flatMap((band, bandIdx) =>
 }
 
 .blob {
-    /** Scale has to breathe around the blob's own centre, not the viewBox origin. */
+    // Scale has to breathe around the blob's own centre, not the viewBox origin.
     transform-box: fill-box;
     transform-origin: center;
     will-change: transform;
@@ -137,11 +137,6 @@ const blobs: Blob[] = BANDS.flatMap((band, bandIdx) =>
     animation-iteration-count: infinite;
 }
 
-/**
- * Rise, sway and morph on one track. The non-uniform `scale()` is what the
- * animated `rx`/`ry` attributes used to do — same wobble, but a compositor
- * transform instead of two attribute mutations and a re-tessellated ellipse.
- */
 @keyframes blob-rise-a {
     0% {
         transform: translate(0, 0) scale(1, 1);

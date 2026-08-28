@@ -172,7 +172,7 @@ const { t } = useI18n();
     cursor: pointer;
 }
 
-/** The left inset aligns these under the label, clear of the checkbox. */
+// The left inset aligns these under the label, clear of the checkbox.
 .eightfold-path-desc {
     margin-bottom: $space-1;
     margin-left: $space-6;
@@ -194,7 +194,7 @@ const { t } = useI18n();
     margin-top: $space-2;
     margin-left: $space-6;
 
-    /** Size only — `.zen-textarea` carries the field treatment. */
+    // Size only — `.zen-textarea` carries the field treatment.
     .zen-textarea {
         min-height: auto;
         border-radius: $border-radius;

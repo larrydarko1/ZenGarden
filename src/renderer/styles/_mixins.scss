@@ -1,14 +1,12 @@
-/** Mixins reachable from every SFC. */
+// Mixins reachable from every SFC.
 
 @use '@/renderer/styles/variables' as *;
 
-/* ––––– Scrollbar ––––– */
+// –– Scrollbar ––––––––––––––––––––
 
-/**
- * The overlay panels all scroll their own content. Chromium's default
- * scrollbar is opaque and light-themed, so every one of them hid it by hand
- * before this existed.
- */
+// The overlay panels all scroll their own content. Chromium's default
+// scrollbar is opaque and light-themed, so every one of them hid it by hand
+// before this existed.
 @mixin scrollbar($width: $size-3) {
     &::-webkit-scrollbar {
         width: $width;
@@ -28,22 +26,19 @@
     }
 }
 
-/* ––––– Composited layer ––––– */
+// –– Composited layer ––––––––––––––––––––
 
-/**
- * Promotes an element to its own compositor layer and cuts paint invalidation
- * off at its own box. Use it on anything that animates continuously: without
- * it Chromium re-rasterises the animating element AND re-runs every
- * `backdrop-filter` stacked above it, every frame.
- *
- * One constraint comes with it. Both `layout` and `paint` containment make the
- * element a containing block for `position: fixed` descendants as well as
- * absolute ones — so a fixed child stops resolving against the viewport and
- * resolves against this box instead. That is harmless on a full-bleed
- * `position: fixed; inset: 0` container, where the two are the same rectangle,
- * and it is why `.zen-meditation-overlay` can use this. Do not reach for it on
- * an element that is smaller than the viewport and has fixed descendants.
- */
+// Promotes an element to its own compositor layer and cuts paint invalidation
+// off at its own box. Use it on anything that animates continuously: without
+// it Chromium re-rasterises the animating element AND re-runs every
+// `backdrop-filter` stacked above it, every frame.
+// One constraint comes with it. Both `layout` and `paint` containment make the
+// element a containing block for `position: fixed` descendants as well as
+// absolute ones — so a fixed child stops resolving against the viewport and
+// resolves against this box instead. That is harmless on a full-bleed
+// `position: fixed; inset: 0` container, where the two are the same rectangle,
+// and it is why `.zen-meditation-overlay` can use this. Do not reach for it on
+// an element that is smaller than the viewport and has fixed descendants.
 @mixin composited-layer {
     will-change: transform;
     contain: layout paint style;

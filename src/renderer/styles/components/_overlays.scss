@@ -1,9 +1,9 @@
-/** Overlay furniture and the keyframes the whole app shares. */
+// Overlay furniture and the keyframes the whole app shares.
 
 @use '@/renderer/styles/variables' as *;
 @use '@/renderer/styles/components/placeholders' as *;
 
-/* ––––– Click-away backdrop ––––– */
+// –– Click-away backdrop –––––––––––––––––––––
 
 .zen-backdrop {
     @extend %bare-button;
@@ -13,7 +13,7 @@
     cursor: default;
 }
 
-/* ––––– Shared keyframes ––––– */
+// –– Shared keyframes –––––––––––––––––––––
 
 @keyframes fade-in {
     from {

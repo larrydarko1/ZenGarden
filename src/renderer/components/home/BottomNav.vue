@@ -223,7 +223,7 @@ const { t } = useI18n();
             transform: translateY(-$size-0);
         }
 
-        /** The underline draws itself in on activation, then stays put. */
+        // The underline draws itself in on activation, then stays put.
         &::after {
             content: '';
             position: absolute;

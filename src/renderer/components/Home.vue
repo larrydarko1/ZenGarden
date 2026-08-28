@@ -835,7 +835,7 @@ onUnmounted(() => {
         font-size: $font-size-xs;
         text-align: center;
 
-        /** A number field whose spinners would overflow this narrow bar. */
+        // A number field whose spinners would overflow this narrow bar.
         appearance: textfield;
 
         &::-webkit-outer-spin-button,
@@ -1114,7 +1114,7 @@ onUnmounted(() => {
     text-align: center;
 }
 
-/** Sizing only — `.zen-icon-btn.is-bare` carries the interaction states. */
+// Sizing only — `.zen-icon-btn.is-bare` carries the interaction states.
 .config-close-btn {
     width: auto;
     height: auto;

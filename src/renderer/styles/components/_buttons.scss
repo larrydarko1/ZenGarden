@@ -1,9 +1,9 @@
-/** Buttons — the shapes that recur across unrelated screens. */
+// Buttons — the shapes that recur across unrelated screens.
 
 @use '@/renderer/styles/variables' as *;
 @use '@/renderer/styles/components/placeholders' as *;
 
-/* ––––– Labelled action button ––––– */
+// –– Labelled action button –––––––––––––––––––––
 
 .zen-btn {
     @extend %bare-button;
@@ -34,7 +34,7 @@
         cursor: not-allowed;
     }
 
-    /* Quieter sibling: reads as a link until you reach for it. */
+    // Quieter sibling: reads as a link until you reach for it.
     &.is-ghost {
         background: transparent;
         color: $text2;
@@ -46,7 +46,7 @@
         }
     }
 
-    /* Destructive sibling: carries its own palette, not an opacity tweak. */
+    // Destructive sibling: carries its own palette, not an opacity tweak.
     &.is-danger {
         background: $danger;
         border-color: $danger-border;
@@ -59,7 +59,7 @@
     }
 }
 
-/* ––––– Square glyph button ––––– */
+// –– Square glyph button –––––––––––––––––––––
 
 .zen-icon-btn {
     @extend %bare-button;
@@ -90,7 +90,7 @@
         cursor: default;
     }
 
-    /* Borderless variant for controls that sit inside an existing frame. */
+    // Borderless variant for controls that sit inside an existing frame.
     &.is-bare {
         border-color: transparent;
 

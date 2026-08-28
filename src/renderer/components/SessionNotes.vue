@@ -117,7 +117,7 @@ function handleClose(): void {
     }
 }
 
-/** Glyph metrics only — `.zen-icon-btn` carries the interaction states. */
+// Glyph metrics only — `.zen-icon-btn` carries the interaction states.
 .notes-close {
     width: auto;
     height: auto;

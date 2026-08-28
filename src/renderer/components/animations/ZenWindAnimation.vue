@@ -50,7 +50,7 @@ const STAGGER_SECONDS = 1.2;
 }
 
 .wind-streak {
-    /** Starts off the left edge; the keyframe carries it past the right one. */
+    // Starts off the left edge; the keyframe carries it past the right one.
     animation: wind-sweep $duration-wind linear infinite;
     will-change: transform;
 }
