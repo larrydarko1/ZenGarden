@@ -7,7 +7,7 @@
  * Documents arrive as RawDoc because that is what the JSON files hold — the
  * casts below are reads of fields these collections have always written.
  */
-import type { EightfoldPathAnalytics, EmotionAnalytics } from '@/schemas/storage';
+import type { EightfoldPathAnalytics, EmotionAnalytics, EmotionStat } from '@/schemas/storage';
 import type { RawDoc } from '@/main/services/db';
 
 /** True when a path entry carries a non-blank note, which is what counts as "followed". */
@@ -45,7 +45,7 @@ export function buildEmotionAnalytics(logs: RawDoc[]): EmotionAnalytics {
     let positiveDays = 0;
     let negativeDays = 0;
     const uniqueEmotions = new Set<string>();
-    const emotionCounts: Record<string, { name: string; type: string; count: number }> = {};
+    const emotionCounts = new Map<string, EmotionStat>();
 
     sorted.forEach((log) => {
         if ((log['pnRatio'] as number) >= 0.5) positiveDays++;
@@ -54,9 +54,9 @@ export function buildEmotionAnalytics(logs: RawDoc[]): EmotionAnalytics {
         const emotions = log['emotions'] as { name: string; type: string }[] | undefined;
         emotions?.forEach((emotion) => {
             uniqueEmotions.add(emotion.name);
-            const counter = emotionCounts[emotion.name] ?? { name: emotion.name, type: emotion.type, count: 0 };
+            const counter = emotionCounts.get(emotion.name) ?? { name: emotion.name, type: emotion.type, count: 0 };
             counter.count++;
-            emotionCounts[emotion.name] = counter;
+            emotionCounts.set(emotion.name, counter);
         });
     });
 
@@ -68,7 +68,7 @@ export function buildEmotionAnalytics(logs: RawDoc[]): EmotionAnalytics {
         emotionDiversity: uniqueEmotions.size,
         positiveDays,
         negativeDays,
-        topEmotions: Object.values(emotionCounts).sort((a, b) => b.count - a.count),
+        topEmotions: [...emotionCounts.values()].sort((a, b) => b.count - a.count),
         trends: sorted.map((log) => ({ date: log['date'] as string, pnRatio: log['pnRatio'] as number })),
     };
 }
@@ -91,12 +91,12 @@ export function buildEightfoldPathAnalytics(logs: RawDoc[]): EightfoldPathAnalyt
     // All eight followed on the same day — the only day that counts as perfect.
     const perfectDays = sorted.filter((log) => (log['completedCount'] as number) === 8).length;
 
-    const pathCounts: Record<string, number> = {};
+    const pathCounts = new Map<string, number>();
     sorted.forEach((log) => {
         const paths = log['paths'] as { path: string; note?: string }[] | undefined;
         paths?.forEach((pathEntry) => {
             if (isPathFollowed(pathEntry.note)) {
-                pathCounts[pathEntry.path] = (pathCounts[pathEntry.path] ?? 0) + 1;
+                pathCounts.set(pathEntry.path, (pathCounts.get(pathEntry.path) ?? 0) + 1);
             }
         });
     });
@@ -105,7 +105,7 @@ export function buildEightfoldPathAnalytics(logs: RawDoc[]): EightfoldPathAnalyt
         totalDays: sorted.length,
         averageCompletion: totalCompleted / sorted.length,
         perfectDays,
-        mostFollowedPaths: Object.entries(pathCounts)
+        mostFollowedPaths: [...pathCounts.entries()]
             .map(([path, count]) => ({ path, count }))
             .sort((a, b) => b.count - a.count)
             .slice(0, 8),

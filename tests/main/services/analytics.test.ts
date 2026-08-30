@@ -96,6 +96,23 @@ describe('buildEmotionAnalytics', () => {
         expect(result.trends.map((t) => t.date)).toEqual(['2025-01-01', '2025-01-02', '2025-01-03']);
     });
 
+    it('counts an emotion named after an Object member without polluting the prototype', () => {
+        const result = buildEmotionAnalytics([
+            emotionLog('2026-01-01', 2, 0, [
+                { name: '__proto__', type: 'positive' },
+                { name: 'constructor', type: 'positive' },
+            ]),
+        ]);
+
+        expect(result.topEmotions).toEqual([
+            { name: '__proto__', type: 'positive', count: 1 },
+            { name: 'constructor', type: 'positive', count: 1 },
+        ]);
+        expect(Object.hasOwn(Object.prototype, 'count')).toBe(false);
+        expect(({} as Record<string, unknown>)['count']).toBeUndefined();
+        expect(structuredClone(result.topEmotions)).toHaveLength(2);
+    });
+
     it('tolerates a log stored without an emotions array', () => {
         const result = buildEmotionAnalytics([{ date: '2025-01-01', positiveCount: 1, negativeCount: 0, pnRatio: 1 }]);
 
@@ -154,5 +171,23 @@ describe('buildEightfoldPathAnalytics', () => {
 
         expect(result.mostFollowedPaths).toEqual([]);
         expect(result.totalDays).toBe(1);
+    });
+
+    it('counts a path named after an Object member without reaching the prototype', () => {
+        const result = buildEightfoldPathAnalytics([
+            {
+                date: '2025-01-01',
+                completedCount: 2,
+                paths: [
+                    { path: '__proto__', note: 'a note' },
+                    { path: 'constructor', note: 'a note' },
+                ],
+            },
+        ]);
+
+        expect(result.mostFollowedPaths).toEqual([
+            { path: '__proto__', count: 1 },
+            { path: 'constructor', count: 1 },
+        ]);
     });
 });

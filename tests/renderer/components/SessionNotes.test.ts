@@ -43,10 +43,9 @@ describe('SessionNotes', () => {
         wrapper.unmount();
     });
 
-    it('closes from the × button, the backdrop, and Escape in the field', async () => {
+    it('closes from the × button and Escape in the field', async () => {
         for (const close of [
             (w: ReturnType<typeof mountNotes>) => w.find('.notes-close').trigger('click'),
-            (w: ReturnType<typeof mountNotes>) => w.find('.notes-modal-backdrop').trigger('click'),
             (w: ReturnType<typeof mountNotes>) => w.find('textarea').trigger('keydown.esc'),
         ]) {
             const wrapper = mountNotes();
@@ -56,5 +55,14 @@ describe('SessionNotes', () => {
             expect(wrapper.emitted('close')).toHaveLength(1);
             wrapper.unmount();
         }
+    });
+
+    it('stays open when the area around the modal is clicked', async () => {
+        const wrapper = mountNotes();
+
+        await wrapper.find('.notes-modal-bg').trigger('click');
+
+        expect(wrapper.emitted('close')).toBeUndefined();
+        wrapper.unmount();
     });
 });
