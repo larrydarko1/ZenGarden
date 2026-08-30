@@ -2,10 +2,16 @@ import { describe, it, expect } from 'vitest';
 import { mountWithI18n } from '@test-utils';
 import BottomNav from '@/renderer/components/home/BottomNav.vue';
 
-const INACTIVE = { journalMode: false, calendarMode: false, philosophyMode: false, settingsMode: false };
+const INACTIVE = {
+    journalMode: false,
+    calendarMode: false,
+    philosophyMode: false,
+    settingsMode: false,
+    canCloseVault: true,
+};
 
 describe('BottomNav', () => {
-    it('renders one button per destination, plus logout', () => {
+    it('renders one button per destination, plus close-vault', () => {
         const wrapper = mountWithI18n(BottomNav, { props: INACTIVE });
 
         expect(wrapper.findAll('.nav-item')).toHaveLength(5);
@@ -16,7 +22,7 @@ describe('BottomNav', () => {
         const wrapper = mountWithI18n(BottomNav, { props: INACTIVE });
 
         const labels = wrapper.findAll('.nav-item span').map((span) => span.text());
-        expect(labels).toEqual(['Journal', 'Calendar', 'Philosophy', 'Settings', 'Logout']);
+        expect(labels).toEqual(['Journal', 'Calendar', 'Philosophy', 'Settings', 'Close Vault']);
         wrapper.unmount();
     });
 
@@ -38,7 +44,7 @@ describe('BottomNav', () => {
         ['toggle-calendar', 1],
         ['toggle-philosophy', 2],
         ['toggle-settings', 3],
-        ['logout', 4],
+        ['close-vault', 4],
     ] as const)('clicking button %s emits %s', async (event, index) => {
         const wrapper = mountWithI18n(BottomNav, { props: INACTIVE });
 
@@ -48,12 +54,22 @@ describe('BottomNav', () => {
         wrapper.unmount();
     });
 
-    it('never marks logout active — it is an action, not a destination', () => {
+    it('never marks close-vault active — it is an action, not a destination', () => {
         const wrapper = mountWithI18n(BottomNav, {
-            props: { journalMode: true, calendarMode: true, philosophyMode: true, settingsMode: true },
+            props: { ...INACTIVE, journalMode: true, calendarMode: true, philosophyMode: true, settingsMode: true },
         });
 
-        expect(wrapper.find('.nav-logout').classes()).not.toContain('nav-active');
+        expect(wrapper.find('.nav-close-vault').classes()).not.toContain('nav-active');
+        wrapper.unmount();
+    });
+
+    // Android's vault is fixed, so closing it would drop the user on a picker
+    // that immediately reopens the same folder.
+    it('hides close-vault where the vault cannot be changed', () => {
+        const wrapper = mountWithI18n(BottomNav, { props: { ...INACTIVE, canCloseVault: false } });
+
+        expect(wrapper.findAll('.nav-item')).toHaveLength(4);
+        expect(wrapper.find('.nav-close-vault').exists()).toBe(false);
         wrapper.unmount();
     });
 });

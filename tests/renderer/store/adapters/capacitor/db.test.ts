@@ -1,12 +1,13 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import {
+    DB_FILES,
+    VAULT_DIR,
     readCollection,
     writeCollection,
-    readSession,
-    writeSession,
+    readObject,
+    writeObject,
     generateObjectId,
     initializeStorage,
-    DB_FILES,
 } from '@/renderer/store/adapters/capacitor/db';
 
 const mockReadFile = vi.fn();
@@ -19,145 +20,153 @@ vi.mock('@capacitor/filesystem', () => ({
         writeFile: (...args: unknown[]) => mockWriteFile(...args),
         mkdir: (...args: unknown[]) => mockMkdir(...args),
     },
-    Directory: { Documents: 'DOCUMENTS' },
+    Directory: { Documents: 'DOCUMENTS', Data: 'DATA' },
     Encoding: { UTF8: 'utf8' },
 }));
 
-describe('capacitor/db', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
+vi.mock('@/renderer/utils/logger', () => ({ log: { info: vi.fn(), error: vi.fn() } }));
 
-    describe('readCollection', () => {
-        it('reads and parses JSON array from file', async () => {
-            mockReadFile.mockResolvedValue({ data: '[{"id": 1}, {"id": 2}]' });
-            const result = await readCollection<{ id: number }>('users.json');
-            expect(result).toEqual([{ id: 1 }, { id: 2 }]);
-        });
+beforeEach(() => {
+    vi.clearAllMocks();
+    mockWriteFile.mockResolvedValue(undefined);
+    mockMkdir.mockResolvedValue(undefined);
+});
 
-        it('returns empty array when file does not exist', async () => {
-            mockReadFile.mockRejectedValue(new Error('File not found'));
-            const result = await readCollection('users.json');
-            expect(result).toEqual([]);
-        });
+/**
+ * The Android vault sits in public Documents on purpose. It holds nothing but
+ * the journal — no account, no password hash, no session — so a folder the user
+ * can open in a file manager and copy to a desktop vault is the whole point.
+ */
+describe('vault location', () => {
+    it('reads and writes public Documents', async () => {
+        mockReadFile.mockResolvedValue({ data: '[]' });
 
-        it('returns empty array when data is not a string', async () => {
-            mockReadFile.mockResolvedValue({ data: null });
-            const result = await readCollection('users.json');
-            expect(result).toEqual([]);
-        });
+        await readCollection('users-are-gone.json');
+        await writeCollection('meditations.json', []);
 
-        it('uses correct path under ZenGarden/data/', async () => {
-            mockReadFile.mockResolvedValue({ data: '[]' });
-            await readCollection('users.json');
-            expect(mockReadFile).toHaveBeenCalledWith(expect.objectContaining({ path: 'ZenGarden/data/users.json' }));
+        [...mockReadFile.mock.calls, ...mockWriteFile.mock.calls].forEach(([call]) => {
+            expect((call as { directory: string }).directory).toBe('DOCUMENTS');
         });
     });
 
-    describe('writeCollection', () => {
-        it('writes JSON with indentation', async () => {
-            await writeCollection('test.json', [{ a: 1 }]);
-            expect(mockWriteFile).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    data: JSON.stringify([{ a: 1 }], null, 2),
-                    path: 'ZenGarden/data/test.json',
-                }),
-            );
-        });
+    it('puts the files at the root of the vault folder, not in a subdirectory', async () => {
+        mockReadFile.mockResolvedValue({ data: '[]' });
+        await readCollection(DB_FILES.meditations);
+
+        expect(mockReadFile).toHaveBeenCalledWith(
+            expect.objectContaining({ path: `${VAULT_DIR}/${DB_FILES.meditations}` }),
+        );
+    });
+});
+
+describe('readCollection', () => {
+    it('reads and parses a JSON array', async () => {
+        mockReadFile.mockResolvedValue({ data: '[{"id": 1}, {"id": 2}]' });
+        expect(await readCollection<{ id: number }>(DB_FILES.meditations)).toEqual([{ id: 1 }, { id: 2 }]);
     });
 
-    describe('readSession', () => {
-        it('reads session data from file', async () => {
-            mockReadFile.mockResolvedValue({ data: '{"currentUser": "monk"}' });
-            const result = await readSession();
-            expect(result).toEqual({ currentUser: 'monk' });
-        });
-
-        it('returns empty object when file missing', async () => {
-            mockReadFile.mockRejectedValue(new Error('not found'));
-            const result = await readSession();
-            expect(result).toEqual({});
-        });
-
-        it('returns empty object when data is non-string', async () => {
-            mockReadFile.mockResolvedValue({ data: 123 });
-            const result = await readSession();
-            expect(result).toEqual({});
-        });
+    it('reads a missing file as an empty collection', async () => {
+        mockReadFile.mockRejectedValue(new Error('File not found'));
+        expect(await readCollection(DB_FILES.meditations)).toEqual([]);
     });
 
-    describe('writeSession', () => {
-        it('writes session data to the correct file', async () => {
-            await writeSession({ currentUser: 'monk' });
-            expect(mockWriteFile).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    path: `ZenGarden/data/${DB_FILES.session}`,
-                    data: JSON.stringify({ currentUser: 'monk' }, null, 2),
-                }),
-            );
-        });
+    it('reads unparseable contents as an empty collection', async () => {
+        mockReadFile.mockResolvedValue({ data: '{not json' });
+        expect(await readCollection(DB_FILES.meditations)).toEqual([]);
     });
 
-    describe('generateObjectId', () => {
-        it('returns a hex string', () => {
-            const id = generateObjectId();
-            expect(id).toMatch(/^[0-9a-f]+$/);
-        });
-
-        it('generates unique IDs', () => {
-            const ids = new Set(Array.from({ length: 50 }, () => generateObjectId()));
-            expect(ids.size).toBe(50);
-        });
-
-        it('starts with a timestamp prefix', () => {
-            const before = Math.floor(Date.now() / 1000);
-            const id = generateObjectId();
-            const after = Math.floor(Date.now() / 1000);
-            const timestampHex = id.substring(0, 8);
-            const timestamp = parseInt(timestampHex, 16);
-            expect(timestamp).toBeGreaterThanOrEqual(before);
-            expect(timestamp).toBeLessThanOrEqual(after);
-        });
+    it('reads non-string data as an empty collection', async () => {
+        mockReadFile.mockResolvedValue({ data: null });
+        expect(await readCollection(DB_FILES.meditations)).toEqual([]);
     });
 
-    describe('initializeStorage', () => {
-        it('creates directory and initializes missing files', async () => {
-            mockReadFile.mockRejectedValue(new Error('not found'));
+    // A file holding an object is unusable as a collection, not partially usable.
+    it('reads an object as an empty collection', async () => {
+        mockReadFile.mockResolvedValue({ data: '{"meditations": []}' });
+        expect(await readCollection(DB_FILES.meditations)).toEqual([]);
+    });
+});
 
-            await initializeStorage();
+describe('writeCollection', () => {
+    it('writes indented JSON', async () => {
+        await writeCollection(DB_FILES.meditations, [{ a: 1 }]);
+        expect(mockWriteFile).toHaveBeenCalledWith(
+            expect.objectContaining({
+                path: `${VAULT_DIR}/${DB_FILES.meditations}`,
+                data: JSON.stringify([{ a: 1 }], null, 2),
+            }),
+        );
+    });
+});
 
-            expect(mockMkdir).toHaveBeenCalledWith(
-                expect.objectContaining({ path: 'ZenGarden/data', recursive: true }),
-            );
-            // Should write initial data for all DB_FILES
-            const fileCount = Object.keys(DB_FILES).length;
-            expect(mockWriteFile).toHaveBeenCalledTimes(fileCount);
-        });
+describe('readObject', () => {
+    it('reads a stored object', async () => {
+        mockReadFile.mockResolvedValue({ data: '{"theme":"light"}' });
+        expect(await readObject(DB_FILES.settings)).toEqual({ theme: 'light' });
+    });
 
-        it('skips files that already exist', async () => {
-            mockReadFile.mockResolvedValue({ data: '[]' });
+    it('reads a missing file as null', async () => {
+        mockReadFile.mockRejectedValue(new Error('File not found'));
+        expect(await readObject(DB_FILES.settings)).toBeNull();
+    });
 
-            await initializeStorage();
+    // Settings are an object; an array there is a corrupt file, not settings.
+    it('reads an array as null', async () => {
+        mockReadFile.mockResolvedValue({ data: '[]' });
+        expect(await readObject(DB_FILES.settings)).toBeNull();
+    });
+});
 
-            expect(mockWriteFile).not.toHaveBeenCalled();
-        });
+describe('writeObject', () => {
+    it('writes the object to its file', async () => {
+        await writeObject(DB_FILES.settings, { theme: 'dark' });
+        expect(mockWriteFile).toHaveBeenCalledWith(
+            expect.objectContaining({
+                path: `${VAULT_DIR}/${DB_FILES.settings}`,
+                data: JSON.stringify({ theme: 'dark' }, null, 2),
+            }),
+        );
+    });
+});
 
-        it('initializes session file with {} and others with []', async () => {
-            mockReadFile.mockRejectedValue(new Error('not found'));
+describe('generateObjectId', () => {
+    it('returns a hex string', () => {
+        expect(generateObjectId()).toMatch(/^[0-9a-f]+$/);
+    });
 
-            await initializeStorage();
+    it('generates unique IDs', () => {
+        expect(new Set(Array.from({ length: 50 }, () => generateObjectId())).size).toBe(50);
+    });
 
-            const sessionCall = mockWriteFile.mock.calls.find(
-                (call: unknown[]) => (call[0] as { path: string }).path === `ZenGarden/data/${DB_FILES.session}`,
-            );
-            expect(sessionCall).toBeDefined();
-            expect(JSON.parse((sessionCall![0] as { data: string }).data)).toEqual({});
+    it('starts with a timestamp prefix', () => {
+        const before = Math.floor(Date.now() / 1000);
+        const timestamp = parseInt(generateObjectId().substring(0, 8), 16);
+        expect(timestamp).toBeGreaterThanOrEqual(before);
+        expect(timestamp).toBeLessThanOrEqual(Math.floor(Date.now() / 1000));
+    });
+});
 
-            const usersCall = mockWriteFile.mock.calls.find(
-                (call: unknown[]) => (call[0] as { path: string }).path === `ZenGarden/data/${DB_FILES.users}`,
-            );
-            expect(usersCall).toBeDefined();
-            expect(JSON.parse((usersCall![0] as { data: string }).data)).toEqual([]);
-        });
+describe('initializeStorage', () => {
+    it('creates the vault folder', async () => {
+        await initializeStorage();
+        expect(mockMkdir).toHaveBeenCalledWith(
+            expect.objectContaining({ path: VAULT_DIR, directory: 'DOCUMENTS', recursive: true }),
+        );
+    });
+
+    /**
+     * Nothing is seeded. A missing file reads as an empty collection, so an
+     * empty folder is already a valid empty vault — and seeding would be the
+     * one thing that could overwrite a vault the user dropped in by hand.
+     */
+    it('writes no files', async () => {
+        await initializeStorage();
+        expect(mockWriteFile).not.toHaveBeenCalled();
+    });
+
+    // mkdir is the only way to ask, and an existing folder rejects.
+    it('treats an existing folder as success', async () => {
+        mockMkdir.mockRejectedValue(new Error('Directory exists'));
+        await expect(initializeStorage()).resolves.toBeUndefined();
     });
 });

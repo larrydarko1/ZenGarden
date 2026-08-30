@@ -12,21 +12,15 @@ import type { ElectronAPI } from '@/schemas/electron';
 const api: ElectronAPI = {
     isElectron: (): boolean => true,
 
-    // Auth
-    register: (username: string, password: string, options?: { theme?: string; language?: string }) =>
-        ipcRenderer.invoke('storage:register', username, password, options),
-    login: (username: string, password: string) => ipcRenderer.invoke('storage:login', username, password),
-    logout: () => ipcRenderer.invoke('storage:logout'),
-    getCurrentUser: () => ipcRenderer.invoke('storage:getCurrentUser'),
-    updateUsername: (newUsername: string, password: string) =>
-        ipcRenderer.invoke('storage:updateUsername', newUsername, password),
-    updatePassword: (currentPassword: string, newPassword: string) =>
-        ipcRenderer.invoke('storage:updatePassword', currentPassword, newPassword),
-    deleteAccount: (password: string) => ipcRenderer.invoke('storage:deleteAccount', password),
+    // Vault
+    findVaultPath: () => ipcRenderer.invoke('vault:findPath'),
+    chooseVault: () => ipcRenderer.invoke('vault:choose'),
+    closeVault: () => ipcRenderer.invoke('vault:close'),
 
     // Settings
-    updateTheme: (theme: string) => ipcRenderer.invoke('storage:updateTheme', theme),
-    updateLanguage: (language: string) => ipcRenderer.invoke('storage:updateLanguage', language),
+    getSettings: () => ipcRenderer.invoke('settings:get'),
+    updateTheme: (theme: string) => ipcRenderer.invoke('settings:updateTheme', theme),
+    updateLanguage: (language: string) => ipcRenderer.invoke('settings:updateLanguage', language),
 
     // Meditations
     createMeditation: (date: string, duration: number, notes: string) =>
@@ -44,12 +38,6 @@ const api: ElectronAPI = {
         ipcRenderer.invoke('storage:saveEightfoldPathLog', date, paths),
     getEightfoldPathLogs: (query?: unknown) => ipcRenderer.invoke('storage:getEightfoldPathLogs', query),
     getEightfoldPathAnalytics: (days?: number) => ipcRenderer.invoke('storage:getEightfoldPathAnalytics', days),
-
-    // Recovery codes
-    getRecoveryStatus: () => ipcRenderer.invoke('storage:getRecoveryStatus'),
-    generateRecoveryCodes: (password: string) => ipcRenderer.invoke('storage:generateRecoveryCodes', password),
-    resetPasswordWithRecoveryCode: (username: string, code: string, newPassword: string) =>
-        ipcRenderer.invoke('storage:resetPasswordWithRecoveryCode', username, code, newPassword),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', api);

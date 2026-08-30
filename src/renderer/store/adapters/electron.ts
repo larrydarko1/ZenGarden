@@ -1,14 +1,14 @@
 /**
- * electron — Electron storage adapter bridging Vue to Node.js JSON file backend via IPC.
+ * electron — Electron storage adapter bridging Vue to the vault via IPC.
  * Owns: the IStorageAdapter implementation for desktop.
  * Does NOT own: IPC handlers (main/services/), the bridge contract (@/schemas/electron),
  * type definitions (types.ts).
  */
 import type {
     IStorageAdapter,
-    User,
-    UserCredentials,
-    AuthResponse,
+    Settings,
+    Theme,
+    Language,
     Meditation,
     MeditationInput,
     EmotionLog,
@@ -18,7 +18,6 @@ import type {
     EmotionAnalytics,
     EightfoldPathAnalytics,
     DateRangeQuery,
-    RecoveryStatus,
 } from '@/renderer/store/types';
 import type { ElectronAPI } from '@/schemas/electron';
 import type { IpcResult } from '@/schemas/storage';
@@ -37,53 +36,32 @@ export class ElectronStorageAdapter implements IStorageAdapter {
         return Promise.resolve(window.electronAPI !== undefined);
     }
 
-    async register(
-        credentials: UserCredentials,
-        options: { theme?: 'light' | 'dark'; language?: 'en' | 'es' | 'it' | 'fr' | 'de' | 'pt' | 'zh' | 'ja' } = {},
-    ): Promise<AuthResponse> {
-        return unwrap(await this.api.register(credentials.username, credentials.password, options));
+    async findVaultPath(): Promise<string | null> {
+        return unwrap(await this.api.findVaultPath());
     }
 
-    async login(credentials: UserCredentials): Promise<AuthResponse> {
-        return unwrap(await this.api.login(credentials.username, credentials.password));
+    async chooseVault(): Promise<string | null> {
+        return unwrap(await this.api.chooseVault());
     }
 
-    async logout(): Promise<void> {
-        unwrap(await this.api.logout());
+    async closeVault(): Promise<void> {
+        unwrap(await this.api.closeVault());
     }
 
-    async getCurrentUser(): Promise<{ user: User }> {
-        const user = unwrap(await this.api.getCurrentUser());
-        if (user === null) throw new Error('Not authenticated');
-        return { user };
+    canChooseVault(): boolean {
+        return true;
     }
 
-    async updateUsername(
-        newUsername: string,
-        password: string,
-    ): Promise<{ message: string; username: string; token: string }> {
-        const result = unwrap(await this.api.updateUsername(newUsername, password));
-        return { ...result, username: newUsername, token: '' };
+    async getSettings(): Promise<Settings> {
+        return unwrap(await this.api.getSettings());
     }
 
-    async updatePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
-        return unwrap(await this.api.updatePassword(currentPassword, newPassword));
+    async updateTheme(theme: Theme): Promise<Settings> {
+        return unwrap(await this.api.updateTheme(theme));
     }
 
-    async deleteAccount(password: string): Promise<{ message: string }> {
-        return unwrap(await this.api.deleteAccount(password));
-    }
-
-    async updateTheme(theme: 'light' | 'dark'): Promise<{ message: string; theme: 'light' | 'dark' }> {
-        const result = unwrap(await this.api.updateTheme(theme));
-        return { ...result, theme };
-    }
-
-    async updateLanguage(
-        language: 'en' | 'es' | 'it' | 'fr' | 'de' | 'pt' | 'zh' | 'ja',
-    ): Promise<{ message: string; language: 'en' | 'es' | 'it' | 'fr' | 'de' | 'pt' | 'zh' | 'ja' }> {
-        const result = unwrap(await this.api.updateLanguage(language));
-        return { ...result, language };
+    async updateLanguage(language: Language): Promise<Settings> {
+        return unwrap(await this.api.updateLanguage(language));
     }
 
     async createMeditation(input: MeditationInput): Promise<{ message: string; meditation: Meditation }> {
@@ -122,22 +100,6 @@ export class ElectronStorageAdapter implements IStorageAdapter {
 
     async getEightfoldPathAnalytics(days?: number): Promise<EightfoldPathAnalytics> {
         return unwrap(await this.api.getEightfoldPathAnalytics(days));
-    }
-
-    async getRecoveryStatus(): Promise<RecoveryStatus> {
-        return unwrap(await this.api.getRecoveryStatus());
-    }
-
-    async generateRecoveryCodes(password: string): Promise<{ codes: string[] }> {
-        return unwrap(await this.api.generateRecoveryCodes(password));
-    }
-
-    async resetPasswordWithRecoveryCode(
-        username: string,
-        code: string,
-        newPassword: string,
-    ): Promise<{ message: string }> {
-        return unwrap(await this.api.resetPasswordWithRecoveryCode(username, code, newPassword));
     }
 }
 

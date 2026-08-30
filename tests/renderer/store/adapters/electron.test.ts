@@ -11,23 +11,12 @@ let mockAPI: ReturnType<typeof createMockAPI>;
 function createMockAPI() {
     return {
         isElectron: () => true,
-        register: vi
-            .fn()
-            .mockResolvedValue(
-                ok({ message: 'ok', user: { username: 'u', theme: 'dark', language: 'en' }, token: 't' }),
-            ),
-        login: vi
-            .fn()
-            .mockResolvedValue(
-                ok({ message: 'ok', user: { username: 'u', theme: 'dark', language: 'en' }, token: 't' }),
-            ),
-        logout: vi.fn().mockResolvedValue(ok({ message: 'ok' })),
-        getCurrentUser: vi.fn().mockResolvedValue(ok({ username: 'u', theme: 'dark', language: 'en' })),
-        updateUsername: vi.fn().mockResolvedValue(ok({ message: 'ok' })),
-        updatePassword: vi.fn().mockResolvedValue(ok({ message: 'ok' })),
-        deleteAccount: vi.fn().mockResolvedValue(ok({ message: 'ok' })),
-        updateTheme: vi.fn().mockResolvedValue(ok({ message: 'ok' })),
-        updateLanguage: vi.fn().mockResolvedValue(ok({ message: 'ok' })),
+        findVaultPath: vi.fn().mockResolvedValue(ok('/vault')),
+        chooseVault: vi.fn().mockResolvedValue(ok('/chosen')),
+        closeVault: vi.fn().mockResolvedValue(ok(null)),
+        getSettings: vi.fn().mockResolvedValue(ok({ theme: 'dark', language: 'en' })),
+        updateTheme: vi.fn().mockResolvedValue(ok({ theme: 'light', language: 'en' })),
+        updateLanguage: vi.fn().mockResolvedValue(ok({ theme: 'dark', language: 'ja' })),
         createMeditation: vi.fn().mockResolvedValue(ok({ _id: '1', date: '2025-01-15', duration: 10 })),
         getMeditations: vi.fn().mockResolvedValue(ok([{ _id: '1', date: '2025-01-15' }])),
         saveEmotionLog: vi.fn().mockResolvedValue(ok({ _id: '1', date: '2025-01-15', emotions: [] })),
@@ -36,11 +25,6 @@ function createMockAPI() {
         saveEightfoldPathLog: vi.fn().mockResolvedValue(ok({ _id: '1', date: '2025-01-15' })),
         getEightfoldPathLogs: vi.fn().mockResolvedValue(ok([{ _id: '1' }])),
         getEightfoldPathAnalytics: vi.fn().mockResolvedValue(ok({ totalDays: 3 })),
-        getRecoveryStatus: vi
-            .fn()
-            .mockResolvedValue(ok({ hasRecoveryCodes: false, totalCodes: 0, usedCodes: 0, remainingCodes: 0 })),
-        generateRecoveryCodes: vi.fn().mockResolvedValue(ok({ codes: ['A', 'B'] })),
-        resetPasswordWithRecoveryCode: vi.fn().mockResolvedValue(ok({ message: 'ok' })),
     };
 }
 
@@ -68,58 +52,53 @@ describe('ElectronStorageAdapter', () => {
         });
     });
 
-    describe('auth operations', () => {
-        it('register passes credentials to IPC', async () => {
+    describe('vault operations', () => {
+        it('findVaultPath returns the open vault', async () => {
             const adapter = new ElectronStorageAdapter();
-            await adapter.register({ username: 'user', password: 'pass' }, { theme: 'dark', language: 'en' });
-            expect(mockAPI.register).toHaveBeenCalledWith('user', 'pass', { theme: 'dark', language: 'en' });
+            expect(await adapter.findVaultPath()).toBe('/vault');
         });
 
-        it('login passes credentials to IPC', async () => {
+        // Null is a cancelled dialog, not an error: it has to survive the
+        // unwrapping rather than be turned into a throw.
+        it('chooseVault passes a cancelled dialog through as null', async () => {
+            mockAPI.chooseVault.mockResolvedValue(ok(null));
             const adapter = new ElectronStorageAdapter();
-            await adapter.login({ username: 'user', password: 'pass' });
-            expect(mockAPI.login).toHaveBeenCalledWith('user', 'pass');
+            expect(await adapter.chooseVault()).toBeNull();
         });
 
-        it('logout calls IPC logout', async () => {
+        it('closeVault calls the bridge', async () => {
             const adapter = new ElectronStorageAdapter();
-            await adapter.logout();
-            expect(mockAPI.logout).toHaveBeenCalled();
+            await adapter.closeVault();
+            expect(mockAPI.closeVault).toHaveBeenCalled();
         });
 
-        it('getCurrentUser wraps result in { user }', async () => {
-            const adapter = new ElectronStorageAdapter();
-            const res = await adapter.getCurrentUser();
-            expect(res.user.username).toBe('u');
+        it('canChooseVault is true — the desktop has a folder picker', () => {
+            expect(new ElectronStorageAdapter().canChooseVault()).toBe(true);
         });
 
-        it('getCurrentUser throws when user is null', async () => {
-            mockAPI.getCurrentUser.mockResolvedValue(ok(null));
+        it('turns a handler failure back into a throw', async () => {
+            mockAPI.findVaultPath.mockResolvedValue({ success: false, error: 'nope' });
             const adapter = new ElectronStorageAdapter();
-            await expect(adapter.getCurrentUser()).rejects.toThrow('Not authenticated');
+            await expect(adapter.findVaultPath()).rejects.toThrow('nope');
         });
     });
 
     describe('settings operations', () => {
-        it('updateTheme returns theme in response', async () => {
+        it('getSettings returns the vault settings', async () => {
             const adapter = new ElectronStorageAdapter();
-            const res = await adapter.updateTheme('light');
-            expect(res.theme).toBe('light');
+            expect(await adapter.getSettings()).toEqual({ theme: 'dark', language: 'en' });
+        });
+
+        it('updateTheme returns the settings the handler wrote', async () => {
+            const adapter = new ElectronStorageAdapter();
+            expect(await adapter.updateTheme('light')).toEqual({ theme: 'light', language: 'en' });
             expect(mockAPI.updateTheme).toHaveBeenCalledWith('light');
         });
 
-        it('updateLanguage returns language in response', async () => {
+        it('updateLanguage returns the settings the handler wrote', async () => {
             const adapter = new ElectronStorageAdapter();
-            const res = await adapter.updateLanguage('ja');
-            expect(res.language).toBe('ja');
+            expect(await adapter.updateLanguage('ja')).toEqual({ theme: 'dark', language: 'ja' });
             expect(mockAPI.updateLanguage).toHaveBeenCalledWith('ja');
-        });
-
-        it('updateUsername returns username in response', async () => {
-            const adapter = new ElectronStorageAdapter();
-            const res = await adapter.updateUsername('newname', 'pass');
-            expect(res.username).toBe('newname');
-            expect(mockAPI.updateUsername).toHaveBeenCalledWith('newname', 'pass');
         });
     });
 
@@ -176,27 +155,6 @@ describe('ElectronStorageAdapter', () => {
             const adapter = new ElectronStorageAdapter();
             const res = await adapter.getEightfoldPathAnalytics(30);
             expect(res.totalDays).toBe(3);
-        });
-    });
-
-    describe('recovery code operations', () => {
-        it('getRecoveryStatus returns status', async () => {
-            const adapter = new ElectronStorageAdapter();
-            const res = await adapter.getRecoveryStatus();
-            expect(res.hasRecoveryCodes).toBe(false);
-        });
-
-        it('generateRecoveryCodes passes password to IPC', async () => {
-            const adapter = new ElectronStorageAdapter();
-            const res = await adapter.generateRecoveryCodes('pass');
-            expect(res.codes).toEqual(['A', 'B']);
-            expect(mockAPI.generateRecoveryCodes).toHaveBeenCalledWith('pass');
-        });
-
-        it('resetPasswordWithRecoveryCode passes all args to IPC', async () => {
-            const adapter = new ElectronStorageAdapter();
-            await adapter.resetPasswordWithRecoveryCode('user', 'CODE', 'newpass');
-            expect(mockAPI.resetPasswordWithRecoveryCode).toHaveBeenCalledWith('user', 'CODE', 'newpass');
         });
     });
 });

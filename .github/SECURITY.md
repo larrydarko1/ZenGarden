@@ -6,26 +6,24 @@ ZenGarden is a **local-first, cross-platform application** with a fully offline 
 
 - ✅ **No server-side code** - No backend vulnerabilities or network attack surface
 - ✅ **No network requests** - No data transmission, no telemetry, no tracking
-- ✅ **Local-only storage** - JSON files on the user's device with atomic writes (write to `.tmp`, then `rename`)
+- ✅ **Local-only storage** - JSON files in a folder the user chose, with atomic writes (write to `.tmp`, then `rename`)
 - ✅ **Electron hardening** - `sandbox: true`, `contextIsolation: true`, `nodeIntegration: false`, narrow typed preload bridge
 - ✅ **Content Security Policy** - `default-src 'self'` with no `unsafe-eval`; `object-src`, `frame-src`, `base-uri` and `form-action` all denied
 - ✅ **Navigation containment** - External links open in the system browser; in-app navigation off the app origin is blocked
 - ✅ **Deny-all permissions** - Every web permission request is refused at the session level
-- ✅ **Password hashing** - PBKDF2-SHA256 at 600,000 iterations (OWASP's current figure), derived with Node's `crypto` on desktop and Web Crypto on Android
-- ✅ **One record format** - Desktop and Android write the same hashed-password record, so a copied data folder does not silently lock an account out
-- ✅ **Migration on login** - Records written by older versions are re-hashed to the current format and cost on the next successful login
-- ✅ **Recovery codes** - Crockford base32, stored as PBKDF2 hashes, never in plaintext; compared in constant time
+- ✅ **No credentials** - There is no account, password, session or recovery code, so there is no secret to steal, forge or replay
+- ✅ **Owner-only files** - Files the app creates are written `0600`; the vault folder keeps the permissions the user gave it
+- ✅ **No renderer-supplied paths** - The vault changes only through the OS folder dialog; no IPC channel accepts a path from the renderer
 - ✅ **Input validation** - Every IPC argument is parsed against a Zod schema in the main process before use
-- ✅ **Session management** - Session cleared on app startup; cached storage cleared on window creation
+- ✅ **Session-free** - Nothing is cached between runs but the vault's location; web storage is cleared on window creation and at quit
 - ✅ **Open source** - Fully auditable code
 
 ## Data Privacy
 
-All user data is stored locally:
+All user data is stored locally, in a vault folder:
 
-- **macOS:** `~/Library/Application Support/zen-garden/data/`
-- **Linux:** `~/.config/zen-garden/data/`
-- **Android:** File Manager → Documents → ZenGarden → `data/`
+- **Desktop:** wherever the user pointed the app; only its location is remembered, in `state.json` under the app's config directory
+- **Android:** `Documents/ZenGarden/` — a fixed, user-visible folder, because the files hold nothing but the journal
 
 Your meditation data, emotions, and journal entries never leave your device.
 
@@ -50,13 +48,10 @@ Expect an acknowledgement within a week. ZenGarden is maintained by one person, 
 ## Scope
 
 In scope: anything reachable in the Electron app or its IPC surface — preload bridge escapes,
-renderer code execution, IPC handlers that act without a validated session, authentication bypass,
-recovery-code forgery or replay, and anything that reads or writes another local account's data.
-The same surface on Android, via the Capacitor adapter, counts too.
+renderer code execution, IPC handlers that read or write outside the open vault, and any way for renderer-supplied input to reach the filesystem as a path. The same surface on Android, via the Capacitor adapter, counts too.
 
 Out of scope: findings that require an attacker to already have the user's filesystem or OS account.
-The data folder holds plain JSON files under the user's own permissions by design, so "another local
-process can read `users.json`" is the threat model working as intended, not a vulnerability. Local accounts separate one person's meditation history from another's on a shared device; they are not a security boundary against someone who already controls the machine.
+The vault holds plain JSON files under the user's own permissions by design, so "another local process can read the journal" is the threat model working as intended, not a vulnerability. ZenGarden has no accounts and never had a security boundary between users of the same machine — that boundary is the operating system's.
 
 Dependency advisories with no reachable path in Zen Garden's code are tracked in the audit gate's
 allowlist ([scripts/check/check-audit.mjs](../scripts/check/check-audit.mjs)) rather than reported
@@ -71,8 +66,7 @@ remediation path.
 ## Security Best Practices for Users
 
 - Keep the app updated to the latest version
-- Use a strong password (minimum 8 characters)
-- Generate and securely store your recovery codes
-- Regularly backup your data folder
+- Put the vault somewhere only your OS account can read
+- Regularly back up the vault folder
 - Only download from official releases
 - Use OS-level disk encryption if your journal entries are sensitive

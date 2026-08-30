@@ -5,7 +5,6 @@
  */
 import { getAdapter, checkAvailability } from '@/renderer/store/adapters/factory';
 import type {
-    AuthResponse,
     DateRangeQuery,
     EightfoldPathAnalytics,
     EightfoldPathLog,
@@ -13,10 +12,11 @@ import type {
     EmotionAnalytics,
     EmotionLog,
     IStorageAdapter,
+    Language,
     Meditation,
     PathItem,
-    RecoveryStatus,
-    User,
+    Settings,
+    Theme,
 } from '@/renderer/store/types';
 
 // Re-export types
@@ -26,58 +26,43 @@ export async function checkStorageAvailability(): Promise<{ server: boolean; loc
     return checkAvailability();
 }
 
-// Auth operations
-export async function register(
-    username: string,
-    password: string,
-    options: { theme?: string; language?: string } = {},
-): Promise<AuthResponse> {
+// Vault operations
+export async function findVaultPath(): Promise<string | null> {
     const adapter = await getStorageAdapter();
-    return adapter.register({ username, password }, options);
+    return adapter.findVaultPath();
 }
 
-export async function login(username: string, password: string): Promise<AuthResponse> {
+export async function chooseVault(): Promise<string | null> {
     const adapter = await getStorageAdapter();
-    return adapter.login({ username, password });
+    return adapter.chooseVault();
 }
 
-export async function logout(): Promise<void> {
+export async function closeVault(): Promise<void> {
     const adapter = await getStorageAdapter();
-    return adapter.logout();
+    return adapter.closeVault();
 }
 
-export async function getCurrentUser(): Promise<{ user: User }> {
+/**
+ * Named without a `can` prefix on purpose: that prefix promises a pure
+ * synchronous predicate, and resolving the adapter is neither.
+ */
+export async function vaultIsPickable(): Promise<boolean> {
     const adapter = await getStorageAdapter();
-    return adapter.getCurrentUser();
-}
-
-export async function updateUsername(
-    newUsername: string,
-    password: string,
-): Promise<{ message: string; username: string; token: string }> {
-    const adapter = await getStorageAdapter();
-    return adapter.updateUsername(newUsername, password);
-}
-
-export async function updatePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
-    const adapter = await getStorageAdapter();
-    return adapter.updatePassword(currentPassword, newPassword);
-}
-
-export async function deleteAccount(password: string): Promise<{ message: string }> {
-    const adapter = await getStorageAdapter();
-    return adapter.deleteAccount(password);
+    return adapter.canChooseVault();
 }
 
 // Settings operations
-export async function updateTheme(theme: User['theme']): Promise<{ message: string; theme: User['theme'] }> {
+export async function getSettings(): Promise<Settings> {
+    const adapter = await getStorageAdapter();
+    return adapter.getSettings();
+}
+
+export async function updateTheme(theme: Theme): Promise<Settings> {
     const adapter = await getStorageAdapter();
     return adapter.updateTheme(theme);
 }
 
-export async function updateLanguage(
-    language: User['language'],
-): Promise<{ message: string; language: User['language'] }> {
+export async function updateLanguage(language: Language): Promise<Settings> {
     const adapter = await getStorageAdapter();
     return adapter.updateLanguage(language);
 }
@@ -134,43 +119,6 @@ export async function getEightfoldPathLogs(query?: DateRangeQuery): Promise<{ pa
 export async function getEightfoldPathAnalytics(days?: number): Promise<EightfoldPathAnalytics> {
     const adapter = await getStorageAdapter();
     return adapter.getEightfoldPathAnalytics(days);
-}
-
-// Recovery codes
-export async function getRecoveryStatus(): Promise<RecoveryStatus> {
-    const adapter = await getStorageAdapter();
-    return adapter.getRecoveryStatus();
-}
-
-export async function generateRecoveryCodes(password: string): Promise<{ codes: string[] }> {
-    const adapter = await getStorageAdapter();
-    return adapter.generateRecoveryCodes(password);
-}
-
-export async function resetPasswordWithRecoveryCode(
-    username: string,
-    code: string,
-    newPassword: string,
-): Promise<{ message: string }> {
-    const adapter = await getStorageAdapter();
-    return adapter.resetPasswordWithRecoveryCode(username, code, newPassword);
-}
-
-// Data export/import (only for local mode)
-export async function exportData(): Promise<string> {
-    const adapter = await getStorageAdapter();
-    if (adapter.exportData === undefined) {
-        throw new Error('Export not supported in current storage mode');
-    }
-    return adapter.exportData();
-}
-
-export async function importData(data: string): Promise<{ message: string }> {
-    const adapter = await getStorageAdapter();
-    if (adapter.importData === undefined) {
-        throw new Error('Import not supported in current storage mode');
-    }
-    return adapter.importData(data);
 }
 
 /** The active adapter, resolved on first use. Every wrapper above opens with it. */

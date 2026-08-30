@@ -10,8 +10,7 @@
 
 import type {
     IpcResult,
-    User,
-    AuthResponse,
+    Settings,
     Meditation,
     Emotion,
     EmotionLog,
@@ -20,7 +19,6 @@ import type {
     EmotionAnalytics,
     EightfoldPathAnalytics,
     DateRangeQuery,
-    RecoveryStatus,
 } from '@/schemas/storage';
 
 /**
@@ -31,20 +29,13 @@ import type {
 export type ElectronAPI = {
     isElectron: () => boolean;
 
-    register: (
-        username: string,
-        password: string,
-        options?: { theme?: string; language?: string },
-    ) => Promise<IpcResult<AuthResponse>>;
-    login: (username: string, password: string) => Promise<IpcResult<AuthResponse>>;
-    logout: () => Promise<IpcResult<{ message: string }>>;
-    getCurrentUser: () => Promise<IpcResult<User | null>>;
-    updateUsername: (newUsername: string, password: string) => Promise<IpcResult<{ message: string }>>;
-    updatePassword: (currentPassword: string, newPassword: string) => Promise<IpcResult<{ message: string }>>;
-    deleteAccount: (password: string) => Promise<IpcResult<{ message: string }>>;
+    findVaultPath: () => Promise<IpcResult<string | null>>;
+    chooseVault: () => Promise<IpcResult<string | null>>;
+    closeVault: () => Promise<IpcResult<null>>;
 
-    updateTheme: (theme: string) => Promise<IpcResult<{ message: string }>>;
-    updateLanguage: (language: string) => Promise<IpcResult<{ message: string }>>;
+    getSettings: () => Promise<IpcResult<Settings>>;
+    updateTheme: (theme: string) => Promise<IpcResult<Settings>>;
+    updateLanguage: (language: string) => Promise<IpcResult<Settings>>;
 
     createMeditation: (date: string, duration: number, notes: string) => Promise<IpcResult<Meditation>>;
     getMeditations: () => Promise<IpcResult<Meditation[]>>;
@@ -56,12 +47,4 @@ export type ElectronAPI = {
     saveEightfoldPathLog: (date: string, paths: PathItem[]) => Promise<IpcResult<EightfoldPathLog>>;
     getEightfoldPathLogs: (query?: DateRangeQuery) => Promise<IpcResult<EightfoldPathLog[]>>;
     getEightfoldPathAnalytics: (days?: number) => Promise<IpcResult<EightfoldPathAnalytics>>;
-
-    getRecoveryStatus: () => Promise<IpcResult<RecoveryStatus>>;
-    generateRecoveryCodes: (password: string) => Promise<IpcResult<{ codes: string[] }>>;
-    resetPasswordWithRecoveryCode: (
-        username: string,
-        code: string,
-        newPassword: string,
-    ) => Promise<IpcResult<{ message: string }>>;
 };

@@ -34,15 +34,12 @@ describe('preload / electronAPI', () => {
 
     describe('IPC invoke methods', () => {
         const invokeTests: [string, string, unknown[]][] = [
-            ['register', 'storage:register', ['user', 'pass', { theme: 'dark', language: 'en' }]],
-            ['login', 'storage:login', ['user', 'pass']],
-            ['logout', 'storage:logout', []],
-            ['getCurrentUser', 'storage:getCurrentUser', []],
-            ['updateUsername', 'storage:updateUsername', ['newname', 'pass']],
-            ['updatePassword', 'storage:updatePassword', ['oldpass', 'newpass']],
-            ['deleteAccount', 'storage:deleteAccount', ['pass']],
-            ['updateTheme', 'storage:updateTheme', ['light']],
-            ['updateLanguage', 'storage:updateLanguage', ['fr']],
+            ['findVaultPath', 'vault:findPath', []],
+            ['chooseVault', 'vault:choose', []],
+            ['closeVault', 'vault:close', []],
+            ['getSettings', 'settings:get', []],
+            ['updateTheme', 'settings:updateTheme', ['light']],
+            ['updateLanguage', 'settings:updateLanguage', ['fr']],
             ['createMeditation', 'storage:createMeditation', ['2025-01-15', 10, 'notes']],
             ['getMeditations', 'storage:getMeditations', []],
             ['saveEmotionLog', 'storage:saveEmotionLog', ['2025-01-15', [], 'note']],
@@ -51,9 +48,6 @@ describe('preload / electronAPI', () => {
             ['saveEightfoldPathLog', 'storage:saveEightfoldPathLog', ['2025-01-15', []]],
             ['getEightfoldPathLogs', 'storage:getEightfoldPathLogs', [{ limit: 5 }]],
             ['getEightfoldPathAnalytics', 'storage:getEightfoldPathAnalytics', [30]],
-            ['getRecoveryStatus', 'storage:getRecoveryStatus', []],
-            ['generateRecoveryCodes', 'storage:generateRecoveryCodes', ['pass']],
-            ['resetPasswordWithRecoveryCode', 'storage:resetPasswordWithRecoveryCode', ['user', 'CODE', 'newpass']],
         ];
 
         for (const [method, channel, args] of invokeTests) {
@@ -71,9 +65,9 @@ describe('preload / electronAPI', () => {
     });
 
     describe('optional arguments', () => {
-        it('passes undefined through for an omitted register options object', () => {
-            (capturedApi.register as (u: string, p: string) => unknown)('user', 'pass');
-            expect(mockInvoke).toHaveBeenCalledWith('storage:register', 'user', 'pass', undefined);
+        it('passes undefined through for an omitted emotion-log note', () => {
+            (capturedApi.saveEmotionLog as (d: string, e: unknown[]) => unknown)('2025-01-15', []);
+            expect(mockInvoke).toHaveBeenCalledWith('storage:saveEmotionLog', '2025-01-15', [], undefined);
         });
 
         it('passes undefined through for an omitted analytics window', () => {

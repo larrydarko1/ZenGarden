@@ -4,16 +4,20 @@ import { mountWithI18n } from '@test-utils';
 
 const mockGetMeditations = vi.fn();
 const mockCreateMeditation = vi.fn();
-const mockGetCurrentUser = vi.fn();
-const mockLogout = vi.fn();
+const mockGetVaultPath = vi.fn();
+const mockGetSettings = vi.fn();
+const mockCloseVault = vi.fn();
+const mockCanChooseVault = vi.fn();
 const mockIsDesktop = vi.fn().mockReturnValue(false);
 const mockLogError = vi.fn();
 
 vi.mock('@/renderer/store', () => ({
     getMeditations: () => mockGetMeditations(),
     createMeditation: (...args: unknown[]) => mockCreateMeditation(...args),
-    getCurrentUser: () => mockGetCurrentUser(),
-    logout: () => mockLogout(),
+    findVaultPath: () => mockGetVaultPath(),
+    getSettings: () => mockGetSettings(),
+    closeVault: () => mockCloseVault(),
+    vaultIsPickable: () => mockCanChooseVault(),
 }));
 
 vi.mock('@/renderer/utils/platform', () => ({ isDesktop: () => mockIsDesktop() }));
@@ -80,11 +84,11 @@ vi.mock('@/renderer/composables/useMeditationSession', () => ({
 
 const Home = (await import('@/renderer/components/Home.vue')).default;
 
-const user = { username: 'monk', theme: 'light', language: 'fr' };
+const settings = { theme: 'light', language: 'fr' };
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const stubs = {
-    MonkAuth: { name: 'MonkAuth', template: '<div class="monk-auth-stub" />' },
+    VaultPicker: { name: 'VaultPicker', template: '<div class="vault-picker-stub" />' },
     BottomNav: { name: 'BottomNav', template: '<div class="bottom-nav-stub" />' },
     SessionNotes: { name: 'SessionNotes', template: '<div class="session-notes-stub" />' },
     MeditationOverlay: { name: 'MeditationOverlay', template: '<div class="overlay-stub" />' },
@@ -96,10 +100,10 @@ const stubs = {
 
 const mountHome = () => mountWithI18n(Home, { global: { stubs } });
 
-/** Mount and sign in, which is what puts the main screen on. */
-async function mountSignedIn() {
+/** Mount with a vault open, which is what puts the main screen on. */
+async function mountWithVault() {
     const wrapper = mountHome();
-    wrapper.findComponent(stubs.MonkAuth).vm.$emit('auth', { user, token: 'tok' });
+    wrapper.findComponent(stubs.VaultPicker).vm.$emit('opened', '/vault');
     await settle();
     await wrapper.vm.$nextTick();
     return wrapper;
@@ -114,9 +118,12 @@ beforeEach(() => {
     bellEnabled.value = false;
     isCustomDuration.value = false;
     mockGetMeditations.mockResolvedValue({ meditations: [] });
-    mockGetCurrentUser.mockResolvedValue({ user });
+    mockGetSettings.mockResolvedValue(settings);
     mockCreateMeditation.mockResolvedValue({ message: 'ok' });
-    mockLogout.mockResolvedValue(undefined);
+    // No vault remembered, so the picker is what a bare mount lands on.
+    mockGetVaultPath.mockResolvedValue(null);
+    mockCloseVault.mockResolvedValue(undefined);
+    mockCanChooseVault.mockResolvedValue(true);
 });
 
 afterEach(() => {
@@ -124,26 +131,26 @@ afterEach(() => {
 });
 
 describe('Home', () => {
-    describe('signing in', () => {
-        it('shows only the auth screen until someone signs in', () => {
+    describe('opening a vault', () => {
+        it('shows only the picker until a vault is open', () => {
             const wrapper = mountHome();
 
-            expect(wrapper.find('.monk-auth-stub').exists()).toBe(true);
+            expect(wrapper.find('.vault-picker-stub').exists()).toBe(true);
             expect(wrapper.find('.bottom-nav-stub').exists()).toBe(false);
             wrapper.unmount();
         });
 
-        it('swaps to the main screen and tells the shell who signed in', async () => {
-            const wrapper = await mountSignedIn();
+        it('swaps to the main screen once one is chosen', async () => {
+            const wrapper = await mountWithVault();
 
-            expect(wrapper.find('.monk-auth-stub').exists()).toBe(false);
+            expect(wrapper.find('.vault-picker-stub').exists()).toBe(false);
             expect(wrapper.find('.bottom-nav-stub').exists()).toBe(true);
-            expect(wrapper.emitted('user-changed')?.[0]).toEqual([user]);
             wrapper.unmount();
         });
 
-        it('reports the account theme and language so the shell can apply them', async () => {
-            const wrapper = await mountSignedIn();
+        // Theme and language live in the vault, so they arrive with it.
+        it('reports the vault theme and language so the shell can apply them', async () => {
+            const wrapper = await mountWithVault();
 
             expect(wrapper.emitted('theme-changed')?.at(-1)).toEqual(['light']);
             expect(wrapper.emitted('language-changed')?.at(-1)).toEqual(['fr']);
@@ -151,7 +158,7 @@ describe('Home', () => {
         });
 
         it('loads the meditation history for the calendar', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
 
             expect(mockGetMeditations).toHaveBeenCalled();
             wrapper.unmount();
@@ -159,42 +166,64 @@ describe('Home', () => {
 
         it('stays on the main screen with an empty history when the read fails', async () => {
             mockGetMeditations.mockRejectedValue(new Error('unreadable'));
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
 
             expect(wrapper.find('.bottom-nav-stub').exists()).toBe(true);
+            wrapper.unmount();
+        });
+
+        // A vault remembered from the last run skips the picker entirely.
+        it('opens a remembered vault without asking', async () => {
+            mockGetVaultPath.mockResolvedValue('/remembered');
+            const wrapper = mountHome();
+            await settle();
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.find('.vault-picker-stub').exists()).toBe(false);
+            expect(mockGetSettings).toHaveBeenCalled();
+            wrapper.unmount();
+        });
+
+        it('falls back to the picker and logs why when the vault cannot be resolved', async () => {
+            mockGetVaultPath.mockRejectedValue(new Error('unreadable state'));
+            const wrapper = mountHome();
+            await settle();
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.find('.vault-picker-stub').exists()).toBe(true);
+            expect(mockLogError).toHaveBeenCalledWith('Failed to resolve the vault', expect.any(Error));
             wrapper.unmount();
         });
     });
 
-    describe('signing out', () => {
-        it('returns to the auth screen and reports the empty session', async () => {
-            const wrapper = await mountSignedIn();
+    describe('closing the vault', () => {
+        it('returns to the picker', async () => {
+            const wrapper = await mountWithVault();
 
-            wrapper.findComponent(stubs.BottomNav).vm.$emit('logout');
+            wrapper.findComponent(stubs.BottomNav).vm.$emit('close-vault');
             await settle();
             await wrapper.vm.$nextTick();
 
-            expect(wrapper.find('.monk-auth-stub').exists()).toBe(true);
-            expect(wrapper.emitted('user-changed')?.at(-1)).toEqual([null]);
+            expect(wrapper.find('.vault-picker-stub').exists()).toBe(true);
             wrapper.unmount();
         });
 
-        it('keeps the user signed in and logs why when logout fails', async () => {
-            mockLogout.mockRejectedValue(new Error('offline'));
-            const wrapper = await mountSignedIn();
+        it('keeps the vault open and logs why when closing fails', async () => {
+            mockCloseVault.mockRejectedValue(new Error('offline'));
+            const wrapper = await mountWithVault();
 
-            wrapper.findComponent(stubs.BottomNav).vm.$emit('logout');
+            wrapper.findComponent(stubs.BottomNav).vm.$emit('close-vault');
             await settle();
             await wrapper.vm.$nextTick();
 
             expect(wrapper.find('.bottom-nav-stub').exists()).toBe(true);
-            expect(mockLogError).toHaveBeenCalledWith('Logout failed', expect.any(Error));
+            expect(mockLogError).toHaveBeenCalledWith('Failed to close vault', expect.any(Error));
             wrapper.unmount();
         });
     });
 
     describe('sections', () => {
-        async function open(wrapper: Awaited<ReturnType<typeof mountSignedIn>>, event: string) {
+        async function open(wrapper: Awaited<ReturnType<typeof mountWithVault>>, event: string) {
             wrapper.findComponent(stubs.BottomNav).vm.$emit(event);
             await wrapper.vm.$nextTick();
         }
@@ -205,7 +234,7 @@ describe('Home', () => {
             ['toggle-philosophy', '.philosophy-stub'],
             ['toggle-settings', '.settings-stub'],
         ])('%s opens %s', async (event, selector) => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
 
             await open(wrapper, event);
 
@@ -214,7 +243,7 @@ describe('Home', () => {
         });
 
         it('closes the section it was showing when a different one is opened', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
 
             await open(wrapper, 'toggle-journal');
             await open(wrapper, 'toggle-calendar');
@@ -225,7 +254,7 @@ describe('Home', () => {
         });
 
         it('toggles the open section shut when its own button is pressed again', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
 
             await open(wrapper, 'toggle-journal');
             await open(wrapper, 'toggle-journal');
@@ -235,7 +264,7 @@ describe('Home', () => {
         });
 
         it('refreshes the history when the calendar is opened, so a new session shows', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
             vi.clearAllMocks();
 
             await open(wrapper, 'toggle-calendar');
@@ -246,7 +275,7 @@ describe('Home', () => {
         });
 
         it('closes the bell and breathing panels when a section takes over the screen', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
             showBellConfig.value = true;
             showBreathingPicker.value = true;
             await wrapper.vm.$nextTick();
@@ -259,7 +288,7 @@ describe('Home', () => {
         });
 
         it('hides the centre phrase while a section is open', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
             expect(wrapper.find('.zen-center').exists()).toBe(true);
 
             await open(wrapper, 'toggle-journal');
@@ -269,7 +298,7 @@ describe('Home', () => {
         });
 
         it('passes theme and language choices from settings up to the shell', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
 
             await open(wrapper, 'toggle-settings');
             wrapper.findComponent(stubs.SettingsPopup).vm.$emit('theme-change', 'dark');
@@ -283,7 +312,7 @@ describe('Home', () => {
 
     describe('the meditation control bar', () => {
         it('offers the four preset durations and hands the chosen one to the session', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
 
             const presets = wrapper.findAll(
                 '.duration-btn:not(.custom-btn):not(.bell-config-btn):not(.breathing-config-btn)',
@@ -297,7 +326,7 @@ describe('Home', () => {
         });
 
         it('starts the session with the number of animations to choose from', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
 
             await wrapper.find('.start-meditation-btn').trigger('click');
 
@@ -306,7 +335,7 @@ describe('Home', () => {
         });
 
         it('swaps the control bar for the overlay once a session is running', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
 
             meditationActive.value = true;
             await wrapper.vm.$nextTick();
@@ -318,7 +347,7 @@ describe('Home', () => {
         });
 
         it('tells the shell when a session starts and stops, so the chrome can react', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
 
             meditationActive.value = true;
             await wrapper.vm.$nextTick();
@@ -330,7 +359,7 @@ describe('Home', () => {
         });
 
         it('opens the custom duration field on request', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
 
             await wrapper.find('.custom-btn').trigger('click');
 
@@ -341,14 +370,14 @@ describe('Home', () => {
 
     describe('the bell panel', () => {
         it('stays shut until the bell button is pressed', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
 
             expect(wrapper.find('.breathing-picker-panel').exists()).toBe(false);
             wrapper.unmount();
         });
 
         it('turns bells on at the chosen interval and closes behind the choice', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
             showBellConfig.value = true;
             await wrapper.vm.$nextTick();
 
@@ -364,7 +393,7 @@ describe('Home', () => {
         });
 
         it('turns bells off from the "none" option', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
             bellEnabled.value = true;
             showBellConfig.value = true;
             await wrapper.vm.$nextTick();
@@ -377,7 +406,7 @@ describe('Home', () => {
         });
 
         it('offers the four bell sounds only once bells are on', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
             showBellConfig.value = true;
             await wrapper.vm.$nextTick();
             expect(wrapper.find('.bell-sound-section').exists()).toBe(false);
@@ -395,7 +424,7 @@ describe('Home', () => {
 
     describe('the breathing picker', () => {
         it('lists the exercises the session offers, and closes from the backdrop', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
             showBreathingPicker.value = true;
             await wrapper.vm.$nextTick();
 
@@ -410,7 +439,7 @@ describe('Home', () => {
 
     describe('session notes', () => {
         it('appears only after a session finishes', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
             expect(wrapper.find('.session-notes-stub').exists()).toBe(false);
 
             showNotes.value = true;
@@ -421,7 +450,7 @@ describe('Home', () => {
         });
 
         it('records the session with its note, in whole minutes', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
             showNotes.value = true;
             await wrapper.vm.$nextTick();
 
@@ -434,7 +463,7 @@ describe('Home', () => {
         });
 
         it('still records the session when the note is skipped', async () => {
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
             showNotes.value = true;
             await wrapper.vm.$nextTick();
 
@@ -447,7 +476,7 @@ describe('Home', () => {
 
         it('keeps the panel open when the write fails, so the note is not lost', async () => {
             mockCreateMeditation.mockRejectedValue(new Error('disk full'));
-            const wrapper = await mountSignedIn();
+            const wrapper = await mountWithVault();
             showNotes.value = true;
             await wrapper.vm.$nextTick();
 
@@ -461,7 +490,7 @@ describe('Home', () => {
     });
 
     it('releases the session timers when the screen goes away', async () => {
-        const wrapper = await mountSignedIn();
+        const wrapper = await mountWithVault();
 
         wrapper.unmount();
 

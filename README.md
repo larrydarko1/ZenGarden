@@ -1,6 +1,9 @@
 <img src="public/banner.png">
 
-Zen Garden is a **local-first, cross-platform meditation app** built with **Electron** (desktop), **Capacitor** (mobile), **Vue 3**, and TypeScript. All your data stays on your device in MongoDB-compatible JSON files - no server, no cloud, completely private. Features a meditation timer with bell sounds, breathing exercises, a meditation calendar, and relaxing Zen animations.
+Zen Garden is a **local-first, cross-platform meditation app** built with **Electron** (desktop), **Capacitor** (mobile), **Vue 3**, and TypeScript. Your journal lives in a **vault** — a folder you choose, holding plain JSON files. No server, no cloud, no account. Features a meditation timer with bell sounds, breathing exercises, a meditation calendar, and relaxing Zen animations.
+
+> **Prebuilt binaries are published for Linux only.** The source is MIT licensed and runs on macOS
+> and Android too — see [Other platforms](#other-platforms) to build either one yourself.
 
 ## Demo
 
@@ -29,6 +32,7 @@ Zen Garden is a **local-first, cross-platform meditation app** built with **Elec
 
 ### Design & Experience
 
+- **Vault-based storage** - point the app at any folder; your journal is plain JSON files inside it
 - **Zen philosophy built-in** - explains the design choices behind the app
 - **Animated Zen backgrounds** - Wind, Waves, and other animations
 - **Fully responsive** - optimized for different screen sizes
@@ -36,14 +40,14 @@ Zen Garden is a **local-first, cross-platform meditation app** built with **Elec
 
 ### Technical Features
 
-- **Cross-Platform** - Native apps for macOS, Linux, and Android
+- **Cross-Platform** - Linux desktop releases; macOS and Android build from source
 - **100% Offline** - works completely without internet connection
-- **User-Accessible Storage** - JSON files you can view, backup, and control
+- **User-Accessible Storage** - plain JSON files in a folder you picked; view, back up and sync them however you like
+- **No accounts** - no sign-up, no password, no recovery codes; the folder is the whole story
 - **Privacy-first** - no server, no tracking, no data collection, no telemetry
-- **Secure** - PBKDF2-SHA256 password hashing at 600k iterations, recovery codes, atomic file writes
-- **MongoDB-compatible** - data structure matches MEVN stack for easy migration
+- **Secure** - sandboxed renderer, typed IPC bridge, Zod-validated arguments, atomic file writes
 
-> **Privacy Note:** This app runs entirely on your device. Your meditation data, emotions, and notes are stored in JSON files on your local file system and never leave your device.
+> **Privacy Note:** This app runs entirely on your device. Your meditation data, emotions, and notes are stored in JSON files inside your vault folder and never leave your device.
 
 ## Security & Privacy
 
@@ -54,14 +58,14 @@ Zen Garden is built with privacy and security as core principles:
 - ✅ **No telemetry** - We don't collect any usage data, analytics, or crash reports
 - ✅ **No network requests** - The app works 100% offline and makes zero external connections
 - ✅ **No cloud sync** - Your data never leaves your device unless you explicitly copy it
-- ✅ **No accounts required** - Authentication is local-only; no sign-ups or external auth providers
+- ✅ **No accounts at all** - No sign-up, no login, no password. The app opens a folder; that is the entire model
 
 ### Security Architecture
 
 - ✅ **Electron hardening** - Renderer runs sandboxed with context isolation and Node.js integration disabled
 - ✅ **Typed preload bridge** - Narrow IPC API; no raw Node or Electron APIs leak to the frontend
-- ✅ **Password hashing** - PBKDF2-SHA256 at 600,000 iterations (OWASP's current figure), one record format on every platform
-- ✅ **Recovery codes** - Stored as PBKDF2 hashes, never in plaintext
+- ✅ **Nothing secret to leak** - No credential is stored, because none exists. Protecting the vault is the operating system's job, and yours
+- ✅ **Owner-only files** - Files the app creates are written `0600`; the folder you chose is left with the permissions you gave it
 - ✅ **Atomic writes** - Data written to `.tmp` then renamed, preventing corruption on crash
 - ✅ **Input validation** - Every IPC argument is parsed with a Zod schema in the main process before use
 - ✅ **Content Security Policy** - `default-src 'self'`, no `unsafe-eval`; `object-src`/`frame-src`/`base-uri`/`form-action` all denied
@@ -75,26 +79,32 @@ If you discover a security vulnerability, please see [SECURITY.md](.github/SECUR
 
 ## Data Storage
 
-Your data is stored in MongoDB-compatible JSON files:
+Your data lives in a **vault**: a folder holding plain JSON files, and nothing else. The app has no database, no hidden application-support directory, and no record of you outside that folder.
 
 ### Desktop
 
-- **macOS:** `~/Library/Application Support/zen-garden/data/`
-- **Linux:** `~/.config/zen-garden/data/`
+You choose the folder on first launch, and can change it any time from Settings. Put it wherever suits you — a synced directory, an external drive, a git repository. Common choices:
+
+- **Linux:** `~/Documents/ZenGarden/`, `~/journal/`
+- **macOS:** `~/Documents/ZenGarden/`, `~/Desktop/ZenGarden/`
+
+The only thing kept outside the vault is which folder to reopen, in `state.json` under the app's config directory. Delete it and the app simply asks again.
 
 ### Mobile
 
-- **Android:** File Manager → Documents → ZenGarden → `data/`
+- **Android:** `Documents/ZenGarden/`
+
+Android has no folder picker that yields a real path, so the vault is fixed there. It sits in public Documents on purpose: the files hold nothing but the journal, so a location you can open in a file manager and copy to a desktop vault is exactly what you want.
 
 ### Files
 
-- `users.json` - User accounts (hashed passwords)
 - `meditations.json` - Meditation sessions
 - `emotion_logs.json` - Emotion tracking data
 - `eightfold_path_logs.json` - Buddhist path progress
-- `session.json` - Current session data
+- `settings.json` - Theme and language, so they travel with the vault
 
-> **Note:** On mobile, files are accessible through your device's file manager. You can view, copy, backup, or delete them anytime. Data survives app uninstall.
+> **Note:** These are ordinary files. Copy the folder to another machine and the app opens it as-is;
+> back it up, sync it, or read it with anything that understands JSON.
 
 ## Getting Started
 
@@ -212,17 +222,60 @@ the same list, in the same order, that [CI](.github/workflows/ci.yml) runs on ev
 # Build for your current platform
 npm run build:electron
 
-# Build specifically for macOS
-npm run build:mac
-
-# Build for Linux
+# Build for Linux — the platform this project releases
 npm run build:linux
+
+# Build for macOS — unreleased, self-build only (see Other platforms)
+npm run build:mac
 ```
 
 The built installers will be in the `dist-electron/` directory:
 
-- **macOS:** `.dmg` installer
 - **Linux:** `.AppImage`, `.deb`, `.rpm` and `.tar.gz` packages
+- **macOS:** `.dmg` installer (Apple Silicon / arm64)
+
+Building the `.rpm` needs the `rpm` tool on the build machine (`sudo apt-get install rpm` on
+Debian/Ubuntu); the other Linux targets have no extra prerequisite. `build:mac` has to run on a Mac.
+
+## Other platforms
+
+Releases carry Linux packages only. macOS and Android are both absent for the same reason: a download that installs cleanly needs a signing certificate this project does not have, and an unsigned one asks the person downloading it to disable a security warning first.
+
+- **macOS** needs a paid Apple developer certificate. An ad-hoc signature is rejected by Gatekeeper often enough — the "app is damaged" dialog — that the download caused more problems than it solved.
+- **Android** needs a signing key, and a build signed with a throwaway key installs only after the user allows "install from unknown sources". Handing out an APK on those terms teaches a habit worth not teaching.
+
+Both build targets are still in the repository and are deliberately kept working. ZenGarden is MIT licensed, so if you want it on either platform, build it — the vault format is identical, so a folder you build for yourself opens the same journal as a released Linux build.
+
+**macOS:**
+
+```sh
+git clone https://github.com/larrydarko1/ZenGarden.git
+cd ZenGarden && npm ci && npm run build:mac
+```
+
+The `.dmg` lands in `dist-electron/`, ad-hoc signed for the machine that built it.
+
+**Android** — needs Android Studio for the JDK and SDK, as under [Mobile Development](#mobile-development):
+
+```sh
+git clone https://github.com/larrydarko1/ZenGarden.git
+cd ZenGarden && npm ci && npm run build:mobile
+cd android && ./gradlew assembleDebug
+```
+
+The APK lands in `android/app/build/outputs/apk/debug/`. Installing it means allowing your device to
+install from an unknown source, which is the cost of an unsigned build. If you would rather sign it
+with your own key, generate a keystore, wire it into `android/app/build.gradle`, and run
+`./gradlew assembleRelease`.
+
+Nothing about the app is crippled on either platform — the platform-specific paths are all still
+there.
+
+What "unsupported" means in practice: the maintainer does not run macOS anymore and cannot reproduce
+or verify anything there; Android is developed against but has no distribution channel. Bug reports
+from self-built platforms are welcome and will be read, but they are fixed on a best-effort basis,
+and CI never builds or tests them. The same applies to Windows, which has no build target at all —
+`electron-builder --win` may well work, but nobody has checked.
 
 ### Installing the App
 
@@ -231,7 +284,7 @@ After building:
 1. Navigate to `dist-electron/`
 2. Double-click the installer for your platform
 3. Follow installation prompts
-4. Launch "ZenGarden" from your Applications folder
+4. Launch "ZenGarden" from your applications menu
 
 ## Distribution
 
@@ -244,12 +297,12 @@ To share the app with others:
 
 ## Tech Stack
 
-- **Desktop:** Electron 44, electron-vite 5 (Native macOS, Linux app)
-- **Mobile:** Capacitor 8 (Native Android app)
+- **Desktop:** Electron 44, electron-vite 5 (Linux releases; macOS builds from source)
+- **Mobile:** Capacitor 8 (native Android app, builds from source)
 - **Frontend:** Vue 3, TypeScript (strict), Vite, SCSS, vue-i18n
-- **Storage:** JSON files with atomic writes (MongoDB-compatible document structure)
-- **Security:** PBKDF2-SHA256 password hashing, recovery codes, sandboxed renderer + context-isolated preload bridge
-- **Testing:** [Vitest](https://vitest.dev) + jsdom (585 tests across 38 test files, 80% coverage enforced)
+- **Storage:** Vault folder of plain JSON files, written atomically
+- **Security:** Sandboxed renderer + context-isolated preload bridge, Zod-validated IPC arguments
+- **Testing:** [Vitest](https://vitest.dev) + jsdom (467 tests across 36 test files, 80% coverage enforced)
 - **Code Quality:** [ESLint](https://eslint.org) flat config (modular, under [eslint/](eslint/)), [Prettier](https://prettier.io), [Stylelint](https://stylelint.io), husky + lint-staged + commitlint
 - **Build Tools:** [electron-vite](https://electron-vite.org) + Electron Builder + Capacitor CLI
 - **CI:** GitHub Actions — 16 convention checks → type-check → build → tests at 80% coverage
@@ -262,18 +315,17 @@ src/
 │   ├── index.ts                 → BrowserWindow setup, IPC registration, app lifecycle
 │   ├── lib/
 │   │   ├── config.ts            → The only module that reads process.env, Zod-validated
+│   │   ├── jsonFile.ts          → Atomic, owner-only JSON reads and writes
 │   │   └── logger.ts            → Main-process logging (electron-log)
 │   └── services/
-│       ├── auth.ts              → Auth handlers (register, login, settings, recovery codes)
+│       ├── vault.ts             → Vault root, folder picker, vault settings
 │       ├── data.ts              → Data handlers (meditations, emotions, eightfold path)
 │       ├── analytics.ts         → Emotion + eightfold path analytics computation
-│       ├── db.ts                → JSON file persistence, atomic writes, normalisation
-│       └── crypto.ts            → PBKDF2 derivation, verification, token generation
+│       └── db.ts                → Collection reads and writes inside the open vault
 ├── preload/
 │   └── index.ts                 → contextBridge — narrow typed API exposed to renderer
 ├── schemas/                     → Shared across main, preload and renderer
 │   ├── storage.ts               → Wire types + the Zod schemas IPC arguments are validated against
-│   ├── password.ts              → The hashed-password record format shared by desktop and Android
 │   └── electron.d.ts            → The contextBridge contract, declared once for both ends
 └── renderer/                    → Vue 3 SPA
     ├── components/              → Decomposed UI components
@@ -303,7 +355,7 @@ src/
     └── locales/                 → 8 language bundles (en, es, it, fr, de, pt, zh, ja)
 eslint/                          → Modular ESLint flat-config fragments
 scripts/check/                   → Repo convention checks run by `npm run ci:check`
-tests/                           → Mirrors src/ — 38 test files, 585 tests
+tests/                           → Mirrors src/ — 36 test files, 467 tests
 ```
 
 ## Architecture
@@ -314,17 +366,16 @@ tests/                           → Mirrors src/ — 38 test files, 585 tests
 Desktop App
 ├── Electron (Native shell)
 │   ├── Main Process (Node.js)
-│   │   ├── services/auth.ts       → Authentication + settings + recovery codes
+│   │   ├── services/vault.ts      → Vault root, folder picker, vault settings
 │   │   ├── services/data.ts       → Meditation, emotion, eightfold path CRUD
 │   │   ├── services/analytics.ts  → Analytics computation
-│   │   ├── services/db.ts         → JSON persistence with atomic writes
-│   │   └── services/crypto.ts     → PBKDF2 derivation and verification
+│   │   └── services/db.ts         → JSON persistence with atomic writes
 │   ├── Preload (contextBridge, CommonJS — required by the sandbox)
 │   │   └── Typed IPC API — no Node.js exposure to renderer
 │   └── Renderer Process (Chromium, sandboxed)
 │       └── Vue 3 App → store/adapters/electron.ts → IPC calls
 └── Data Storage
-    └── JSON Files (~/Library/Application Support/zen-garden/data/)
+    └── JSON files in the vault folder you chose
 ```
 
 ### Mobile (Capacitor)
@@ -337,7 +388,7 @@ Mobile App
 │   │   └── Vue 3 App → store/adapters/capacitor.ts → Filesystem API
 │   └── Native Plugins
 │       ├── Filesystem API (JSON file operations)
-│       └── Preferences API (session storage)
+│       └── Preferences API (platform probe)
 └── Data Storage
     └── Android: Documents/ZenGarden/data/
 ```
@@ -348,8 +399,8 @@ The app uses an `IStorageAdapter` interface implemented by two adapters. `getAda
 [factory.ts](src/renderer/store/adapters/factory.ts) probes the platform at runtime and caches the result:
 
 - **ElectronStorageAdapter** — bridges Vue to the Node.js JSON backend via IPC
-- **CapacitorStorageAdapter** — uses Capacitor Filesystem + Web Crypto API
-- **Same interface, same JSON structure** — both use MongoDB-compatible documents
+- **CapacitorStorageAdapter** — uses the Capacitor Filesystem API against the fixed Android vault
+- **Same interface, same files** — a vault written by one opens in the other
 
 Every argument crossing the Electron IPC boundary is re-validated in the main process against a Zod
 schema in [schemas/storage.ts](src/schemas/storage.ts). Handlers answer with a discriminated
@@ -358,56 +409,41 @@ adapter is where a failure becomes a thrown error again.
 
 ## Data Format
 
-All data is stored in MongoDB-compatible JSON format. Example meditation document:
+Each file is a JSON array of plain documents. Example meditation record:
 
 ```json
 {
     "_id": "lqr8g4k3j2h",
-    "username": "john",
     "date": "2026-01-22",
     "duration": 20,
-    "notes": "Great session focusing on breath",
-    "createdAt": "2026-01-22T20:35:00.000Z"
+    "notes": "Great session focusing on breath"
 }
 ```
 
-This makes it easy to:
+No owner field, no envelope, no wrapper types — the vault folder is the scope. This makes it easy to:
 
-- Read your data in any text editor
-- Migrate to MongoDB if needed
-- Backup by copying JSON files
-- Process data with scripts
+- Read your journal in any text editor
+- Back it up by copying a folder
+- Process it with scripts, or diff it in git
 
 ## Backup & Migration
 
 ### Backing Up Your Data
 
-**Desktop:** Simply copy the entire data folder:
+Copy the vault folder. That is the backup — there is nothing else to collect.
 
-- **macOS:** `~/Library/Application Support/zen-garden/data/`
-- **Linux:** `~/.config/zen-garden/data/`
+**Desktop:** wherever you pointed the app. Because you chose the folder, putting it in a synced
+directory or a git repository makes backup something you no longer think about.
 
-**Mobile:** Access files through your device:
-
-- **Android:** File Manager → Documents → ZenGarden → Copy to Drive/SD card
+**Android:** `Documents/ZenGarden/`, reachable from any file manager.
 
 ### Restoring Data
 
-1. Quit the app (or uninstall on mobile)
-2. Replace the data folder with your backup
-3. Restart the app (or reinstall on mobile)
+1. Quit the app
+2. Put the folder back, or copy it somewhere new
+3. Restart the app and point it at the folder
 
-Desktop and Android write the same password record format, so an account copied between them keeps
-working. A record written by an older version is re-hashed to the current format the next time you
-log in.
-
-### Migrating to MongoDB (Future)
-
-Since data is already in MongoDB format:
-
-1. Read the JSON files
-2. Import directly into MongoDB collections
-3. No data transformation needed!
+Desktop and Android write the same files, so a vault copied between them opens either way.
 
 ## Contributing
 

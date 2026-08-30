@@ -6,6 +6,7 @@ defineProps<{
     calendarMode: boolean;
     philosophyMode: boolean;
     settingsMode: boolean;
+    canCloseVault: boolean;
 }>();
 
 defineEmits<{
@@ -13,7 +14,7 @@ defineEmits<{
     'toggle-calendar': [];
     'toggle-philosophy': [];
     'toggle-settings': [];
-    'logout': [];
+    'close-vault': [];
 }>();
 
 const { t } = useI18n();
@@ -123,9 +124,10 @@ const { t } = useI18n();
             <span>{{ t('header.settings') }}</span>
         </button>
         <button
-            class="nav-item nav-logout"
-            aria-label="Logout from your account"
-            @click="$emit('logout')">
+            v-if="canCloseVault"
+            class="nav-item nav-close-vault"
+            aria-label="Close the current vault"
+            @click="$emit('close-vault')">
             <svg
                 width="22"
                 height="22"
@@ -139,7 +141,7 @@ const { t } = useI18n();
                     stroke-linecap="round"
                     stroke-linejoin="round" />
             </svg>
-            <span>{{ t('header.logout') }}</span>
+            <span>{{ t('vault.close') }}</span>
         </button>
     </nav>
 </template>
@@ -239,7 +241,7 @@ const { t } = useI18n();
         }
     }
 
-    &.nav-logout {
+    &.nav-close-vault {
         color: color-mix(in srgb, $text2 60%, transparent);
 
         &:hover {

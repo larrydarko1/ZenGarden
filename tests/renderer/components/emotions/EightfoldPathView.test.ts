@@ -54,7 +54,7 @@ describe('EightfoldPathView', () => {
     it('checks exactly the paths the parent says are followed', () => {
         const wrapper = mountView({ followedPaths: ['speech'] });
 
-        const checked = wrapper.findAll('input[type="checkbox"]').map((box) => box.element.checked);
+        const checked = wrapper.findAll<HTMLInputElement>('input[type="checkbox"]').map((box) => box.element.checked);
         expect(checked).toEqual(paths.map((path) => path.key === 'speech'));
         wrapper.unmount();
     });
@@ -79,7 +79,7 @@ describe('EightfoldPathView', () => {
     it('emits the merged note map and a save tick when the note is typed into', async () => {
         const wrapper = mountView({ followedPaths: ['action'], pathNotes: { view: 'kept' } });
 
-        const textarea = wrapper.find('.eightfold-path-note textarea');
+        const textarea = wrapper.find<HTMLTextAreaElement>('.eightfold-path-note textarea');
         textarea.element.value = 'noted';
         await textarea.trigger('input');
 

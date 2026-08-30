@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import AccountSettings from '@/renderer/components/AccountSettings.vue';
+import { vaultIsPickable, chooseVault, findVaultPath } from '@/renderer/store';
+import { log } from '@/renderer/utils/logger';
 
 const props = defineProps<{ theme: 'light' | 'dark' }>();
 
 const emit = defineEmits<{
-    'close': [];
     'theme-change': [theme: string];
     'language-change': [language: string];
 }>();
@@ -25,9 +25,10 @@ const languages = {
 
 const { t, locale } = useI18n();
 
-// Theme is owned by App.vue; this popup remounts on every open, so it reads the
-// prop rather than keeping a copy that would reset to a hardcoded default.
 const currentLanguage = ref(locale.value);
+
+const vaultPath = ref<string | null>(null);
+const vaultPickable = ref(false);
 
 function selectTheme(theme: string): void {
     emit('theme-change', theme);
@@ -38,15 +39,23 @@ function selectLanguage(lang: string): void {
     emit('language-change', lang);
 }
 
-function handleUsernameChange(_newUsername: string): void {
-    window.location.reload();
+async function switchVault(): Promise<void> {
+    try {
+        const path = await chooseVault();
+        if (path !== null) window.location.reload();
+    } catch (error) {
+        log.error('Failed to switch vault', error);
+    }
 }
 
-function handleAccountDeletion(): void {
-    // Account deleted, redirect to login
-    emit('close');
-    window.location.reload();
-}
+onMounted(async () => {
+    try {
+        vaultPickable.value = await vaultIsPickable();
+        vaultPath.value = await findVaultPath();
+    } catch (error) {
+        log.error('Failed to read the vault location', error);
+    }
+});
 </script>
 
 <template>
@@ -84,9 +93,22 @@ function handleAccountDeletion(): void {
 
         <div class="zen-divider settings-divider"></div>
 
-        <AccountSettings
-            @username-changed="handleUsernameChange"
-            @account-deleted="handleAccountDeletion" />
+        <div class="settings-section">
+            <h3 class="zen-label">{{ t('vault.location') }}</h3>
+            <p class="vault-path">{{ vaultPath ?? '—' }}</p>
+            <button
+                v-if="vaultPickable"
+                type="button"
+                class="zen-btn is-ghost vault-switch"
+                @click="switchVault">
+                {{ t('vault.change') }}
+            </button>
+            <p
+                v-else
+                class="vault-note"
+                >{{ t('vault.fixedLocation') }}</p
+            >
+        </div>
     </div>
 </template>
 
@@ -112,6 +134,24 @@ function handleAccountDeletion(): void {
 
 .settings-divider {
     margin: $space-2 0 $space-5;
+}
+
+/* ––––– Vault ––––– */
+
+.vault-path {
+    margin-bottom: $space-3;
+    color: $text2;
+    font-size: $font-size-xs;
+    word-break: break-all;
+}
+
+.vault-note {
+    color: $text2;
+    font-size: $font-size-xs;
+}
+
+.vault-switch {
+    width: 100%;
 }
 
 /* ––––– Theme ––––– */

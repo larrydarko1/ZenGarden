@@ -1,77 +1,51 @@
 /**
  * Capacitor DB - JSON file persistence primitives for Capacitor.
- * Owns: file I/O, session management, ID generation, storage initialization.
+ * Owns: file I/O, ID generation, vault location.
+ *
+ * The Android vault is a fixed folder in public Documents, and that is the
+ * point rather than an oversight: it holds nothing but the journal itself — no
+ * account, no password hash, no session token — so a location the user can
+ * open in a file manager, copy to a desktop vault, or sync with anything else
+ * is exactly what the vault model is for. There is no folder picker here
+ * because Android has no path-based one to offer.
  */
 
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { log } from '@/renderer/utils/logger';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export type SessionData = {
-    currentUser?: string;
-};
-
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 export const DB_FILES = {
-    users: 'users.json',
     meditations: 'meditations.json',
     emotionLogs: 'emotion_logs.json',
     eightfoldPathLogs: 'eightfold_path_logs.json',
-    session: 'session.json',
+    settings: 'settings.json',
 };
+
+/** Public Documents, so the folder is browsable, copyable and backup-visible. */
+export const VAULT_DIR = 'ZenGarden';
+
+const STORAGE_DIR = Directory.Documents;
 
 // ─── Collection I/O ───────────────────────────────────────────────────────────
 
 export async function readCollection<T>(filename: string): Promise<T[]> {
-    try {
-        const result = await Filesystem.readFile({
-            path: `ZenGarden/data/${filename}`,
-            directory: Directory.Documents,
-            encoding: Encoding.UTF8,
-        });
-        const data = typeof result.data === 'string' ? result.data : '';
-        const parsed: unknown = JSON.parse(data);
-        return Array.isArray(parsed) ? (parsed as T[]) : [];
-    } catch {
-        return [];
-    }
+    const parsed = await readJson(filename);
+    return Array.isArray(parsed) ? (parsed as T[]) : [];
 }
 
 export async function writeCollection<T>(filename: string, data: T[]): Promise<void> {
-    await Filesystem.writeFile({
-        path: `ZenGarden/data/${filename}`,
-        data: JSON.stringify(data, null, 2),
-        directory: Directory.Documents,
-        encoding: Encoding.UTF8,
-    });
+    await writeJson(filename, data);
 }
 
-// ─── Session I/O ──────────────────────────────────────────────────────────────
-
-export async function readSession(): Promise<SessionData> {
-    try {
-        const result = await Filesystem.readFile({
-            path: `ZenGarden/data/${DB_FILES.session}`,
-            directory: Directory.Documents,
-            encoding: Encoding.UTF8,
-        });
-        const data = typeof result.data === 'string' ? result.data : '{}';
-        const parsed = JSON.parse(data) as SessionData | null;
-        return parsed ?? {};
-    } catch {
-        return {};
-    }
+export async function readObject<T>(filename: string): Promise<T | null> {
+    const parsed = await readJson(filename);
+    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+    return parsed as T;
 }
 
-export async function writeSession(session: SessionData): Promise<void> {
-    await Filesystem.writeFile({
-        path: `ZenGarden/data/${DB_FILES.session}`,
-        data: JSON.stringify(session, null, 2),
-        directory: Directory.Documents,
-        encoding: Encoding.UTF8,
-    });
+export async function writeObject(filename: string, data: unknown): Promise<void> {
+    await writeJson(filename, data);
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
@@ -84,32 +58,39 @@ export function generateObjectId(): string {
 
 // ─── Initialization ───────────────────────────────────────────────────────────
 
+/**
+ * Creates the vault folder. Nothing is seeded into it: a missing file reads as
+ * an empty collection, so an empty folder is already a valid empty vault.
+ */
 export async function initializeStorage(): Promise<void> {
     try {
-        await Filesystem.mkdir({
-            path: 'ZenGarden/data',
-            directory: Directory.Documents,
-            recursive: true,
-        });
-
-        for (const [key, filename] of Object.entries(DB_FILES)) {
-            try {
-                await Filesystem.readFile({
-                    path: `ZenGarden/data/${filename}`,
-                    directory: Directory.Documents,
-                });
-            } catch {
-                const initialData = key === 'session' ? {} : [];
-                await Filesystem.writeFile({
-                    path: `ZenGarden/data/${filename}`,
-                    data: JSON.stringify(initialData, null, 2),
-                    directory: Directory.Documents,
-                    encoding: Encoding.UTF8,
-                });
-                log.info('Created collection file', { filename });
-            }
-        }
-    } catch (error) {
-        log.error('Storage initialization failed', error);
+        await Filesystem.mkdir({ path: VAULT_DIR, directory: STORAGE_DIR, recursive: true });
+    } catch {
+        /* already there — mkdir is the only way to ask, and "exists" is success here */
     }
+}
+
+async function readJson(filename: string): Promise<unknown> {
+    try {
+        const result = await Filesystem.readFile({
+            path: `${VAULT_DIR}/${filename}`,
+            directory: STORAGE_DIR,
+            encoding: Encoding.UTF8,
+        });
+        if (typeof result.data !== 'string') return null;
+        return JSON.parse(result.data);
+    } catch {
+        /* absent or unreadable — the caller treats both as "nothing stored yet" */
+        return null;
+    }
+}
+
+async function writeJson(filename: string, data: unknown): Promise<void> {
+    await Filesystem.writeFile({
+        path: `${VAULT_DIR}/${filename}`,
+        data: JSON.stringify(data, null, 2),
+        directory: STORAGE_DIR,
+        encoding: Encoding.UTF8,
+    });
+    log.info('Wrote vault file', { filename });
 }

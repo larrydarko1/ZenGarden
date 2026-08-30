@@ -19,28 +19,24 @@ export type IpcResult<T> = { success: true; data: T } | { success: false; error:
 /** The themes the stylesheet defines — anything else is a bad write. */
 const ThemeSchema = z.enum(['light', 'dark']);
 
-type Theme = z.infer<typeof ThemeSchema>;
+export type Theme = z.infer<typeof ThemeSchema>;
 
 /** The locales that ship under assets/locales/. */
 const LanguageSchema = z.enum(['en', 'es', 'it', 'fr', 'de', 'pt', 'zh', 'ja']);
 
-type Language = z.infer<typeof LanguageSchema>;
+export type Language = z.infer<typeof LanguageSchema>;
 
 /**
- * Usernames are trimmed before they are measured, so " ab " fails on length
- * rather than on the regex. The message is deliberately the same for every
- * way of being wrong — it is what the account form shows the user.
+ * The vault's settings.json. Every field falls back rather than failing, so a
+ * hand-edited file with one bad value still opens the vault — this is a folder
+ * the user owns and is invited to poke at.
  */
-const UsernameSchema = z
-    .string({ error: 'Username must be 3-32 alphanumeric characters' })
-    .trim()
-    .regex(/^[a-zA-Z0-9]+$/, { error: 'Username must be 3-32 alphanumeric characters' })
-    .min(3, { error: 'Username must be 3-32 alphanumeric characters' })
-    .max(32, { error: 'Username must be 3-32 alphanumeric characters' });
+export const SettingsSchema = z.object({
+    theme: ThemeSchema.catch('dark'),
+    language: LanguageSchema.catch('en'),
+});
 
-const PasswordSchema = z
-    .string({ error: 'Password must be a string' })
-    .min(8, { error: 'Password must be at least 8 characters' });
+export type Settings = z.infer<typeof SettingsSchema>;
 
 const EmotionSchema = z.object({
     name: z.string(),
@@ -87,51 +83,31 @@ export const EightfoldPathInputSchema = z.object({
 
 export type EightfoldPathInput = z.infer<typeof EightfoldPathInputSchema>;
 
-export type User = {
-    username: string;
-    theme: Theme;
-    language: Language;
-};
-
-export type UserCredentials = {
-    username: string;
-    password: string;
-};
-
-export type AuthResponse = {
-    message: string;
-    user: User;
-    token: string;
-};
-
 export type Meditation = {
     _id?: string;
-    username: string;
-    date: Date | string;
+    date: string;
     duration: number;
     notes: string;
 };
 
 export type EmotionLog = {
     _id?: string;
-    username: string;
-    date: Date | string;
+    date: string;
     emotions: Emotion[];
     positiveCount: number;
     negativeCount: number;
     pnRatio: number;
     note?: string;
-    updatedAt: Date | string;
+    updatedAt: string;
 };
 
 export type EightfoldPathLog = {
     _id?: string;
-    username: string;
-    date: Date | string;
+    date: string;
     paths: PathItem[];
     completedCount: number;
     progressPercentage: number;
-    updatedAt: Date | string;
+    updatedAt: string;
 };
 
 export type EmotionStat = {
@@ -160,66 +136,12 @@ export type EightfoldPathAnalytics = {
     trends: { date: string; completedCount: number }[];
 };
 
-export type RecoveryStatus = {
-    hasRecoveryCodes: boolean;
-    totalCodes: number;
-    usedCodes: number;
-    remainingCodes: number;
-};
-
-/**
- * Registration preferences are advisory, not authoritative: the account is
- * created either way. `.catch()` on each field is what turns an unknown theme
- * into the default instead of a failed signup.
- */
-export const RegisterArgsSchema = z.object({
-    username: UsernameSchema,
-    password: PasswordSchema,
-    options: z
-        .object({
-            theme: ThemeSchema.catch('dark'),
-            language: LanguageSchema.catch('en'),
-        })
-        .catch({ theme: 'dark', language: 'en' }),
-});
-
-/**
- * Login deliberately does NOT reuse UsernameSchema. A too-short username must
- * fail exactly the way a wrong password does, or the error text tells an
- * attacker which half they got right.
- */
-export const LoginArgsSchema = z.object({
-    username: z.string({ error: 'Invalid username or password' }).trim(),
-    password: z.string({ error: 'Invalid username or password' }),
-});
-
-export const PasswordArgSchema = z.object({
-    password: z.string({ error: 'Invalid password' }),
-});
-
-export const UpdateUsernameArgsSchema = z.object({
-    newUsername: UsernameSchema,
-    password: z.string({ error: 'Invalid password' }),
-});
-
-export const UpdatePasswordArgsSchema = z.object({
-    currentPassword: z.string({ error: 'Password must be a string' }),
-    newPassword: PasswordSchema,
-});
-
 export const ThemeArgSchema = z.object({
     theme: ThemeSchema,
 });
 
 export const LanguageArgSchema = z.object({
     language: LanguageSchema,
-});
-
-/** Same silence as LoginArgsSchema: a bad code and a bad username read alike. */
-export const ResetPasswordArgsSchema = z.object({
-    username: z.string({ error: 'Invalid username or recovery code' }).trim(),
-    code: z.string({ error: 'Invalid username or recovery code' }),
-    newPassword: PasswordSchema,
 });
 
 /** Analytics windows default to 30 days when the renderer omits the argument. */

@@ -6,7 +6,10 @@ const NOW = new Date(2025, 2, 12, 9, 0, 0);
 
 const iso = (year: number, month: number, day: number) => new Date(year, month, day, 12).toISOString();
 
-const mountCalendar = (meditations: unknown[] = []) => mountWithI18n(MeditationCalendar, { props: { meditations } });
+type CalendarEntry = { date: string; duration?: number; notes?: string };
+
+const mountCalendar = (meditations: CalendarEntry[] = []) =>
+    mountWithI18n(MeditationCalendar, { props: { meditations } });
 
 beforeEach(() => {
     vi.useFakeTimers();
@@ -60,7 +63,7 @@ describe('MeditationCalendar', () => {
     });
 
     it('reads the Mongo-wrapped date shape as well as a plain string', () => {
-        const wrapper = mountCalendar([{ date: { $date: iso(2025, 2, 7) } }]);
+        const wrapper = mountCalendar([{ date: iso(2025, 2, 7) }]);
 
         const complete = wrapper.findAll('.calendar-day').filter((cell) => cell.classes().includes('complete'));
         expect(complete.map((cell) => cell.text())).toEqual(['7']);

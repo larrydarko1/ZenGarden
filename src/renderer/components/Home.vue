@@ -10,15 +10,21 @@ import ZenWavesAnimation from '@/renderer/components/animations/ZenWavesAnimatio
 import ZenBreatheAnimation from '@/renderer/components/animations/ZenBreatheAnimation.vue';
 import ZenParticlesAnimation from '@/renderer/components/animations/ZenParticlesAnimation.vue';
 import ZenLavaAnimation from '@/renderer/components/animations/ZenLavaAnimation.vue';
-import MonkAuth from '@/renderer/components/MonkAuth.vue';
+import VaultPicker from '@/renderer/components/VaultPicker.vue';
 import BottomNav from '@/renderer/components/home/BottomNav.vue';
 import MeditationOverlay from '@/renderer/components/home/MeditationOverlay.vue';
-import { getMeditations, createMeditation, getCurrentUser, logout } from '@/renderer/store';
+import {
+    getMeditations,
+    createMeditation,
+    findVaultPath,
+    getSettings,
+    closeVault,
+    vaultIsPickable,
+} from '@/renderer/store';
 import { useI18n } from 'vue-i18n';
 import { isDesktop } from '@/renderer/utils/platform';
 import { useMeditationSession } from '@/renderer/composables/useMeditationSession';
 import { log } from '@/renderer/utils/logger';
-import type { User } from '@/renderer/store/types';
 
 defineProps<{ theme: 'light' | 'dark' }>();
 
@@ -26,7 +32,6 @@ const emit = defineEmits<{
     'meditation-active': [active: boolean];
     'theme-changed': [theme: string];
     'language-changed': [language: string];
-    'user-changed': [user: User | null];
     'theme-change': [theme: string];
     'language-change': [language: string];
 }>();
@@ -93,16 +98,13 @@ const anySectionOpen = computed(
     () => journalMode.value || calendarMode.value || philosophyMode.value || settingsMode.value,
 );
 
-const meditations = ref<{ date: string | { $date: string }; username?: string; duration?: number; notes?: string }[]>(
-    [],
-);
-const user = ref<User | null>(null);
-const token = ref<string | null>(null);
+const meditations = ref<{ date: string; duration?: number; notes?: string }[]>([]);
 
-/** Meditation dates arrive as ISO strings from IPC but as Date objects from the in-process adapter. */
-function toDateString(value: Date | string): string {
-    return typeof value === 'string' ? value : value.toISOString();
-}
+/** The open vault, or null when none is — which is what the picker screen keys on. */
+const vaultPath = ref<string | null>(null);
+
+/** False on Android, where the vault is fixed and closing it leads nowhere. */
+const vaultPickable = ref(false);
 
 // Wrap to pass ANIMATIONS.length without exposing it to the template
 function startMeditation(): void {
@@ -140,7 +142,7 @@ function toggleCalendarMode(): void {
         settingsMode.value = false;
         showBellConfig.value = false;
         showBreathingPicker.value = false;
-        if (user.value !== null) void fetchMeditations();
+        if (vaultPath.value !== null) void fetchMeditations();
     }
 }
 
@@ -178,8 +180,7 @@ async function fetchMeditations(): Promise<void> {
     try {
         const res = await getMeditations();
         meditations.value = res.meditations.map((meditation) => ({
-            date: toDateString(meditation.date),
-            username: meditation.username,
+            date: meditation.date,
             duration: meditation.duration,
             notes: meditation.notes,
         }));
@@ -188,14 +189,14 @@ async function fetchMeditations(): Promise<void> {
     }
 }
 
-async function fetchUserData(): Promise<void> {
+/** Theme and language live in the vault, so they arrive with it rather than before it. */
+async function loadSettings(): Promise<void> {
     try {
-        const res = await getCurrentUser();
-        user.value = res.user;
-        emit('theme-changed', res.user.theme);
-        emit('language-changed', res.user.language);
-    } catch {
-        // Silently handle — user will be logged out if token is invalid
+        const settings = await getSettings();
+        emit('theme-changed', settings.theme);
+        emit('language-changed', settings.language);
+    } catch (error) {
+        log.error('Failed to read vault settings', error);
     }
 }
 
@@ -203,7 +204,6 @@ async function saveSessionNotes(notes: string): Promise<void> {
     try {
         await createMeditation(new Date().toISOString(), Math.round(completedMeditationDuration.value / 60), notes);
         await fetchMeditations();
-        await fetchUserData();
         showNotes.value = false;
     } catch {
         // Saving meditation failed — UI handles gracefully
@@ -214,31 +214,25 @@ async function skipSessionNotes(): Promise<void> {
     try {
         await createMeditation(new Date().toISOString(), Math.round(completedMeditationDuration.value / 60), '');
         await fetchMeditations();
-        await fetchUserData();
         showNotes.value = false;
     } catch {
         // Saving meditation failed — UI handles gracefully
     }
 }
 
-async function handleAuth(evt: { user: User; token: string }): Promise<void> {
-    user.value = evt.user;
-    token.value = evt.token;
-    emit('user-changed', evt.user);
-    await fetchUserData();
+async function handleVaultOpened(path: string): Promise<void> {
+    vaultPath.value = path;
+    await loadSettings();
     await fetchMeditations();
-    emit('theme-changed', evt.user.theme);
-    emit('language-changed', evt.user.language);
 }
 
-async function handleLogout(): Promise<void> {
+async function handleCloseVault(): Promise<void> {
     try {
-        await logout();
-        user.value = null;
-        token.value = null;
-        emit('user-changed', null);
+        await closeVault();
+        vaultPath.value = null;
+        meditations.value = [];
     } catch (error) {
-        log.error('Logout failed', error);
+        log.error('Failed to close vault', error);
     }
 }
 
@@ -263,13 +257,21 @@ watch(anySectionOpen, (open) => {
 onMounted(async () => {
     desktopApp.value = isDesktop();
     phraseIntervalId = window.setInterval(setRandomPhrase, 10000);
-    if (token.value !== null) {
-        try {
-            await fetchUserData();
-            await fetchMeditations();
-        } catch {
-            token.value = null;
-        }
+
+    // A vault remembered from the last run opens straight into the app; anything
+    // else falls through to the picker.
+    try {
+        vaultPickable.value = await vaultIsPickable();
+        const remembered = await findVaultPath();
+        // Only if nothing was opened while this was still resolving — otherwise a
+        // slow lookup would close a vault the user had already picked by hand.
+        if (vaultPath.value === null) vaultPath.value = remembered;
+    } catch (error) {
+        log.error('Failed to resolve the vault', error);
+    }
+    if (vaultPath.value !== null) {
+        await loadSettings();
+        await fetchMeditations();
     }
 });
 
@@ -282,11 +284,11 @@ onUnmounted(() => {
 
 <template>
     <div class="zen-bg">
-        <MonkAuth
-            v-if="!user"
-            @auth="handleAuth" />
+        <VaultPicker
+            v-if="vaultPath === null"
+            @opened="handleVaultOpened" />
         <template v-else>
-            <!-- Main app content below, only visible if authenticated -->
+            <!-- Main app content below, only visible once a vault is open -->
 
             <!-- Bottom Navigation Bar -->
             <BottomNav
@@ -295,11 +297,12 @@ onUnmounted(() => {
                 :calendar-mode="calendarMode"
                 :philosophy-mode="philosophyMode"
                 :settings-mode="settingsMode"
+                :can-close-vault="vaultPickable"
                 @toggle-journal="toggleJournalMode"
                 @toggle-calendar="toggleCalendarMode"
                 @toggle-philosophy="togglePhilosophyMode"
                 @toggle-settings="toggleSettingsMode"
-                @logout="handleLogout" />
+                @close-vault="handleCloseVault" />
 
             <SessionNotes
                 v-if="showNotes"
@@ -406,7 +409,6 @@ onUnmounted(() => {
                         :class="[{ 'has-header': desktopApp }]">
                         <SettingsPopup
                             :theme="theme"
-                            @close="settingsMode = false"
                             @theme-change="handleSettingsThemeChange"
                             @language-change="handleSettingsLanguageChange" />
                     </div>

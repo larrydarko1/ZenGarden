@@ -208,7 +208,9 @@ describe('EmotionTracker', () => {
             selectedEmotions.value = [{ name: 'glad' }];
             const wrapper = mountTracker();
 
-            const checked = wrapper.findAll('.inline-emotion-item input').map((box) => box.element.checked);
+            const checked = wrapper
+                .findAll<HTMLInputElement>('.inline-emotion-item input')
+                .map((box) => box.element.checked);
             expect(checked).toEqual([false, true]);
             wrapper.unmount();
         });

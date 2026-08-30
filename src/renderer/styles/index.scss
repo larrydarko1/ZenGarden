@@ -1,7 +1,6 @@
 // Style barrel — auto-injected into every Vue SFC via electron.vite.config.ts
 // (css.preprocessorOptions.scss.additionalData), so every component can reach
 // `$space-4`, `$accent`, `@include scrollbar` and friends with no import line.
-//
 // ── Style Architecture ────────────────────────────────────────────────────────
 // index.scss      → this barrel; @forward only, emits nothing
 // _variables.scss  → design tokens and the SCSS colour aliases
@@ -10,7 +9,6 @@
 // _themes.scss     → theme palettes, as CSS custom properties
 // _base.scss       → resets, element defaults, reduced motion, window dragging
 // components/      → global classes shared by 2+ unrelated components
-//
 // ── Why the split ─────────────────────────────────────────────────────────────
 // The barrel is injected into every SFC, and each SFC `<style>` block is its own
 // Sass compilation — so anything reachable from here is emitted once PER

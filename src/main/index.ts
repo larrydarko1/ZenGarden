@@ -1,15 +1,16 @@
 /**
  * Electron Main Process — ZenGarden
  * Owns: BrowserWindow setup, IPC registration, app lifecycle, session clearing.
- * Does NOT own: data persistence (src/main/services/db.ts), bridge API (src/preload/index.ts).
+ * Does NOT own: the vault (src/main/services/vault.ts), data persistence (src/main/services/db.ts), bridge API (src/preload/index.ts).
  * IPC handler ownership:
- *   auth-service → storage:register, storage:login, storage:logout, storage:getCurrentUser, storage:updateUsername, storage:updatePassword, storage:deleteAccount, storage:updateTheme, storage:updateLanguage, storage:getRecoveryStatus, storage:generateRecoveryCodes, storage:resetPasswordWithRecoveryCode
+ *   vault-service → vault:findPath, vault:choose, vault:close, settings:get, settings:updateTheme, settings:updateLanguage
  *   data-service → storage:createMeditation, storage:getMeditations, storage:saveEmotionLog, storage:getEmotionLogs, storage:getEmotionAnalytics, storage:saveEightfoldPathLog, storage:getEightfoldPathLogs, storage:getEightfoldPathAnalytics
  */
 import { BrowserWindow, ipcMain, screen, app, session, shell } from 'electron';
 import path from 'path';
-import * as authService from '@/main/services/auth';
+import { pathToFileURL } from 'url';
 import * as dataService from '@/main/services/data';
+import * as vaultService from '@/main/services/vault';
 import { log } from '@/main/lib/logger';
 import { config } from '@/main/lib/config';
 
@@ -18,6 +19,7 @@ let mainWindow: BrowserWindow | null = null;
 function createWindow(): void {
     const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
     const iconPath = path.join(import.meta.dirname, '../../build/icon.png');
+    const rendererFile = path.join(import.meta.dirname, '../renderer/index.html');
 
     mainWindow = new BrowserWindow({
         width: Math.round(sw * 0.9),
@@ -50,7 +52,7 @@ function createWindow(): void {
         void mainWindow.loadURL(config.rendererUrl);
         mainWindow.webContents.openDevTools();
     } else {
-        void mainWindow.loadFile(path.join(import.meta.dirname, '../renderer/index.html'));
+        void mainWindow.loadFile(rendererFile);
     }
 
     // Keep external links out of the app window
@@ -59,8 +61,10 @@ function createWindow(): void {
         return { action: 'deny' };
     });
 
+    const appOrigin =
+        config.rendererUrl !== '' ? config.rendererUrl : `${pathToFileURL(path.dirname(rendererFile)).href}/`;
+
     mainWindow.webContents.on('will-navigate', (event, url): void => {
-        const appOrigin = config.rendererUrl !== '' ? config.rendererUrl : 'file://';
         if (!url.startsWith(appOrigin)) {
             event.preventDefault();
             if (url.startsWith('http://') || url.startsWith('https://')) void shell.openExternal(url);
@@ -90,7 +94,7 @@ void app.whenReady().then((): void => {
         return false;
     });
 
-    authService.register(ipcMain);
+    vaultService.register(ipcMain);
     dataService.register(ipcMain);
     createWindow();
 

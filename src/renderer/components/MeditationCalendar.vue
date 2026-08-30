@@ -3,7 +3,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 type Meditation = {
-    date: string | { $date: string };
+    date: string;
     username?: string;
     duration?: number;
     notes?: string;
@@ -43,7 +43,7 @@ function nextMonth(): void {
 }
 
 function findMeditationDate(meditation: Meditation): Date | null {
-    const raw = typeof meditation.date === 'string' ? meditation.date : meditation.date.$date;
+    const raw = meditation.date;
     if (raw.length === 0) return null;
     const parsed = new Date(raw);
     return Number.isNaN(parsed.getTime()) ? null : parsed;

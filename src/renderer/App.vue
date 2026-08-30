@@ -4,35 +4,29 @@ import { useI18n } from 'vue-i18n';
 import Home from '@/renderer/components/Home.vue';
 import { updateTheme, updateLanguage } from '@/renderer/store';
 import { isDesktop } from '@/renderer/utils/platform';
-import type { User } from '@/renderer/store/types';
 import { log } from '@/renderer/utils/logger';
 
 const { locale } = useI18n();
 
 const currentTheme = ref<'light' | 'dark'>('dark');
 const meditationActive = ref(false); // controlled by Home.vue
-const isAuthenticated = ref(false);
 const isDesktopApp = ref(false);
 
 function onMeditationActive(val: boolean): void {
     meditationActive.value = val;
 }
 
-function onUserChanged(user: User | null): void {
-    isAuthenticated.value = user !== null;
-}
-
 function isThemeId(value: string): value is 'light' | 'dark' {
     return value === 'light' || value === 'dark';
 }
 
-function setThemeFromLogin(theme: string): void {
+function applyVaultTheme(theme: string): void {
     if (isThemeId(theme)) {
         currentTheme.value = theme;
     }
 }
 
-function setLanguageFromLogin(language: string): void {
+function applyVaultLanguage(language: string): void {
     const languages = ['en', 'es', 'it', 'fr', 'de', 'pt', 'zh', 'ja'];
     if (languages.includes(language)) {
         locale.value = language;
@@ -71,9 +65,8 @@ onMounted(() => {
         <Home
             :theme="currentTheme"
             @meditation-active="onMeditationActive"
-            @theme-changed="setThemeFromLogin"
-            @language-changed="setLanguageFromLogin"
-            @user-changed="onUserChanged"
+            @theme-changed="applyVaultTheme"
+            @language-changed="applyVaultLanguage"
             @theme-change="setTheme"
             @language-change="setLanguage" />
     </div>

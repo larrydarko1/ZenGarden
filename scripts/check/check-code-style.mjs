@@ -50,15 +50,11 @@ const LINE_CAP = 400;
  * cap, fails. Lower a number when you refactor.
  */
 const LENGTH_BASELINE = {
-    'src/renderer/components/Home.vue': 1297,
-    'src/renderer/components/MonkAuth.vue': 926,
-    'src/renderer/components/AccountSettings.vue': 789,
-    'src/renderer/store/adapters/capacitor.ts': 770,
-    'src/renderer/components/home/MeditationOverlay.vue': 737,
-    'src/renderer/components/EmotionTracker.vue': 624,
-    'src/renderer/components/emotions/EmotionAnalytics.vue': 572,
-    'src/renderer/components/MeditationCalendar.vue': 451,
-    'src/main/services/auth.ts': 402,
+    'src/renderer/components/Home.vue': 1246,
+    'src/renderer/components/home/MeditationOverlay.vue': 696,
+    'src/renderer/components/EmotionTracker.vue': 569,
+    'src/renderer/components/emotions/EmotionAnalytics.vue': 529,
+    'src/renderer/components/MeditationCalendar.vue': 428,
 };
 
 /** Ambient declaration files are named after what they declare, not by our casing. */

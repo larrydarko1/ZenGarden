@@ -9,40 +9,19 @@ const event = {} as Electron.IpcMainInvokeEvent;
 const ipc = makeMockIpc();
 
 let collections: Record<string, unknown[]> = {};
-let mockSession: { username: string; token: string } | null = null;
-
-vi.mock('electron', () => ({
-    app: { getPath: () => '/tmp/zengarden-test' },
-}));
-
-vi.mock('fs', () => ({
-    default: {
-        existsSync: () => true,
-        readFileSync: () => '[]',
-        writeFileSync: vi.fn(),
-        renameSync: vi.fn(),
-        mkdirSync: vi.fn(),
-        unlinkSync: vi.fn(),
-    },
-    existsSync: () => true,
-    readFileSync: () => '[]',
-    writeFileSync: vi.fn(),
-    renameSync: vi.fn(),
-    mkdirSync: vi.fn(),
-    unlinkSync: vi.fn(),
-}));
+/** Whether a vault is open. `db` throws exactly as the real module does when not. */
+let vaultOpen = true;
 
 vi.mock('@/main/services/db', () => ({
-    readCollection: (name: string) => collections[name] ?? [],
+    generateId: () => Math.random().toString(36).substring(2),
+    readCollection: (name: string) => {
+        if (!vaultOpen) throw new Error('No vault is open');
+        return collections[name] ?? [];
+    },
     writeCollection: (name: string, data: unknown[]) => {
+        if (!vaultOpen) throw new Error('No vault is open');
         collections[name] = data;
     },
-    readSession: () => mockSession,
-    saveSession: vi.fn(),
-}));
-
-vi.mock('@/main/services/auth', () => ({
-    findCurrentSession: () => mockSession,
 }));
 
 function makeMockIpc() {
@@ -62,8 +41,8 @@ function makeMockIpc() {
 }
 
 function resetState(): void {
-    collections = { users: [], meditations: [], emotionLogs: [], eightfoldPathLogs: [] };
-    mockSession = { username: 'testuser', token: 'tok' };
+    collections = { meditations: [], emotionLogs: [], eightfoldPathLogs: [] };
+    vaultOpen = true;
 }
 registerDataHandlers(ipc as unknown as Electron.IpcMain);
 
@@ -75,7 +54,6 @@ describe('storage:createMeditation', () => {
             string,
             unknown
         >;
-        expect(res.username).toBe('testuser');
         expect(res.date).toBe('2025-01-15');
         expect(res.duration).toBe(10);
         expect(res.notes).toBe('Peaceful session');
@@ -87,9 +65,9 @@ describe('storage:createMeditation', () => {
         expect(collections['meditations']).toHaveLength(1);
     });
 
-    it('rejects when not authenticated', async () => {
-        mockSession = null;
-        await expect(ipc.invoke('storage:createMeditation', '2025-01-15', 10, '')).rejects.toThrow('Not authenticated');
+    it('rejects when no vault is open', async () => {
+        vaultOpen = false;
+        await expect(ipc.invoke('storage:createMeditation', '2025-01-15', 10, '')).rejects.toThrow('No vault is open');
     });
 });
 
@@ -97,26 +75,28 @@ describe('storage:getMeditations', () => {
     beforeEach(() => {
         resetState();
         collections['meditations'] = [
-            { _id: '1', username: 'testuser', date: '2025-01-01' },
-            { _id: '2', username: 'testuser', date: '2025-01-15' },
-            { _id: '3', username: 'otheruser', date: '2025-01-10' },
+            { _id: '1', date: '2025-01-01' },
+            { _id: '2', date: '2025-01-15' },
+            { _id: '3', date: '2025-01-10' },
         ];
     });
 
-    it('returns only the current user meditations', async () => {
+    // Every record in the folder belongs to the vault. There is no owner field
+    // to filter on, which is the whole point of dropping accounts.
+    it('returns every meditation in the vault', async () => {
         const res = (await ipc.invoke('storage:getMeditations')) as unknown[];
-        expect(res).toHaveLength(2);
+        expect(res).toHaveLength(3);
     });
 
     it('returns meditations sorted by date descending', async () => {
         const res = (await ipc.invoke('storage:getMeditations')) as { date: string }[];
         expect(res[0].date).toBe('2025-01-15');
-        expect(res[1].date).toBe('2025-01-01');
+        expect(res[2].date).toBe('2025-01-01');
     });
 
-    it('rejects when not authenticated', async () => {
-        mockSession = null;
-        await expect(ipc.invoke('storage:getMeditations')).rejects.toThrow('Not authenticated');
+    it('rejects when no vault is open', async () => {
+        vaultOpen = false;
+        await expect(ipc.invoke('storage:getMeditations')).rejects.toThrow('No vault is open');
     });
 });
 
@@ -132,7 +112,6 @@ describe('storage:saveEmotionLog', () => {
             string,
             unknown
         >;
-        expect(res.username).toBe('testuser');
         expect(res.positiveCount).toBe(1);
         expect(res.negativeCount).toBe(1);
         expect(res.pnRatio).toBe(0.5);
@@ -153,16 +132,16 @@ describe('storage:getEmotionLogs', () => {
     beforeEach(() => {
         resetState();
         collections['emotionLogs'] = [
-            { _id: '1', username: 'testuser', date: '2025-01-01' },
-            { _id: '2', username: 'testuser', date: '2025-01-15' },
-            { _id: '3', username: 'testuser', date: '2025-01-10' },
-            { _id: '4', username: 'otheruser', date: '2025-01-01' },
+            { _id: '1', date: '2025-01-01' },
+            { _id: '2', date: '2025-01-15' },
+            { _id: '3', date: '2025-01-10' },
+            { _id: '4', date: '2025-01-02' },
         ];
     });
 
-    it('returns only current user logs', async () => {
+    it('returns every log in the vault', async () => {
         const res = (await ipc.invoke('storage:getEmotionLogs')) as unknown[];
-        expect(res).toHaveLength(3);
+        expect(res).toHaveLength(4);
     });
 
     it('filters by date range', async () => {
@@ -186,7 +165,6 @@ describe('storage:getEmotionAnalytics', () => {
         collections['emotionLogs'] = [
             {
                 _id: '1',
-                username: 'testuser',
                 date: today,
                 positiveCount: 3,
                 negativeCount: 1,
@@ -245,22 +223,22 @@ describe('storage:getEightfoldPathLogs', () => {
     beforeEach(() => {
         resetState();
         collections['eightfoldPathLogs'] = [
-            { _id: '1', username: 'testuser', date: '2025-01-01' },
-            { _id: '2', username: 'testuser', date: '2025-01-15' },
-            { _id: '3', username: 'otheruser', date: '2025-01-10' },
+            { _id: '1', date: '2025-01-01' },
+            { _id: '2', date: '2025-01-15' },
+            { _id: '3', date: '2025-01-10' },
         ];
     });
 
-    it('returns only current user logs', async () => {
+    it('returns every log in the vault', async () => {
         const res = (await ipc.invoke('storage:getEightfoldPathLogs')) as unknown[];
-        expect(res).toHaveLength(2);
+        expect(res).toHaveLength(3);
     });
 
     it('filters by date range', async () => {
         const res = (await ipc.invoke('storage:getEightfoldPathLogs', {
             startDate: '2025-01-10',
         })) as unknown[];
-        expect(res).toHaveLength(1);
+        expect(res).toHaveLength(2);
     });
 });
 
@@ -272,7 +250,6 @@ describe('storage:getEightfoldPathAnalytics', () => {
         collections['eightfoldPathLogs'] = [
             {
                 _id: '1',
-                username: 'testuser',
                 date: today,
                 completedCount: 8,
                 paths: [
@@ -288,7 +265,6 @@ describe('storage:getEightfoldPathAnalytics', () => {
             },
             {
                 _id: '2',
-                username: 'testuser',
                 date: yesterday,
                 completedCount: 3,
                 paths: [
@@ -343,8 +319,7 @@ describe('storage:getEightfoldPathAnalytics', () => {
 
 describe('argument validation at the IPC boundary', () => {
     beforeEach(() => {
-        collections = { meditations: [], emotionLogs: [], eightfoldPathLogs: [] };
-        mockSession = { username: 'testuser', token: 'tok' };
+        resetState();
     });
 
     it('rejects a meditation with a non-numeric duration without writing it', async () => {
@@ -385,7 +360,7 @@ describe('argument validation at the IPC boundary', () => {
     });
 
     it('accepts an omitted query as "everything"', async () => {
-        collections.emotionLogs = [{ _id: '1', username: 'testuser', date: '2025-01-15' }];
+        collections.emotionLogs = [{ _id: '1', date: '2025-01-15' }];
         await expect(ipc.invoke('storage:getEmotionLogs')).resolves.toHaveLength(1);
     });
 

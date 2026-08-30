@@ -74,7 +74,6 @@
         "@capacitor/core": "^8.0.1",
         "@capacitor/filesystem": "^8.1.0",
         "@capacitor/preferences": "^8.0.0",
-        "argon2": "^0.44.0",
         "electron-log": "~5.4.3",
         "vue": "^3.5.17",
         "vue-i18n": "^11.4.10",

@@ -112,37 +112,53 @@ jobs:
 
                       ## Installing
 
-                      These builds are not signed with a paid developer certificate, so your OS will warn
-                      you the first time you open the app.
+                      ZenGarden ships prebuilt binaries for **Linux only**. These builds are not signed,
+                      so your desktop environment may warn you the first time you open the app.
 
-                      - **macOS** — right-click the app → **Open**, then click **Open** in the dialog.
-                        If macOS calls the app "damaged", run: `xattr -cr /Applications/ZenGarden.app`
-                      - **Linux, AppImage** — `chmod +x` the file, then run it.
-                      - **Linux, deb / rpm** — install with your package manager.
-                      - **Linux, tar.gz** — extract anywhere and run the `zen-garden` binary inside.
+                      - **AppImage** — `chmod +x` the file, then run it.
+                      - **deb / rpm** — install with your package manager.
+                      - **tar.gz** — extract anywhere and run the `zen-garden` binary inside.
 
-    # ── Installers, one job per platform ──────────────────
+                      ## macOS and Android
+
+                      There is no prebuilt download for either, and the reason is the same for both: a
+                      binary that installs without a security warning has to be signed, and this project
+                      has neither an Apple developer certificate nor an Android signing key it can stand
+                      behind. ZenGarden is MIT licensed and both build targets are kept working, so
+                      build it yourself:
+
+                      ```sh
+                      git clone https://github.com/larrydarko1/ZenGarden.git
+                      cd ZenGarden && npm ci
+
+                      npm run build:mac                            # .dmg  → dist-electron/
+                      npm run build:mobile && cd android \
+                          && ./gradlew assembleDebug               # .apk  → app/build/outputs/apk/debug/
+                      ```
+
+                      The Android build needs Android Studio for its JDK and SDK, and the resulting APK is
+                      unsigned — your device will ask you to allow installing from an unknown source. Both
+                      are untested by the maintainer; bug reports from self-built platforms are welcome but
+                      are fixed on a best-effort basis. See the README for the longer version.
+
+    # ── Installers ────────────────────────────────────────
+    # Linux is the only platform this project distributes binaries for. The macOS and
+    # Android jobs were both dropped deliberately, and for the same reason: neither can
+    # be signed. Without a paid Apple developer certificate the only macOS option is an
+    # ad-hoc signature, which Gatekeeper treats as damaged often enough that the download
+    # was a worse experience than no download; without a signing key the only Android
+    # option is an unsigned debug APK, which installs only once the user has allowed
+    # unknown sources. Both build targets are still in the repo — `npm run build:mac`,
+    # and `npm run build:mobile` then `./gradlew assembleDebug` — so anyone can build
+    # their own. They are just not something CI publishes. The release body above tells
+    # readers exactly that, so a missing download reads as a decision, not an outage.
     build:
-        name: Build ${{ matrix.name }}
+        name: Build Linux packages
         needs: [version, prepare]
-        runs-on: ${{ matrix.os }}
+        runs-on: ubuntu-24.04
         timeout-minutes: 40
         permissions:
             contents: write
-
-        strategy:
-            fail-fast: false
-            matrix:
-                include:
-                    - name: macOS DMG (ad-hoc signed)
-                      os: macos-26
-                      script: build:mac
-                      assets: dist-electron/*.dmg
-
-                    - name: Linux packages
-                      os: ubuntu-24.04
-                      script: build:linux
-                      assets: dist-electron/*.AppImage dist-electron/*.deb dist-electron/*.rpm dist-electron/*.tar.gz
 
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -153,18 +169,17 @@ jobs:
             - uses: ./.github/actions/node-setup
 
             - name: Install rpm tooling
-              if: runner.os == 'Linux'
               run: sudo apt-get update && sudo apt-get install -y rpm
 
-            - name: Build installer
-              run: npm run ${{ matrix.script }}
+            - name: Build installers
+              run: npm run build:linux
 
             - name: Upload to draft release
               env:
                   GH_TOKEN: ${{ github.token }}
                   GH_REPO: ${{ github.repository }}
                   TAG: ${{ needs.version.outputs.tag }}
-                  ASSETS: ${{ matrix.assets }}
+                  ASSETS: dist-electron/*.AppImage dist-electron/*.deb dist-electron/*.rpm dist-electron/*.tar.gz
               run: |
                   set -euo pipefail
                   # shellcheck disable=SC2086
