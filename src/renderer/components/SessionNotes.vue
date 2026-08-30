@@ -31,11 +31,6 @@ function handleClose(): void {
 
 <template>
     <div class="notes-modal-bg">
-        <button
-            type="button"
-            class="zen-backdrop notes-modal-backdrop"
-            aria-label="Close notes modal"
-            @click="handleClose"></button>
         <div
             class="notes-modal"
             role="dialog"
