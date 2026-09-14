@@ -18,6 +18,7 @@
         "stop": "停止",
         "bell": {
             "settings": "ベルの設定",
+            "none": "なし",
             "every": "{minutes}分ごと",
             "sound": "音",
             "option": "ベル {number}",
@@ -68,24 +69,6 @@
         "placeholder": "考えを書いてください...",
         "save": "保存",
         "skip": "スキップ"
-    },
-    "breathing": {
-        "title": "呼吸エクササイズ",
-        "none": "なし",
-        "box": "ボックス呼吸",
-        "deep": "深呼吸",
-        "fourSevenEight": "4-7-8呼吸",
-        "energizing": "活力呼吸",
-        "cycle": "サイクル",
-        "breatheIn": "吸う",
-        "hold": "止める",
-        "breatheOut": "吐く",
-        "descriptions": {
-            "box": "均等な部分：吸う、止める、吐く、止める (4-4-4-4)",
-            "fourSevenEight": "落ち着きの技法：吸う4、止める7、吐く8",
-            "deep": "長くゆっくりとした呼吸：吸う6、吐く6",
-            "energizing": "速い吸気、長い呼気：2入り4出"
-        }
     },
     "calendar": {
         "minutes": "分",

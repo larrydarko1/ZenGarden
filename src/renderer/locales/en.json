@@ -18,6 +18,7 @@
         "stop": "Stop",
         "bell": {
             "settings": "Bell Settings",
+            "none": "None",
             "every": "Every {minutes} min",
             "sound": "Sound",
             "option": "Bell {number}",
@@ -68,24 +69,6 @@
         "placeholder": "Write your thoughts...",
         "save": "Save",
         "skip": "Skip"
-    },
-    "breathing": {
-        "title": "Breathing Exercise",
-        "none": "None",
-        "box": "Box Breathing",
-        "deep": "Deep Breathing",
-        "fourSevenEight": "4-7-8 Breathing",
-        "energizing": "Energizing Breath",
-        "cycle": "Cycle",
-        "breatheIn": "Breathe In",
-        "hold": "Hold",
-        "breatheOut": "Breathe Out",
-        "descriptions": {
-            "box": "Equal parts: inhale, hold, exhale, hold (4-4-4-4)",
-            "fourSevenEight": "Calming technique: inhale 4, hold 7, exhale 8",
-            "deep": "Long slow breaths: inhale 6, exhale 6",
-            "energizing": "Quick inhale, longer exhale: 2 in, 4 out"
-        }
     },
     "calendar": {
         "minutes": "min",

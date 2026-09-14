@@ -14,12 +14,6 @@ function mountOverlay(overrides: Record<string, unknown> = {}) {
             bellEnabled: false,
             bellInterval: 10,
             bellSound: '1',
-            selectedBreathingExercise: null,
-            breathingActive: false,
-            breathingPhase: 'in',
-            breathingPhaseText: 'Breathe in',
-            breathingPhaseDuration: 4,
-            breathingCycleCount: 0,
             meditationSeconds: 125,
             formatTime,
             ...overrides,
@@ -120,61 +114,6 @@ describe('MeditationOverlay', () => {
 
             expect(wrapper.find('.bell-dropdown-menu').exists()).toBe(false);
             expect(wrapper.emitted('update:bellInterval')).toBeUndefined();
-            wrapper.unmount();
-        });
-    });
-
-    describe('breathing guide', () => {
-        it('hides the toggle entirely when no exercise is selected', () => {
-            const wrapper = mountOverlay();
-
-            expect(wrapper.find('.breathing-toggle-btn').exists()).toBe(false);
-            wrapper.unmount();
-        });
-
-        it('emits toggle-breathing when the guide is started', async () => {
-            const wrapper = mountOverlay({ selectedBreathingExercise: { name: 'Box' } });
-
-            await wrapper.find('.breathing-toggle-btn').trigger('click');
-
-            expect(wrapper.emitted('toggle-breathing')).toHaveLength(1);
-            wrapper.unmount();
-        });
-
-        it('shows the sphere only while the guide is running', () => {
-            const idle = mountOverlay({ selectedBreathingExercise: { name: 'Box' } });
-            expect(idle.find('.breathing-overlay').exists()).toBe(false);
-            idle.unmount();
-
-            const running = mountOverlay({ selectedBreathingExercise: { name: 'Box' }, breathingActive: true });
-            expect(running.find('.breathing-overlay').exists()).toBe(true);
-            running.unmount();
-        });
-
-        it('drives the sphere from the phase, and its animation from the phase duration', () => {
-            const wrapper = mountOverlay({
-                selectedBreathingExercise: { name: 'Box' },
-                breathingActive: true,
-                breathingPhase: 'holdOut',
-                breathingPhaseDuration: 7,
-            });
-
-            const sphere = wrapper.find('.breathing-sphere');
-            expect(sphere.classes()).toContain('breathing-hold-out');
-            expect(sphere.classes()).not.toContain('breathing-in');
-            expect(sphere.attributes('style')).toContain('animation-duration: 7s');
-            wrapper.unmount();
-        });
-
-        it('names the exercise and counts the cycles completed', () => {
-            const wrapper = mountOverlay({
-                selectedBreathingExercise: { name: 'Box breathing' },
-                breathingActive: true,
-                breathingCycleCount: 3,
-            });
-
-            expect(wrapper.find('.breathing-exercise-name').text()).toBe('Box breathing');
-            expect(wrapper.find('.breathing-cycle').text()).toContain('3');
             wrapper.unmount();
         });
     });

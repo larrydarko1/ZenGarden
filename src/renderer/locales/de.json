@@ -18,6 +18,7 @@
         "stop": "Stoppen",
         "bell": {
             "settings": "Glocken-Einstellungen",
+            "none": "Keine",
             "every": "Alle {minutes} Min.",
             "sound": "Klang",
             "option": "Glocke {number}",
@@ -68,24 +69,6 @@
         "placeholder": "Schreiben Sie Ihre Gedanken...",
         "save": "Speichern",
         "skip": "Überspringen"
-    },
-    "breathing": {
-        "title": "Atemübung",
-        "none": "Keine",
-        "box": "Box-Atmung",
-        "deep": "Tiefe Atmung",
-        "fourSevenEight": "4-7-8 Atmung",
-        "energizing": "Energetisierende Atmung",
-        "cycle": "Zyklus",
-        "breatheIn": "Einatmen",
-        "hold": "Halten",
-        "breatheOut": "Ausatmen",
-        "descriptions": {
-            "box": "Gleiche Teile: einatmen, halten, ausatmen, halten (4-4-4-4)",
-            "fourSevenEight": "Beruhigende Technik: einatmen 4, halten 7, ausatmen 8",
-            "deep": "Lange langsame Atemzüge: einatmen 6, ausatmen 6",
-            "energizing": "Schnelles Einatmen, längeres Ausatmen: 2 rein, 4 raus"
-        }
     },
     "calendar": {
         "minutes": "Min",

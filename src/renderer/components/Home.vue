@@ -53,14 +53,6 @@ const {
     bellInterval,
     bellSound,
     showBellConfig,
-    showBreathingPicker,
-    selectedBreathingExercise,
-    breathingActive,
-    breathingPhase,
-    breathingPhaseText,
-    breathingPhaseDuration,
-    breathingCycleCount,
-    breathingExercises,
     completedMeditationDuration,
     showNotes,
     meditationAnimationIdx,
@@ -70,7 +62,6 @@ const {
     cancelCustomDuration,
     selectBellSound,
     selectBellSoundFromDropdown,
-    toggleBreathingDuringMeditation,
     startMeditation: startMeditationSession,
     stopMeditation,
     cleanup: cleanupMeditation,
@@ -130,7 +121,6 @@ function toggleJournalMode(): void {
         philosophyMode.value = false;
         settingsMode.value = false;
         showBellConfig.value = false;
-        showBreathingPicker.value = false;
     }
 }
 
@@ -141,7 +131,6 @@ function toggleCalendarMode(): void {
         philosophyMode.value = false;
         settingsMode.value = false;
         showBellConfig.value = false;
-        showBreathingPicker.value = false;
         if (vaultPath.value !== null) void fetchMeditations();
     }
 }
@@ -153,7 +142,6 @@ function togglePhilosophyMode(): void {
         calendarMode.value = false;
         settingsMode.value = false;
         showBellConfig.value = false;
-        showBreathingPicker.value = false;
     }
 }
 
@@ -164,7 +152,6 @@ function toggleSettingsMode(): void {
         calendarMode.value = false;
         philosophyMode.value = false;
         showBellConfig.value = false;
-        showBreathingPicker.value = false;
     }
 }
 
@@ -310,60 +297,6 @@ onUnmounted(() => {
                 @save="saveSessionNotes"
                 @skip="skipSessionNotes"
                 @close="skipSessionNotes" />
-            <!-- Breathing Exercise Picker (pre-meditation) -->
-            <button
-                v-if="showBreathingPicker && !meditationActive"
-                type="button"
-                class="zen-backdrop breathing-picker-backdrop"
-                aria-label="Close breathing picker"
-                @click="showBreathingPicker = false"></button>
-            <div
-                v-if="showBreathingPicker && !meditationActive"
-                class="breathing-picker-panel">
-                <div class="breathing-picker-header">
-                    <h3 class="breathing-picker-title">{{ t('breathing.title') }}</h3>
-                    <button
-                        class="zen-icon-btn is-bare config-close-btn"
-                        aria-label="Close breathing picker"
-                        @click="showBreathingPicker = false">
-                        <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M18 6L6 18M6 6l12 12"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round" />
-                        </svg>
-                    </button>
-                </div>
-                <div class="breathing-picker-options">
-                    <button
-                        class="breathing-option-btn"
-                        :class="[{ active: !selectedBreathingExercise }]"
-                        @click="
-                            selectedBreathingExercise = null;
-                            showBreathingPicker = false;
-                        ">
-                        {{ t('breathing.none') }}
-                    </button>
-                    <button
-                        v-for="ex in breathingExercises"
-                        :key="ex.id"
-                        class="breathing-option-btn"
-                        :class="[{ active: selectedBreathingExercise?.id === ex.id }]"
-                        @click="
-                            selectedBreathingExercise = ex;
-                            showBreathingPicker = false;
-                        ">
-                        <div class="breathing-option-name">{{ ex.name }}</div>
-                        <div class="breathing-option-desc">{{ ex.description }}</div>
-                    </button>
-                </div>
-            </div>
 
             <div
                 v-if="!meditationActive"
@@ -522,32 +455,6 @@ onUnmounted(() => {
                         </svg>
                     </button>
                     <button
-                        class="duration-btn breathing-config-btn"
-                        :class="[{ active: !!selectedBreathingExercise }]"
-                        :aria-label="'Configure breathing exercise'"
-                        @click="showBreathingPicker = !showBreathingPicker">
-                        <svg
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <circle
-                                cx="12"
-                                cy="12"
-                                r="9"
-                                stroke="currentColor"
-                                stroke-width="1.5" />
-                            <circle
-                                cx="12"
-                                cy="12"
-                                r="4"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                opacity="0.5" />
-                        </svg>
-                    </button>
-                    <button
                         class="start-meditation-btn"
                         :aria-label="`Start a ${selectedDuration}-minute meditation session`"
                         @click="startMeditation">
@@ -559,14 +466,14 @@ onUnmounted(() => {
                 <button
                     v-if="showBellConfig && !meditationActive"
                     type="button"
-                    class="zen-backdrop breathing-picker-backdrop"
+                    class="zen-backdrop config-panel-backdrop"
                     aria-label="Close bell settings"
                     @click="showBellConfig = false"></button>
                 <div
                     v-if="showBellConfig && !meditationActive"
-                    class="breathing-picker-panel bell-picker-panel">
-                    <div class="breathing-picker-header">
-                        <h3 class="breathing-picker-title">{{ t('meditation.bell.settings') }}</h3>
+                    class="config-panel">
+                    <div class="config-panel-header">
+                        <h3 class="config-panel-title">{{ t('meditation.bell.settings') }}</h3>
                         <button
                             class="zen-icon-btn is-bare config-close-btn"
                             aria-label="Close bell settings"
@@ -585,27 +492,27 @@ onUnmounted(() => {
                             </svg>
                         </button>
                     </div>
-                    <div class="breathing-picker-options">
+                    <div class="config-panel-options">
                         <button
-                            class="breathing-option-btn"
+                            class="config-option-btn"
                             :class="[{ active: !bellEnabled }]"
                             @click="
                                 bellEnabled = false;
                                 showBellConfig = false;
                             ">
-                            {{ t('breathing.none') }}
+                            {{ t('meditation.bell.none') }}
                         </button>
                         <button
                             v-for="interval in [5, 10, 15, 20]"
                             :key="interval"
-                            class="breathing-option-btn"
+                            class="config-option-btn"
                             :class="[{ active: bellEnabled && bellInterval === interval }]"
                             @click="
                                 bellEnabled = true;
                                 bellInterval = interval;
                                 showBellConfig = false;
                             ">
-                            <div class="breathing-option-name">{{
+                            <div class="config-option-name">{{
                                 t('meditation.bell.every', { minutes: interval })
                             }}</div>
                         </button>
@@ -618,7 +525,7 @@ onUnmounted(() => {
                             <button
                                 v-for="sound in ['1', '2', '3', '4']"
                                 :key="sound"
-                                class="breathing-option-btn bell-sound-inline-btn"
+                                class="config-option-btn bell-sound-inline-btn"
                                 :class="[{ active: bellSound === sound }]"
                                 @click="selectBellSound(sound)">
                                 {{ t('meditation.bell.option', { number: sound }) }}
@@ -633,19 +540,12 @@ onUnmounted(() => {
                 :bell-enabled="bellEnabled"
                 :bell-interval="bellInterval"
                 :bell-sound="bellSound"
-                :selected-breathing-exercise="selectedBreathingExercise"
-                :breathing-active="breathingActive"
-                :breathing-phase="breathingPhase"
-                :breathing-phase-text="breathingPhaseText"
-                :breathing-phase-duration="breathingPhaseDuration"
-                :breathing-cycle-count="breathingCycleCount"
                 :meditation-seconds="meditationSeconds"
                 :format-time="formatTime"
                 @stop="stopMeditation"
                 @update:bell-enabled="bellEnabled = $event"
                 @update:bell-interval="bellInterval = $event"
-                @select-bell-sound="selectBellSoundFromDropdown($event)"
-                @toggle-breathing="toggleBreathingDuringMeditation" />
+                @select-bell-sound="selectBellSoundFromDropdown($event)" />
         </template>
     </div>
 </template>
@@ -966,16 +866,16 @@ onUnmounted(() => {
     }
 }
 
-/* ––––– Breathing picker ––––– */
+/* ––––– Config panel (bell settings) ––––– */
 
-.breathing-picker-backdrop {
+.config-panel-backdrop {
     position: fixed;
     z-index: $z-modal;
     background: color-mix(in srgb, $scrim 30%, transparent);
     animation: fade-in $duration-slow $ease-standard;
 }
 
-.breathing-picker-panel {
+.config-panel {
     @include scrollbar;
 
     position: fixed;
@@ -1008,7 +908,7 @@ onUnmounted(() => {
     }
 }
 
-.breathing-picker-header {
+.config-panel-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1016,7 +916,7 @@ onUnmounted(() => {
     border-bottom: $border-width-thin $input-border;
 }
 
-.breathing-picker-title {
+.config-panel-title {
     margin: 0;
     color: $text1;
     font-size: $font-size-xs;
@@ -1025,14 +925,14 @@ onUnmounted(() => {
     letter-spacing: $letter-spacing-4;
 }
 
-.breathing-picker-options {
+.config-panel-options {
     display: flex;
     flex-direction: column;
     gap: $space-1;
     padding: $space-2;
 }
 
-.breathing-option-btn {
+.config-option-btn {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -1068,17 +968,10 @@ onUnmounted(() => {
     }
 }
 
-.breathing-option-name {
+.config-option-name {
     color: inherit;
     font-size: $font-size-xs;
     font-weight: $font-weight-normal;
-}
-
-.breathing-option-desc {
-    margin-top: $space-0;
-    color: $text2;
-    font-size: $font-size-xxs;
-    line-height: $line-height-tight;
 }
 
 /* ––––– Bell config ––––– */
@@ -1202,7 +1095,7 @@ onUnmounted(() => {
         }
     }
 
-    .breathing-picker-panel {
+    .config-panel {
         width: $size-44;
         max-width: 90vw;
     }

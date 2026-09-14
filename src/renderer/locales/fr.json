@@ -18,6 +18,7 @@
         "stop": "Arrêter",
         "bell": {
             "settings": "Paramètres de la Cloche",
+            "none": "Aucun",
             "every": "Toutes les {minutes} min",
             "sound": "Son",
             "option": "Cloche {number}",
@@ -68,24 +69,6 @@
         "placeholder": "Écrivez vos pensées...",
         "save": "Enregistrer",
         "skip": "Passer"
-    },
-    "breathing": {
-        "title": "Exercice de Respiration",
-        "none": "Aucun",
-        "box": "Respiration en Boîte",
-        "deep": "Respiration Profonde",
-        "fourSevenEight": "Respiration 4-7-8",
-        "energizing": "Respiration Énergisante",
-        "cycle": "Cycle",
-        "breatheIn": "Inspirer",
-        "hold": "Retenir",
-        "breatheOut": "Expirer",
-        "descriptions": {
-            "box": "Parties égales : inspirer, retenir, expirer, retenir (4-4-4-4)",
-            "fourSevenEight": "Technique calmante : inspirer 4, retenir 7, expirer 8",
-            "deep": "Respirations longues et lentes : inspirer 6, expirer 6",
-            "energizing": "Inspiration rapide, expiration plus longue : 2 dedans, 4 dehors"
-        }
     },
     "calendar": {
         "minutes": "min",

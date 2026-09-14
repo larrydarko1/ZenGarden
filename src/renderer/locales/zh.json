@@ -18,6 +18,7 @@
         "stop": "停止",
         "bell": {
             "settings": "钟声设置",
+            "none": "无",
             "every": "每 {minutes} 分钟",
             "sound": "音效",
             "option": "钟声 {number}",
@@ -68,24 +69,6 @@
         "placeholder": "写下你的想法...",
         "save": "保存",
         "skip": "跳过"
-    },
-    "breathing": {
-        "title": "呼吸练习",
-        "none": "无",
-        "box": "方框呼吸",
-        "deep": "深呼吸",
-        "fourSevenEight": "4-7-8呼吸",
-        "energizing": "活力呼吸",
-        "cycle": "循环",
-        "breatheIn": "吸气",
-        "hold": "屏住",
-        "breatheOut": "呼气",
-        "descriptions": {
-            "box": "均等部分：吸气、屏住、呼气、屏住 (4-4-4-4)",
-            "fourSevenEight": "平静技巧：吸气4、屏住7、呼气8",
-            "deep": "长而缓慢的呼吸：吸气6、呼气6",
-            "energizing": "快速吸气，较长呼气：2进4出"
-        }
     },
     "calendar": {
         "minutes": "分钟",

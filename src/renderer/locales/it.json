@@ -18,6 +18,7 @@
         "stop": "Ferma",
         "bell": {
             "settings": "Impostazioni Campana",
+            "none": "Nessuno",
             "every": "Ogni {minutes} min",
             "sound": "Suono",
             "option": "Campana {number}",
@@ -68,24 +69,6 @@
         "placeholder": "Scrivi i tuoi pensieri...",
         "save": "Salva",
         "skip": "Salta"
-    },
-    "breathing": {
-        "title": "Esercizio di Respirazione",
-        "none": "Nessuno",
-        "box": "Respirazione a Scatola",
-        "deep": "Respirazione Profonda",
-        "fourSevenEight": "Respirazione 4-7-8",
-        "energizing": "Respiro Energizzante",
-        "cycle": "Ciclo",
-        "breatheIn": "Inspira",
-        "hold": "Trattieni",
-        "breatheOut": "Espira",
-        "descriptions": {
-            "box": "Parti uguali: inspirare, trattenere, espirare, trattenere (4-4-4-4)",
-            "fourSevenEight": "Tecnica calmante: inspirare 4, trattenere 7, espirare 8",
-            "deep": "Respiri lunghi e lenti: inspirare 6, espirare 6",
-            "energizing": "Inspirazione rapida, espirazione più lunga: 2 dentro, 4 fuori"
-        }
     },
     "calendar": {
         "minutes": "min",

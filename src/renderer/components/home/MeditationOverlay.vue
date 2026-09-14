@@ -2,21 +2,11 @@
 import { ref, type Component } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-type BreathingExercise = {
-    name: string;
-};
-
 defineProps<{
     animationComponent: Component;
     bellEnabled: boolean;
     bellInterval: number;
     bellSound: string;
-    selectedBreathingExercise: BreathingExercise | null;
-    breathingActive: boolean;
-    breathingPhase: string;
-    breathingPhaseText: string;
-    breathingPhaseDuration: number;
-    breathingCycleCount: number;
     meditationSeconds: number;
     formatTime: (seconds: number) => string;
 }>();
@@ -26,7 +16,6 @@ const emit = defineEmits<{
     'update:bellEnabled': [value: boolean];
     'update:bellInterval': [value: number];
     'select-bell-sound': [sound: string];
-    'toggle-breathing': [];
 }>();
 
 const BELL_INTERVALS = [5, 10, 15, 20];
@@ -125,59 +114,6 @@ const showSoundDropdown = ref(false);
                         </button>
                     </div>
                 </div>
-            </div>
-
-            <!-- Breathing toggle -->
-            <div
-                v-if="selectedBreathingExercise"
-                class="toolbar-divider"></div>
-            <button
-                v-if="selectedBreathingExercise"
-                class="breathing-toggle-btn"
-                :class="[{ active: breathingActive }]"
-                :aria-label="breathingActive ? 'Stop breathing guide' : 'Start breathing guide'"
-                @click="emit('toggle-breathing')">
-                <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <circle
-                        cx="12"
-                        cy="12"
-                        r="9"
-                        stroke="currentColor"
-                        stroke-width="2" />
-                    <circle
-                        cx="12"
-                        cy="12"
-                        r="4"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        opacity="0.5" />
-                </svg>
-            </button>
-        </div>
-
-        <!-- Breathing Sphere Overlay -->
-        <div
-            v-if="breathingActive && selectedBreathingExercise"
-            class="breathing-overlay">
-            <div
-                class="breathing-sphere"
-                :class="{
-                    'breathing-in': breathingPhase === 'in',
-                    'breathing-hold': breathingPhase === 'hold',
-                    'breathing-out': breathingPhase === 'out',
-                    'breathing-hold-out': breathingPhase === 'holdOut',
-                }"
-                :style="{ animationDuration: `${breathingPhaseDuration}s` }">
-                <span class="breathing-sphere-text">{{ breathingPhaseText }}</span>
-            </div>
-            <div class="breathing-info">
-                <span class="breathing-exercise-name">{{ selectedBreathingExercise.name }}</span>
-                <span class="breathing-cycle">{{ t('breathing.cycle') }} {{ breathingCycleCount }}</span>
             </div>
         </div>
 
@@ -416,12 +352,6 @@ const showSoundDropdown = ref(false);
     background: transparent;
 }
 
-.toolbar-divider {
-    width: $size-0;
-    height: $size-11;
-    background: $input-border;
-}
-
 @keyframes dropdown-slide {
     from {
         opacity: $opacity-faint;
@@ -444,127 +374,6 @@ const showSoundDropdown = ref(false);
         opacity: $opacity-full;
         transform: translateX(0);
     }
-}
-
-/* ––––– Breathing overlay ––––– */
-
-.breathing-toggle-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: $space-1;
-    background: transparent;
-    border: none;
-    border-radius: $border-radius-sm;
-    color: $text2;
-    opacity: $opacity-mid;
-    cursor: pointer;
-    transition:
-        color $transition-base,
-        background $transition-base,
-        opacity $transition-base;
-
-    &:hover {
-        color: $text1;
-        opacity: $opacity-full;
-    }
-
-    &.active {
-        background: color-mix(in srgb, $glass 10%, transparent);
-        color: $text1;
-        opacity: $opacity-full;
-    }
-}
-
-.breathing-overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    z-index: $z-popover;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: $space-6;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-}
-
-.breathing-sphere {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: $size-34;
-    height: $size-34;
-    background: radial-gradient(
-        circle at 40% 35%,
-        color-mix(in srgb, $glass 15%, transparent),
-        color-mix(in srgb, $glass 3%, transparent)
-    );
-    backdrop-filter: blur($blur-base);
-    border: $border-width-thin color-mix(in srgb, $glass 15%, transparent);
-    border-radius: $border-radius-round;
-    box-shadow: $shadow-sphere;
-    transition: transform $transition-slow;
-    will-change: transform;
-
-    &.breathing-in {
-        animation: sphere-breath ease-in-out forwards;
-    }
-
-    &.breathing-out {
-        animation: sphere-breath ease-in-out forwards reverse;
-    }
-
-    &.breathing-hold {
-        transform: scale($scale-160);
-    }
-
-    &.breathing-hold-out {
-        transform: scale($scale-100);
-    }
-}
-
-@keyframes sphere-breath {
-    from {
-        transform: scale($scale-100);
-        opacity: $opacity-mid;
-    }
-
-    to {
-        transform: scale($scale-160);
-        opacity: $opacity-full;
-    }
-}
-
-.breathing-sphere-text {
-    color: $text1;
-    font-size: $font-size-xs;
-    font-weight: $font-weight-normal;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: $letter-spacing-6;
-    opacity: $opacity-almost-opaque;
-}
-
-.breathing-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: $space-1;
-}
-
-.breathing-exercise-name {
-    color: $text2;
-    font-size: $font-size-xs;
-    text-transform: uppercase;
-    letter-spacing: $letter-spacing-4;
-    opacity: $opacity-mid-high;
-}
-
-.breathing-cycle {
-    color: $text2;
-    font-size: $font-size-xxs;
-    opacity: $opacity-mid-low;
 }
 
 /* –––––– Responsive –––––– */
@@ -594,10 +403,6 @@ const showSoundDropdown = ref(false);
 
     .bell-dropdown-btn {
         padding: $space-1 $space-2;
-    }
-
-    .toolbar-divider {
-        height: $size-12;
     }
 }
 
@@ -672,11 +477,6 @@ const showSoundDropdown = ref(false);
 
     .dropdown-backdrop-inline {
         display: none;
-    }
-
-    .breathing-sphere {
-        width: $size-37;
-        height: $size-37;
     }
 }
 

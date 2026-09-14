@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { mountWithI18n } from '@test-utils';
 
 const mockGetMeditations = vi.fn();
@@ -29,7 +29,6 @@ vi.mock('@/renderer/utils/logger', () => ({
 const meditationActive = ref(false);
 const showNotes = ref(false);
 const showBellConfig = ref(false);
-const showBreathingPicker = ref(false);
 const bellEnabled = ref(false);
 const isCustomDuration = ref(false);
 const completedMeditationDuration = ref(900);
@@ -43,7 +42,6 @@ const mockApplyCustomDuration = vi.fn();
 const mockCancelCustomDuration = vi.fn();
 const mockSelectBellSound = vi.fn();
 const mockSelectBellSoundFromDropdown = vi.fn();
-const mockToggleBreathing = vi.fn();
 
 vi.mock('@/renderer/composables/useMeditationSession', () => ({
     useMeditationSession: () => ({
@@ -57,14 +55,6 @@ vi.mock('@/renderer/composables/useMeditationSession', () => ({
         bellInterval: ref(10),
         bellSound: ref('1'),
         showBellConfig,
-        showBreathingPicker,
-        selectedBreathingExercise: ref(null),
-        breathingActive: ref(false),
-        breathingPhase: ref('in'),
-        breathingPhaseText: ref('In'),
-        breathingPhaseDuration: ref(4),
-        breathingCycleCount: ref(0),
-        breathingExercises: computed(() => [{ key: 'box', name: 'Box', description: '4-4-4-4' }]),
         completedMeditationDuration,
         showNotes,
         meditationAnimationIdx: ref(0),
@@ -74,7 +64,6 @@ vi.mock('@/renderer/composables/useMeditationSession', () => ({
         cancelCustomDuration: mockCancelCustomDuration,
         selectBellSound: mockSelectBellSound,
         selectBellSoundFromDropdown: mockSelectBellSoundFromDropdown,
-        toggleBreathingDuringMeditation: mockToggleBreathing,
         startMeditation: mockStartMeditation,
         stopMeditation: mockStopMeditation,
         cleanup: mockCleanup,
@@ -114,7 +103,6 @@ beforeEach(() => {
     meditationActive.value = false;
     showNotes.value = false;
     showBellConfig.value = false;
-    showBreathingPicker.value = false;
     bellEnabled.value = false;
     isCustomDuration.value = false;
     mockGetMeditations.mockResolvedValue({ meditations: [] });
@@ -274,16 +262,14 @@ describe('Home', () => {
             wrapper.unmount();
         });
 
-        it('closes the bell and breathing panels when a section takes over the screen', async () => {
+        it('closes the bell panel when a section takes over the screen', async () => {
             const wrapper = await mountWithVault();
             showBellConfig.value = true;
-            showBreathingPicker.value = true;
             await wrapper.vm.$nextTick();
 
             await open(wrapper, 'toggle-settings');
 
             expect(showBellConfig.value).toBe(false);
-            expect(showBreathingPicker.value).toBe(false);
             wrapper.unmount();
         });
 
@@ -314,9 +300,7 @@ describe('Home', () => {
         it('offers the four preset durations and hands the chosen one to the session', async () => {
             const wrapper = await mountWithVault();
 
-            const presets = wrapper.findAll(
-                '.duration-btn:not(.custom-btn):not(.bell-config-btn):not(.breathing-config-btn)',
-            );
+            const presets = wrapper.findAll('.duration-btn:not(.custom-btn):not(.bell-config-btn)');
             expect(presets.map((preset) => preset.text())).toEqual(['5', '10', '15', '30']);
 
             await presets[2].trigger('click');
@@ -372,7 +356,7 @@ describe('Home', () => {
         it('stays shut until the bell button is pressed', async () => {
             const wrapper = await mountWithVault();
 
-            expect(wrapper.find('.breathing-picker-panel').exists()).toBe(false);
+            expect(wrapper.find('.config-panel').exists()).toBe(false);
             wrapper.unmount();
         });
 
@@ -382,7 +366,7 @@ describe('Home', () => {
             await wrapper.vm.$nextTick();
 
             // The first option is "none"; the four after it are the intervals.
-            const options = wrapper.findAll('.breathing-picker-options .breathing-option-btn');
+            const options = wrapper.findAll('.config-panel-options .config-option-btn');
             expect(options).toHaveLength(5);
 
             await options[3].trigger('click');
@@ -398,7 +382,7 @@ describe('Home', () => {
             showBellConfig.value = true;
             await wrapper.vm.$nextTick();
 
-            await wrapper.findAll('.breathing-picker-options .breathing-option-btn')[0].trigger('click');
+            await wrapper.findAll('.config-panel-options .config-option-btn')[0].trigger('click');
 
             expect(bellEnabled.value).toBe(false);
             expect(showBellConfig.value).toBe(false);
@@ -418,21 +402,6 @@ describe('Home', () => {
             expect(sounds).toHaveLength(4);
             await sounds[1].trigger('click');
             expect(mockSelectBellSound).toHaveBeenCalledWith('2');
-            wrapper.unmount();
-        });
-    });
-
-    describe('the breathing picker', () => {
-        it('lists the exercises the session offers, and closes from the backdrop', async () => {
-            const wrapper = await mountWithVault();
-            showBreathingPicker.value = true;
-            await wrapper.vm.$nextTick();
-
-            expect(wrapper.findAll('.breathing-option-name').map((option) => option.text())).toContain('Box');
-
-            await wrapper.find('.breathing-picker-backdrop').trigger('click');
-
-            expect(showBreathingPicker.value).toBe(false);
             wrapper.unmount();
         });
     });

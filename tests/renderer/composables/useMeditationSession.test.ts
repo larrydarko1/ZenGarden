@@ -1,12 +1,6 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { useMeditationSession } from '@/renderer/composables/useMeditationSession';
 
-vi.mock('vue-i18n', () => ({
-    useI18n: () => ({
-        t: (key: string) => key,
-    }),
-}));
-
 // Stub HTMLAudioElement
 class MockAudio {
     src = '';
@@ -49,17 +43,6 @@ describe('useMeditationSession', () => {
         it('has bell disabled by default', () => {
             const { bellEnabled } = setup();
             expect(bellEnabled.value).toBe(false);
-        });
-
-        it('has no breathing exercise selected', () => {
-            const { selectedBreathingExercise } = setup();
-            expect(selectedBreathingExercise.value).toBeNull();
-        });
-
-        it('provides 4 breathing exercises', () => {
-            const { breathingExercises } = setup();
-            expect(breathingExercises).toHaveLength(4);
-            expect(breathingExercises.map((e) => e.id)).toEqual(['box', '478', 'deep', 'energizing']);
         });
     });
 
@@ -167,13 +150,6 @@ describe('useMeditationSession', () => {
             vi.advanceTimersByTime(3000);
             expect(meditationSeconds.value).toBe(597);
         });
-
-        it('starts breathing cycle if exercise is selected', () => {
-            const { startMeditation, breathingExercises, selectedBreathingExercise, breathingActive } = setup();
-            selectedBreathingExercise.value = breathingExercises[0];
-            startMeditation(3);
-            expect(breathingActive.value).toBe(true);
-        });
     });
 
     describe('stopMeditation', () => {
@@ -187,16 +163,6 @@ describe('useMeditationSession', () => {
             const secondsAfterStop = meditationSeconds.value;
             vi.advanceTimersByTime(3000);
             expect(meditationSeconds.value).toBe(secondsAfterStop);
-        });
-
-        it('stops breathing if active', () => {
-            const { startMeditation, stopMeditation, breathingExercises, selectedBreathingExercise, breathingActive } =
-                setup();
-            selectedBreathingExercise.value = breathingExercises[0];
-            startMeditation(3);
-            expect(breathingActive.value).toBe(true);
-            stopMeditation();
-            expect(breathingActive.value).toBe(false);
         });
     });
 
@@ -222,78 +188,6 @@ describe('useMeditationSession', () => {
         });
     });
 
-    describe('breathing exercises', () => {
-        it('startBreathingCycle does nothing without an exercise selected', () => {
-            const { startBreathingCycle, breathingActive } = setup();
-            startBreathingCycle();
-            expect(breathingActive.value).toBe(false);
-        });
-
-        it('starts cycling through phases', () => {
-            const {
-                startBreathingCycle,
-                breathingExercises,
-                selectedBreathingExercise,
-                breathingActive,
-                breathingPhase,
-            } = setup();
-            selectedBreathingExercise.value = breathingExercises[0]; // box breathing
-            startBreathingCycle();
-
-            expect(breathingActive.value).toBe(true);
-            expect(breathingPhase.value).toBe('in');
-        });
-
-        it('advances to next phase on interval', () => {
-            const { startBreathingCycle, breathingExercises, selectedBreathingExercise, breathingPhase } = setup();
-            selectedBreathingExercise.value = breathingExercises[0]; // box: in(4s), hold(4s), out(4s), hold(4s)
-            startBreathingCycle();
-
-            // First phase is 'in' with 4s duration. Interval runs at phaseDuration * 1000
-            vi.advanceTimersByTime(4000);
-            expect(breathingPhase.value).toBe('hold');
-        });
-
-        it('stopBreathingCycle stops the cycle', () => {
-            const {
-                startBreathingCycle,
-                stopBreathingCycle,
-                breathingExercises,
-                selectedBreathingExercise,
-                breathingActive,
-            } = setup();
-            selectedBreathingExercise.value = breathingExercises[0];
-            startBreathingCycle();
-            stopBreathingCycle();
-            expect(breathingActive.value).toBe(false);
-        });
-
-        it('toggleBreathingDuringMeditation toggles cycle on/off', () => {
-            const { toggleBreathingDuringMeditation, breathingExercises, selectedBreathingExercise, breathingActive } =
-                setup();
-            selectedBreathingExercise.value = breathingExercises[0];
-
-            toggleBreathingDuringMeditation();
-            expect(breathingActive.value).toBe(true);
-
-            toggleBreathingDuringMeditation();
-            expect(breathingActive.value).toBe(false);
-        });
-
-        it('increments cycle count after completing all phases', () => {
-            const { startBreathingCycle, breathingExercises, selectedBreathingExercise, breathingCycleCount } = setup();
-            // Deep breathing: in(6s), out(6s)
-            selectedBreathingExercise.value = breathingExercises[2];
-            startBreathingCycle();
-
-            expect(breathingCycleCount.value).toBe(1);
-            // After 2 phases (in + out at 6s interval each), cycle completes
-            vi.advanceTimersByTime(6000); // phase 2 (out)
-            vi.advanceTimersByTime(6000); // back to phase 1 → cycle 2
-            expect(breathingCycleCount.value).toBe(2);
-        });
-    });
-
     describe('bell sound', () => {
         it('selectBellSound updates the sound id', () => {
             const { selectBellSound, bellSound } = setup();
@@ -311,10 +205,8 @@ describe('useMeditationSession', () => {
     });
 
     describe('cleanup', () => {
-        it('clears meditation and breathing intervals', () => {
-            const { startMeditation, breathingExercises, selectedBreathingExercise, cleanup, meditationSeconds } =
-                setup();
-            selectedBreathingExercise.value = breathingExercises[0];
+        it('clears the meditation interval', () => {
+            const { startMeditation, cleanup, meditationSeconds } = setup();
             startMeditation(3);
 
             cleanup();

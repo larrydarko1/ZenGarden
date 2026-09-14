@@ -1,20 +1,10 @@
 /**
- * useMeditationSession — timer, bell, and breathing exercise state and lifecycle.
- * Owns: meditation countdown, bell scheduling, breathing cycle, audio playback, session result.
+ * useMeditationSession — timer, bell, and session-result state and lifecycle.
+ * Owns: meditation countdown, bell scheduling, audio playback, session result.
  * Does NOT own: animation selection (Home.vue), session notes saving (Home.vue), auth (Home.vue).
  */
 
 import { ref, type Ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type BreathingExercise = {
-    id: string;
-    name: string;
-    description: string;
-    pattern: { phase: string; duration: number; text: string }[];
-};
 
 type MeditationSession = {
     // Timer
@@ -31,15 +21,6 @@ type MeditationSession = {
     showBellConfig: Ref<boolean>;
     showIntervalDropdown: Ref<boolean>;
     showSoundDropdown: Ref<boolean>;
-    // Breathing
-    showBreathingPicker: Ref<boolean>;
-    selectedBreathingExercise: Ref<BreathingExercise | null>;
-    breathingActive: Ref<boolean>;
-    breathingPhase: Ref<string>;
-    breathingPhaseText: Ref<string>;
-    breathingPhaseDuration: Ref<number>;
-    breathingCycleCount: Ref<number>;
-    breathingExercises: BreathingExercise[];
     // Session result
     completedMeditationDuration: Ref<number>;
     showNotes: Ref<boolean>;
@@ -51,9 +32,6 @@ type MeditationSession = {
     cancelCustomDuration: () => void;
     selectBellSound: (sound: string) => void;
     selectBellSoundFromDropdown: (sound: string) => void;
-    startBreathingCycle: () => void;
-    stopBreathingCycle: () => void;
-    toggleBreathingDuringMeditation: () => void;
     startMeditation: (animationCount: number) => void;
     stopMeditation: () => void;
     finishMeditation: () => void;
@@ -61,11 +39,7 @@ type MeditationSession = {
     formatTime: (sec: number) => string;
 };
 
-// ─── Composable ───────────────────────────────────────────────────────────────
-
 export function useMeditationSession(): MeditationSession {
-    const { t } = useI18n();
-
     // ── Timer ─────────────────────────────────────────────────────────────────
     const meditationActive = ref(false);
     const meditationSeconds = ref(600);
@@ -84,58 +58,6 @@ export function useMeditationSession(): MeditationSession {
     const showSoundDropdown = ref(false);
     let lastBellTime = 0;
     let bellAudioInstance: HTMLAudioElement | null = null;
-
-    // ── Breathing ─────────────────────────────────────────────────────────────
-    const showBreathingPicker = ref(false);
-    const selectedBreathingExercise = ref<BreathingExercise | null>(null);
-    const breathingActive = ref(false);
-    const breathingPhase = ref('in');
-    const breathingPhaseText = ref('');
-    const breathingPhaseDuration = ref(4);
-    const breathingCycleCount = ref(1);
-    let breathingIntervalId: number | undefined;
-
-    const breathingExercises: BreathingExercise[] = [
-        {
-            id: 'box',
-            name: t('breathing.box'),
-            description: t('breathing.descriptions.box'),
-            pattern: [
-                { phase: 'in', duration: 4, text: t('breathing.breatheIn') },
-                { phase: 'hold', duration: 4, text: t('breathing.hold') },
-                { phase: 'out', duration: 4, text: t('breathing.breatheOut') },
-                { phase: 'hold', duration: 4, text: t('breathing.hold') },
-            ],
-        },
-        {
-            id: '478',
-            name: t('breathing.fourSevenEight'),
-            description: t('breathing.descriptions.fourSevenEight'),
-            pattern: [
-                { phase: 'in', duration: 4, text: t('breathing.breatheIn') },
-                { phase: 'hold', duration: 7, text: t('breathing.hold') },
-                { phase: 'out', duration: 8, text: t('breathing.breatheOut') },
-            ],
-        },
-        {
-            id: 'deep',
-            name: t('breathing.deep'),
-            description: t('breathing.descriptions.deep'),
-            pattern: [
-                { phase: 'in', duration: 6, text: t('breathing.breatheIn') },
-                { phase: 'out', duration: 6, text: t('breathing.breatheOut') },
-            ],
-        },
-        {
-            id: 'energizing',
-            name: t('breathing.energizing'),
-            description: t('breathing.descriptions.energizing'),
-            pattern: [
-                { phase: 'in', duration: 2, text: t('breathing.breatheIn') },
-                { phase: 'out', duration: 4, text: t('breathing.breatheOut') },
-            ],
-        },
-    ];
 
     // ── Session result ────────────────────────────────────────────────────────
     const completedMeditationDuration = ref(0);
@@ -209,56 +131,10 @@ export function useMeditationSession(): MeditationSession {
         playBellSound();
     }
 
-    // ── Breathing ─────────────────────────────────────────────────────────────
-
-    function startBreathingCycle(): void {
-        if (selectedBreathingExercise.value === null) return;
-        breathingActive.value = true;
-        breathingCycleCount.value = 1;
-        let patternIndex = 0;
-        const pattern = selectedBreathingExercise.value.pattern;
-
-        function nextPhase(): void {
-            if (!breathingActive.value || selectedBreathingExercise.value === null) return;
-            const current = pattern[patternIndex];
-            breathingPhase.value = current.phase;
-            breathingPhaseText.value = current.text;
-            breathingPhaseDuration.value = current.duration;
-            patternIndex++;
-            if (patternIndex >= pattern.length) {
-                patternIndex = 0;
-                breathingCycleCount.value++;
-            }
-        }
-
-        nextPhase();
-        // Interval uses the duration of the first phase — intentional, preserved from original.
-        breathingIntervalId = window.setInterval(() => {
-            nextPhase();
-        }, breathingPhaseDuration.value * 1000);
-    }
-
-    function stopBreathingCycle(): void {
-        breathingActive.value = false;
-        if (breathingIntervalId !== undefined) {
-            clearInterval(breathingIntervalId);
-            breathingIntervalId = undefined;
-        }
-    }
-
-    function toggleBreathingDuringMeditation(): void {
-        if (breathingActive.value) {
-            stopBreathingCycle();
-        } else if (selectedBreathingExercise.value !== null) {
-            startBreathingCycle();
-        }
-    }
-
     // ── Timer lifecycle ───────────────────────────────────────────────────────
 
     function finishMeditation(): void {
         meditationActive.value = false;
-        stopBreathingCycle();
         if (meditationIntervalId !== undefined) clearInterval(meditationIntervalId);
         playAlert();
         completedMeditationDuration.value = selectedDuration.value * 60 - meditationSeconds.value;
@@ -267,7 +143,6 @@ export function useMeditationSession(): MeditationSession {
 
     function stopMeditation(): void {
         meditationActive.value = false;
-        stopBreathingCycle();
         if (meditationIntervalId !== undefined) clearInterval(meditationIntervalId);
         playAlert();
     }
@@ -297,14 +172,10 @@ export function useMeditationSession(): MeditationSession {
             }
         }, 1000);
         playAlert();
-        if (selectedBreathingExercise.value !== null) {
-            startBreathingCycle();
-        }
     }
 
     function cleanup(): void {
         if (meditationIntervalId !== undefined) clearInterval(meditationIntervalId);
-        stopBreathingCycle();
     }
 
     function formatTime(sec: number): string {
@@ -328,15 +199,6 @@ export function useMeditationSession(): MeditationSession {
         showBellConfig,
         showIntervalDropdown,
         showSoundDropdown,
-        // Breathing
-        showBreathingPicker,
-        selectedBreathingExercise,
-        breathingActive,
-        breathingPhase,
-        breathingPhaseText,
-        breathingPhaseDuration,
-        breathingCycleCount,
-        breathingExercises,
         // Session result
         completedMeditationDuration,
         showNotes,
@@ -348,9 +210,6 @@ export function useMeditationSession(): MeditationSession {
         cancelCustomDuration,
         selectBellSound,
         selectBellSoundFromDropdown,
-        startBreathingCycle,
-        stopBreathingCycle,
-        toggleBreathingDuringMeditation,
         startMeditation,
         stopMeditation,
         finishMeditation,

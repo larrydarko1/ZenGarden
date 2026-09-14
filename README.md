@@ -1,6 +1,6 @@
 <img src="public/banner.png">
 
-Zen Garden is a **local-first, cross-platform meditation app** built with **Electron** (desktop), **Capacitor** (mobile), **Vue 3**, and TypeScript. Your journal lives in a **vault** — a folder you choose, holding plain JSON files. No server, no cloud, no account. Features a meditation timer with bell sounds, breathing exercises, a meditation calendar, and relaxing Zen animations.
+Zen Garden is a **local-first, cross-platform meditation app** built with **Electron** (desktop), **Capacitor** (mobile), **Vue 3**, and TypeScript. Your journal lives in a **vault** — a folder you choose, holding plain JSON files. No server, no cloud, no account. Features a meditation timer with bell sounds, a meditation calendar and a few relaxing Zen animations.
 
 > **Prebuilt binaries are published for Linux only.** The source is MIT licensed and runs on macOS
 > and Android too — see [Other platforms](#other-platforms) to build either one yourself.
@@ -18,9 +18,8 @@ Zen Garden is a **local-first, cross-platform meditation app** built with **Elec
 - **Meditation calendar** - visual tracking of your meditation history
 - **Session notes** - reflect and journal after each session
 
-### Breathing & Wellness
+### Wellness
 
-- **Breathing exercises** - Box, 4-7-8, Deep, and Energizing techniques
 - **Emotion tracker** - log and monitor your daily emotional state with daily notes
 
 ### Insights & Progress
@@ -355,7 +354,7 @@ src/
     └── locales/                 → 8 language bundles (en, es, it, fr, de, pt, zh, ja)
 eslint/                          → Modular ESLint flat-config fragments
 scripts/check/                   → Repo convention checks run by `npm run ci:check`
-tests/                           → Mirrors src/ — 36 test files, 467 tests
+tests/                           → Mirrors src/ — 36 test files, 454 tests
 ```
 
 ## Architecture

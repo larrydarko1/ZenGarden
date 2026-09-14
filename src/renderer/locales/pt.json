@@ -18,6 +18,7 @@
         "stop": "Parar",
         "bell": {
             "settings": "Configurações de Sino",
+            "none": "Nenhum",
             "every": "A cada {minutes} min",
             "sound": "Som",
             "option": "Sino {number}",
@@ -68,24 +69,6 @@
         "placeholder": "Escreva seus pensamentos...",
         "save": "Salvar",
         "skip": "Pular"
-    },
-    "breathing": {
-        "title": "Exercício de Respiração",
-        "none": "Nenhum",
-        "box": "Respiração em Caixa",
-        "deep": "Respiração Profunda",
-        "fourSevenEight": "Respiração 4-7-8",
-        "energizing": "Respiração Energizante",
-        "cycle": "Ciclo",
-        "breatheIn": "Inspirar",
-        "hold": "Segurar",
-        "breatheOut": "Expirar",
-        "descriptions": {
-            "box": "Partes iguais: inspirar, segurar, expirar, segurar (4-4-4-4)",
-            "fourSevenEight": "Técnica calmante: inspirar 4, segurar 7, expirar 8",
-            "deep": "Respirações longas e lentas: inspirar 6, expirar 6",
-            "energizing": "Inspiração rápida, expiração mais longa: 2 dentro, 4 fora"
-        }
     },
     "calendar": {
         "minutes": "min",
