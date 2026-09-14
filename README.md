@@ -1,13 +1,13 @@
 <img src="public/banner.png">
 
-Zen Garden is a **local-first, cross-platform meditation app** built with **Electron** (desktop), **Capacitor** (mobile), **Vue 3**, and TypeScript. Your journal lives in a **vault** — a folder you choose, holding plain JSON files. No server, no cloud, no account. Features a meditation timer with bell sounds, a meditation calendar and a few relaxing Zen animations.
+ZenGarden is a **local-first, cross-platform meditation app** built with **Electron** (desktop), **Capacitor** (mobile), **Vue 3**, and TypeScript. Your journal lives in a **vault** — a folder you choose, holding plain JSON files. No server, no cloud, no account. Features a meditation timer with bell sounds, a meditation calendar and a few relaxing Zen animations.
 
 > **Prebuilt binaries are published for Linux only.** The source is MIT licensed and runs on macOS
 > and Android too — see [Other platforms](#other-platforms) to build either one yourself.
 
 ## Demo
 
-![Zen Garden Demo](./public/demo.gif)
+![ZenGarden Demo](./public/demo.gif)
 
 ## Features
 
@@ -50,7 +50,7 @@ Zen Garden is a **local-first, cross-platform meditation app** built with **Elec
 
 ## Security & Privacy
 
-Zen Garden is built with privacy and security as core principles:
+ZenGarden is built with privacy and security as core principles:
 
 ### Privacy Guarantees
 
@@ -110,7 +110,7 @@ Android has no folder picker that yields a real path, so the vault is fixed ther
 ### Prerequisites
 
 - Node.js 24+ (enforced by `engines` in [package.json](package.json))
-- npm
+- npm >=11
 - **For Android development:** [Android Studio](https://developer.android.com/studio) installed (provides the JDK and Android SDK)
 
 ### Setup
@@ -446,7 +446,7 @@ Desktop and Android write the same files, so a vault copied between them opens e
 
 ## Contributing
 
-Zen Garden is a personal portfolio project and is **not open to outside contributions** — see
+ZenGarden is a personal portfolio project and is **not open to outside contributions** — see
 [CONTRIBUTING.md](.github/CONTRIBUTING.md). Bug reports are welcome, and the code is MIT licensed,
 so forking it is explicitly fine.
 

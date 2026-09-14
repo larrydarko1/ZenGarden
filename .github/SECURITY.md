@@ -53,7 +53,7 @@ renderer code execution, IPC handlers that read or write outside the open vault,
 Out of scope: findings that require an attacker to already have the user's filesystem or OS account.
 The vault holds plain JSON files under the user's own permissions by design, so "another local process can read the journal" is the threat model working as intended, not a vulnerability. ZenGarden has no accounts and never had a security boundary between users of the same machine — that boundary is the operating system's.
 
-Dependency advisories with no reachable path in Zen Garden's code are tracked in the audit gate's
+Dependency advisories with no reachable path in ZenGarden's code are tracked in the audit gate's
 allowlist ([scripts/check/check-audit.mjs](../scripts/check/check-audit.mjs)) rather than reported
 as vulnerabilities. Each entry carries the reason it cannot be fixed here, and CI fails once the
 advisory stops being reported — upstream shipped a fix, so the waiver has to go.
