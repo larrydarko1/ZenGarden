@@ -24,7 +24,6 @@ function createMockAPI() {
         getEmotionAnalytics: vi.fn().mockResolvedValue(ok({ totalDays: 5 })),
         saveEightfoldPathLog: vi.fn().mockResolvedValue(ok({ _id: '1', date: '2025-01-15' })),
         getEightfoldPathLogs: vi.fn().mockResolvedValue(ok([{ _id: '1' }])),
-        getEightfoldPathAnalytics: vi.fn().mockResolvedValue(ok({ totalDays: 3 })),
     };
 }
 
@@ -149,12 +148,6 @@ describe('ElectronStorageAdapter', () => {
             const adapter = new ElectronStorageAdapter();
             const res = await adapter.getEightfoldPathLogs();
             expect(res.pathLogs).toHaveLength(1);
-        });
-
-        it('getEightfoldPathAnalytics returns analytics directly', async () => {
-            const adapter = new ElectronStorageAdapter();
-            const res = await adapter.getEightfoldPathAnalytics(30);
-            expect(res.totalDays).toBe(3);
         });
     });
 });

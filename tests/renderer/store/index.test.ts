@@ -14,8 +14,6 @@ import {
     getEmotionAnalytics,
     saveEightfoldPathLog,
     getEightfoldPathLogs,
-    getEightfoldPathAnalytics,
-    checkStorageAvailability,
 } from '@/renderer/store';
 
 const mockAdapter = vi.hoisted(() => ({
@@ -34,13 +32,10 @@ const mockAdapter = vi.hoisted(() => ({
     getEmotionAnalytics: vi.fn().mockResolvedValue({ totalDays: 0 }),
     saveEightfoldPathLog: vi.fn().mockResolvedValue({ message: 'ok', pathLog: {} }),
     getEightfoldPathLogs: vi.fn().mockResolvedValue({ pathLogs: [] }),
-    getEightfoldPathAnalytics: vi.fn().mockResolvedValue({ totalDays: 0 }),
 }));
 
 vi.mock('@/renderer/store/adapters/factory', () => ({
     getAdapter: vi.fn().mockResolvedValue(mockAdapter),
-    checkAvailability: vi.fn().mockResolvedValue({ server: false, local: true }),
-    resetAdapter: vi.fn(),
 }));
 
 beforeEach(() => {
@@ -124,15 +119,5 @@ describe('store convenience functions', () => {
     it('getEightfoldPathLogs delegates to adapter', async () => {
         await getEightfoldPathLogs();
         expect(mockAdapter.getEightfoldPathLogs).toHaveBeenCalledWith(undefined);
-    });
-
-    it('getEightfoldPathAnalytics delegates to adapter', async () => {
-        await getEightfoldPathAnalytics(60);
-        expect(mockAdapter.getEightfoldPathAnalytics).toHaveBeenCalledWith(60);
-    });
-
-    it('checkStorageAvailability returns availability info', async () => {
-        const res = await checkStorageAvailability();
-        expect(res).toEqual({ server: false, local: true });
     });
 });

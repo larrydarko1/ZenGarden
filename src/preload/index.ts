@@ -37,7 +37,6 @@ const api: ElectronAPI = {
     saveEightfoldPathLog: (date: string, paths: unknown[]) =>
         ipcRenderer.invoke('storage:saveEightfoldPathLog', date, paths),
     getEightfoldPathLogs: (query?: unknown) => ipcRenderer.invoke('storage:getEightfoldPathLogs', query),
-    getEightfoldPathAnalytics: (days?: number) => ipcRenderer.invoke('storage:getEightfoldPathAnalytics', days),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', api);

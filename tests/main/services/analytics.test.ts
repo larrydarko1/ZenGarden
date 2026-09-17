@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildEightfoldPathAnalytics, buildEmotionAnalytics, isPathFollowed } from '@/main/services/analytics';
+import { buildEmotionAnalytics, isPathFollowed } from '@/main/services/analytics';
 
 import type { RawDoc } from '@/main/services/db';
 
@@ -12,15 +12,6 @@ function emotionLog(
 ): RawDoc {
     const total = positiveCount + negativeCount;
     return { date, positiveCount, negativeCount, pnRatio: total > 0 ? positiveCount / total : 0, emotions };
-}
-
-function pathLog(date: string, followed: string[]): RawDoc {
-    const all = ['view', 'intention', 'speech', 'action', 'livelihood', 'effort', 'mindfulness', 'concentration'];
-    return {
-        date,
-        completedCount: followed.length,
-        paths: all.map((path) => ({ path, note: followed.includes(path) ? 'a note' : '' })),
-    };
 }
 
 describe('isPathFollowed', () => {
@@ -118,76 +109,5 @@ describe('buildEmotionAnalytics', () => {
 
         expect(result.emotionDiversity).toBe(0);
         expect(result.topEmotions).toEqual([]);
-    });
-});
-
-describe('buildEightfoldPathAnalytics', () => {
-    it('returns a zeroed summary for no logs', () => {
-        expect(buildEightfoldPathAnalytics([])).toEqual({
-            totalDays: 0,
-            averageCompletion: 0,
-            perfectDays: 0,
-            mostFollowedPaths: [],
-            trends: [],
-        });
-    });
-
-    it('counts only days with all eight paths followed as perfect', () => {
-        const all = ['view', 'intention', 'speech', 'action', 'livelihood', 'effort', 'mindfulness', 'concentration'];
-        const result = buildEightfoldPathAnalytics([
-            pathLog('2025-01-01', all),
-            pathLog('2025-01-02', all.slice(0, 7)),
-        ]);
-
-        expect(result.perfectDays).toBe(1);
-        expect(result.averageCompletion).toBe(7.5);
-    });
-
-    it('ranks the paths followed most often', () => {
-        const result = buildEightfoldPathAnalytics([
-            pathLog('2025-01-01', ['view', 'speech']),
-            pathLog('2025-01-02', ['view']),
-        ]);
-
-        expect(result.mostFollowedPaths[0]).toEqual({ path: 'view', count: 2 });
-        expect(result.mostFollowedPaths).toHaveLength(2);
-    });
-
-    it('caps the ranking at the eight paths that exist', () => {
-        const all = ['view', 'intention', 'speech', 'action', 'livelihood', 'effort', 'mindfulness', 'concentration'];
-        const result = buildEightfoldPathAnalytics([pathLog('2025-01-01', all)]);
-
-        expect(result.mostFollowedPaths).toHaveLength(8);
-    });
-
-    it('returns trends oldest-first regardless of input order', () => {
-        const result = buildEightfoldPathAnalytics([pathLog('2025-01-03', ['view']), pathLog('2025-01-01', ['view'])]);
-
-        expect(result.trends.map((t) => t.date)).toEqual(['2025-01-01', '2025-01-03']);
-    });
-
-    it('tolerates a log stored without a paths array', () => {
-        const result = buildEightfoldPathAnalytics([{ date: '2025-01-01', completedCount: 0 }]);
-
-        expect(result.mostFollowedPaths).toEqual([]);
-        expect(result.totalDays).toBe(1);
-    });
-
-    it('counts a path named after an Object member without reaching the prototype', () => {
-        const result = buildEightfoldPathAnalytics([
-            {
-                date: '2025-01-01',
-                completedCount: 2,
-                paths: [
-                    { path: '__proto__', note: 'a note' },
-                    { path: 'constructor', note: 'a note' },
-                ],
-            },
-        ]);
-
-        expect(result.mostFollowedPaths).toEqual([
-            { path: '__proto__', count: 1 },
-            { path: 'constructor', count: 1 },
-        ]);
     });
 });

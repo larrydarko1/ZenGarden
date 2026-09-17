@@ -9,7 +9,6 @@
 import type { IpcMain } from 'electron';
 import {
     type DateRangeQuery,
-    type EightfoldPathAnalytics,
     type EightfoldPathLog,
     type EmotionAnalytics,
     type EmotionLog,
@@ -22,7 +21,7 @@ import {
     MeditationInputSchema,
 } from '@/schemas/storage';
 import { type RawDoc, generateId, readCollection, writeCollection } from '@/main/services/db';
-import { buildEightfoldPathAnalytics, buildEmotionAnalytics, isPathFollowed } from '@/main/services/analytics';
+import { buildEmotionAnalytics, isPathFollowed } from '@/main/services/analytics';
 
 export function register(ipc: IpcMain): void {
     ipc.handle(
@@ -163,21 +162,6 @@ export function register(ipc: IpcMain): void {
 
         try {
             return { success: true, data: filterByDateRange(readCollection<RawDoc>('eightfoldPathLogs'), parsed.data) };
-        } catch (err) {
-            return { success: false, error: (err as Error).message };
-        }
-    });
-
-    ipc.handle('storage:getEightfoldPathAnalytics', (_event, days: unknown): IpcResult<EightfoldPathAnalytics> => {
-        const parsed = AnalyticsDaysSchema.safeParse(days ?? undefined);
-        if (!parsed.success) return { success: false, error: 'Invalid day count' };
-
-        try {
-            const cutoffStr = getCutoffDate(parsed.data);
-            const logs = readCollection<RawDoc>('eightfoldPathLogs').filter(
-                (log) => (log['date'] as string) >= cutoffStr,
-            );
-            return { success: true, data: buildEightfoldPathAnalytics(logs) };
         } catch (err) {
             return { success: false, error: (err as Error).message };
         }

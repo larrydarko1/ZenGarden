@@ -15,7 +15,6 @@ import type {
     EightfoldPathLog,
     EightfoldPathInput,
     EmotionAnalytics,
-    EightfoldPathAnalytics,
     DateRangeQuery,
 } from '@/schemas/storage';
 
@@ -54,5 +53,4 @@ export type IStorageAdapter = {
     // Eightfold Path
     saveEightfoldPathLog(log: EightfoldPathInput): Promise<{ message: string; pathLog: EightfoldPathLog }>;
     getEightfoldPathLogs(query?: DateRangeQuery): Promise<{ pathLogs: EightfoldPathLog[] }>;
-    getEightfoldPathAnalytics(days?: number): Promise<EightfoldPathAnalytics>;
 };

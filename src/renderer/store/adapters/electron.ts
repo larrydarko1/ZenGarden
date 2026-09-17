@@ -16,7 +16,6 @@ import type {
     EightfoldPathLog,
     EightfoldPathInput,
     EmotionAnalytics,
-    EightfoldPathAnalytics,
     DateRangeQuery,
 } from '@/renderer/store/types';
 import type { ElectronAPI } from '@/schemas/electron';
@@ -96,10 +95,6 @@ export class ElectronStorageAdapter implements IStorageAdapter {
     async getEightfoldPathLogs(query?: DateRangeQuery): Promise<{ pathLogs: EightfoldPathLog[] }> {
         const pathLogs = unwrap(await this.api.getEightfoldPathLogs(query));
         return { pathLogs };
-    }
-
-    async getEightfoldPathAnalytics(days?: number): Promise<EightfoldPathAnalytics> {
-        return unwrap(await this.api.getEightfoldPathAnalytics(days));
     }
 }
 

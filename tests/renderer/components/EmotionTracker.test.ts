@@ -15,6 +15,11 @@ const positiveEmotions = ref([
 ]);
 const negativeEmotions = ref([{ name: 'tense', type: 'negative', displayName: 'Tense', description: 'tight' }]);
 
+// Shared with the useEightfoldPath mock below: the note box writes back through
+// the parent, so a test needs to read the same ref the component assigns to.
+const followedPaths = ref<string[]>([]);
+const pathNotes = ref<Record<string, string>>({});
+
 const mockToggleEmotion = vi.fn();
 const mockHandleNoteInput = vi.fn();
 const mockLoadEmotions = vi.fn().mockResolvedValue(undefined);
@@ -49,13 +54,13 @@ vi.mock('@/renderer/composables/useEmotions', () => ({
 
 vi.mock('@/renderer/composables/useEightfoldPath', () => ({
     useEightfoldPath: () => ({
-        followedPaths: ref<string[]>([]),
-        pathNotes: ref<Record<string, string>>({}),
+        followedPaths,
+        pathNotes,
         loadingPath: ref(false),
         eightfoldPaths: ref([{ key: 'view', displayName: 'Right view', description: 'd', questions: 'q' }]),
-        efCompletedCount: computed(() => 0),
+        efCompletedCount: computed(() => followedPaths.value.length),
         efProgressPercentage: computed(() => 0),
-        isPathFollowed: () => false,
+        isPathFollowed: (key: string) => followedPaths.value.includes(key),
         togglePath: mockTogglePath,
         debouncedSavePath: mockDebouncedSavePath,
         loadPathData: mockLoadPathData,
@@ -75,6 +80,8 @@ beforeEach(() => {
     selectedEmotions.value = [];
     saveStatus.value = null;
     loadingEmotions.value = false;
+    followedPaths.value = [];
+    pathNotes.value = {};
 });
 
 afterEach(() => {
@@ -230,6 +237,40 @@ describe('EmotionTracker', () => {
 
             expect(wrapper.find('.loading').exists()).toBe(true);
             expect(wrapper.find('.inline-emotion-item').exists()).toBe(false);
+            wrapper.unmount();
+        });
+    });
+
+    describe('eightfold notes', () => {
+        /** Opens the eightfold tab with one path ticked, which is what reveals its note box. */
+        async function openNoteBox(): Promise<ReturnType<typeof mountTracker>> {
+            followedPaths.value = ['view'];
+            const wrapper = mountTracker();
+            await tabs(wrapper)[3].trigger('click');
+            await wrapper.vm.$nextTick();
+            return wrapper;
+        }
+
+        // The note box lives in the child and only announces what was typed. Unless
+        // the tracker catches that and writes it back, every save records an empty
+        // note — the day's entry lands in the vault with the text dropped.
+        it('writes a typed path note back into the state the save reads from', async () => {
+            const wrapper = await openNoteBox();
+            const note = wrapper.find('.eightfold-path-note textarea');
+
+            (note.element as HTMLTextAreaElement).value = 'sat with this today';
+            await note.trigger('input');
+
+            expect(pathNotes.value).toEqual({ view: 'sat with this today' });
+            wrapper.unmount();
+        });
+
+        it('asks for a save once it has the note', async () => {
+            const wrapper = await openNoteBox();
+
+            await wrapper.find('.eightfold-path-note textarea').trigger('input');
+
+            expect(mockDebouncedSavePath).toHaveBeenCalled();
             wrapper.unmount();
         });
     });

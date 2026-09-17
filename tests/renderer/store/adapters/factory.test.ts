@@ -28,19 +28,28 @@ vi.mock('@/renderer/store/adapters/capacitor', () => ({
     }),
 }));
 
-import { getAdapter, checkAvailability, resetAdapter } from '@/renderer/store/adapters/factory';
+/**
+ * The factory caches its adapter in a module-level singleton, so every test needs a
+ * module that has never resolved one. `vi.resetModules()` in `beforeEach` drops the
+ * registry and this dynamic import rebuilds it — the mocks above still apply. A
+ * `resetAdapter()` export would do the same job, but only production code belongs in
+ * production modules; the hoisted consts survive the reset, being outside the registry.
+ */
+const loadFactory = () => import('@/renderer/store/adapters/factory');
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('StorageFactory', () => {
     beforeEach(() => {
-        resetAdapter();
+        vi.resetModules();
         vi.clearAllMocks();
     });
 
     describe('getAdapter', () => {
         it('returns ElectronStorageAdapter when Electron is available', async () => {
             mockElectronAvailable.mockResolvedValue(true);
+            const { getAdapter } = await loadFactory();
+
             const adapter = await getAdapter();
             expect(adapter).toBeDefined();
             expect(adapter.probeAvailability).toBe(mockElectronAvailable);
@@ -49,6 +58,8 @@ describe('StorageFactory', () => {
         it('falls back to CapacitorStorageAdapter when Electron is unavailable', async () => {
             mockElectronAvailable.mockResolvedValue(false);
             mockCapacitorAvailable.mockResolvedValue(true);
+            const { getAdapter } = await loadFactory();
+
             const adapter = await getAdapter();
             expect(adapter.probeAvailability).toBe(mockCapacitorAvailable);
         });
@@ -56,49 +67,30 @@ describe('StorageFactory', () => {
         it('throws when neither adapter is available', async () => {
             mockElectronAvailable.mockResolvedValue(false);
             mockCapacitorAvailable.mockResolvedValue(false);
+            const { getAdapter } = await loadFactory();
+
             await expect(getAdapter()).rejects.toThrow('No storage adapter available');
         });
 
         it('caches the adapter on subsequent calls', async () => {
             mockElectronAvailable.mockResolvedValue(true);
+            const { getAdapter } = await loadFactory();
+
             const first = await getAdapter();
             const second = await getAdapter();
             expect(first).toBe(second);
             // probeAvailability called only once because second call returns cache
             expect(mockElectronAvailable).toHaveBeenCalledTimes(1);
         });
-    });
 
-    describe('checkAvailability', () => {
-        it('returns local: true when Electron is available', async () => {
+        it('starts from an empty cache in a freshly loaded module', async () => {
             mockElectronAvailable.mockResolvedValue(true);
-            const res = await checkAvailability();
-            expect(res).toEqual({ server: false, local: true });
-        });
+            const { getAdapter } = await loadFactory();
 
-        it('returns local: true when Capacitor is available', async () => {
-            mockElectronAvailable.mockRejectedValue(new Error('no electron'));
-            mockCapacitorAvailable.mockResolvedValue(true);
-            const res = await checkAvailability();
-            expect(res).toEqual({ server: false, local: true });
-        });
-
-        it('returns local: false when neither is available', async () => {
-            mockElectronAvailable.mockResolvedValue(false);
-            mockCapacitorAvailable.mockResolvedValue(false);
-            const res = await checkAvailability();
-            expect(res).toEqual({ server: false, local: false });
-        });
-    });
-
-    describe('reset', () => {
-        it('clears the cached adapter', async () => {
-            mockElectronAvailable.mockResolvedValue(true);
+            // The previous test already resolved an adapter; this module is a new one,
+            // so it has to probe again rather than hand back that instance.
             await getAdapter();
-            resetAdapter();
-            await getAdapter();
-            // probeAvailability called twice because cache was cleared
-            expect(mockElectronAvailable).toHaveBeenCalledTimes(2);
+            expect(mockElectronAvailable).toHaveBeenCalledTimes(1);
         });
     });
 });

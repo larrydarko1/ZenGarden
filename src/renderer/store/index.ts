@@ -3,10 +3,9 @@
  * Owns: re-exports, thin async wrappers for each storage operation.
  * Does NOT own: adapter selection (factory.ts), type definitions (types.ts).
  */
-import { getAdapter, checkAvailability } from '@/renderer/store/adapters/factory';
+import { getAdapter } from '@/renderer/store/adapters/factory';
 import type {
     DateRangeQuery,
-    EightfoldPathAnalytics,
     EightfoldPathLog,
     Emotion,
     EmotionAnalytics,
@@ -19,12 +18,7 @@ import type {
     Theme,
 } from '@/renderer/store/types';
 
-// Re-export types
 export * from '@/renderer/store/types';
-
-export async function checkStorageAvailability(): Promise<{ server: boolean; local: boolean }> {
-    return checkAvailability();
-}
 
 // Vault operations
 export async function findVaultPath(): Promise<string | null> {
@@ -114,11 +108,6 @@ export async function saveEightfoldPathLog(
 export async function getEightfoldPathLogs(query?: DateRangeQuery): Promise<{ pathLogs: EightfoldPathLog[] }> {
     const adapter = await getStorageAdapter();
     return adapter.getEightfoldPathLogs(query);
-}
-
-export async function getEightfoldPathAnalytics(days?: number): Promise<EightfoldPathAnalytics> {
-    const adapter = await getStorageAdapter();
-    return adapter.getEightfoldPathAnalytics(days);
 }
 
 /** The active adapter, resolved on first use. Every wrapper above opens with it. */

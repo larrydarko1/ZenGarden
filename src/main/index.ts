@@ -4,7 +4,7 @@
  * Does NOT own: the vault (src/main/services/vault.ts), data persistence (src/main/services/db.ts), bridge API (src/preload/index.ts).
  * IPC handler ownership:
  *   vault-service → vault:findPath, vault:choose, vault:close, settings:get, settings:updateTheme, settings:updateLanguage
- *   data-service → storage:createMeditation, storage:getMeditations, storage:saveEmotionLog, storage:getEmotionLogs, storage:getEmotionAnalytics, storage:saveEightfoldPathLog, storage:getEightfoldPathLogs, storage:getEightfoldPathAnalytics
+ *   data-service → storage:createMeditation, storage:getMeditations, storage:saveEmotionLog, storage:getEmotionLogs, storage:getEmotionAnalytics, storage:saveEightfoldPathLog, storage:getEightfoldPathLogs
  */
 import { BrowserWindow, ipcMain, screen, app, session, shell } from 'electron';
 import path from 'path';

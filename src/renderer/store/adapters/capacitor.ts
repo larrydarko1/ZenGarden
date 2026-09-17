@@ -30,7 +30,6 @@ import type {
     EightfoldPathLog,
     EightfoldPathInput,
     EmotionAnalytics,
-    EightfoldPathAnalytics,
     DateRangeQuery,
 } from '@/renderer/store/types';
 
@@ -236,44 +235,6 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
 
         const logs = await readCollection<EightfoldPathLog>(DB_FILES.eightfoldPathLogs);
         return { pathLogs: applyDateRange(logs, query) };
-    }
-
-    async getEightfoldPathAnalytics(days = 30): Promise<EightfoldPathAnalytics> {
-        await this.ensureInitialized();
-
-        const logs = await readCollection<EightfoldPathLog>(DB_FILES.eightfoldPathLogs);
-        const recentLogs = logs.filter((l) => l.date >= cutoffDate(days));
-
-        const totalDays = recentLogs.length;
-        const avgCompletion =
-            totalDays > 0 ? recentLogs.reduce((sum, log) => sum + log.completedCount, 0) / totalDays : 0;
-        const perfectDays = recentLogs.filter((log) => log.completedCount === 8).length;
-
-        const pathCounts: Record<string, number> = {};
-        recentLogs.forEach((log) => {
-            log.paths.forEach((pathItem) => {
-                if (pathItem.note !== undefined && pathItem.note.trim() !== '') {
-                    pathCounts[pathItem.path] = (pathCounts[pathItem.path] ?? 0) + 1;
-                }
-            });
-        });
-
-        const mostFollowedPaths = Object.entries(pathCounts)
-            .map(([path, count]) => ({ path, count }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 8);
-
-        const trends = recentLogs
-            .sort((a, b) => a.date.localeCompare(b.date))
-            .map((log) => ({ date: log.date, completedCount: log.completedCount }));
-
-        return {
-            totalDays,
-            averageCompletion: avgCompletion,
-            perfectDays,
-            mostFollowedPaths,
-            trends,
-        };
     }
 
     private async ensureInitialized(): Promise<void> {

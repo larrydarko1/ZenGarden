@@ -272,31 +272,4 @@ describe('eightfold path', () => {
 
         expect((await adapter().getEightfoldPathLogs({ startDate: '2025-01-10' })).pathLogs).toHaveLength(1);
     });
-
-    it('summarises completion across the window', async () => {
-        vault[DB_FILES.eightfoldPathLogs] = [
-            { _id: '1', date: today, completedCount: 8, paths: donePaths },
-            { _id: '2', date: yesterday, completedCount: 4, paths: donePaths.slice(0, 4) },
-        ];
-
-        const analytics = await adapter().getEightfoldPathAnalytics(30);
-        expect(analytics.totalDays).toBe(2);
-        expect(analytics.averageCompletion).toBe(6);
-        expect(analytics.perfectDays).toBe(1);
-    });
-
-    it('ranks the most followed paths first', async () => {
-        vault[DB_FILES.eightfoldPathLogs] = [
-            { _id: '1', date: today, completedCount: 1, paths: [{ path: 'Right View', note: 'yes' }] },
-            { _id: '2', date: yesterday, completedCount: 1, paths: [{ path: 'Right View', note: 'yes' }] },
-        ];
-
-        const analytics = await adapter().getEightfoldPathAnalytics(30);
-        expect(analytics.mostFollowedPaths[0]).toEqual({ path: 'Right View', count: 2 });
-    });
-
-    it('excludes logs older than the window', async () => {
-        vault[DB_FILES.eightfoldPathLogs] = [{ _id: '1', date: '2020-01-01', completedCount: 8, paths: [] }];
-        expect((await adapter().getEightfoldPathAnalytics(30)).totalDays).toBe(0);
-    });
 });

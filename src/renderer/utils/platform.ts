@@ -1,6 +1,6 @@
 /**
- * platform — runtime platform detection (Electron vs Capacitor vs web).
- * Owns: isElectron(), isCapacitor(), isMobile(), isWeb() checks.
+ * platform — runtime platform detection (Electron desktop vs everything else).
+ * Owns: the isDesktop() check.
  * Does NOT own: adapter selection (store/adapters/factory.ts).
  */
 
@@ -10,30 +10,7 @@ type ElectronWindow = {
     };
 };
 
-export function isElectron(): boolean {
-    return (window as unknown as ElectronWindow).electronAPI?.isElectron?.() === true;
-}
-
+/** True only in the Electron renderer, where preload exposes `electronAPI.isElectron`. */
 export function isDesktop(): boolean {
-    return isElectron();
-}
-
-export function isMobile(): boolean {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-}
-
-export function isWeb(): boolean {
-    return !isElectron();
-}
-
-export function getPlatform(): string {
-    if (isElectron()) {
-        const ua = navigator.userAgent.toLowerCase();
-        if (ua.includes('mac')) return 'darwin';
-        if (ua.includes('win')) return 'win32';
-        if (ua.includes('linux')) return 'linux';
-        return 'unknown';
-    }
-    if (isMobile()) return 'mobile';
-    return 'web';
+    return (window as unknown as ElectronWindow).electronAPI?.isElectron?.() === true;
 }

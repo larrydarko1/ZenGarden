@@ -17,7 +17,6 @@ import type {
     PathItem,
     EightfoldPathLog,
     EmotionAnalytics,
-    EightfoldPathAnalytics,
     DateRangeQuery,
 } from '@/schemas/storage';
 
@@ -46,5 +45,4 @@ export type ElectronAPI = {
 
     saveEightfoldPathLog: (date: string, paths: PathItem[]) => Promise<IpcResult<EightfoldPathLog>>;
     getEightfoldPathLogs: (query?: DateRangeQuery) => Promise<IpcResult<EightfoldPathLog[]>>;
-    getEightfoldPathAnalytics: (days?: number) => Promise<IpcResult<EightfoldPathAnalytics>>;
 };

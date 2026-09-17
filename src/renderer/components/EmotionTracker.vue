@@ -237,6 +237,7 @@ onMounted(() => {
                 :completed-count="efCompletedCount"
                 :progress-percentage="efProgressPercentage"
                 :is-path-followed="isPathFollowed"
+                @update:path-notes="pathNotes = $event"
                 @toggle-path="togglePath"
                 @save-path="debouncedSavePath" />
         </div>
@@ -274,14 +275,6 @@ onMounted(() => {
 .emotion-list {
     display: grid;
     gap: $space-3;
-}
-
-.emotion-name {
-    flex: 1;
-    min-width: auto;
-    color: $text1;
-    font-size: $font-size-base;
-    font-weight: $font-weight-semibold;
 }
 
 /* ––––– Save indicator ––––– */
@@ -530,11 +523,6 @@ onMounted(() => {
 @media (width > #{$breakpoint-xl}) {
     .emotion-list {
         gap: $space-2;
-    }
-
-    .emotion-name {
-        flex: 0 1 auto;
-        min-width: $size-36;
     }
 
     .inline-header {

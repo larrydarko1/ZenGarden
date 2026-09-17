@@ -1,13 +1,13 @@
 /**
- * analytics — the arithmetic behind the emotion and eightfold-path summaries.
- * Owns: aggregating a user's stored logs into the shapes the charts read, and
- * the rule for what counts as a followed path.
+ * analytics — the arithmetic behind the emotion summaries.
+ * Owns: aggregating a user's stored emotion logs into the shapes the charts
+ * read, and the rule for what counts as a followed eightfold path.
  * Does NOT own: IPC registration or the date-window filtering that selects
  * which logs to aggregate (data.ts), persistence (db.ts).
  * Documents arrive as RawDoc because that is what the JSON files hold — the
  * casts below are reads of fields these collections have always written.
  */
-import type { EightfoldPathAnalytics, EmotionAnalytics, EmotionStat } from '@/schemas/storage';
+import type { EmotionAnalytics, EmotionStat } from '@/schemas/storage';
 import type { RawDoc } from '@/main/services/db';
 
 /** True when a path entry carries a non-blank note, which is what counts as "followed". */
@@ -70,48 +70,5 @@ export function buildEmotionAnalytics(logs: RawDoc[]): EmotionAnalytics {
         negativeDays,
         topEmotions: [...emotionCounts.values()].sort((a, b) => b.count - a.count),
         trends: sorted.map((log) => ({ date: log['date'] as string, pnRatio: log['pnRatio'] as number })),
-    };
-}
-
-/** Aggregates eightfold-path logs already narrowed to one user and one date window. */
-export function buildEightfoldPathAnalytics(logs: RawDoc[]): EightfoldPathAnalytics {
-    if (logs.length === 0) {
-        return {
-            totalDays: 0,
-            averageCompletion: 0,
-            perfectDays: 0,
-            mostFollowedPaths: [],
-            trends: [],
-        };
-    }
-
-    const sorted = [...logs].sort((a, b) => (a['date'] as string).localeCompare(b['date'] as string));
-
-    const totalCompleted = sorted.reduce((acc, log) => acc + (log['completedCount'] as number), 0);
-    // All eight followed on the same day — the only day that counts as perfect.
-    const perfectDays = sorted.filter((log) => (log['completedCount'] as number) === 8).length;
-
-    const pathCounts = new Map<string, number>();
-    sorted.forEach((log) => {
-        const paths = log['paths'] as { path: string; note?: string }[] | undefined;
-        paths?.forEach((pathEntry) => {
-            if (isPathFollowed(pathEntry.note)) {
-                pathCounts.set(pathEntry.path, (pathCounts.get(pathEntry.path) ?? 0) + 1);
-            }
-        });
-    });
-
-    return {
-        totalDays: sorted.length,
-        averageCompletion: totalCompleted / sorted.length,
-        perfectDays,
-        mostFollowedPaths: [...pathCounts.entries()]
-            .map(([path, count]) => ({ path, count }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 8),
-        trends: sorted.map((log) => ({
-            date: log['date'] as string,
-            completedCount: log['completedCount'] as number,
-        })),
     };
 }

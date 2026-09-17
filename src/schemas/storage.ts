@@ -128,14 +128,6 @@ export type EmotionAnalytics = {
     trends: { date: string; pnRatio: number }[];
 };
 
-export type EightfoldPathAnalytics = {
-    totalDays: number;
-    averageCompletion: number;
-    perfectDays: number;
-    mostFollowedPaths: { path: string; count: number }[];
-    trends: { date: string; completedCount: number }[];
-};
-
 export const ThemeArgSchema = z.object({
     theme: ThemeSchema,
 });

@@ -242,81 +242,6 @@ describe('storage:getEightfoldPathLogs', () => {
     });
 });
 
-describe('storage:getEightfoldPathAnalytics', () => {
-    beforeEach(() => {
-        resetState();
-        const today = new Date().toISOString().split('T')[0];
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-        collections['eightfoldPathLogs'] = [
-            {
-                _id: '1',
-                date: today,
-                completedCount: 8,
-                paths: [
-                    { path: 'Right View', note: 'Done' },
-                    { path: 'Right Intention', note: 'Done' },
-                    { path: 'Right Speech', note: 'Done' },
-                    { path: 'Right Action', note: 'Done' },
-                    { path: 'Right Livelihood', note: 'Done' },
-                    { path: 'Right Effort', note: 'Done' },
-                    { path: 'Right Mindfulness', note: 'Done' },
-                    { path: 'Right Concentration', note: 'Done' },
-                ],
-            },
-            {
-                _id: '2',
-                date: yesterday,
-                completedCount: 3,
-                paths: [
-                    { path: 'Right View', note: 'Done' },
-                    { path: 'Right Speech', note: 'Done' },
-                    { path: 'Right Mindfulness', note: 'Done' },
-                ],
-            },
-        ];
-    });
-
-    it('returns analytics with correct shape', async () => {
-        const res = (await ipc.invoke('storage:getEightfoldPathAnalytics', 30)) as {
-            totalDays: number;
-            averageCompletion: number;
-            perfectDays: number;
-            mostFollowedPaths: { path: string; count: number }[];
-            trends: { date: string; completedCount: number }[];
-        };
-        expect(res.totalDays).toBe(2);
-        expect(res.averageCompletion).toBe(5.5);
-        expect(res.perfectDays).toBe(1);
-        expect(res.mostFollowedPaths.length).toBeGreaterThan(0);
-        expect(res.trends).toHaveLength(2);
-    });
-
-    it('identifies the most followed paths', async () => {
-        const res = (await ipc.invoke('storage:getEightfoldPathAnalytics', 30)) as {
-            mostFollowedPaths: { path: string; count: number }[];
-        };
-        const topPath = res.mostFollowedPaths[0];
-        expect(topPath.count).toBe(2);
-    });
-
-    it('returns trends sorted by date ascending', async () => {
-        const res = (await ipc.invoke('storage:getEightfoldPathAnalytics', 30)) as {
-            trends: { date: string; completedCount: number }[];
-        };
-        expect(res.trends[0].date < res.trends[1].date).toBe(true);
-    });
-
-    it('returns empty analytics when no data', async () => {
-        collections['eightfoldPathLogs'] = [];
-        const res = (await ipc.invoke('storage:getEightfoldPathAnalytics', 30)) as {
-            totalDays: number;
-            perfectDays: number;
-        };
-        expect(res.totalDays).toBe(0);
-        expect(res.perfectDays).toBe(0);
-    });
-});
-
 describe('argument validation at the IPC boundary', () => {
     beforeEach(() => {
         resetState();
@@ -367,11 +292,10 @@ describe('argument validation at the IPC boundary', () => {
     it('rejects an analytics window that is not a positive integer', async () => {
         await expect(ipc.invoke('storage:getEmotionAnalytics', 0)).rejects.toThrow('Invalid day count');
         await expect(ipc.invoke('storage:getEmotionAnalytics', '30')).rejects.toThrow('Invalid day count');
-        await expect(ipc.invoke('storage:getEightfoldPathAnalytics', -5)).rejects.toThrow('Invalid day count');
+        await expect(ipc.invoke('storage:getEmotionAnalytics', -5)).rejects.toThrow('Invalid day count');
     });
 
     it('defaults an omitted analytics window to 30 days', async () => {
         await expect(ipc.invoke('storage:getEmotionAnalytics')).resolves.toMatchObject({ totalDays: 0 });
-        await expect(ipc.invoke('storage:getEightfoldPathAnalytics')).resolves.toMatchObject({ totalDays: 0 });
     });
 });

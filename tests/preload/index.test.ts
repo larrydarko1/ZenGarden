@@ -47,7 +47,6 @@ describe('preload / electronAPI', () => {
             ['getEmotionAnalytics', 'storage:getEmotionAnalytics', [30]],
             ['saveEightfoldPathLog', 'storage:saveEightfoldPathLog', ['2025-01-15', []]],
             ['getEightfoldPathLogs', 'storage:getEightfoldPathLogs', [{ limit: 5 }]],
-            ['getEightfoldPathAnalytics', 'storage:getEightfoldPathAnalytics', [30]],
         ];
 
         for (const [method, channel, args] of invokeTests) {

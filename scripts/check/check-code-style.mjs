@@ -52,7 +52,7 @@ const LINE_CAP = 400;
 const LENGTH_BASELINE = {
     'src/renderer/components/Home.vue': 1246,
     'src/renderer/components/home/MeditationOverlay.vue': 696,
-    'src/renderer/components/EmotionTracker.vue': 569,
+    'src/renderer/components/EmotionTracker.vue': 557,
     'src/renderer/components/emotions/EmotionAnalytics.vue': 529,
     'src/renderer/components/MeditationCalendar.vue': 428,
 };
