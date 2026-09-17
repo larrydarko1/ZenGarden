@@ -3,12 +3,11 @@ import { CapacitorStorageAdapter } from '@/renderer/store/adapters/capacitor';
 import { DB_FILES } from '@/renderer/store/adapters/capacitor/db';
 import { nth } from '@test-utils';
 
-/** Files keyed by name, standing in for the vault folder on disk. */
-let vault: Record<string, unknown> = {};
-
 vi.mock('@capacitor/preferences', () => ({
     Preferences: { get: vi.fn().mockResolvedValue({ value: null }) },
 }));
+
+let vault: Record<string, unknown> = {};
 
 vi.mock('@/renderer/store/adapters/capacitor/db', () => ({
     DB_FILES: {
@@ -56,11 +55,6 @@ describe('probeAvailability', () => {
     });
 });
 
-/**
- * Android has no path-based folder picker, so the vault is a fixed location
- * rather than a choice. The UI keys on `canChooseVault` to hide the controls
- * that would otherwise lead nowhere.
- */
 describe('vault', () => {
     it('reports the fixed vault location', async () => {
         expect(await adapter().findVaultPath()).toBe('Documents/ZenGarden');
@@ -89,7 +83,6 @@ describe('settings', () => {
         expect(await adapter().getSettings()).toEqual({ theme: 'light', language: 'ja' });
     });
 
-    // The file is in a folder the user can edit; one bad value must not brick it.
     it('falls back per field on a hand-edited file', async () => {
         vault[DB_FILES.settings] = { theme: 'neon', language: 'ja' };
         expect(await adapter().getSettings()).toEqual({ theme: 'dark', language: 'ja' });
@@ -124,7 +117,6 @@ describe('meditations', () => {
         expect((await store.getMeditations()).meditations).toHaveLength(2);
     });
 
-    // Every record in the folder belongs to the vault — there is nothing to filter on.
     it('returns everything in the vault', async () => {
         vault[DB_FILES.meditations] = [
             { _id: '1', date: today },

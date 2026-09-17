@@ -8,9 +8,6 @@ const mockGetVaultPath = vi.fn();
 const mockGetSettings = vi.fn();
 const mockCloseVault = vi.fn();
 const mockCanChooseVault = vi.fn();
-const mockIsDesktop = vi.fn().mockReturnValue(false);
-const mockLogError = vi.fn();
-
 vi.mock('@/renderer/store', () => ({
     getMeditations: () => mockGetMeditations(),
     createMeditation: (...args: unknown[]) => mockCreateMeditation(...args),
@@ -20,7 +17,11 @@ vi.mock('@/renderer/store', () => ({
     vaultIsPickable: () => mockCanChooseVault(),
 }));
 
+const mockIsDesktop = vi.fn().mockReturnValue(false);
+
 vi.mock('@/renderer/utils/platform', () => ({ isDesktop: () => mockIsDesktop() }));
+
+const mockLogError = vi.fn();
 
 vi.mock('@/renderer/utils/logger', () => ({
     log: { error: (...args: unknown[]) => mockLogError(...args), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
@@ -73,7 +74,6 @@ vi.mock('@/renderer/composables/useMeditationSession', () => ({
 const Home = (await import('@/renderer/components/Home.vue')).default;
 
 const settings = { theme: 'light', language: 'fr' };
-const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const stubs = {
     VaultPicker: { name: 'VaultPicker', template: '<div class="vault-picker-stub" />' },
@@ -86,9 +86,9 @@ const stubs = {
     SettingsPopup: { name: 'SettingsPopup', template: '<div class="settings-stub" />' },
 };
 
+const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 const mountHome = () => mountWithI18n(Home, { global: { stubs } });
 
-/** Mount with a vault open, which is what puts the main screen on. */
 async function mountWithVault() {
     const wrapper = mountHome();
     wrapper.findComponent(stubs.VaultPicker).vm.$emit('opened', '/vault');
@@ -107,7 +107,6 @@ beforeEach(() => {
     mockGetMeditations.mockResolvedValue({ meditations: [] });
     mockGetSettings.mockResolvedValue(settings);
     mockCreateMeditation.mockResolvedValue({ message: 'ok' });
-    // No vault remembered, so the picker is what a bare mount lands on.
     mockGetVaultPath.mockResolvedValue(null);
     mockCloseVault.mockResolvedValue(undefined);
     mockCanChooseVault.mockResolvedValue(true);
@@ -135,7 +134,6 @@ describe('Home', () => {
             wrapper.unmount();
         });
 
-        // Theme and language live in the vault, so they arrive with it.
         it('reports the vault theme and language so the shell can apply them', async () => {
             const wrapper = await mountWithVault();
 
@@ -159,7 +157,6 @@ describe('Home', () => {
             wrapper.unmount();
         });
 
-        // A vault remembered from the last run skips the picker entirely.
         it('opens a remembered vault without asking', async () => {
             mockGetVaultPath.mockResolvedValue('/remembered');
             const wrapper = mountHome();
@@ -364,7 +361,6 @@ describe('Home', () => {
             showBellConfig.value = true;
             await wrapper.vm.$nextTick();
 
-            // The first option is "none"; the four after it are the intervals.
             const options = wrapper.findAll('.config-panel-options .config-option-btn');
             expect(options).toHaveLength(5);
 

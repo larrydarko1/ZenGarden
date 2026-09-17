@@ -1,6 +1,5 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { register as registerDataHandlers } from '@/main/services/data';
-
 import type { IpcResult } from '@/schemas/storage';
 
 type IpcHandler = (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => unknown;
@@ -9,7 +8,6 @@ const event = {} as Electron.IpcMainInvokeEvent;
 const ipc = makeMockIpc();
 
 let collections: Record<string, unknown[]> = {};
-/** Whether a vault is open. `db` throws exactly as the real module does when not. */
 let vaultOpen = true;
 
 vi.mock('@/main/services/db', () => ({
@@ -81,8 +79,6 @@ describe('storage:getMeditations', () => {
         ];
     });
 
-    // Every record in the folder belongs to the vault. There is no owner field
-    // to filter on, which is the whole point of dropping accounts.
     it('returns every meditation in the vault', async () => {
         const res = (await ipc.invoke('storage:getMeditations')) as unknown[];
         expect(res).toHaveLength(3);

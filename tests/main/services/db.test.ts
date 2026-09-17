@@ -23,17 +23,11 @@ describe('readCollection', () => {
         expect(readJsonFile).toHaveBeenCalledWith('/vault/emotion_logs.json', []);
     });
 
-    // The whole point of the vault model: a folder with nothing in it is a valid
-    // empty vault, so nothing has to be seeded before the first write.
     it('reads a missing file as an empty collection', () => {
         vi.mocked(readJsonFile).mockReturnValue([]);
         expect(readCollection('meditations')).toEqual([]);
     });
 
-    /**
-     * A collection file that is not a JSON array is unusable, not partially
-     * usable — reading it as one would hand every caller a `.map` that throws.
-     */
     it('reads a non-array file as an empty collection', () => {
         vi.mocked(readJsonFile).mockReturnValue({ meditations: [] });
         expect(readCollection('meditations')).toEqual([]);

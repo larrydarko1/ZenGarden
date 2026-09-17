@@ -4,17 +4,18 @@ import { i18n } from '@/renderer/i18n';
 
 const mockUpdateTheme = vi.fn().mockResolvedValue({ message: 'ok', theme: 'light' });
 const mockUpdateLanguage = vi.fn().mockResolvedValue({ message: 'ok', language: 'fr' });
-const mockIsDesktop = vi.fn().mockReturnValue(false);
-const mockLogError = vi.fn();
-
 vi.mock('@/renderer/store', () => ({
     updateTheme: (...args: unknown[]) => mockUpdateTheme(...args),
     updateLanguage: (...args: unknown[]) => mockUpdateLanguage(...args),
 }));
 
+const mockIsDesktop = vi.fn().mockReturnValue(false);
+
 vi.mock('@/renderer/utils/platform', () => ({
     isDesktop: () => mockIsDesktop(),
 }));
+
+const mockLogError = vi.fn();
 
 vi.mock('@/renderer/utils/logger', () => ({
     log: { error: (...args: unknown[]) => mockLogError(...args), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },

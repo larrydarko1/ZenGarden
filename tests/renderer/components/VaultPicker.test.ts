@@ -4,12 +4,13 @@ import VaultPicker from '@/renderer/components/VaultPicker.vue';
 
 const mockCanChooseVault = vi.fn();
 const mockChooseVault = vi.fn();
-const mockLogError = vi.fn();
 
 vi.mock('@/renderer/store', () => ({
     vaultIsPickable: () => mockCanChooseVault(),
     chooseVault: () => mockChooseVault(),
 }));
+
+const mockLogError = vi.fn();
 
 vi.mock('@/renderer/utils/logger', () => ({
     log: { error: (...args: unknown[]) => mockLogError(...args), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
@@ -17,7 +18,6 @@ vi.mock('@/renderer/utils/logger', () => ({
 
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-/** Mounted and settled, so the `vaultIsPickable` probe in onMounted has landed. */
 async function mountPicker() {
     const wrapper = mountWithI18n(VaultPicker);
     await settle();
@@ -50,7 +50,6 @@ describe('VaultPicker', () => {
         wrapper.unmount();
     });
 
-    // Cancelling is not a failure. The picker stays put and says nothing.
     it('stays put when the dialog is cancelled', async () => {
         mockChooseVault.mockResolvedValue(null);
         const wrapper = await mountPicker();
@@ -89,10 +88,6 @@ describe('VaultPicker', () => {
         wrapper.unmount();
     });
 
-    /**
-     * Android has one fixed vault and no picker to show, so opening it is not a
-     * decision the user has to make — the screen takes it for them.
-     */
     describe('where the vault cannot be chosen', () => {
         beforeEach(() => {
             mockCanChooseVault.mockResolvedValue(false);

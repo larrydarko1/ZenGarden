@@ -3,6 +3,12 @@ import { ref } from 'vue';
 import { useEmotions } from '@/renderer/composables/useEmotions';
 import { nth } from '@test-utils';
 
+vi.mock('vue-i18n', () => ({
+    useI18n: () => ({
+        t: (key: string) => key,
+    }),
+}));
+
 const mockSaveEmotionLog = vi.fn().mockResolvedValue({ message: 'ok', emotionLog: {} });
 const mockGetEmotionLogs = vi.fn().mockResolvedValue({ emotionLogs: [] });
 const mockGetEmotionAnalytics = vi.fn().mockResolvedValue({ totalDays: 0, topEmotions: [] });
@@ -11,12 +17,6 @@ vi.mock('@/renderer/store', () => ({
     saveEmotionLog: (...args: unknown[]) => mockSaveEmotionLog(...args),
     getEmotionLogs: (...args: unknown[]) => mockGetEmotionLogs(...args),
     getEmotionAnalytics: (...args: unknown[]) => mockGetEmotionAnalytics(...args),
-}));
-
-vi.mock('vue-i18n', () => ({
-    useI18n: () => ({
-        t: (key: string) => key,
-    }),
 }));
 
 describe('useEmotions', () => {
@@ -110,7 +110,6 @@ describe('useEmotions', () => {
             toggleEmotion(nth(positiveEmotions.value, 0));
             toggleEmotion(nth(positiveEmotions.value, 1));
             toggleEmotion(nth(negativeEmotions.value, 0));
-            // 2 positive out of 3 total = 0.67
             expect(pnRatio.value).toBe('0.67');
         });
 

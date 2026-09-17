@@ -2,12 +2,11 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import type { IpcMain } from 'electron';
 import { readJsonFile, writeJsonFile } from '@/main/lib/jsonFile';
 
+type Handler = (event: unknown, ...args: unknown[]) => unknown;
+
 const state = vi.hoisted(() => ({
-    /** Contents of the app's state.json, as `readJsonFile` would return it. */
     savedState: {} as Record<string, unknown>,
-    /** Contents of the vault's settings.json, or undefined when it has none. */
     settings: undefined as unknown,
-    /** Whether a remembered vault path still resolves on disk. */
     vaultExists: true,
     dialogResult: { canceled: false, filePaths: ['/chosen/vault'] } as {
         canceled: boolean;
@@ -36,14 +35,6 @@ vi.mock('@/main/lib/jsonFile', () => ({
 
 vi.mock('@/main/lib/logger', () => ({ log: { info: vi.fn(), error: vi.fn() } }));
 
-type Handler = (event: unknown, ...args: unknown[]) => unknown;
-
-/**
- * Re-imports the module so its startup work — reading the remembered vault out
- * of state.json — runs against whatever `state` currently says. That resolution
- * happens once, at import, so a test that wants a different answer needs a
- * fresh module rather than a fresh call.
- */
 async function loadVault(): Promise<Map<string, Handler>> {
     vi.resetModules();
     const handlers = new Map<string, Handler>();
@@ -72,11 +63,6 @@ describe('vault:findPath', () => {
         expect(await handlers.get('vault:findPath')!(null)).toEqual({ success: true, data: '/remembered/vault' });
     });
 
-    /**
-     * The folder belongs to the user, who is free to move, rename or delete it
-     * between launches. The app has to come up asking for a new one rather than
-     * failing every read against a dead path.
-     */
     it('forgets a remembered vault that no longer exists', async () => {
         state.savedState = { vaultRoot: '/deleted/vault' };
         state.vaultExists = false;
@@ -102,7 +88,6 @@ describe('vault:choose', () => {
         expect(writeJsonFile).toHaveBeenCalledWith('/app/userData/state.json', { vaultRoot: '/chosen/vault' });
     });
 
-    // Cancelling is not a failure, and must not clear the vault already open.
     it('leaves the current vault alone when the dialog is cancelled', async () => {
         state.savedState = { vaultRoot: '/remembered/vault' };
         state.dialogResult = { canceled: true, filePaths: [] };
@@ -153,8 +138,6 @@ describe('settings', () => {
         });
     });
 
-    // The vault is a folder the user is invited to poke at, so one bad value in
-    // a hand-edited settings.json must not brick the app.
     it('falls back per field on a hand-edited file', async () => {
         state.savedState = { vaultRoot: '/remembered/vault' };
         state.settings = { theme: 'neon', language: 'fr' };

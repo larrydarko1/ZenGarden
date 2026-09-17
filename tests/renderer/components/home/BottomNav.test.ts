@@ -63,8 +63,6 @@ describe('BottomNav', () => {
         wrapper.unmount();
     });
 
-    // Android's vault is fixed, so closing it would drop the user on a picker
-    // that immediately reopens the same folder.
     it('hides close-vault where the vault cannot be changed', () => {
         const wrapper = mountWithI18n(BottomNav, { props: { ...INACTIVE, canCloseVault: false } });
 

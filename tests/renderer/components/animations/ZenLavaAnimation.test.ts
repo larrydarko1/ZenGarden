@@ -44,7 +44,6 @@ describe('ZenLavaAnimation', () => {
         expect(wrapper.html()).not.toContain('<feGaussianBlur');
         expect(wrapper.findAll('[filter]')).toHaveLength(0);
 
-        // The falloff that replaced it: each gradient reaches zero opacity.
         for (const gradient of wrapper.findAll('radialGradient')) {
             const stops = gradient.findAll('stop');
             expect(stops.length).toBeGreaterThanOrEqual(4);

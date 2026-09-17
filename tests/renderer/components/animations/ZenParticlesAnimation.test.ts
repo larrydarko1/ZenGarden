@@ -46,7 +46,6 @@ describe('ZenParticlesAnimation', () => {
         const particles = wrapper.findAll('circle');
         expect(particles.length).toBeGreaterThan(0);
         for (const particle of particles) {
-            // `animation-iteration-count: infinite` lives on the shared class.
             expect(particle.classes()).toContain('particle');
             expect(particle.classes().some((c) => c.startsWith('particle-bob-'))).toBe(true);
             expect(particle.attributes('style') ?? '').toMatch(/animation-duration:\s*[\d.]+s/);
@@ -63,7 +62,6 @@ describe('ZenParticlesAnimation', () => {
         wrapper.unmount();
     });
 
-    /** The 3px band is a flat fill — the glow gradient is invisible at that size. */
     it('reserves the glow gradient for the two larger bands', () => {
         const wrapper = mountWithI18n(ZenParticlesAnimation);
 

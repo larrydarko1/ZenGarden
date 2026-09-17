@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mountWithI18n, nth } from '@test-utils';
 import MeditationCalendar from '@/renderer/components/MeditationCalendar.vue';
 
+type CalendarEntry = { date: string; duration?: number; notes?: string };
+
 const NOW = new Date(2025, 2, 12, 9, 0, 0);
 
 const iso = (year: number, month: number, day: number) => new Date(year, month, day, 12).toISOString();
-
-type CalendarEntry = { date: string; duration?: number; notes?: string };
 
 const mountCalendar = (meditations: CalendarEntry[] = []) =>
     mountWithI18n(MeditationCalendar, { props: { meditations } });
@@ -38,7 +38,6 @@ describe('MeditationCalendar', () => {
     it('pads the grid so the first of the month lands on its real weekday', () => {
         const wrapper = mountCalendar();
 
-        // 1 March 2025 is a Saturday: six blanks, then 31 days.
         const cells = wrapper.findAll('.calendar-day');
         expect(cells).toHaveLength(6 + 31);
         expect(cells.slice(0, 6).every((cell) => cell.text() === '')).toBe(true);

@@ -2,7 +2,6 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { shallowRef } from 'vue';
 import { useMeditationSession } from '@/renderer/composables/useMeditationSession';
 
-// Stub HTMLAudioElement
 class MockAudio {
     src = '';
     volume = 1;
@@ -26,7 +25,6 @@ describe('useMeditationSession', () => {
     });
 
     function setup() {
-        // No element to focus outside a mounted template; the focus call opts out on null.
         return useMeditationSession(shallowRef<HTMLInputElement | null>(null));
     }
 
@@ -60,7 +58,7 @@ describe('useMeditationSession', () => {
             const { enableCustomDuration, isCustomDuration, customDurationValue } = setup();
             enableCustomDuration();
             expect(isCustomDuration.value).toBe(true);
-            expect(customDurationValue.value).toBe(10); // copies current selectedDuration
+            expect(customDurationValue.value).toBe(10);
         });
 
         it('applyCustomDuration sets the duration when valid', () => {
@@ -92,7 +90,7 @@ describe('useMeditationSession', () => {
             customDurationValue.value = 99;
             cancelCustomDuration();
             expect(isCustomDuration.value).toBe(false);
-            expect(customDurationValue.value).toBe(10); // reset to selectedDuration
+            expect(customDurationValue.value).toBe(10);
         });
     });
 
@@ -139,7 +137,7 @@ describe('useMeditationSession', () => {
             startMeditation(3);
             vi.advanceTimersByTime(5000);
             const secondsBefore = meditationSeconds.value;
-            startMeditation(3); // should be ignored
+            startMeditation(3);
             expect(meditationActive.value).toBe(true);
             expect(meditationSeconds.value).toBe(secondsBefore);
         });
@@ -171,20 +169,20 @@ describe('useMeditationSession', () => {
     describe('finishMeditation', () => {
         it('auto-finishes when timer reaches 0', () => {
             const { startMeditation, meditationActive, showNotes, selectedDuration } = setup();
-            selectedDuration.value = 1; // 1 minute = 60 seconds
+            selectedDuration.value = 1;
             startMeditation(3);
 
-            vi.advanceTimersByTime(61000); // 61 seconds to ensure completion
+            vi.advanceTimersByTime(61000);
             expect(meditationActive.value).toBe(false);
             expect(showNotes.value).toBe(true);
         });
 
         it('records completed duration on finish', () => {
             const { startMeditation, finishMeditation, completedMeditationDuration, selectedDuration } = setup();
-            selectedDuration.value = 1; // 60 seconds
+            selectedDuration.value = 1;
             startMeditation(3);
 
-            vi.advanceTimersByTime(30000); // 30s elapsed
+            vi.advanceTimersByTime(30000);
             finishMeditation();
             expect(completedMeditationDuration.value).toBe(30);
         });

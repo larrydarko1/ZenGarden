@@ -1,12 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { isDesktop } from '@/renderer/utils/platform';
 
-// Helper to set/delete properties on window in tests
 const win = window as unknown as Record<string, unknown>;
 
 describe('platform utilities', () => {
     beforeEach(() => {
-        // Reset electronAPI on window between tests
         delete win['electronAPI'];
     });
 

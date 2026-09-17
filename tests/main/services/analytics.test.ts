@@ -1,9 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildEmotionAnalytics, isPathFollowed } from '@/main/services/analytics';
-
 import type { RawDoc } from '@/main/services/db';
 
-/** One stored emotion log, with only the fields the aggregation reads. */
 function emotionLog(
     date: string,
     positiveCount: number,
@@ -54,10 +52,7 @@ describe('buildEmotionAnalytics', () => {
     });
 
     it('splits days at a pnRatio of 0.5, counting the boundary as positive', () => {
-        const result = buildEmotionAnalytics([
-            emotionLog('2025-01-01', 2, 2, []), // ratio exactly 0.5
-            emotionLog('2025-01-02', 1, 3, []), // ratio 0.25
-        ]);
+        const result = buildEmotionAnalytics([emotionLog('2025-01-01', 2, 2, []), emotionLog('2025-01-02', 1, 3, [])]);
 
         expect(result.positiveDays).toBe(1);
         expect(result.negativeDays).toBe(1);

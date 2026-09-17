@@ -3,7 +3,6 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { readJsonFile, writeJsonFile } from '@/main/lib/jsonFile';
 
 const state = vi.hoisted(() => ({
-    /** What the next readFileSync returns, keyed by full path. */
     files: {} as Record<string, string>,
 }));
 
@@ -36,8 +35,6 @@ describe('readJsonFile', () => {
         expect(readJsonFile('/vault/absent.json', { fallback: true })).toEqual({ fallback: true });
     });
 
-    // A half-written file is indistinguishable from a corrupt one at this level,
-    // and both have to read as "nothing usable" rather than throw into a handler.
     it('falls back on unparseable JSON', () => {
         state.files['/vault/broken.json'] = '{not json';
         expect(readJsonFile('/vault/broken.json', [])).toEqual([]);
@@ -56,9 +53,6 @@ describe('writeJsonFile', () => {
         expect(fs.renameSync).toHaveBeenCalledWith('/vault/meditations.json.tmp', '/vault/meditations.json');
     });
 
-    // `mode` on writeFileSync applies only when the file is created, so a .tmp
-    // orphaned by an earlier crash would keep its old mode and be renamed into
-    // place at 0644. The explicit chmod is what stops that.
     it('applies the mode outright, not only via the create flag', () => {
         writeJsonFile('/vault/meditations.json', []);
         expect(fs.chmodSync).toHaveBeenCalledWith('/vault/meditations.json.tmp', 0o600);
@@ -67,9 +61,6 @@ describe('writeJsonFile', () => {
     it('renames only after the contents are written', () => {
         writeJsonFile('/vault/meditations.json', []);
 
-        // The defaults put an absent write last and an absent rename first, so a
-        // call that never happened fails the comparison instead of passing on a
-        // missing value.
         const [writeOrder = Infinity] = vi.mocked(fs.writeFileSync).mock.invocationCallOrder;
         const [renameOrder = 0] = vi.mocked(fs.renameSync).mock.invocationCallOrder;
         expect(writeOrder).toBeLessThan(renameOrder);

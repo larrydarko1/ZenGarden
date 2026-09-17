@@ -2,11 +2,11 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { ElectronStorageAdapter } from '@/renderer/store/adapters/electron';
 import type { IpcResult } from '@/schemas/storage';
 
-/** The success envelope every bridge method now answers with. */
+let mockAPI: ReturnType<typeof createMockAPI>;
+
 function ok<T>(data: T): IpcResult<T> {
     return { success: true, data };
 }
-let mockAPI: ReturnType<typeof createMockAPI>;
 
 function createMockAPI() {
     return {
@@ -57,8 +57,6 @@ describe('ElectronStorageAdapter', () => {
             expect(await adapter.findVaultPath()).toBe('/vault');
         });
 
-        // Null is a cancelled dialog, not an error: it has to survive the
-        // unwrapping rather than be turned into a throw.
         it('chooseVault passes a cancelled dialog through as null', async () => {
             mockAPI.chooseVault.mockResolvedValue(ok(null));
             const adapter = new ElectronStorageAdapter();

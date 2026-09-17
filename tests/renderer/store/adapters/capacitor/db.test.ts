@@ -10,6 +10,8 @@ import {
     initializeStorage,
 } from '@/renderer/store/adapters/capacitor/db';
 
+vi.mock('@/renderer/utils/logger', () => ({ log: { info: vi.fn(), error: vi.fn() } }));
+
 const mockReadFile = vi.fn();
 const mockWriteFile = vi.fn().mockResolvedValue(undefined);
 const mockMkdir = vi.fn().mockResolvedValue(undefined);
@@ -24,19 +26,12 @@ vi.mock('@capacitor/filesystem', () => ({
     Encoding: { UTF8: 'utf8' },
 }));
 
-vi.mock('@/renderer/utils/logger', () => ({ log: { info: vi.fn(), error: vi.fn() } }));
-
 beforeEach(() => {
     vi.clearAllMocks();
     mockWriteFile.mockResolvedValue(undefined);
     mockMkdir.mockResolvedValue(undefined);
 });
 
-/**
- * The Android vault sits in public Documents on purpose. It holds nothing but
- * the journal — no account, no password hash, no session — so a folder the user
- * can open in a file manager and copy to a desktop vault is the whole point.
- */
 describe('vault location', () => {
     it('reads and writes public Documents', async () => {
         mockReadFile.mockResolvedValue({ data: '[]' });
@@ -80,7 +75,6 @@ describe('readCollection', () => {
         expect(await readCollection(DB_FILES.meditations)).toEqual([]);
     });
 
-    // A file holding an object is unusable as a collection, not partially usable.
     it('reads an object as an empty collection', async () => {
         mockReadFile.mockResolvedValue({ data: '{"meditations": []}' });
         expect(await readCollection(DB_FILES.meditations)).toEqual([]);
@@ -110,7 +104,6 @@ describe('readObject', () => {
         expect(await readObject(DB_FILES.settings)).toBeNull();
     });
 
-    // Settings are an object; an array there is a corrupt file, not settings.
     it('reads an array as null', async () => {
         mockReadFile.mockResolvedValue({ data: '[]' });
         expect(await readObject(DB_FILES.settings)).toBeNull();
@@ -154,17 +147,11 @@ describe('initializeStorage', () => {
         );
     });
 
-    /**
-     * Nothing is seeded. A missing file reads as an empty collection, so an
-     * empty folder is already a valid empty vault — and seeding would be the
-     * one thing that could overwrite a vault the user dropped in by hand.
-     */
     it('writes no files', async () => {
         await initializeStorage();
         expect(mockWriteFile).not.toHaveBeenCalled();
     });
 
-    // mkdir is the only way to ask, and an existing folder rejects.
     it('treats an existing folder as success', async () => {
         mockMkdir.mockRejectedValue(new Error('Directory exists'));
         await expect(initializeStorage()).resolves.toBeUndefined();

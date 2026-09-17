@@ -15,8 +15,6 @@ const positiveEmotions = ref([
 ]);
 const negativeEmotions = ref([{ name: 'tense', type: 'negative', displayName: 'Tense', description: 'tight' }]);
 
-// Shared with the useEightfoldPath mock below: the note box writes back through
-// the parent, so a test needs to read the same ref the component assigns to.
 const followedPaths = ref<string[]>([]);
 const pathNotes = ref<Record<string, string>>({});
 
@@ -24,9 +22,6 @@ const mockToggleEmotion = vi.fn();
 const mockHandleNoteInput = vi.fn();
 const mockLoadEmotions = vi.fn().mockResolvedValue(undefined);
 const mockLoadAnalytics = vi.fn().mockResolvedValue(undefined);
-const mockTogglePath = vi.fn();
-const mockDebouncedSavePath = vi.fn();
-const mockLoadPathData = vi.fn().mockResolvedValue(undefined);
 
 vi.mock('@/renderer/composables/useEmotions', () => ({
     useEmotions: () => ({
@@ -51,6 +46,10 @@ vi.mock('@/renderer/composables/useEmotions', () => ({
         loadAnalytics: mockLoadAnalytics,
     }),
 }));
+
+const mockTogglePath = vi.fn();
+const mockDebouncedSavePath = vi.fn();
+const mockLoadPathData = vi.fn().mockResolvedValue(undefined);
 
 vi.mock('@/renderer/composables/useEightfoldPath', () => ({
     useEightfoldPath: () => ({
@@ -242,7 +241,6 @@ describe('EmotionTracker', () => {
     });
 
     describe('eightfold notes', () => {
-        /** Opens the eightfold tab with one path ticked, which is what reveals its note box. */
         async function openNoteBox(): Promise<ReturnType<typeof mountTracker>> {
             followedPaths.value = ['view'];
             const wrapper = mountTracker();
@@ -251,9 +249,6 @@ describe('EmotionTracker', () => {
             return wrapper;
         }
 
-        // The note box lives in the child and only announces what was typed. Unless
-        // the tracker catches that and writes it back, every save records an empty
-        // note — the day's entry lands in the vault with the text dropped.
         it('writes a typed path note back into the state the save reads from', async () => {
             const wrapper = await openNoteBox();
             const note = wrapper.find('.eightfold-path-note textarea');
