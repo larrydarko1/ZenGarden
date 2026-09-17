@@ -1,6 +1,6 @@
 {
     "name": "zen-garden",
-    "version": "2.1.0",
+    "version": "2.1.2",
     "description": "A local-only meditation and mindfulness app built with Vue 3. Runs completely offline with no server required.",
     "keywords": [
         "meditation",
