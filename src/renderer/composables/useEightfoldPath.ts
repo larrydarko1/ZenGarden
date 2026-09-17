@@ -110,8 +110,8 @@ export function useEightfoldPath(
                 endDate: end.toISOString(),
             });
 
-            if (response.pathLogs?.length > 0) {
-                const pathLog = response.pathLogs[0];
+            const [pathLog] = response.pathLogs ?? [];
+            if (pathLog !== undefined) {
                 followedPaths.value = pathLog.paths.map((entry: { path: string }) => entry.path);
                 pathNotes.value = {};
                 pathLog.paths.forEach((entry: { path: string; note?: string }) => {

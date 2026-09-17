@@ -74,7 +74,7 @@ describe('buildEmotionAnalytics', () => {
 
         expect(result.emotionDiversity).toBe(2);
         expect(result.topEmotions[0]).toEqual({ name: 'calm', type: 'positive', count: 2 });
-        expect(result.topEmotions[1].count).toBe(1);
+        expect(result.topEmotions[1]?.count).toBe(1);
     });
 
     it('returns trends oldest-first regardless of input order', () => {

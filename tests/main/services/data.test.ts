@@ -54,10 +54,10 @@ describe('storage:createMeditation', () => {
             string,
             unknown
         >;
-        expect(res.date).toBe('2025-01-15');
-        expect(res.duration).toBe(10);
-        expect(res.notes).toBe('Peaceful session');
-        expect(res._id).toBeTruthy();
+        expect(res['date']).toBe('2025-01-15');
+        expect(res['duration']).toBe(10);
+        expect(res['notes']).toBe('Peaceful session');
+        expect(res['_id']).toBeTruthy();
     });
 
     it('persists to the meditations collection', async () => {
@@ -90,8 +90,7 @@ describe('storage:getMeditations', () => {
 
     it('returns meditations sorted by date descending', async () => {
         const res = (await ipc.invoke('storage:getMeditations')) as { date: string }[];
-        expect(res[0].date).toBe('2025-01-15');
-        expect(res[2].date).toBe('2025-01-01');
+        expect(res.map((meditation) => meditation.date)).toEqual(['2025-01-15', '2025-01-10', '2025-01-01']);
     });
 
     it('rejects when no vault is open', async () => {
@@ -112,9 +111,9 @@ describe('storage:saveEmotionLog', () => {
             string,
             unknown
         >;
-        expect(res.positiveCount).toBe(1);
-        expect(res.negativeCount).toBe(1);
-        expect(res.pnRatio).toBe(0.5);
+        expect(res['positiveCount']).toBe(1);
+        expect(res['negativeCount']).toBe(1);
+        expect(res['pnRatio']).toBe(0.5);
     });
 
     it('upserts on the same date', async () => {
@@ -123,8 +122,8 @@ describe('storage:saveEmotionLog', () => {
         await ipc.invoke('storage:saveEmotionLog', '2025-01-15', emotions1);
         await ipc.invoke('storage:saveEmotionLog', '2025-01-15', emotions2);
         expect(collections['emotionLogs']).toHaveLength(1);
-        const log = collections['emotionLogs'][0] as { negativeCount: number };
-        expect(log.negativeCount).toBe(1);
+        const [log] = collections['emotionLogs'] as { negativeCount: number }[];
+        expect(log?.negativeCount).toBe(1);
     });
 });
 
@@ -206,8 +205,8 @@ describe('storage:saveEightfoldPathLog', () => {
             { path: 'Right Intention', note: '' },
         ];
         const res = (await ipc.invoke('storage:saveEightfoldPathLog', '2025-01-15', paths)) as Record<string, unknown>;
-        expect(res.completedCount).toBe(1);
-        expect(res.progressPercentage).toBe(12.5);
+        expect(res['completedCount']).toBe(1);
+        expect(res['progressPercentage']).toBe(12.5);
     });
 
     it('upserts on the same date', async () => {
@@ -251,7 +250,7 @@ describe('argument validation at the IPC boundary', () => {
         await expect(ipc.invoke('storage:createMeditation', '2025-01-15', '10', '')).rejects.toThrow(
             'Invalid meditation',
         );
-        expect(collections.meditations).toHaveLength(0);
+        expect(collections['meditations']).toHaveLength(0);
     });
 
     it('rejects a meditation missing its notes', async () => {
@@ -264,7 +263,7 @@ describe('argument validation at the IPC boundary', () => {
         await expect(ipc.invoke('storage:saveEmotionLog', '2025-01-15', 'happy')).rejects.toThrow(
             'Invalid emotion log',
         );
-        expect(collections.emotionLogs).toHaveLength(0);
+        expect(collections['emotionLogs']).toHaveLength(0);
     });
 
     it('rejects an emotion carrying an unknown type', async () => {
@@ -285,7 +284,7 @@ describe('argument validation at the IPC boundary', () => {
     });
 
     it('accepts an omitted query as "everything"', async () => {
-        collections.emotionLogs = [{ _id: '1', date: '2025-01-15' }];
+        collections['emotionLogs'] = [{ _id: '1', date: '2025-01-15' }];
         await expect(ipc.invoke('storage:getEmotionLogs')).resolves.toHaveLength(1);
     });
 

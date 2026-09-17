@@ -30,6 +30,7 @@ import type {
     EightfoldPathLog,
     EightfoldPathInput,
     EmotionAnalytics,
+    EmotionStat,
     DateRangeQuery,
 } from '@/renderer/store/types';
 
@@ -122,13 +123,13 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         const pnRatio = negativeCount > 0 ? positiveCount / negativeCount : positiveCount;
 
         const emotionLog: EmotionLog = {
-            _id: existingIndex >= 0 ? emotionLogs[existingIndex]._id : generateObjectId(),
+            _id: emotionLogs[existingIndex]?._id ?? generateObjectId(),
             date: input.date,
             emotions: input.emotions,
             positiveCount,
             negativeCount,
             pnRatio,
-            note: input.note,
+            ...(input.note !== undefined ? { note: input.note } : {}),
             updatedAt: new Date().toISOString(),
         };
 
@@ -157,9 +158,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         const recentLogs = emotionLogs.filter((log) => log.date >= cutoffDate(days));
 
         // Calculate emotion frequencies
-        const emotionCounts: Record<string, number> = {};
-        const emotionTypes: Record<string, string> = {};
-        const uniqueEmotions = new Set<string>();
+        const emotionCounts = new Map<string, EmotionStat>();
         let positiveDays = 0;
         let negativeDays = 0;
 
@@ -168,16 +167,14 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
             else negativeDays++;
 
             log.emotions.forEach((emotion) => {
-                uniqueEmotions.add(emotion.name);
-                emotionCounts[emotion.name] = (emotionCounts[emotion.name] ?? 0) + 1;
-                emotionTypes[emotion.name] = emotion.type;
+                const counter = emotionCounts.get(emotion.name) ?? { name: emotion.name, type: emotion.type, count: 0 };
+                counter.count++;
+                emotionCounts.set(emotion.name, counter);
             });
         });
 
         // Build emotion frequency array
-        const topEmotions = Object.entries(emotionCounts)
-            .map(([name, count]) => ({ name, count, type: emotionTypes[name] }))
-            .sort((a, b) => b.count - a.count);
+        const topEmotions = [...emotionCounts.values()].sort((a, b) => b.count - a.count);
 
         // Calculate averages
         const totalPositive = recentLogs.reduce((sum, log) => sum + log.positiveCount, 0);
@@ -192,7 +189,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
             averagePositiveCount: recentLogs.length > 0 ? totalPositive / recentLogs.length : 0,
             averageNegativeCount: recentLogs.length > 0 ? totalNegative / recentLogs.length : 0,
             averagePNRatio: recentLogs.length > 0 ? totalRatio / recentLogs.length : 0,
-            emotionDiversity: uniqueEmotions.size,
+            emotionDiversity: emotionCounts.size,
             positiveDays,
             negativeDays,
             topEmotions,
@@ -211,7 +208,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         const progressPercentage = (completedCount / 8) * 100;
 
         const log: EightfoldPathLog = {
-            _id: existingIndex >= 0 ? logs[existingIndex]._id : generateObjectId(),
+            _id: logs[existingIndex]?._id ?? generateObjectId(),
             date: input.date,
             paths: input.paths,
             completedCount,
@@ -274,5 +271,5 @@ function applyDateRange<T extends { date: string }>(logs: T[], query?: DateRange
 function cutoffDate(days: number): string {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - days);
-    return cutoff.toISOString().split('T')[0];
+    return cutoff.toISOString().slice(0, 10);
 }

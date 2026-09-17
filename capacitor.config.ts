@@ -1,11 +1,11 @@
-import { CapacitorConfig } from '@capacitor/cli';
+import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
     appId: 'com.zengarden.app',
     appName: 'ZenGarden',
     webDir: 'dist',
     server: {
-        androidScheme: 'https'
+        androidScheme: 'https',
     },
     plugins: {
         SplashScreen: {
@@ -14,9 +14,9 @@ const config: CapacitorConfig = {
             showSpinner: false,
             androidSpinnerStyle: 'small',
             splashFullScreen: true,
-            splashImmersive: true
-        }
-    }
+            splashImmersive: true,
+        },
+    },
 };
 
 export default config;

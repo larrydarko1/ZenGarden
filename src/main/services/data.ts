@@ -74,7 +74,7 @@ export function register(ipc: IpcMain): void {
                 const existingIdx = logs.findIndex((log) => log.date === logDate);
 
                 const emotionLog: EmotionLog = {
-                    _id: existingIdx >= 0 ? logs[existingIdx]._id : generateId(),
+                    _id: logs[existingIdx]?._id ?? generateId(),
                     date: logDate,
                     emotions: emotionList,
                     positiveCount,
@@ -135,7 +135,7 @@ export function register(ipc: IpcMain): void {
             const existingIdx = logs.findIndex((log) => log.date === logDate);
 
             const pathLog: EightfoldPathLog = {
-                _id: existingIdx >= 0 ? logs[existingIdx]._id : generateId(),
+                _id: logs[existingIdx]?._id ?? generateId(),
                 date: logDate,
                 paths: pathList,
                 completedCount,
@@ -189,5 +189,5 @@ function filterByDateRange(docs: RawDoc[], query: DateRangeQuery): RawDoc[] {
 function getCutoffDate(days: number): string {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - days);
-    return cutoff.toISOString().split('T')[0];
+    return cutoff.toISOString().slice(0, 10);
 }

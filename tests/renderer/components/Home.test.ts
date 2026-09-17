@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ref } from 'vue';
-import { mountWithI18n } from '@test-utils';
+import { mountWithI18n, nth } from '@test-utils';
 
 const mockGetMeditations = vi.fn();
 const mockCreateMeditation = vi.fn();
@@ -50,7 +50,6 @@ vi.mock('@/renderer/composables/useMeditationSession', () => ({
         selectedDuration: ref(10),
         isCustomDuration,
         customDurationValue: ref(10),
-        customInput: ref('10'),
         bellEnabled,
         bellInterval: ref(10),
         bellSound: ref('1'),
@@ -303,7 +302,7 @@ describe('Home', () => {
             const presets = wrapper.findAll('.duration-btn:not(.custom-btn):not(.bell-config-btn)');
             expect(presets.map((preset) => preset.text())).toEqual(['5', '10', '15', '30']);
 
-            await presets[2].trigger('click');
+            await nth(presets, 2).trigger('click');
 
             expect(mockSelectPresetDuration).toHaveBeenCalledWith(15);
             wrapper.unmount();
@@ -369,7 +368,7 @@ describe('Home', () => {
             const options = wrapper.findAll('.config-panel-options .config-option-btn');
             expect(options).toHaveLength(5);
 
-            await options[3].trigger('click');
+            await nth(options, 3).trigger('click');
 
             expect(bellEnabled.value).toBe(true);
             expect(showBellConfig.value).toBe(false);
@@ -382,7 +381,7 @@ describe('Home', () => {
             showBellConfig.value = true;
             await wrapper.vm.$nextTick();
 
-            await wrapper.findAll('.config-panel-options .config-option-btn')[0].trigger('click');
+            await nth(wrapper.findAll('.config-panel-options .config-option-btn'), 0).trigger('click');
 
             expect(bellEnabled.value).toBe(false);
             expect(showBellConfig.value).toBe(false);
@@ -400,7 +399,7 @@ describe('Home', () => {
 
             const sounds = wrapper.findAll('.bell-sound-options-inline button');
             expect(sounds).toHaveLength(4);
-            await sounds[1].trigger('click');
+            await nth(sounds, 1).trigger('click');
             expect(mockSelectBellSound).toHaveBeenCalledWith('2');
             wrapper.unmount();
         });

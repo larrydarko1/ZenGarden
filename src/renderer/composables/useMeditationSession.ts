@@ -4,7 +4,10 @@
  * Does NOT own: animation selection (Home.vue), session notes saving (Home.vue), auth (Home.vue).
  */
 
-import { ref, type Ref } from 'vue';
+import { ref, type Ref, type ShallowRef } from 'vue';
+
+/** The custom-duration input, owned by the caller's template — this only focuses it. */
+type CustomInputRef = Readonly<ShallowRef<HTMLInputElement | null>>;
 
 type MeditationSession = {
     // Timer
@@ -13,7 +16,6 @@ type MeditationSession = {
     selectedDuration: Ref<number>;
     isCustomDuration: Ref<boolean>;
     customDurationValue: Ref<number>;
-    customInput: Ref<HTMLInputElement | null>;
     // Bell
     bellEnabled: Ref<boolean>;
     bellInterval: Ref<number>;
@@ -39,14 +41,13 @@ type MeditationSession = {
     formatTime: (sec: number) => string;
 };
 
-export function useMeditationSession(): MeditationSession {
+export function useMeditationSession(customInput: CustomInputRef): MeditationSession {
     // ── Timer ─────────────────────────────────────────────────────────────────
     const meditationActive = ref(false);
     const meditationSeconds = ref(600);
     const selectedDuration = ref(10); // minutes
     const isCustomDuration = ref(false);
     const customDurationValue = ref(10);
-    const customInput = ref<HTMLInputElement | null>(null);
     let meditationIntervalId: number | undefined;
 
     // ── Bell ──────────────────────────────────────────────────────────────────
@@ -191,7 +192,6 @@ export function useMeditationSession(): MeditationSession {
         selectedDuration,
         isCustomDuration,
         customDurationValue,
-        customInput,
         // Bell
         bellEnabled,
         bellInterval,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mountWithI18n } from '@test-utils';
+import { mountWithI18n, nth } from '@test-utils';
 import EightfoldPathView from '@/renderer/components/emotions/EightfoldPathView.vue';
 
 const paths = ['view', 'intention', 'speech', 'action', 'livelihood', 'effort', 'mindfulness', 'concentration'].map(
@@ -12,7 +12,7 @@ const paths = ['view', 'intention', 'speech', 'action', 'livelihood', 'effort', 
 );
 
 function mountView(overrides: Record<string, unknown> = {}) {
-    const followedPaths = (overrides.followedPaths as string[]) ?? [];
+    const followedPaths = (overrides['followedPaths'] as string[]) ?? [];
     return mountWithI18n(EightfoldPathView, {
         props: {
             loading: false,
@@ -62,7 +62,7 @@ describe('EightfoldPathView', () => {
     it('emits toggle-path with the key of the row that was clicked', async () => {
         const wrapper = mountView();
 
-        await wrapper.findAll('input[type="checkbox"]')[2].trigger('change');
+        await nth(wrapper.findAll('input[type="checkbox"]'), 2).trigger('change');
 
         expect(wrapper.emitted('toggle-path')).toEqual([['speech']]);
         wrapper.unmount();

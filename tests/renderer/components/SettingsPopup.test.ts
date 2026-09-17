@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mountWithI18n } from '@test-utils';
+import { mountWithI18n, nth } from '@test-utils';
 import SettingsPopup from '@/renderer/components/SettingsPopup.vue';
 
 const mockCanChooseVault = vi.fn();
@@ -59,37 +59,37 @@ describe('SettingsPopup', () => {
     it('highlights the theme it is given, not a hardcoded default', () => {
         const wrapper = mountSettings('light');
 
-        expect(wrapper.findAll('.theme-option')[1].classes()).toContain('active');
-        expect(wrapper.findAll('.theme-option')[0].classes()).not.toContain('active');
+        expect(nth(wrapper.findAll('.theme-option'), 1).classes()).toContain('active');
+        expect(nth(wrapper.findAll('.theme-option'), 0).classes()).not.toContain('active');
         wrapper.unmount();
     });
 
     it('highlights dark when that is the active theme', () => {
         const wrapper = mountSettings('dark');
 
-        expect(wrapper.findAll('.theme-option')[0].classes()).toContain('active');
-        expect(wrapper.findAll('.theme-option')[1].classes()).not.toContain('active');
+        expect(nth(wrapper.findAll('.theme-option'), 0).classes()).toContain('active');
+        expect(nth(wrapper.findAll('.theme-option'), 1).classes()).not.toContain('active');
         wrapper.unmount();
     });
 
     it('emits theme-change, and the highlight follows once the parent applies it', async () => {
         const wrapper = mountSettings('dark');
 
-        await wrapper.findAll('.theme-option')[1].trigger('click');
+        await nth(wrapper.findAll('.theme-option'), 1).trigger('click');
 
         expect(wrapper.emitted('theme-change')).toEqual([['light']]);
 
         await wrapper.setProps({ theme: 'light' });
 
-        expect(wrapper.findAll('.theme-option')[1].classes()).toContain('active');
-        expect(wrapper.findAll('.theme-option')[0].classes()).not.toContain('active');
+        expect(nth(wrapper.findAll('.theme-option'), 1).classes()).toContain('active');
+        expect(nth(wrapper.findAll('.theme-option'), 0).classes()).not.toContain('active');
         wrapper.unmount();
     });
 
     it('emits language-change with the code, not the display name', async () => {
         const wrapper = mountSettings();
 
-        await wrapper.findAll('.language-option')[3].trigger('click');
+        await nth(wrapper.findAll('.language-option'), 3).trigger('click');
 
         expect(wrapper.emitted('language-change')).toEqual([['fr']]);
         wrapper.unmount();
@@ -98,7 +98,7 @@ describe('SettingsPopup', () => {
     it('marks the active language so the current one is visible at a glance', async () => {
         const wrapper = mountSettings();
 
-        await wrapper.findAll('.language-option')[2].trigger('click');
+        await nth(wrapper.findAll('.language-option'), 2).trigger('click');
 
         const active = wrapper.findAll('.language-option').filter((option) => option.classes().includes('active'));
         expect(active.map((option) => option.text())).toEqual(['Italiano']);

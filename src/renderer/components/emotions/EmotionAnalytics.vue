@@ -32,6 +32,12 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+
+/** Bar width as a share of the longest bar — the lists arrive sorted, so that is the first entry. */
+function barWidth(count: number, stats: EmotionStat[]): string {
+    const max = stats[0]?.count ?? 0;
+    return max > 0 ? `${(count / max) * 100}%` : '0%';
+}
 </script>
 
 <template>
@@ -100,9 +106,7 @@ const { t } = useI18n();
                             ><span
                                 class="emotion-bar"
                                 :class="emotion.type"
-                                :style="{
-                                    width: `${(emotion.count / props.analytics.topEmotions[0].count) * 100}%`,
-                                }"></span
+                                :style="{ width: barWidth(emotion.count, props.analytics.topEmotions) }"></span
                         ></span>
                         <span class="emotion-count">{{ emotion.count }}</span>
                     </div>
@@ -120,9 +124,7 @@ const { t } = useI18n();
                         <span class="emotion-bar-container"
                             ><span
                                 class="emotion-bar positive"
-                                :style="{
-                                    width: `${props.topPositiveEmotions.length > 0 ? (emotion.count / props.topPositiveEmotions[0].count) * 100 : 0}%`,
-                                }"></span
+                                :style="{ width: barWidth(emotion.count, props.topPositiveEmotions) }"></span
                         ></span>
                         <span class="emotion-count">{{ emotion.count }}</span>
                     </div>
@@ -145,9 +147,7 @@ const { t } = useI18n();
                         <span class="emotion-bar-container"
                             ><span
                                 class="emotion-bar negative"
-                                :style="{
-                                    width: `${props.topNegativeEmotions.length > 0 ? (emotion.count / props.topNegativeEmotions[0].count) * 100 : 0}%`,
-                                }"></span
+                                :style="{ width: barWidth(emotion.count, props.topNegativeEmotions) }"></span
                         ></span>
                         <span class="emotion-count">{{ emotion.count }}</span>
                     </div>

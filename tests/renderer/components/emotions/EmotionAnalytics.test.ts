@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { mountWithI18n } from '@test-utils';
+import { mountWithI18n, nth } from '@test-utils';
 import EmotionAnalytics from '@/renderer/components/emotions/EmotionAnalytics.vue';
 
 const getTranslatedEmotionName = vi.fn((name: string) => `T(${name})`);
@@ -70,7 +70,7 @@ describe('EmotionAnalytics', () => {
     it('passes an already-formatted ratio through untouched', () => {
         const wrapper = mountAnalytics({ analytics: { ...analytics, averagePNRatio: 'n/a' } });
 
-        expect(wrapper.findAll('.analytics-value')[1].text()).toBe('n/a');
+        expect(nth(wrapper.findAll('.analytics-value'), 1).text()).toBe('n/a');
         wrapper.unmount();
     });
 
@@ -78,19 +78,19 @@ describe('EmotionAnalytics', () => {
         const wrapper = mountAnalytics();
 
         const segments = wrapper.findAll('.days-bar-segment');
-        expect(segments[0].attributes('style')).toContain('width: 60%');
-        expect(segments[1].attributes('style')).toContain('width: 40%');
+        expect(nth(segments, 0).attributes('style')).toContain('width: 60%');
+        expect(nth(segments, 1).attributes('style')).toContain('width: 40%');
         wrapper.unmount();
     });
 
     it('ranks top emotions and scales each bar against the leader', () => {
         const wrapper = mountAnalytics();
 
-        const items = wrapper.findAll('.analytics-section')[1].findAll('.top-emotion-item');
-        expect(items[0].find('.emotion-rank').text()).toBe('1');
-        expect(items[0].find('.emotion-name').text()).toBe('T(calm)');
-        expect(items[0].find('.emotion-bar').attributes('style')).toContain('width: 100%');
-        expect(items[1].find('.emotion-bar').attributes('style')).toContain('width: 50%');
+        const items = nth(wrapper.findAll('.analytics-section'), 1).findAll('.top-emotion-item');
+        expect(nth(items, 0).find('.emotion-rank').text()).toBe('1');
+        expect(nth(items, 0).find('.emotion-name').text()).toBe('T(calm)');
+        expect(nth(items, 0).find('.emotion-bar').attributes('style')).toContain('width: 100%');
+        expect(nth(items, 1).find('.emotion-bar').attributes('style')).toContain('width: 50%');
         wrapper.unmount();
     });
 
@@ -105,15 +105,15 @@ describe('EmotionAnalytics', () => {
         const wrapper = mountAnalytics();
 
         const bars = wrapper.findAll('.trend-bar');
-        expect(bars[0].classes()).toContain('positive');
-        expect(bars[1].classes()).toContain('negative');
+        expect(nth(bars, 0).classes()).toContain('positive');
+        expect(nth(bars, 1).classes()).toContain('negative');
         wrapper.unmount();
     });
 
     it('captions each trend bar with its formatted date and ratio', () => {
         const wrapper = mountAnalytics();
 
-        expect(wrapper.findAll('.trend-bar')[0].attributes('title')).toBe('d:2025-01-14: P/N Ratio 0.80');
+        expect(nth(wrapper.findAll('.trend-bar'), 0).attributes('title')).toBe('d:2025-01-14: P/N Ratio 0.80');
         wrapper.unmount();
     });
 
@@ -121,8 +121,8 @@ describe('EmotionAnalytics', () => {
         const wrapper = mountAnalytics();
 
         const bars = wrapper.findAll('.trend-bar');
-        expect(bars[0].attributes('style')).toContain('height: 100%');
-        expect(bars[1].attributes('style')).toContain('height: 25%');
+        expect(nth(bars, 0).attributes('style')).toContain('height: 100%');
+        expect(nth(bars, 1).attributes('style')).toContain('height: 25%');
         wrapper.unmount();
     });
 });

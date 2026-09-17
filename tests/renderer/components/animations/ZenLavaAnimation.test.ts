@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mountWithI18n } from '@test-utils';
+import { mountWithI18n, nth } from '@test-utils';
 import ZenLavaAnimation from '@/renderer/components/animations/ZenLavaAnimation.vue';
 
 describe('ZenLavaAnimation', () => {
@@ -48,7 +48,7 @@ describe('ZenLavaAnimation', () => {
         for (const gradient of wrapper.findAll('radialGradient')) {
             const stops = gradient.findAll('stop');
             expect(stops.length).toBeGreaterThanOrEqual(4);
-            expect(stops[stops.length - 1].attributes('stop-opacity')).toBe('0');
+            expect(nth(stops, stops.length - 1).attributes('stop-opacity')).toBe('0');
         }
         wrapper.unmount();
     });

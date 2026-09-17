@@ -55,9 +55,10 @@ export function register(ipc: IpcMain): void {
             const result =
                 window === null ? await dialog.showOpenDialog(options) : await dialog.showOpenDialog(window, options);
 
-            if (result.canceled || result.filePaths.length === 0) return { success: true, data: null };
+            const [chosen] = result.filePaths;
+            if (result.canceled || chosen === undefined) return { success: true, data: null };
 
-            vaultRoot = result.filePaths[0];
+            vaultRoot = chosen;
             persistVaultRoot();
             log.info('Vault opened', { vault: vaultRoot });
             return { success: true, data: vaultRoot };

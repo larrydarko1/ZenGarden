@@ -1,6 +1,7 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { CapacitorStorageAdapter } from '@/renderer/store/adapters/capacitor';
 import { DB_FILES } from '@/renderer/store/adapters/capacitor/db';
+import { nth } from '@test-utils';
 
 /** Files keyed by name, standing in for the vault folder on disk. */
 let vault: Record<string, unknown> = {};
@@ -31,8 +32,8 @@ vi.mock('@/renderer/store/adapters/capacitor/db', () => ({
     }),
 }));
 
-const today = new Date().toISOString().split('T')[0];
-const yesterday = new Date(Date.now() - 86_400_000).toISOString().split('T')[0];
+const today = new Date().toISOString().slice(0, 10);
+const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
 
 function adapter(): CapacitorStorageAdapter {
     return new CapacitorStorageAdapter();
@@ -151,7 +152,7 @@ describe('emotion logs', () => {
 
         const { emotionLogs } = await store.getEmotionLogs();
         expect(emotionLogs).toHaveLength(1);
-        expect(emotionLogs[0].emotions).toEqual([worry]);
+        expect(nth(emotionLogs, 0).emotions).toEqual([worry]);
     });
 
     it('keeps the id when it overwrites', async () => {
@@ -261,7 +262,7 @@ describe('eightfold path', () => {
 
         const { pathLogs } = await store.getEightfoldPathLogs();
         expect(pathLogs).toHaveLength(1);
-        expect(pathLogs[0].completedCount).toBe(8);
+        expect(nth(pathLogs, 0).completedCount).toBe(8);
     });
 
     it('filters by date range', async () => {

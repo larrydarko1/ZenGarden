@@ -28,7 +28,7 @@ describe('preload / electronAPI', () => {
         });
 
         it('isElectron returns true, which is how the factory picks this adapter', () => {
-            expect((capturedApi.isElectron as () => boolean)()).toBe(true);
+            expect((capturedApi['isElectron'] as () => boolean)()).toBe(true);
         });
     });
 
@@ -65,12 +65,12 @@ describe('preload / electronAPI', () => {
 
     describe('optional arguments', () => {
         it('passes undefined through for an omitted emotion-log note', () => {
-            (capturedApi.saveEmotionLog as (d: string, e: unknown[]) => unknown)('2025-01-15', []);
+            (capturedApi['saveEmotionLog'] as (d: string, e: unknown[]) => unknown)('2025-01-15', []);
             expect(mockInvoke).toHaveBeenCalledWith('storage:saveEmotionLog', '2025-01-15', [], undefined);
         });
 
         it('passes undefined through for an omitted analytics window', () => {
-            (capturedApi.getEmotionAnalytics as () => unknown)();
+            (capturedApi['getEmotionAnalytics'] as () => unknown)();
             expect(mockInvoke).toHaveBeenCalledWith('storage:getEmotionAnalytics', undefined);
         });
     });

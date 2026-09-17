@@ -204,14 +204,15 @@ export function useEmotions(selectedDate: Ref<Date>, activeTab: Ref<string>): Em
 
             const response = await getEmotionLogs({ startDate: start.toISOString(), endDate: end.toISOString() });
 
-            if (response.emotionLogs?.length > 0) {
-                const loaded = response.emotionLogs[0].emotions ?? [];
+            const [emotionLog] = response.emotionLogs ?? [];
+            if (emotionLog !== undefined) {
+                const loaded = emotionLog.emotions ?? [];
                 const all = [...positiveEmotions.value, ...negativeEmotions.value];
                 selectedEmotions.value = loaded.map(
                     (entry: { name: string; type: string }) =>
                         all.find((full) => full.name === entry.name) ?? (entry as Emotion),
                 );
-                dailyNote.value = response.emotionLogs[0].note ?? '';
+                dailyNote.value = emotionLog.note ?? '';
             } else {
                 selectedEmotions.value = [];
                 dailyNote.value = '';

@@ -67,8 +67,11 @@ describe('writeJsonFile', () => {
     it('renames only after the contents are written', () => {
         writeJsonFile('/vault/meditations.json', []);
 
-        const writeOrder = vi.mocked(fs.writeFileSync).mock.invocationCallOrder[0];
-        const renameOrder = vi.mocked(fs.renameSync).mock.invocationCallOrder[0];
+        // The defaults put an absent write last and an absent rename first, so a
+        // call that never happened fails the comparison instead of passing on a
+        // missing value.
+        const [writeOrder = Infinity] = vi.mocked(fs.writeFileSync).mock.invocationCallOrder;
+        const [renameOrder = 0] = vi.mocked(fs.renameSync).mock.invocationCallOrder;
         expect(writeOrder).toBeLessThan(renameOrder);
     });
 });

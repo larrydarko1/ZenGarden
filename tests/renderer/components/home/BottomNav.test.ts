@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mountWithI18n } from '@test-utils';
+import { mountWithI18n, nth } from '@test-utils';
 import BottomNav from '@/renderer/components/home/BottomNav.vue';
 
 const INACTIVE = {
@@ -48,7 +48,7 @@ describe('BottomNav', () => {
     ] as const)('clicking button %s emits %s', async (event, index) => {
         const wrapper = mountWithI18n(BottomNav, { props: INACTIVE });
 
-        await wrapper.findAll('.nav-item')[index].trigger('click');
+        await nth(wrapper.findAll('.nav-item'), index).trigger('click');
 
         expect(wrapper.emitted(event)).toHaveLength(1);
         wrapper.unmount();

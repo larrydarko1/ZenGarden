@@ -1,4 +1,5 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { shallowRef } from 'vue';
 import { useMeditationSession } from '@/renderer/composables/useMeditationSession';
 
 // Stub HTMLAudioElement
@@ -25,7 +26,8 @@ describe('useMeditationSession', () => {
     });
 
     function setup() {
-        return useMeditationSession();
+        // No element to focus outside a mounted template; the focus call opts out on null.
+        return useMeditationSession(shallowRef<HTMLInputElement | null>(null));
     }
 
     describe('initial state', () => {

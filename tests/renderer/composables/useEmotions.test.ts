@@ -1,6 +1,7 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ref } from 'vue';
 import { useEmotions } from '@/renderer/composables/useEmotions';
+import { nth } from '@test-utils';
 
 const mockSaveEmotionLog = vi.fn().mockResolvedValue({ message: 'ok', emotionLog: {} });
 const mockGetEmotionLogs = vi.fn().mockResolvedValue({ emotionLogs: [] });
@@ -41,32 +42,32 @@ describe('useEmotions', () => {
         it('provides positive emotions', () => {
             const { positiveEmotions } = setup();
             expect(positiveEmotions.value.length).toBeGreaterThan(0);
-            expect(positiveEmotions.value[0]).toMatchObject({ type: 'positive' });
+            expect(nth(positiveEmotions.value, 0)).toMatchObject({ type: 'positive' });
         });
 
         it('provides negative emotions', () => {
             const { negativeEmotions } = setup();
             expect(negativeEmotions.value.length).toBeGreaterThan(0);
-            expect(negativeEmotions.value[0]).toMatchObject({ type: 'negative' });
+            expect(nth(negativeEmotions.value, 0)).toMatchObject({ type: 'negative' });
         });
 
         it('translates emotion names via i18n key', () => {
             const { positiveEmotions } = setup();
-            expect(positiveEmotions.value[0].displayName).toContain('emotions.list.');
+            expect(nth(positiveEmotions.value, 0).displayName).toContain('emotions.list.');
         });
     });
 
     describe('toggleEmotion', () => {
         it('adds an emotion when toggled on', () => {
             const { toggleEmotion, selectedEmotions, positiveEmotions } = setup();
-            const joy = positiveEmotions.value[0];
+            const joy = nth(positiveEmotions.value, 0);
             toggleEmotion(joy);
             expect(selectedEmotions.value).toContainEqual(joy);
         });
 
         it('removes an emotion when toggled off', () => {
             const { toggleEmotion, selectedEmotions, positiveEmotions } = setup();
-            const joy = positiveEmotions.value[0];
+            const joy = nth(positiveEmotions.value, 0);
             toggleEmotion(joy);
             toggleEmotion(joy);
             expect(selectedEmotions.value).not.toContainEqual(joy);
@@ -74,7 +75,7 @@ describe('useEmotions', () => {
 
         it('calls saveEmotionLog after toggling', async () => {
             const { toggleEmotion, positiveEmotions } = setup();
-            toggleEmotion(positiveEmotions.value[0]);
+            toggleEmotion(nth(positiveEmotions.value, 0));
             await vi.waitFor(() => {
                 expect(mockSaveEmotionLog).toHaveBeenCalled();
             });
@@ -84,7 +85,7 @@ describe('useEmotions', () => {
     describe('isEmotionSelected', () => {
         it('returns true for selected emotions', () => {
             const { toggleEmotion, isEmotionSelected, positiveEmotions } = setup();
-            const joy = positiveEmotions.value[0];
+            const joy = nth(positiveEmotions.value, 0);
             toggleEmotion(joy);
             expect(isEmotionSelected(joy.name)).toBe(true);
         });
@@ -98,17 +99,17 @@ describe('useEmotions', () => {
     describe('computed counts', () => {
         it('counts positive and negative separately', () => {
             const { toggleEmotion, positiveCount, negativeCount, positiveEmotions, negativeEmotions } = setup();
-            toggleEmotion(positiveEmotions.value[0]);
-            toggleEmotion(negativeEmotions.value[0]);
+            toggleEmotion(nth(positiveEmotions.value, 0));
+            toggleEmotion(nth(negativeEmotions.value, 0));
             expect(positiveCount.value).toBe(1);
             expect(negativeCount.value).toBe(1);
         });
 
         it('calculates pnRatio correctly', () => {
             const { toggleEmotion, pnRatio, positiveEmotions, negativeEmotions } = setup();
-            toggleEmotion(positiveEmotions.value[0]);
-            toggleEmotion(positiveEmotions.value[1]);
-            toggleEmotion(negativeEmotions.value[0]);
+            toggleEmotion(nth(positiveEmotions.value, 0));
+            toggleEmotion(nth(positiveEmotions.value, 1));
+            toggleEmotion(nth(negativeEmotions.value, 0));
             // 2 positive out of 3 total = 0.67
             expect(pnRatio.value).toBe('0.67');
         });
@@ -137,7 +138,7 @@ describe('useEmotions', () => {
                 trends: [],
             };
             expect(topPositiveEmotions.value).toHaveLength(1);
-            expect(topPositiveEmotions.value[0].name).toBe('Joy');
+            expect(nth(topPositiveEmotions.value, 0).name).toBe('Joy');
         });
 
         it('filters top negative from analytics', () => {
@@ -157,7 +158,7 @@ describe('useEmotions', () => {
                 trends: [],
             };
             expect(topNegativeEmotions.value).toHaveLength(1);
-            expect(topNegativeEmotions.value[0].name).toBe('Sadness');
+            expect(nth(topNegativeEmotions.value, 0).name).toBe('Sadness');
         });
     });
 
@@ -199,7 +200,7 @@ describe('useEmotions', () => {
             mockGetEmotionLogs.mockResolvedValue({ emotionLogs: [] });
 
             const { loadEmotions, selectedEmotions, dailyNote, positiveEmotions, toggleEmotion } = setup();
-            toggleEmotion(positiveEmotions.value[0]);
+            toggleEmotion(nth(positiveEmotions.value, 0));
             await loadEmotions();
 
             expect(selectedEmotions.value).toHaveLength(0);
@@ -290,7 +291,7 @@ describe('useEmotions', () => {
         it('reloads analytics after save when activeTab is analytics', async () => {
             activeTab.value = 'analytics';
             const { toggleEmotion, positiveEmotions } = setup();
-            toggleEmotion(positiveEmotions.value[0]);
+            toggleEmotion(nth(positiveEmotions.value, 0));
 
             await vi.waitFor(() => {
                 expect(mockSaveEmotionLog).toHaveBeenCalled();

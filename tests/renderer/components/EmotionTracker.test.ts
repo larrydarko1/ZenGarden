@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ref, computed } from 'vue';
-import { mountWithI18n } from '@test-utils';
+import { mountWithI18n, nth } from '@test-utils';
 
 const selectedEmotions = ref<{ name: string }[]>([]);
 const dailyNote = ref('');
@@ -111,7 +111,7 @@ describe('EmotionTracker', () => {
             const wrapper = mountTracker();
             vi.clearAllMocks();
 
-            await wrapper.findAll('.inline-date-btn')[0].trigger('click');
+            await nth(wrapper.findAll('.inline-date-btn'), 0).trigger('click');
 
             expect(wrapper.find('.inline-date-text').text()).toBe('Mar 11, 2025');
             expect(mockLoadEmotions).toHaveBeenCalled();
@@ -122,17 +122,17 @@ describe('EmotionTracker', () => {
         it('disables the forward step on today, because the future is not trackable', () => {
             const wrapper = mountTracker();
 
-            expect(wrapper.findAll('.inline-date-btn')[1].attributes('disabled')).toBeDefined();
+            expect(nth(wrapper.findAll('.inline-date-btn'), 1).attributes('disabled')).toBeDefined();
             wrapper.unmount();
         });
 
         it('re-enables the forward step once the day is in the past, and walks back to today', async () => {
             const wrapper = mountTracker();
 
-            await wrapper.findAll('.inline-date-btn')[0].trigger('click');
-            expect(wrapper.findAll('.inline-date-btn')[1].attributes('disabled')).toBeUndefined();
+            await nth(wrapper.findAll('.inline-date-btn'), 0).trigger('click');
+            expect(nth(wrapper.findAll('.inline-date-btn'), 1).attributes('disabled')).toBeUndefined();
 
-            await wrapper.findAll('.inline-date-btn')[1].trigger('click');
+            await nth(wrapper.findAll('.inline-date-btn'), 1).trigger('click');
             expect(wrapper.find('.inline-date-text').text()).toBe('Mar 12, 2025');
             wrapper.unmount();
         });
@@ -140,7 +140,7 @@ describe('EmotionTracker', () => {
         it('refuses to step past today even when the button is invoked directly', async () => {
             const wrapper = mountTracker();
 
-            await wrapper.findAll('.inline-date-btn')[1].trigger('click');
+            await nth(wrapper.findAll('.inline-date-btn'), 1).trigger('click');
 
             expect(wrapper.find('.inline-date-text').text()).toBe('Mar 12, 2025');
             wrapper.unmount();
@@ -151,15 +151,15 @@ describe('EmotionTracker', () => {
         it('counts the emotions on each list in its own tab label', () => {
             const wrapper = mountTracker();
 
-            expect(tabs(wrapper)[0].text()).toContain('(2)');
-            expect(tabs(wrapper)[1].text()).toContain('(1)');
+            expect(nth(tabs(wrapper), 0).text()).toContain('(2)');
+            expect(nth(tabs(wrapper), 1).text()).toContain('(1)');
             wrapper.unmount();
         });
 
         it('opens on the positive list', () => {
             const wrapper = mountTracker();
 
-            expect(tabs(wrapper)[0].classes()).toContain('active');
+            expect(nth(tabs(wrapper), 0).classes()).toContain('active');
             expect(
                 wrapper.findAll('.inline-emotion-item').map((item) => item.find('.inline-emotion-name').text()),
             ).toEqual(['Calm', 'Glad']);
@@ -170,7 +170,7 @@ describe('EmotionTracker', () => {
             const wrapper = mountTracker();
             vi.clearAllMocks();
 
-            await tabs(wrapper)[1].trigger('click');
+            await nth(tabs(wrapper), 1).trigger('click');
 
             expect(
                 wrapper.findAll('.inline-emotion-item').map((item) => item.find('.inline-emotion-name').text()),
@@ -182,7 +182,7 @@ describe('EmotionTracker', () => {
         it('loads analytics the first time the analytics tab is opened', async () => {
             const wrapper = mountTracker();
 
-            await tabs(wrapper)[2].trigger('click');
+            await nth(tabs(wrapper), 2).trigger('click');
             await wrapper.vm.$nextTick();
 
             expect(mockLoadAnalytics).toHaveBeenCalled();
@@ -193,7 +193,7 @@ describe('EmotionTracker', () => {
             const wrapper = mountTracker();
             vi.clearAllMocks();
 
-            await tabs(wrapper)[3].trigger('click');
+            await nth(tabs(wrapper), 3).trigger('click');
             await wrapper.vm.$nextTick();
 
             expect(mockLoadPathData).toHaveBeenCalled();
@@ -203,7 +203,7 @@ describe('EmotionTracker', () => {
         it('shows the note field on the notes tab', async () => {
             const wrapper = mountTracker();
 
-            await tabs(wrapper)[4].trigger('click');
+            await nth(tabs(wrapper), 4).trigger('click');
 
             expect(wrapper.find('textarea').exists()).toBe(true);
             wrapper.unmount();
@@ -225,7 +225,7 @@ describe('EmotionTracker', () => {
         it('hands the whole emotion to the composable, not just its name', async () => {
             const wrapper = mountTracker();
 
-            await wrapper.findAll('.inline-emotion-item input')[0].trigger('change');
+            await nth(wrapper.findAll('.inline-emotion-item input'), 0).trigger('change');
 
             expect(mockToggleEmotion).toHaveBeenCalledWith(positiveEmotions.value[0]);
             wrapper.unmount();
@@ -246,7 +246,7 @@ describe('EmotionTracker', () => {
         async function openNoteBox(): Promise<ReturnType<typeof mountTracker>> {
             followedPaths.value = ['view'];
             const wrapper = mountTracker();
-            await tabs(wrapper)[3].trigger('click');
+            await nth(tabs(wrapper), 3).trigger('click');
             await wrapper.vm.$nextTick();
             return wrapper;
         }

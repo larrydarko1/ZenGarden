@@ -4,7 +4,7 @@ import SessionNotes from '@/renderer/components/SessionNotes.vue';
 import EmotionTracker from '@/renderer/components/EmotionTracker.vue';
 import ZenPhilosophy from '@/renderer/components/ZenPhilosophy.vue';
 import SettingsPopup from '@/renderer/components/SettingsPopup.vue';
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed, useTemplateRef } from 'vue';
 import ZenWindAnimation from '@/renderer/components/animations/ZenWindAnimation.vue';
 import ZenWavesAnimation from '@/renderer/components/animations/ZenWavesAnimation.vue';
 import ZenBreatheAnimation from '@/renderer/components/animations/ZenBreatheAnimation.vue';
@@ -36,19 +36,29 @@ const emit = defineEmits<{
     'language-change': [language: string];
 }>();
 
-const ANIMATIONS = [ZenWindAnimation, ZenWavesAnimation, ZenBreatheAnimation, ZenParticlesAnimation, ZenLavaAnimation];
+// `as const` makes this a tuple, so ANIMATIONS[0] is a Component rather than a
+// possibly-missing one — it is the fallback the cycling index falls back to.
+const ANIMATIONS = [
+    ZenWindAnimation,
+    ZenWavesAnimation,
+    ZenBreatheAnimation,
+    ZenParticlesAnimation,
+    ZenLavaAnimation,
+] as const;
 
 const i18n = useI18n();
 const { t } = i18n;
 
 // ── Meditation session ────────────────────────────────────────────────────────
+// The template owns the custom-duration input; the session composable only focuses it.
+const customInput = useTemplateRef<HTMLInputElement>('customInput');
+
 const {
     meditationActive,
     meditationSeconds,
     selectedDuration,
     isCustomDuration,
     customDurationValue,
-    customInput,
     bellEnabled,
     bellInterval,
     bellSound,
@@ -66,7 +76,10 @@ const {
     stopMeditation,
     cleanup: cleanupMeditation,
     formatTime,
-} = useMeditationSession();
+} = useMeditationSession(customInput);
+
+/** The animation for the running session. The index cycles within ANIMATIONS, so the fallback never shows. */
+const meditationAnimation = computed(() => ANIMATIONS[meditationAnimationIdx.value] ?? ANIMATIONS[0]);
 
 const desktopApp = ref(false);
 
@@ -103,7 +116,7 @@ function startMeditation(): void {
 }
 
 function pickPhrase(): string {
-    return phrases.value[Math.floor(Math.random() * phrases.value.length)];
+    return phrases.value[Math.floor(Math.random() * phrases.value.length)] ?? '';
 }
 
 function setRandomPhrase(): void {
@@ -536,7 +549,7 @@ onUnmounted(() => {
             </div>
             <MeditationOverlay
                 v-if="meditationActive"
-                :animation-component="ANIMATIONS[meditationAnimationIdx]"
+                :animation-component="meditationAnimation"
                 :bell-enabled="bellEnabled"
                 :bell-interval="bellInterval"
                 :bell-sound="bellSound"

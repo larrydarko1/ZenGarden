@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { mountWithI18n } from '@test-utils';
+import { mountWithI18n, nth } from '@test-utils';
 import MeditationCalendar from '@/renderer/components/MeditationCalendar.vue';
 
 const NOW = new Date(2025, 2, 12, 9, 0, 0);
@@ -42,7 +42,7 @@ describe('MeditationCalendar', () => {
         const cells = wrapper.findAll('.calendar-day');
         expect(cells).toHaveLength(6 + 31);
         expect(cells.slice(0, 6).every((cell) => cell.text() === '')).toBe(true);
-        expect(cells[6].text()).toBe('1');
+        expect(nth(cells, 6).text()).toBe('1');
         wrapper.unmount();
     });
 
@@ -95,25 +95,25 @@ describe('MeditationCalendar', () => {
             { date: iso(2025, 2, 20), duration: 30 },
         ]);
 
-        await wrapper
-            .findAll('.calendar-day')
-            .filter((cell) => cell.classes().includes('complete'))[0]
-            .trigger('click');
+        await nth(
+            wrapper.findAll('.calendar-day').filter((cell) => cell.classes().includes('complete')),
+            0,
+        ).trigger('click');
 
         const entries = wrapper.findAll('.meditation-entry');
         expect(entries).toHaveLength(1);
-        expect(entries[0].find('.meditation-duration').text()).toContain('12');
-        expect(entries[0].find('.meditation-notes').text()).toContain('quiet');
+        expect(nth(entries, 0).find('.meditation-duration').text()).toContain('12');
+        expect(nth(entries, 0).find('.meditation-notes').text()).toContain('quiet');
         wrapper.unmount();
     });
 
     it('omits the notes block for a session that was skipped', async () => {
         const wrapper = mountCalendar([{ date: iso(2025, 2, 5), duration: 12 }]);
 
-        await wrapper
-            .findAll('.calendar-day')
-            .filter((cell) => cell.classes().includes('complete'))[0]
-            .trigger('click');
+        await nth(
+            wrapper.findAll('.calendar-day').filter((cell) => cell.classes().includes('complete')),
+            0,
+        ).trigger('click');
 
         expect(wrapper.find('.meditation-notes').exists()).toBe(false);
         wrapper.unmount();
@@ -125,10 +125,10 @@ describe('MeditationCalendar', () => {
             { date: new Date(2025, 2, 5, 20).toISOString(), duration: 20 },
         ]);
 
-        await wrapper
-            .findAll('.calendar-day')
-            .filter((cell) => cell.classes().includes('complete'))[0]
-            .trigger('click');
+        await nth(
+            wrapper.findAll('.calendar-day').filter((cell) => cell.classes().includes('complete')),
+            0,
+        ).trigger('click');
 
         expect(wrapper.findAll('.meditation-entry')).toHaveLength(2);
         wrapper.unmount();
@@ -137,7 +137,9 @@ describe('MeditationCalendar', () => {
     it('steps between months and stops at the ends of the year', async () => {
         const wrapper = mountCalendar();
 
-        const [prev, next] = wrapper.findAll('.calendar-arrow');
+        const arrows = wrapper.findAll('.calendar-arrow');
+        const prev = nth(arrows, 0);
+        const next = nth(arrows, 1);
         await next.trigger('click');
         expect(wrapper.find('.calendar-title').text()).toBe('April 2025');
 
