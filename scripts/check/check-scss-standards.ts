@@ -30,7 +30,7 @@
  *      theme only, for whoever picked it. A token in the themes but not in
  *      `:root` has nothing to paint on the first frame. A `var()` in neither
  *      renders as nothing. This is the CSS analogue of the locale parity in
- *      check-i18n.mjs, and it is the reason that gate exists.
+ *      check-i18n.ts, and it is the reason that gate exists.
  *   4. SELF-HOSTED EVERYTHING. No CDN `@import url()`, no remote font. Zero
  *      third-party requests is a claim about what is ABSENT from the repo, which
  *      only a sweep can check — and in a local-first app it is a privacy
@@ -40,7 +40,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { REPO_ROOT as ROOT } from '../lib/repo-root.mjs';
+import { REPO_ROOT as ROOT } from '../lib/repo-root.ts';
 
 const STYLES = 'src/renderer/styles';
 const THEMES = `${STYLES}/_themes.scss`;
@@ -56,12 +56,19 @@ const REFERENCE_THEME = 'dark';
  */
 const COMPONENT_LOCAL_VARS = new Map([
     ['i', 'MonkAuth.vue — form field index, staggers the field-in animation delay'],
-    ['peak-opacity', 'ZenParticlesAnimation.vue — per-band peak opacity, so three keyframe tracks cover all 62 particles'],
+    [
+        'peak-opacity',
+        'ZenParticlesAnimation.vue — per-band peak opacity, so three keyframe tracks cover all 62 particles',
+    ],
 ]);
 
-const failures = [];
-const fail = (file, what, why) => failures.push({ file, what, why });
-const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
+type Failure = { file: string; what: string; why: string };
+
+const failures: Failure[] = [];
+const fail = (file: string, what: string, why: string): void => {
+    failures.push({ file, what, why });
+};
+const read = (rel: string): string => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 
 // ── 1. The barrel ────────────────────────────────────────────────────────────
 const index = read(INDEX);
@@ -79,19 +86,29 @@ for (const module of ['variables', 'mixins']) {
 }
 
 for (const [module, why] of [
-    ['themes', 'The palettes are CSS custom properties. Un-@used, every `var(--token)` in the app resolves to nothing.'],
-    ['base', '_base.scss carries the reset, element defaults and the reduced-motion override. Un-@used, none of it reaches the bundle.'],
-    ['components', 'components/ holds the classes shared across unrelated SFCs. Un-@used, every template that names one of them renders unstyled.'],
-]) {
+    [
+        'themes',
+        'The palettes are CSS custom properties. Un-@used, every `var(--token)` in the app resolves to nothing.',
+    ],
+    [
+        'base',
+        '_base.scss carries the reset, element defaults and the reduced-motion override. Un-@used, none of it reaches the bundle.',
+    ],
+    [
+        'components',
+        'components/ holds the classes shared across unrelated SFCs. Un-@used, every template that names one of them renders unstyled.',
+    ],
+] as const) {
     if (!new RegExp(`@use\\s+['"][^'"]*${module}['"]`).test(global)) {
         fail(GLOBAL, `does not \`@use\` ${module}`, why);
     }
 }
 
-const EMITTING_AT_RULES = /^\s*@(media|supports|keyframes|font-face|include|extend|at-root|container|layer|page|property|counter-style)\b/;
-const seenBarrelModules = new Set();
+const EMITTING_AT_RULES =
+    /^\s*@(media|supports|keyframes|font-face|include|extend|at-root|container|layer|page|property|counter-style)\b/;
+const seenBarrelModules = new Set<string>();
 
-const emitsCss = (rel) => {
+const emitsCss = (rel: string): boolean => {
     if (seenBarrelModules.has(rel)) return false;
     seenBarrelModules.add(rel);
 
@@ -99,7 +116,11 @@ const emitsCss = (rel) => {
     try {
         source = read(rel);
     } catch {
-        fail(INDEX, `forwards \`${rel}\`, which does not exist`, 'The barrel names a module Sass cannot resolve; every SFC fails to compile.');
+        fail(
+            INDEX,
+            `forwards \`${rel}\`, which does not exist`,
+            'The barrel names a module Sass cannot resolve; every SFC fails to compile.',
+        );
         return false;
     }
 
@@ -134,12 +155,16 @@ const emitsCss = (rel) => {
 
     // Follow the graph: a forwarded module's own forwards are equally reachable.
     for (const m of stripped.matchAll(/@(?:use|forward)\s+['"]([^'"]+)['"]/g)) {
-        const spec = m[1];
+        const spec = m[1] ?? '';
         if (spec.startsWith('sass:')) continue;
         const name = spec.replace('@/renderer/styles/', '').replace(/^\.\//, '');
         const dir = path.dirname(name) === '.' ? '' : `${path.dirname(name)}/`;
         const base = path.basename(name);
-        for (const candidate of [`${STYLES}/${dir}_${base}.scss`, `${STYLES}/${dir}${base}.scss`, `${STYLES}/${dir}${base}/_index.scss`]) {
+        for (const candidate of [
+            `${STYLES}/${dir}_${base}.scss`,
+            `${STYLES}/${dir}${base}.scss`,
+            `${STYLES}/${dir}${base}/_index.scss`,
+        ]) {
             if (fs.existsSync(path.join(ROOT, candidate))) {
                 emitsCss(candidate);
                 break;
@@ -186,7 +211,7 @@ for (const viteConfigPath of VITE_CONFIGS) {
             'It must inject the barrel, never global.scss: global.scss @uses the modules that emit, and injecting it ships every global rule once per SFC. The `as *` is what puts the tokens in the SFC’s own namespace.',
         );
     }
-    if (additionalData !== null && !/renderer.{1,4}styles/.test(additionalData[1])) {
+    if (additionalData !== null && !/renderer.{1,4}styles/.test(additionalData[1] ?? '')) {
         fail(
             viteConfigPath,
             'additionalData does not exempt the styles directory',
@@ -203,18 +228,18 @@ const variables = read(THEMES);
  * `:root` shares its block with the default theme, so one block can answer to
  * two names — which is the point: they cannot drift apart.
  */
-const paletteBlocks = new Map();
+const paletteBlocks = new Map<string, Set<string>>();
 for (const m of variables.matchAll(
     /^((?::root|#app\.[a-z0-9-]+)(?:,\s*\n(?::root|#app\.[a-z0-9-]+))*)\s*\{([\s\S]*?)\n\}/gim,
 )) {
-    const tokens = new Set([...m[2].matchAll(/^\s*--([a-z0-9-]+)\s*:/gim)].map((t) => t[1]));
+    const tokens = new Set([...(m[2] ?? '').matchAll(/^\s*--([a-z0-9-]+)\s*:/gim)].map((t) => t[1] ?? ''));
     if (tokens.size === 0) continue;
-    for (const selector of m[1].split(',').map((sel) => sel.trim())) {
+    for (const selector of (m[1] ?? '').split(',').map((sel) => sel.trim())) {
         paletteBlocks.set(selector === ':root' ? ':root' : selector.replace('#app.', ''), tokens);
     }
 }
 
-const rootTokens = paletteBlocks.get(':root') ?? new Set();
+const rootTokens = paletteBlocks.get(':root') ?? new Set<string>();
 if (!paletteBlocks.has(':root')) {
     fail(
         THEMES,
@@ -281,8 +306,8 @@ if (reference === undefined) {
 }
 
 // 3c. Every `var(--token)` resolves to something.
-const styleFiles = [];
-const collect = (dir) => {
+const styleFiles: string[] = [];
+const collect = (dir: string): void => {
     for (const entry of fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })) {
         const rel = `${dir}/${entry.name}`;
         if (entry.isDirectory()) collect(rel);
@@ -292,12 +317,12 @@ const collect = (dir) => {
 collect('src/renderer');
 
 const declaredTokens = new Set([...rootTokens, ...(reference ?? []), ...COMPONENT_LOCAL_VARS.keys()]);
-const unresolved = new Map();
+const unresolved = new Map<string, string>();
 
 for (const rel of styleFiles) {
     const source = read(rel);
-    for (const m of source.matchAll(/var\(\s*--([a-z0-9-]+)/gi)) {
-        if (!declaredTokens.has(m[1]) && !unresolved.has(m[1])) unresolved.set(m[1], rel);
+    for (const [, token = ''] of source.matchAll(/var\(\s*--([a-z0-9-]+)/gi)) {
+        if (!declaredTokens.has(token) && !unresolved.has(token)) unresolved.set(token, rel);
     }
 }
 

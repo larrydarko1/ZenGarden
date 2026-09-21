@@ -38,8 +38,8 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { REPO_ROOT as ROOT } from '../lib/repo-root.mjs';
-import { stripComments } from '../lib/strip-comments.mjs';
+import { REPO_ROOT as ROOT } from '../lib/repo-root.ts';
+import { stripComments } from '../lib/strip-comments.ts';
 
 const SOURCE_ROOT = 'src';
 const LINE_CAP = 400;
@@ -49,7 +49,7 @@ const LINE_CAP = 400;
  * A file may shrink freely; growing past its entry, or a new file crossing the
  * cap, fails. Lower a number when you refactor.
  */
-const LENGTH_BASELINE = {
+const LENGTH_BASELINE: Record<string, number> = {
     'src/renderer/components/Home.vue': 1246,
     'src/renderer/components/home/MeditationOverlay.vue': 696,
     'src/renderer/components/EmotionTracker.vue': 557,
@@ -63,11 +63,15 @@ const DECLARATION = /\.d\.ts$/;
 const PASCAL_CASE = /^[A-Z][A-Za-z0-9]*$/;
 const CAMEL_CASE = /^[a-z][A-Za-z0-9]*$/;
 
-const failures = [];
-const fail = (file, what, why) => failures.push({ file, what, why });
+type Failure = { file: string; what: string; why: string };
+
+const failures: Failure[] = [];
+const fail = (file: string, what: string, why: string): void => {
+    failures.push({ file, what, why });
+};
 
 /** Every tracked source file under src/, as repo-relative POSIX paths. */
-function walk(dir, out = []) {
+function walk(dir: string, out: string[] = []): string[] {
     for (const entry of fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })) {
         const rel = `${dir}/${entry.name}`;
         if (entry.isDirectory()) walk(rel, out);
@@ -144,7 +148,7 @@ for (const rel of files) {
             if (lateExport !== undefined) {
                 fail(
                     rel,
-                    `exported \`${lateExport.name}()\` is declared after the private \`${declarations[firstPrivate].name}()\``,
+                    `exported \`${lateExport.name}()\` is declared after the private \`${declarations[firstPrivate]?.name ?? ''}()\``,
                     'Public API first, machinery below, so a reader meets what the module offers before how it works.',
                 );
             }
@@ -211,7 +215,7 @@ for (const rel of files) {
         if (styleStart !== -1) {
             const style = source.slice(styleStart);
             for (const m of style.matchAll(/^[ \t]*\/\*(?!\s*–)([^*]*)\*\//gm)) {
-                const text = m[1].trim();
+                const text = (m[1] ?? '').trim();
                 if (text === '' || /^stylelint-/.test(text)) continue;
                 fail(
                     rel,
