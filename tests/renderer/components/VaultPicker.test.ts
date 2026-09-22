@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mountWithI18n } from '@test-utils';
+
 import VaultPicker from '@/renderer/components/VaultPicker.vue';
+import { mountWithI18n } from '@test-utils';
 
 const mockCanChooseVault = vi.fn();
 const mockChooseVault = vi.fn();

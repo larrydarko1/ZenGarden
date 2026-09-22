@@ -1,4 +1,5 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+
 import { ElectronStorageAdapter } from '@/renderer/store/adapters/electron';
 import type { IpcResult } from '@/schemas/storage';
 

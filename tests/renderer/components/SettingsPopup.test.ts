@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mountWithI18n, nth } from '@test-utils';
+
 import SettingsPopup from '@/renderer/components/SettingsPopup.vue';
+import { mountWithI18n, nth } from '@test-utils';
 
 vi.mock('@/renderer/utils/logger', () => ({
     log: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },

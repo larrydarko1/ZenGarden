@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { mountWithI18n } from '@test-utils';
+
 import ZenSpinner from '@/renderer/components/common/ZenSpinner.vue';
+import { mountWithI18n } from '@test-utils';
 
 describe('ZenSpinner', () => {
     it('defaults to the arc variant the auth screen uses', () => {

@@ -7,6 +7,7 @@
  */
 
 import { Preferences } from '@capacitor/preferences';
+
 import {
     DB_FILES,
     VAULT_DIR,
@@ -17,7 +18,6 @@ import {
     generateObjectId,
     initializeStorage,
 } from '@/renderer/store/adapters/capacitor/db';
-import { SettingsSchema } from '@/schemas/storage';
 import type {
     IStorageAdapter,
     Settings,
@@ -33,6 +33,7 @@ import type {
     EmotionStat,
     DateRangeQuery,
 } from '@/renderer/store/types';
+import { SettingsSchema } from '@/schemas/storage';
 
 export class CapacitorStorageAdapter implements IStorageAdapter {
     private initialized = false;

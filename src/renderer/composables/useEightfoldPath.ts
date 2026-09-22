@@ -5,6 +5,7 @@
  */
 import { ref, computed, type ComputedRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 import { saveEightfoldPathLog, getEightfoldPathLogs } from '@/renderer/store';
 import { log } from '@/renderer/utils/logger';
 

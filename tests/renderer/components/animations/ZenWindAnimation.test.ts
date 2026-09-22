@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { mountWithI18n } from '@test-utils';
+
 import ZenWindAnimation from '@/renderer/components/animations/ZenWindAnimation.vue';
+import { mountWithI18n } from '@test-utils';
 
 describe('ZenWindAnimation', () => {
     it('renders as the root svg itself, with no wrapper element', () => {

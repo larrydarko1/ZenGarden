@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { mountWithI18n, nth } from '@test-utils';
+
 import BottomNav from '@/renderer/components/home/BottomNav.vue';
+import { mountWithI18n, nth } from '@test-utils';
 
 const INACTIVE = {
     journalMode: false,

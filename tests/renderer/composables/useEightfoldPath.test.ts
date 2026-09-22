@@ -2,6 +2,7 @@
 
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ref, nextTick } from 'vue';
+
 import { useEightfoldPath } from '@/renderer/composables/useEightfoldPath';
 
 vi.mock('vue-i18n', () => ({

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ref } from 'vue';
+
 import { mountWithI18n, nth } from '@test-utils';
 
 const mockGetMeditations = vi.fn();

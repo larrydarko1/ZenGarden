@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 import { vaultIsPickable, chooseVault, findVaultPath } from '@/renderer/store';
 import { log } from '@/renderer/utils/logger';
 

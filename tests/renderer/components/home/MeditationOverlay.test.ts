@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { defineComponent } from 'vue';
-import { mountWithI18n, nth } from '@test-utils';
+
 import MeditationOverlay from '@/renderer/components/home/MeditationOverlay.vue';
+import { mountWithI18n, nth } from '@test-utils';
 
 const AnimationStub = defineComponent({ name: 'AnimationStub', template: '<div class="animation-stub" />' });
 

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mountWithI18n } from '@test-utils';
+
 import { i18n } from '@/renderer/i18n';
+import { mountWithI18n } from '@test-utils';
 
 const mockUpdateTheme = vi.fn().mockResolvedValue({ message: 'ok', theme: 'light' });
 const mockUpdateLanguage = vi.fn().mockResolvedValue({ message: 'ok', language: 'fr' });

@@ -1,4 +1,5 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+
 import { CapacitorStorageAdapter } from '@/renderer/store/adapters/capacitor';
 import { DB_FILES } from '@/renderer/store/adapters/capacitor/db';
 import { nth } from '@test-utils';

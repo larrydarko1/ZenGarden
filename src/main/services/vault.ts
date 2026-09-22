@@ -9,13 +9,15 @@
  * putting it in a synced directory is all "sync" means here.
  */
 
-import { BrowserWindow, app, dialog } from 'electron';
 import fs from 'fs';
 import path from 'path';
-import { type IpcResult, type Settings, LanguageArgSchema, SettingsSchema, ThemeArgSchema } from '@/schemas/storage';
+
+import { BrowserWindow, app, dialog } from 'electron';
 import type { IpcMain, OpenDialogOptions } from 'electron';
+
 import { readJsonFile, writeJsonFile } from '@/main/lib/jsonFile';
 import { log } from '@/main/lib/logger';
+import { type IpcResult, type Settings, LanguageArgSchema, SettingsSchema, ThemeArgSchema } from '@/schemas/storage';
 
 /**
  * The one thing the app keeps outside the vault: which folder to reopen. It

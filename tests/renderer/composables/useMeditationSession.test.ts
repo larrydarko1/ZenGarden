@@ -1,5 +1,6 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { shallowRef } from 'vue';
+
 import { useMeditationSession } from '@/renderer/composables/useMeditationSession';
 
 class MockAudio {

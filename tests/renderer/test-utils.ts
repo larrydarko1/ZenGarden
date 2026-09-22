@@ -1,4 +1,5 @@
 import { mount, type VueWrapper, type ComponentMountingOptions } from '@vue/test-utils';
+
 import { i18n } from '@/renderer/i18n';
 
 /**

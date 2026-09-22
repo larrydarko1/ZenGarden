@@ -1,4 +1,5 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+
 import { register as registerDataHandlers } from '@/main/services/data';
 import type { IpcResult } from '@/schemas/storage';
 

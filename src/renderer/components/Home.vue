@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import MeditationCalendar from '@/renderer/components/MeditationCalendar.vue';
-import SessionNotes from '@/renderer/components/SessionNotes.vue';
-import EmotionTracker from '@/renderer/components/EmotionTracker.vue';
-import ZenPhilosophy from '@/renderer/components/ZenPhilosophy.vue';
-import SettingsPopup from '@/renderer/components/SettingsPopup.vue';
 import { ref, onMounted, onUnmounted, watch, computed, useTemplateRef } from 'vue';
-import ZenWindAnimation from '@/renderer/components/animations/ZenWindAnimation.vue';
-import ZenWavesAnimation from '@/renderer/components/animations/ZenWavesAnimation.vue';
+import { useI18n } from 'vue-i18n';
+
 import ZenBreatheAnimation from '@/renderer/components/animations/ZenBreatheAnimation.vue';
-import ZenParticlesAnimation from '@/renderer/components/animations/ZenParticlesAnimation.vue';
 import ZenLavaAnimation from '@/renderer/components/animations/ZenLavaAnimation.vue';
-import VaultPicker from '@/renderer/components/VaultPicker.vue';
+import ZenParticlesAnimation from '@/renderer/components/animations/ZenParticlesAnimation.vue';
+import ZenWavesAnimation from '@/renderer/components/animations/ZenWavesAnimation.vue';
+import ZenWindAnimation from '@/renderer/components/animations/ZenWindAnimation.vue';
+import EmotionTracker from '@/renderer/components/EmotionTracker.vue';
 import BottomNav from '@/renderer/components/home/BottomNav.vue';
 import MeditationOverlay from '@/renderer/components/home/MeditationOverlay.vue';
+import MeditationCalendar from '@/renderer/components/MeditationCalendar.vue';
+import SessionNotes from '@/renderer/components/SessionNotes.vue';
+import SettingsPopup from '@/renderer/components/SettingsPopup.vue';
+import VaultPicker from '@/renderer/components/VaultPicker.vue';
+import ZenPhilosophy from '@/renderer/components/ZenPhilosophy.vue';
+import { useMeditationSession } from '@/renderer/composables/useMeditationSession';
 import {
     getMeditations,
     createMeditation,
@@ -21,10 +24,8 @@ import {
     closeVault,
     vaultIsPickable,
 } from '@/renderer/store';
-import { useI18n } from 'vue-i18n';
-import { isDesktop } from '@/renderer/utils/platform';
-import { useMeditationSession } from '@/renderer/composables/useMeditationSession';
 import { log } from '@/renderer/utils/logger';
+import { isDesktop } from '@/renderer/utils/platform';
 
 defineProps<{ theme: 'light' | 'dark' }>();
 

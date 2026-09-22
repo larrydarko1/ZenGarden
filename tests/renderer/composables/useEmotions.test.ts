@@ -1,5 +1,6 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ref } from 'vue';
+
 import { useEmotions } from '@/renderer/composables/useEmotions';
 import { nth } from '@test-utils';
 

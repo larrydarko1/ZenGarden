@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+
 import { isDesktop } from '@/renderer/utils/platform';
 
 const win = window as unknown as Record<string, unknown>;

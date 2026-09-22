@@ -11,9 +11,8 @@
  */
 
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
-import { log } from '@/renderer/utils/logger';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+import { log } from '@/renderer/utils/logger';
 
 export const DB_FILES = {
     meditations: 'meditations.json',
@@ -26,8 +25,6 @@ export const DB_FILES = {
 export const VAULT_DIR = 'ZenGarden';
 
 const STORAGE_DIR = Directory.Documents;
-
-// ─── Collection I/O ───────────────────────────────────────────────────────────
 
 export async function readCollection<T>(filename: string): Promise<T[]> {
     const parsed = await readJson(filename);
@@ -48,15 +45,11 @@ export async function writeObject(filename: string, data: unknown): Promise<void
     await writeJson(filename, data);
 }
 
-// ─── Utilities ────────────────────────────────────────────────────────────────
-
 export function generateObjectId(): string {
     const timestamp = Math.floor(Date.now() / 1000).toString(16);
     const random = Math.random().toString(16).substring(2, 18);
     return timestamp + random.padEnd(16, '0');
 }
-
-// ─── Initialization ───────────────────────────────────────────────────────────
 
 /**
  * Creates the vault folder. Nothing is seeded into it: a missing file reads as

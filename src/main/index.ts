@@ -6,13 +6,15 @@
  *   vault-service → vault:findPath, vault:choose, vault:close, settings:get, settings:updateTheme, settings:updateLanguage
  *   data-service → storage:createMeditation, storage:getMeditations, storage:saveEmotionLog, storage:getEmotionLogs, storage:getEmotionAnalytics, storage:saveEightfoldPathLog, storage:getEightfoldPathLogs
  */
-import { BrowserWindow, ipcMain, screen, app, session, shell } from 'electron';
 import path from 'path';
 import { pathToFileURL } from 'url';
+
+import { BrowserWindow, ipcMain, screen, app, session, shell } from 'electron';
+
+import { config } from '@/main/lib/config';
+import { log } from '@/main/lib/logger';
 import * as dataService from '@/main/services/data';
 import * as vaultService from '@/main/services/vault';
-import { log } from '@/main/lib/logger';
-import { config } from '@/main/lib/config';
 
 let mainWindow: BrowserWindow | null = null;
 

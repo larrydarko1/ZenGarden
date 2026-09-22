@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 import Home from '@/renderer/components/Home.vue';
 import { updateTheme, updateLanguage } from '@/renderer/store';
-import { isDesktop } from '@/renderer/utils/platform';
 import { log } from '@/renderer/utils/logger';
+import { isDesktop } from '@/renderer/utils/platform';
 
 const { locale } = useI18n();
 

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { mountWithI18n } from '@test-utils';
+
 import SessionNotes from '@/renderer/components/SessionNotes.vue';
+import { mountWithI18n } from '@test-utils';
 
 const mountNotes = () => mountWithI18n(SessionNotes, { props: { duration: 600 } });
 

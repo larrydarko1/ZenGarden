@@ -7,8 +7,8 @@
  * Documents arrive as RawDoc because that is what the JSON files hold — the
  * casts below are reads of fields these collections have always written.
  */
-import type { EmotionAnalytics, EmotionStat } from '@/schemas/storage';
 import type { RawDoc } from '@/main/services/db';
+import type { EmotionAnalytics, EmotionStat } from '@/schemas/storage';
 
 /** True when a path entry carries a non-blank note, which is what counts as "followed". */
 export function isPathFollowed(note: string | undefined): boolean {

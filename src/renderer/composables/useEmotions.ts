@@ -5,6 +5,7 @@
  */
 import { ref, computed, type ComputedRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 import { saveEmotionLog, getEmotionLogs, getEmotionAnalytics } from '@/renderer/store';
 import type { EmotionAnalytics, EmotionStat } from '@/renderer/store/types';
 import { log } from '@/renderer/utils/logger';

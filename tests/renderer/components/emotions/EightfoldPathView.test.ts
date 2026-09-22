@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { mountWithI18n, nth } from '@test-utils';
+
 import EightfoldPathView from '@/renderer/components/emotions/EightfoldPathView.vue';
+import { mountWithI18n, nth } from '@test-utils';
 
 const paths = ['view', 'intention', 'speech', 'action', 'livelihood', 'effort', 'mindfulness', 'concentration'].map(
     (key) => ({

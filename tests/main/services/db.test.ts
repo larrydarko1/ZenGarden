@@ -1,6 +1,7 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { generateId, readCollection, writeCollection } from '@/main/services/db';
+
 import { readJsonFile, writeJsonFile } from '@/main/lib/jsonFile';
+import { generateId, readCollection, writeCollection } from '@/main/services/db';
 
 vi.mock('@/main/services/vault', () => ({
     getVaultRoot: (): string => '/vault',

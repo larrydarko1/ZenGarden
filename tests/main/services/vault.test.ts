@@ -1,5 +1,6 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
 import type { IpcMain } from 'electron';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+
 import { readJsonFile, writeJsonFile } from '@/main/lib/jsonFile';
 
 type Handler = (event: unknown, ...args: unknown[]) => unknown;

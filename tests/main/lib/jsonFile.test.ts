@@ -1,5 +1,7 @@
 import fs from 'fs';
+
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+
 import { readJsonFile, writeJsonFile } from '@/main/lib/jsonFile';
 
 const state = vi.hoisted(() => ({

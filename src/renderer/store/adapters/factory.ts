@@ -4,9 +4,9 @@
  * Does NOT own: adapter implementations (electron.ts, capacitor.ts), types (types.ts).
  */
 
-import type { IStorageAdapter } from '@/renderer/store/types';
-import { ElectronStorageAdapter } from '@/renderer/store/adapters/electron';
 import { CapacitorStorageAdapter } from '@/renderer/store/adapters/capacitor';
+import { ElectronStorageAdapter } from '@/renderer/store/adapters/electron';
+import type { IStorageAdapter } from '@/renderer/store/types';
 
 let instance: IStorageAdapter | null = null;
 

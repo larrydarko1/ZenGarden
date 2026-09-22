@@ -5,6 +5,7 @@
  */
 
 import { contextBridge, ipcRenderer } from 'electron';
+
 import type { ElectronAPI } from '@/schemas/electron';
 
 // Annotated, not inferred: the annotation is what makes a renamed or

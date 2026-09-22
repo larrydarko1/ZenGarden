@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useEmotions } from '@/renderer/composables/useEmotions';
-import { useEightfoldPath } from '@/renderer/composables/useEightfoldPath';
-import EmotionAnalytics from '@/renderer/components/emotions/EmotionAnalytics.vue';
-import EightfoldPathView from '@/renderer/components/emotions/EightfoldPathView.vue';
+
 import DailyNotes from '@/renderer/components/emotions/DailyNotes.vue';
+import EightfoldPathView from '@/renderer/components/emotions/EightfoldPathView.vue';
+import EmotionAnalytics from '@/renderer/components/emotions/EmotionAnalytics.vue';
+import { useEightfoldPath } from '@/renderer/composables/useEightfoldPath';
+import { useEmotions } from '@/renderer/composables/useEmotions';
 
 const emit = defineEmits<{ close: [] }>();
 

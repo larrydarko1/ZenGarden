@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { mountWithI18n } from '@test-utils';
+
 import ZenPhilosophy from '@/renderer/components/ZenPhilosophy.vue';
+import { mountWithI18n } from '@test-utils';
 
 describe('ZenPhilosophy', () => {
     it('renders one section per principle', () => {

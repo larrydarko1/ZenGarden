@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { mountWithI18n } from '@test-utils';
+
 import DailyNotes from '@/renderer/components/emotions/DailyNotes.vue';
+import { mountWithI18n } from '@test-utils';
 
 const formatDate = vi.fn((date: Date | string) => `formatted:${String(date)}`);
 const selectedDate = new Date('2025-01-15T00:00:00');

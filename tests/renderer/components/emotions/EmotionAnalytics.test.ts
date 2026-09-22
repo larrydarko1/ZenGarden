@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { mountWithI18n, nth } from '@test-utils';
+
 import EmotionAnalytics from '@/renderer/components/emotions/EmotionAnalytics.vue';
+import { mountWithI18n, nth } from '@test-utils';
 
 const getTranslatedEmotionName = vi.fn((name: string) => `T(${name})`);
 const formatDate = vi.fn((date: Date | string) => `d:${String(date)}`);

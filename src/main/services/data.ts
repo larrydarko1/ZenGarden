@@ -7,6 +7,9 @@
  * the app at a different folder is what a different journal means.
  */
 import type { IpcMain } from 'electron';
+
+import { buildEmotionAnalytics, isPathFollowed } from '@/main/services/analytics';
+import { type RawDoc, generateId, readCollection, writeCollection } from '@/main/services/db';
 import {
     type DateRangeQuery,
     type EightfoldPathLog,
@@ -20,8 +23,6 @@ import {
     EmotionLogInputSchema,
     MeditationInputSchema,
 } from '@/schemas/storage';
-import { type RawDoc, generateId, readCollection, writeCollection } from '@/main/services/db';
-import { buildEmotionAnalytics, isPathFollowed } from '@/main/services/analytics';
 
 export function register(ipc: IpcMain): void {
     ipc.handle(

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { mountWithI18n, nth } from '@test-utils';
+
 import MeditationCalendar from '@/renderer/components/MeditationCalendar.vue';
+import { mountWithI18n, nth } from '@test-utils';
 
 type CalendarEntry = { date: string; duration?: number; notes?: string };
 

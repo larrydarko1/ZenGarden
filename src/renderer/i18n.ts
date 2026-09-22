@@ -1,13 +1,14 @@
 /** i18n — vue-i18n instance with 8 locale bundles, English as default/fallback. */
 import { createI18n } from 'vue-i18n';
+
+import de from './locales/de.json';
 import en from './locales/en.json';
 import es from './locales/es.json';
-import it from './locales/it.json';
 import fr from './locales/fr.json';
-import de from './locales/de.json';
+import it from './locales/it.json';
+import ja from './locales/ja.json';
 import pt from './locales/pt.json';
 import zh from './locales/zh.json';
-import ja from './locales/ja.json';
 
 export const i18n = createI18n({
     legacy: false,

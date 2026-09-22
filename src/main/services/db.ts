@@ -8,7 +8,9 @@
  */
 
 import path from 'path';
+
 import { z } from 'zod';
+
 import { readJsonFile, writeJsonFile } from '@/main/lib/jsonFile';
 import { getVaultRoot } from '@/main/services/vault';
 
