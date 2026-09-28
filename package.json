@@ -43,7 +43,6 @@
         "cap:run:android": "JAVA_HOME=/Applications/Android\\ Studio.app/Contents/jbr/Contents/Home ANDROID_HOME=$HOME/Library/Android/sdk npm run build:mobile && JAVA_HOME=/Applications/Android\\ Studio.app/Contents/jbr/Contents/Home ANDROID_HOME=$HOME/Library/Android/sdk npx cap run android",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
-        "lint:dup": "jscpd src --config .jscpd.json --reporters console",
         "format": "prettier --write \"src/**/*.{ts,vue,scss,json}\"",
         "format:check": "prettier --check \"src/**/*.{ts,vue,scss,json}\"",
         "audit:check": "node scripts/check/check-audit.ts",
