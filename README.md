@@ -194,7 +194,9 @@ npm run format
 Tests live in the `tests/` directory and mirror the `src/` structure.
 
 Beyond the standard lint/format/test steps, the repo enforces its own conventions through a set of
-check scripts under [scripts/check/](scripts/check/). `npm run ci:check` runs the whole gate locally —
+check scripts under [scripts/check/](scripts/check/), each a thin wrapper over a gate from
+[@larrydarko/lint-config](https://www.npmjs.com/package/@larrydarko/lint-config) that holds only this
+repo's answers. `npm run ci:check` runs the whole gate locally —
 the same list, in the same order, that [CI](.github/workflows/ci.yml) runs on every push and pull request:
 
 | Script            | Enforces                                                                        |
@@ -206,13 +208,14 @@ the same list, in the same order, that [CI](.github/workflows/ci.yml) runs on ev
 | `declorder:check` | Declaration order within modules                                                |
 | `html:check`      | Template/HTML standards                                                         |
 | `scss:check`      | SCSS structure, token usage, and nesting depth                                  |
-| `refactor:check`  | Module size and complexity ceilings                                             |
+| `refactor:check`  | No deferral markers (`TODO`, `FIXME`, …) left in code; they belong in `todo.md` |
 | `ipc:check`       | Every IPC channel is declared, typed, and validated on both ends                |
 | `security:check`  | Electron process model, navigation containment, permission handlers, HTML sinks |
 | `error:check`     | Error-handling conventions                                                      |
 | `dup:check`       | Copy-paste duplication ([jscpd](https://github.com/kucherenko/jscpd))           |
 | `dead:check`      | Unused files, exports, and dependencies ([knip](https://knip.dev))              |
 | `i18n:check`      | Every user-facing string is translated across all 8 locales                     |
+| `tsconfig:check`  | Compiler flags stay at the standard; no Node types in the renderer              |
 | `test:check`      | Test-suite structure and coverage conventions                                   |
 
 ### Building Desktop Apps
@@ -302,7 +305,7 @@ To share the app with others:
 - **Storage:** Vault folder of plain JSON files, written atomically
 - **Security:** Sandboxed renderer + context-isolated preload bridge, Zod-validated IPC arguments
 - **Testing:** [Vitest](https://vitest.dev) + jsdom (467 tests across 36 test files, 80% coverage enforced)
-- **Code Quality:** [ESLint](https://eslint.org) flat config (modular, under [eslint/](eslint/)), [Prettier](https://prettier.io), [Stylelint](https://stylelint.io), husky + lint-staged + commitlint
+- **Code Quality:** [@larrydarko/lint-config](https://www.npmjs.com/package/@larrydarko/lint-config) — one shared package that bundles [ESLint](https://eslint.org) (flat config), [Prettier](https://prettier.io), [Stylelint](https://stylelint.io), knip, jscpd, husky + lint-staged + commitlint, and the CI gates
 - **Build Tools:** [electron-vite](https://electron-vite.org) + Electron Builder + Capacitor CLI
 - **CI:** GitHub Actions — 16 convention checks → type-check → build → tests at 80% coverage
 
@@ -352,8 +355,7 @@ src/
     │   ├── platform.ts          → Runtime platform detection
     │   └── logger.ts            → Renderer-side logging
     └── locales/                 → 8 language bundles (en, es, it, fr, de, pt, zh, ja)
-eslint/                          → Modular ESLint flat-config fragments
-scripts/check/                   → Repo convention checks run by `npm run ci:check`
+scripts/check/                   → Repo convention checks run by `npm run ci:check` (wrappers over the shared gates)
 tests/                           → Mirrors src/ — 36 test files, 454 tests
 ```
 
