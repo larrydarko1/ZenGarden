@@ -69,8 +69,6 @@ onMounted(async () => {
 </template>
 
 <style scoped lang="scss">
-@use '@/renderer/styles/variables' as *;
-
 .vault-picker {
     display: flex;
     align-items: center;
