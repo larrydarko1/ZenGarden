@@ -27,18 +27,6 @@ import {
 
 const SOURCE = ['src/**/*.{ts,vue}', 'scripts/**/*.ts'];
 
-// A bare name in `patterns` matches that segment at any depth, so the shared `electron` entry
-// also bans `@/schemas/electron` and the store's electron adapter. Bare names move to `paths`,
-// which match the module exactly, keeping each group's message; the globbed entries stay.
-const isBareName = (group) => !group.includes('*');
-const rendererPatterns = rendererBannedImports.patterns.map((pattern) => ({
-    ...pattern,
-    group: pattern.group.filter((group) => !isBareName(group)),
-}));
-const rendererPaths = rendererBannedImports.patterns.flatMap((pattern) =>
-    pattern.group.filter(isBareName).map((name) => ({ name, message: pattern.message })),
-);
-
 export default larry({
     preset: 'electron',
     rootDir: import.meta.dirname,
@@ -197,9 +185,9 @@ export default larry({
                 'no-restricted-imports': [
                     'error',
                     {
-                        paths: [...bannedCryptoModules, ...rendererPaths],
+                        paths: bannedCryptoModules,
                         patterns: [
-                            ...rendererPatterns,
+                            ...rendererBannedImports.patterns,
                             ...noStoreLibraryPatterns,
                             ...aliasOnlyImportPatterns,
                         ],
@@ -213,9 +201,9 @@ export default larry({
                 'no-restricted-imports': [
                     'error',
                     {
-                        paths: [...bannedCryptoModules, ...rendererPaths],
+                        paths: bannedCryptoModules,
                         patterns: [
-                            ...rendererPatterns,
+                            ...rendererBannedImports.patterns,
                             ...noStoreLibraryPatterns,
                             ...aliasOnlyImportPatterns,
                             ...utilsBannedImportPatterns,
