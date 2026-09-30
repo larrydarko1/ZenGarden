@@ -7,12 +7,12 @@
  *
  * What stays here is this repo's answers.
  *
- * THE THREE FILE ROLES. `index.scss` is the BARREL: it `@forward`s variables and
- * mixins and nothing else. It is also the INJECTED module — both Vite configs
- * prepend `@use '@/renderer/styles' as *` to every SFC style block, and each block
- * is its own Sass compilation, so anything reachable from the barrel that emits a
- * rule ships once per component. `global.scss` is the ENTRY: it `@use`s the modules
- * that do emit, and main.ts imports it exactly once.
+ * THE TWO FILE ROLES. `index.scss` is the ENTRY: it `@use`s the modules that
+ * emit, and main.ts imports it exactly once. `_variables.scss` is the INJECTED
+ * module — both Vite configs prepend it to every SFC style block, and each block
+ * is its own Sass compilation, so anything reachable from it that emits a rule
+ * ships once per component. The mixins live in it too, for that reason: a mixin
+ * emits nothing until it is included. The gate fixes both names.
  *
  * `viteConfigs` names two files because there are two builds of the same SFCs:
  * electron-vite for the desktop app and plain Vite for the Capacitor Android app.
@@ -31,13 +31,9 @@ import { checkScssStandards } from '@larrydarko/lint-config/gates/scss-standards
 checkScssStandards({
     styles: 'src/renderer/styles',
     src: 'src/renderer',
-    barrel: 'index.scss',
-    entry: 'global.scss',
-    injected: 'index.scss',
     mainScript: 'src/renderer/main.ts',
     viteConfigs: ['electron.vite.config.ts', 'vite.config.ts'],
-    injectedSpecifier: '@/renderer/styles',
-    forwarded: ['variables', 'mixins'],
+    injectedSpecifier: '@/renderer/styles/variables',
     emitters: [
         {
             module: 'themes',
