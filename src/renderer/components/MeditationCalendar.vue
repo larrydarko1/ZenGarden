@@ -2,6 +2,9 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import IconChevronLeft from '@/renderer/components/icons/IconChevronLeft.vue';
+import IconChevronRight from '@/renderer/components/icons/IconChevronRight.vue';
+
 type Meditation = {
     date: string;
     username?: string;
@@ -18,11 +21,9 @@ const { t } = i18n;
 const today = new Date();
 const year = today.getFullYear();
 
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-const weekdays = computed<string[]>(() => i18n.tm('calendar.weekdays') as string[]);
+const weekdays = computed<string[]>(() => i18n.tm('calendar.weekdays'));
 
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-const monthNames = computed<string[]>(() => i18n.tm('calendar.months') as string[]);
+const monthNames = computed<string[]>(() => i18n.tm('calendar.months'));
 const visibleMonth = ref(today.getMonth());
 const selectedDay = ref<Date | null>(null);
 
@@ -100,18 +101,9 @@ function selectDay(day: CalendarDay): void {
                 :disabled="visibleMonth === 0"
                 aria-label="Previous month"
                 @click="prevMonth">
-                <svg
+                <IconChevronLeft
                     width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none">
-                    <path
-                        d="M15 18l-6-6 6-6"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
+                    height="14" />
             </button>
             <span class="calendar-title">{{ monthNames[visibleMonth] }} {{ year }}</span>
             <button
@@ -119,18 +111,9 @@ function selectDay(day: CalendarDay): void {
                 :disabled="visibleMonth === 11"
                 aria-label="Next month"
                 @click="nextMonth">
-                <svg
+                <IconChevronRight
                     width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none">
-                    <path
-                        d="M9 18l6-6-6-6"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
+                    height="14" />
             </button>
         </div>
 

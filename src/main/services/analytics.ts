@@ -4,11 +4,8 @@
  * read, and the rule for what counts as a followed eightfold path.
  * Does NOT own: IPC registration or the date-window filtering that selects
  * which logs to aggregate (data.ts), persistence (db.ts).
- * Documents arrive as RawDoc because that is what the JSON files hold — the
- * casts below are reads of fields these collections have always written.
  */
-import type { RawDoc } from '@/main/services/db';
-import type { EmotionAnalytics, EmotionStat } from '@/schemas/storage';
+import type { EmotionAnalytics, EmotionLog, EmotionStat } from '@/schemas/storage';
 
 /** True when a path entry carries a non-blank note, which is what counts as "followed". */
 export function isPathFollowed(note: string | undefined): boolean {
@@ -16,7 +13,7 @@ export function isPathFollowed(note: string | undefined): boolean {
 }
 
 /** Aggregates emotion logs already narrowed to one user and one date window. */
-export function buildEmotionAnalytics(logs: RawDoc[]): EmotionAnalytics {
+export function buildEmotionAnalytics(logs: EmotionLog[]): EmotionAnalytics {
     if (logs.length === 0) {
         return {
             totalDays: 0,
@@ -31,13 +28,13 @@ export function buildEmotionAnalytics(logs: RawDoc[]): EmotionAnalytics {
         };
     }
 
-    const sorted = [...logs].sort((a, b) => (a['date'] as string).localeCompare(b['date'] as string));
+    const sorted = [...logs].sort((a, b) => a.date.localeCompare(b.date));
 
     const totals = sorted.reduce<{ positive: number; negative: number; ratio: number }>(
         (acc, log) => ({
-            positive: acc.positive + (log['positiveCount'] as number),
-            negative: acc.negative + (log['negativeCount'] as number),
-            ratio: acc.ratio + (log['pnRatio'] as number),
+            positive: acc.positive + log.positiveCount,
+            negative: acc.negative + log.negativeCount,
+            ratio: acc.ratio + log.pnRatio,
         }),
         { positive: 0, negative: 0, ratio: 0 },
     );
@@ -48,11 +45,10 @@ export function buildEmotionAnalytics(logs: RawDoc[]): EmotionAnalytics {
     const emotionCounts = new Map<string, EmotionStat>();
 
     sorted.forEach((log) => {
-        if ((log['pnRatio'] as number) >= 0.5) positiveDays++;
+        if (log.pnRatio >= 0.5) positiveDays++;
         else negativeDays++;
 
-        const emotions = log['emotions'] as { name: string; type: string }[] | undefined;
-        emotions?.forEach((emotion) => {
+        log.emotions.forEach((emotion) => {
             uniqueEmotions.add(emotion.name);
             const counter = emotionCounts.get(emotion.name) ?? { name: emotion.name, type: emotion.type, count: 0 };
             counter.count++;
@@ -69,6 +65,6 @@ export function buildEmotionAnalytics(logs: RawDoc[]): EmotionAnalytics {
         positiveDays,
         negativeDays,
         topEmotions: [...emotionCounts.values()].sort((a, b) => b.count - a.count),
-        trends: sorted.map((log) => ({ date: log['date'] as string, pnRatio: log['pnRatio'] as number })),
+        trends: sorted.map((log) => ({ date: log.date, pnRatio: log.pnRatio })),
     };
 }

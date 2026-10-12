@@ -8,7 +8,7 @@ type EightfoldPath = {
     questions: string;
 };
 
-defineProps<{
+const props = defineProps<{
     loading: boolean;
     paths: EightfoldPath[];
     followedPaths: string[];
@@ -25,6 +25,12 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+
+function onPathNoteInput(key: string, event: Event): void {
+    if (!(event.target instanceof HTMLTextAreaElement)) return;
+    emit('update:pathNotes', { ...props.pathNotes, [key]: event.target.value });
+    emit('save-path');
+}
 </script>
 
 <template>
@@ -74,15 +80,7 @@ const { t } = useI18n();
                         :placeholder="t('eightfold.notesPlaceholder')"
                         :aria-label="t('eightfold.notesPlaceholder')"
                         rows="2"
-                        @input="
-                            (e) => {
-                                emit('update:pathNotes', {
-                                    ...pathNotes,
-                                    [path.key]: (e.target as HTMLTextAreaElement).value,
-                                });
-                                emit('save-path');
-                            }
-                        "></textarea>
+                        @input="onPathNoteInput(path.key, $event)"></textarea>
                 </div>
             </div>
         </div>

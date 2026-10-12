@@ -209,9 +209,14 @@ export function useEmotions(selectedDate: Ref<Date>, activeTab: Ref<string>): Em
             if (emotionLog !== undefined) {
                 const loaded = emotionLog.emotions ?? [];
                 const all = [...positiveEmotions.value, ...negativeEmotions.value];
+                // An emotion no longer in the list still shows, under the name it was stored with.
                 selectedEmotions.value = loaded.map(
-                    (entry: { name: string; type: string }) =>
-                        all.find((full) => full.name === entry.name) ?? (entry as Emotion),
+                    (entry) =>
+                        all.find((full) => full.name === entry.name) ?? {
+                            ...entry,
+                            displayName: entry.name,
+                            description: '',
+                        },
                 );
                 dailyNote.value = emotionLog.note ?? '';
             } else {

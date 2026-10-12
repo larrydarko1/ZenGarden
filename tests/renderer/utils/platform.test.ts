@@ -2,11 +2,14 @@ import { describe, it, expect, beforeEach } from 'vitest';
 
 import { isDesktop } from '@/renderer/utils/platform';
 
-const win = window as unknown as Record<string, unknown>;
+/** Puts `api` where the preload would, whatever its shape — that is what is under test. */
+function exposeBridge(api: unknown): void {
+    Reflect.set(window, 'electronAPI', api);
+}
 
 describe('platform utilities', () => {
     beforeEach(() => {
-        delete win['electronAPI'];
+        Reflect.deleteProperty(window, 'electronAPI');
     });
 
     describe('isDesktop', () => {
@@ -15,17 +18,17 @@ describe('platform utilities', () => {
         });
 
         it('returns false when electronAPI exists but isElectron is missing', () => {
-            win['electronAPI'] = {};
+            exposeBridge({});
             expect(isDesktop()).toBe(false);
         });
 
         it('returns true when electronAPI.isElectron() returns true', () => {
-            win['electronAPI'] = { isElectron: () => true };
+            exposeBridge({ isElectron: () => true });
             expect(isDesktop()).toBe(true);
         });
 
         it('returns false when electronAPI.isElectron() returns false', () => {
-            win['electronAPI'] = { isElectron: () => false };
+            exposeBridge({ isElectron: () => false });
             expect(isDesktop()).toBe(false);
         });
     });

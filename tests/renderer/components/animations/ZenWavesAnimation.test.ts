@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { defineComponent, h } from 'vue';
 
 import ZenWavesAnimation from '@/renderer/components/animations/ZenWavesAnimation.vue';
 import { mountWithI18n } from '@test-utils';
@@ -7,7 +8,7 @@ describe('ZenWavesAnimation', () => {
     it('renders as the root svg itself, with no wrapper element', () => {
         const wrapper = mountWithI18n(ZenWavesAnimation);
 
-        expect(wrapper.element.tagName.toLowerCase()).toBe('svg');
+        expect(wrapper.element).toBeInstanceOf(SVGSVGElement);
         expect(wrapper.classes()).toContain('zen-waves-anim');
         wrapper.unmount();
     });
@@ -23,10 +24,21 @@ describe('ZenWavesAnimation', () => {
     it('fills the waves from the gradient it defines', () => {
         const wrapper = mountWithI18n(ZenWavesAnimation);
 
-        expect(wrapper.find('linearGradient#zenWaveGradient').exists()).toBe(true);
+        const gradientId = wrapper.find('linearGradient').attributes('id') ?? '';
+        expect(gradientId).not.toBe('');
         for (const wave of wrapper.findAll('path.wave')) {
-            expect(wave.attributes('fill')).toBe('url(#zenWaveGradient)');
+            expect(wave.attributes('fill')).toBe(`url(#${gradientId})`);
         }
+        wrapper.unmount();
+    });
+
+    it('gives each instance its own gradient id, so two on a page never share one', () => {
+        const TwoWaves = defineComponent({ render: () => h('div', [h(ZenWavesAnimation), h(ZenWavesAnimation)]) });
+        const wrapper = mountWithI18n(TwoWaves);
+
+        const ids = wrapper.findAll('linearGradient').map((gradient) => gradient.attributes('id'));
+        expect(ids).toHaveLength(2);
+        expect(new Set(ids).size).toBe(2);
         wrapper.unmount();
     });
 

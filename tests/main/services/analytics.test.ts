@@ -1,16 +1,18 @@
 import { describe, it, expect } from 'vitest';
 
 import { buildEmotionAnalytics, isPathFollowed } from '@/main/services/analytics';
-import type { RawDoc } from '@/main/services/db';
+import type { Emotion, EmotionLog } from '@/schemas/storage';
 
-function emotionLog(
-    date: string,
-    positiveCount: number,
-    negativeCount: number,
-    emotions: { name: string; type: string }[],
-): RawDoc {
+function emotionLog(date: string, positiveCount: number, negativeCount: number, emotions: Emotion[]): EmotionLog {
     const total = positiveCount + negativeCount;
-    return { date, positiveCount, negativeCount, pnRatio: total > 0 ? positiveCount / total : 0, emotions };
+    return {
+        date,
+        positiveCount,
+        negativeCount,
+        pnRatio: total > 0 ? positiveCount / total : 0,
+        emotions,
+        updatedAt: `${date}T00:00:00.000Z`,
+    };
 }
 
 describe('isPathFollowed', () => {
@@ -98,12 +100,5 @@ describe('buildEmotionAnalytics', () => {
         expect(Object.hasOwn(Object.prototype, 'count')).toBe(false);
         expect(({} as Record<string, unknown>)['count']).toBeUndefined();
         expect(structuredClone(result.topEmotions)).toHaveLength(2);
-    });
-
-    it('tolerates a log stored without an emotions array', () => {
-        const result = buildEmotionAnalytics([{ date: '2025-01-01', positiveCount: 1, negativeCount: 0, pnRatio: 1 }]);
-
-        expect(result.emotionDiversity).toBe(0);
-        expect(result.topEmotions).toEqual([]);
     });
 });

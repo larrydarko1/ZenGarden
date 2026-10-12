@@ -7,6 +7,7 @@
  */
 
 import { Preferences } from '@capacitor/preferences';
+import type { z } from 'zod';
 
 import {
     DB_FILES,
@@ -33,7 +34,13 @@ import type {
     EmotionStat,
     DateRangeQuery,
 } from '@/renderer/store/types';
-import { SettingsSchema } from '@/schemas/storage';
+import {
+    DatedEntrySchema,
+    EightfoldPathLogSchema,
+    EmotionLogSchema,
+    MeditationSchema,
+    SettingsSchema,
+} from '@/schemas/storage';
 
 export class CapacitorStorageAdapter implements IStorageAdapter {
     private initialized = false;
@@ -74,7 +81,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     // ─── Settings ────────────────────────────────────────────────────────────
     async getSettings(): Promise<Settings> {
         await this.ensureInitialized();
-        const raw = await readObject<unknown>(DB_FILES.settings);
+        const raw = await readObject(DB_FILES.settings);
         const parsed = SettingsSchema.safeParse(raw ?? {});
         return parsed.success ? parsed.data : { theme: 'dark', language: 'en' };
     }
@@ -91,7 +98,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     async createMeditation(input: MeditationInput): Promise<{ message: string; meditation: Meditation }> {
         await this.ensureInitialized();
 
-        const meditations = await readCollection<Meditation>(DB_FILES.meditations);
+        const meditations = await readCollection(DB_FILES.meditations);
         const newMeditation: Meditation = {
             _id: generateObjectId(),
             date: input.date,
@@ -107,24 +114,19 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
 
     async getMeditations(): Promise<{ meditations: Meditation[] }> {
         await this.ensureInitialized();
-        return { meditations: await readCollection<Meditation>(DB_FILES.meditations) };
+        return { meditations: await readDocs(DB_FILES.meditations, MeditationSchema) };
     }
 
     // ─── Emotions ────────────────────────────────────────────────────────────
     async saveEmotionLog(input: EmotionLogInput): Promise<{ message: string; emotionLog: EmotionLog }> {
         await this.ensureInitialized();
 
-        const emotionLogs = await readCollection<EmotionLog>(DB_FILES.emotionLogs);
-
-        // Check if entry exists for this date
-        const existingIndex = emotionLogs.findIndex((log) => log.date === input.date);
-
         const positiveCount = input.emotions.filter((e) => e.type === 'positive').length;
         const negativeCount = input.emotions.filter((e) => e.type === 'negative').length;
-        const pnRatio = negativeCount > 0 ? positiveCount / negativeCount : positiveCount;
+        const total = positiveCount + negativeCount;
+        const pnRatio = total > 0 ? positiveCount / total : 0;
 
-        const emotionLog: EmotionLog = {
-            _id: emotionLogs[existingIndex]?._id ?? generateObjectId(),
+        const emotionLog = await saveByDate(DB_FILES.emotionLogs, {
             date: input.date,
             emotions: input.emotions,
             positiveCount,
@@ -132,15 +134,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
             pnRatio,
             ...(input.note !== undefined ? { note: input.note } : {}),
             updatedAt: new Date().toISOString(),
-        };
-
-        if (existingIndex >= 0) {
-            emotionLogs[existingIndex] = emotionLog;
-        } else {
-            emotionLogs.push(emotionLog);
-        }
-
-        await writeCollection(DB_FILES.emotionLogs, emotionLogs);
+        });
 
         return { message: 'Emotion log saved successfully', emotionLog };
     }
@@ -148,14 +142,14 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     async getEmotionLogs(query?: DateRangeQuery): Promise<{ emotionLogs: EmotionLog[] }> {
         await this.ensureInitialized();
 
-        const emotionLogs = await readCollection<EmotionLog>(DB_FILES.emotionLogs);
+        const emotionLogs = await readDocs(DB_FILES.emotionLogs, EmotionLogSchema);
         return { emotionLogs: applyDateRange(emotionLogs, query) };
     }
 
     async getEmotionAnalytics(days = 30): Promise<EmotionAnalytics> {
         await this.ensureInitialized();
 
-        const emotionLogs = await readCollection<EmotionLog>(DB_FILES.emotionLogs);
+        const emotionLogs = await readDocs(DB_FILES.emotionLogs, EmotionLogSchema);
         const recentLogs = emotionLogs.filter((log) => log.date >= cutoffDate(days));
 
         // Calculate emotion frequencies
@@ -202,36 +196,24 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     async saveEightfoldPathLog(input: EightfoldPathInput): Promise<{ message: string; pathLog: EightfoldPathLog }> {
         await this.ensureInitialized();
 
-        const logs = await readCollection<EightfoldPathLog>(DB_FILES.eightfoldPathLogs);
-        const existingIndex = logs.findIndex((l) => l.date === input.date);
-
         const completedCount = input.paths.filter((p) => p.note !== undefined && p.note.trim() !== '').length;
         const progressPercentage = (completedCount / 8) * 100;
 
-        const log: EightfoldPathLog = {
-            _id: logs[existingIndex]?._id ?? generateObjectId(),
+        const pathLog = await saveByDate(DB_FILES.eightfoldPathLogs, {
             date: input.date,
             paths: input.paths,
             completedCount,
             progressPercentage,
             updatedAt: new Date().toISOString(),
-        };
+        });
 
-        if (existingIndex >= 0) {
-            logs[existingIndex] = log;
-        } else {
-            logs.push(log);
-        }
-
-        await writeCollection(DB_FILES.eightfoldPathLogs, logs);
-
-        return { message: 'Eightfold path log saved successfully', pathLog: log };
+        return { message: 'Eightfold path log saved successfully', pathLog };
     }
 
     async getEightfoldPathLogs(query?: DateRangeQuery): Promise<{ pathLogs: EightfoldPathLog[] }> {
         await this.ensureInitialized();
 
-        const logs = await readCollection<EightfoldPathLog>(DB_FILES.eightfoldPathLogs);
+        const logs = await readDocs(DB_FILES.eightfoldPathLogs, EightfoldPathLogSchema);
         return { pathLogs: applyDateRange(logs, query) };
     }
 
@@ -247,6 +229,38 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
         await writeObject(DB_FILES.settings, next);
         return next;
     }
+}
+
+/**
+ * The entries of a collection that `schema` accepts. One that does not parse is
+ * passed over rather than failing the read, and stays in the file: saveByDate
+ * writes it back untouched.
+ */
+async function readDocs<T>(filename: string, schema: z.ZodType<T>): Promise<T[]> {
+    const entries = await readCollection(filename);
+    return entries.flatMap((entry) => {
+        const parsed = schema.safeParse(entry);
+        return parsed.success ? [parsed.data] : [];
+    });
+}
+
+/**
+ * Files `doc` under its date: it replaces the entry already dated that day, keeping
+ * that entry's id, or is appended with a new one. Every other entry is written back
+ * exactly as it was read, including any readDocs passes over.
+ */
+async function saveByDate<T extends { date: string }>(filename: string, doc: T): Promise<T & { _id: string }> {
+    const entries = await readCollection(filename);
+    const index = entries.findIndex((entry) => DatedEntrySchema.safeParse(entry).data?.date === doc.date);
+    const saved = { _id: DatedEntrySchema.safeParse(entries[index]).data?._id ?? generateObjectId(), ...doc };
+
+    if (index >= 0) {
+        entries[index] = saved;
+    } else {
+        entries.push(saved);
+    }
+    await writeCollection(filename, entries);
+    return saved;
 }
 
 /** Shared startDate/endDate/limit filter — the two log collections query alike. */

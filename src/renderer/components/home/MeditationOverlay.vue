@@ -2,6 +2,8 @@
 import { ref, type Component } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import IconBell from '@/renderer/components/icons/IconBell.vue';
+
 defineProps<{
     animationComponent: Component;
     bellEnabled: boolean;
@@ -39,19 +41,9 @@ const showSoundDropdown = ref(false);
                 :class="[{ active: bellEnabled }]"
                 :aria-label="bellEnabled ? 'Disable interval bells' : 'Enable interval bells'"
                 @click="emit('update:bellEnabled', !bellEnabled)">
-                <svg
+                <IconBell
                     width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M12 2C10.9 2 10 2.9 10 4C10 4.6 10.2 5.1 10.6 5.5C8 6.1 6 8.3 6 11V16L4 18V19H20V18L18 16V11C18 8.3 16 6.1 13.4 5.5C13.8 5.1 14 4.6 14 4C14 2.9 13.1 2 12 2ZM10 20C10 21.1 10.9 22 12 22C13.1 22 14 21.1 14 20"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
+                    height="16" />
             </button>
 
             <div

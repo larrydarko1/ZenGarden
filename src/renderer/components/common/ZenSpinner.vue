@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import IconSpinnerArc from '@/renderer/components/icons/IconSpinnerArc.vue';
+import IconSpinnerBar from '@/renderer/components/icons/IconSpinnerBar.vue';
+
 type ZenSpinnerVariant = 'arc' | 'bar';
 
 withDefaults(defineProps<{ variant?: ZenSpinnerVariant }>(), { variant: 'arc' });
@@ -6,54 +9,15 @@ withDefaults(defineProps<{ variant?: ZenSpinnerVariant }>(), { variant: 'arc' })
 
 <template>
     <span class="zen-loader">
-        <svg
+        <IconSpinnerArc
             v-if="variant === 'arc'"
             width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            aria-hidden="true"
-            focusable="false">
-            <circle
-                cx="10"
-                cy="10"
-                r="8"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-dasharray="40 60"
-                opacity="0.4">
-                <animateTransform
-                    attributeName="transform"
-                    type="rotate"
-                    from="0 10 10"
-                    to="360 10 10"
-                    dur="1s"
-                    repeatCount="indefinite" />
-            </circle>
-        </svg>
-        <svg
+            height="20" />
+        <IconSpinnerBar
             v-else
+            class="spinner-bar"
             width="20"
-            height="20"
-            viewBox="0 0 32 32"
-            aria-hidden="true"
-            focusable="false">
-            <rect
-                x="10"
-                y="15"
-                width="12"
-                height="2"
-                rx="1">
-                <animateTransform
-                    attributeName="transform"
-                    type="rotate"
-                    from="0 16 16"
-                    to="360 16 16"
-                    dur="2.5s"
-                    repeatCount="indefinite" />
-            </rect>
-        </svg>
+            height="20" />
     </span>
 </template>
 
@@ -68,7 +32,7 @@ withDefaults(defineProps<{ variant?: ZenSpinnerVariant }>(), { variant: 'arc' })
     display: block;
 }
 
-.zen-loader svg rect {
-    fill: $text1;
+.spinner-bar {
+    color: $text1;
 }
 </style>

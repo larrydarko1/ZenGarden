@@ -1,22 +1,12 @@
-import { mount, type VueWrapper, type ComponentMountingOptions } from '@vue/test-utils';
-
-import { i18n } from '@/renderer/i18n';
+import { mount } from '@vue/test-utils';
 
 /**
- * Mount a component with vue-i18n already installed, so `useI18n()` resolves
- * instead of throwing. vitest.setup.ts seeds the real English messages, which is
- * what makes an assertion on rendered text meaningful rather than a key echo.
+ * vitest.setup.ts installs vue-i18n on every mount, so `useI18n()` resolves instead
+ * of throwing and the real English messages render. This is `mount` under the name
+ * the suites know, with mount's own types — a wrapper typed loosely here is how a
+ * test reaches into a component through `any`.
  */
-export function mountWithI18n<T>(component: T, options?: ComponentMountingOptions<T>): VueWrapper {
-    const mountOptions: ComponentMountingOptions<any> = {
-        ...options,
-        global: {
-            ...(options?.global ?? {}),
-            plugins: [...(options?.global?.plugins ?? []), i18n],
-        },
-    };
-    return mount(component as any, mountOptions);
-}
+export const mountWithI18n = mount;
 
 /**
  * The nth entry of a list, or a failure naming what was missing.

@@ -14,7 +14,14 @@
 
 import { z } from 'zod';
 
-export type IpcResult<T> = { success: true; data: T } | { success: false; error: string };
+/**
+ * Why an IPC call failed. The renderer gets the code; the error itself stays in the
+ * main-process log, because its message is English the window cannot translate and
+ * can name paths on the user's disk.
+ */
+export type IpcErrorCode = 'INVALID_ARGUMENTS' | 'NO_VAULT' | 'ACCESS_DENIED' | 'NOT_FOUND' | 'DISK_FULL' | 'UNKNOWN';
+
+export type IpcResult<T> = { success: true; data: T } | { success: false; error: IpcErrorCode };
 
 /** The themes the stylesheet defines — anything else is a bad write. */
 const ThemeSchema = z.enum(['light', 'dark']);
@@ -83,32 +90,48 @@ export const EightfoldPathInputSchema = z.object({
 
 export type EightfoldPathInput = z.infer<typeof EightfoldPathInputSchema>;
 
-export type Meditation = {
-    _id?: string;
-    date: string;
-    duration: number;
-    notes: string;
-};
+/*
+ * The stored records. A collection file is the user's to copy, sync and hand-edit, so
+ * nothing read from one is trusted to have its shape: a read keeps the entries these
+ * accept and passes over the rest, and a rewrite puts every entry back as it was read.
+ */
 
-export type EmotionLog = {
-    _id?: string;
-    date: string;
-    emotions: Emotion[];
-    positiveCount: number;
-    negativeCount: number;
-    pnRatio: number;
-    note?: string;
-    updatedAt: string;
-};
+export const MeditationSchema = MeditationInputSchema.extend({
+    _id: z.string().optional(),
+});
 
-export type EightfoldPathLog = {
-    _id?: string;
-    date: string;
-    paths: PathItem[];
-    completedCount: number;
-    progressPercentage: number;
-    updatedAt: string;
-};
+export type Meditation = z.infer<typeof MeditationSchema>;
+
+export const EmotionLogSchema = z.object({
+    _id: z.string().optional(),
+    date: z.string(),
+    // Logs have been stored without one; they read as a day with no emotions picked.
+    emotions: z.array(EmotionSchema).default([]),
+    positiveCount: z.number(),
+    negativeCount: z.number(),
+    pnRatio: z.number(),
+    note: z.string().optional(),
+    updatedAt: z.string(),
+});
+
+export type EmotionLog = z.infer<typeof EmotionLogSchema>;
+
+export const EightfoldPathLogSchema = z.object({
+    _id: z.string().optional(),
+    date: z.string(),
+    paths: z.array(PathItemSchema),
+    completedCount: z.number(),
+    progressPercentage: z.number(),
+    updatedAt: z.string(),
+});
+
+export type EightfoldPathLog = z.infer<typeof EightfoldPathLogSchema>;
+
+/** What a rewrite needs from any entry, readable or not: the day it is filed under, and its id. */
+export const DatedEntrySchema = z.object({
+    _id: z.string().optional(),
+    date: z.string(),
+});
 
 export type EmotionStat = {
     name: string;

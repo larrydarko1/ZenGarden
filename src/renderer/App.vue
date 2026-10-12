@@ -4,8 +4,11 @@ import { useI18n } from 'vue-i18n';
 
 import Home from '@/renderer/components/Home.vue';
 import { updateTheme, updateLanguage } from '@/renderer/store';
+import type { Language } from '@/renderer/store/types';
 import { log } from '@/renderer/utils/logger';
 import { isDesktop } from '@/renderer/utils/platform';
+
+const LANGUAGES: readonly Language[] = ['en', 'es', 'it', 'fr', 'de', 'pt', 'zh', 'ja'];
 
 const { locale } = useI18n();
 
@@ -21,6 +24,10 @@ function isThemeId(value: string): value is 'light' | 'dark' {
     return value === 'light' || value === 'dark';
 }
 
+function isLanguage(value: string): value is Language {
+    return LANGUAGES.some((language) => language === value);
+}
+
 function applyVaultTheme(theme: string): void {
     if (isThemeId(theme)) {
         currentTheme.value = theme;
@@ -28,8 +35,7 @@ function applyVaultTheme(theme: string): void {
 }
 
 function applyVaultLanguage(language: string): void {
-    const languages = ['en', 'es', 'it', 'fr', 'de', 'pt', 'zh', 'ja'];
-    if (languages.includes(language)) {
+    if (isLanguage(language)) {
         locale.value = language;
     }
 }
@@ -45,10 +51,10 @@ async function setTheme(theme: string): Promise<void> {
 }
 
 async function setLanguage(language: string): Promise<void> {
-    const validLanguage = language as 'en' | 'es' | 'it' | 'fr' | 'de' | 'pt' | 'zh' | 'ja';
-    locale.value = validLanguage;
+    if (!isLanguage(language)) return;
+    locale.value = language;
     try {
-        await updateLanguage(validLanguage);
+        await updateLanguage(language);
     } catch (err) {
         log.error('Failed to update language', err);
     }

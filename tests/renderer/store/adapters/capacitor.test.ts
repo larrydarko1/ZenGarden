@@ -2,6 +2,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 import { CapacitorStorageAdapter } from '@/renderer/store/adapters/capacitor';
 import { DB_FILES } from '@/renderer/store/adapters/capacitor/db';
+import type { EightfoldPathLog, EmotionLog, Meditation } from '@/renderer/store/types';
 import { nth } from '@test-utils';
 
 vi.mock('@capacitor/preferences', () => ({
@@ -20,7 +21,10 @@ vi.mock('@/renderer/store/adapters/capacitor/db', () => ({
     VAULT_DIR: 'ZenGarden',
     initializeStorage: vi.fn().mockResolvedValue(undefined),
     generateObjectId: vi.fn(() => Math.random().toString(16).substring(2)),
-    readCollection: vi.fn((file: string) => Promise.resolve((vault[file] as unknown[]) ?? [])),
+    readCollection: vi.fn((file: string): Promise<unknown[]> => {
+        const entries = vault[file];
+        return Promise.resolve(Array.isArray(entries) ? entries : []);
+    }),
     writeCollection: vi.fn((file: string, data: unknown[]) => {
         vault[file] = data;
         return Promise.resolve();
@@ -37,6 +41,18 @@ const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
 
 function adapter(): CapacitorStorageAdapter {
     return new CapacitorStorageAdapter();
+}
+
+function meditation(_id: string, date: string): Meditation {
+    return { _id, date, duration: 10, notes: '' };
+}
+
+function emotionLog(_id: string, date: string, fields: Partial<EmotionLog> = {}): EmotionLog {
+    return { _id, date, emotions: [], positiveCount: 0, negativeCount: 0, pnRatio: 0, updatedAt: date, ...fields };
+}
+
+function pathLog(_id: string, date: string): EightfoldPathLog {
+    return { _id, date, paths: [], completedCount: 0, progressPercentage: 0, updatedAt: date };
 }
 
 beforeEach(() => {
@@ -119,11 +135,13 @@ describe('meditations', () => {
     });
 
     it('returns everything in the vault', async () => {
-        vault[DB_FILES.meditations] = [
-            { _id: '1', date: today },
-            { _id: '2', date: yesterday },
-        ];
+        vault[DB_FILES.meditations] = [meditation('1', today), meditation('2', yesterday)];
         expect((await adapter().getMeditations()).meditations).toHaveLength(2);
+    });
+
+    it('passes over an entry it cannot read', async () => {
+        vault[DB_FILES.meditations] = [meditation('1', today), { _id: '2', date: yesterday }, 'junk'];
+        expect((await adapter().getMeditations()).meditations.map((entry) => entry._id)).toEqual(['1']);
     });
 });
 
@@ -136,6 +154,18 @@ describe('emotion logs', () => {
 
         expect(res.emotionLog.positiveCount).toBe(2);
         expect(res.emotionLog.negativeCount).toBe(1);
+    });
+
+    // pnRatio is the positive share of the day, as on desktop: analytics split days at 0.5.
+    it.each([
+        { emotions: [joy, joy, worry], pnRatio: 2 / 3 },
+        { emotions: [joy, worry, worry, worry], pnRatio: 0.25 },
+        { emotions: [joy], pnRatio: 1 },
+        { emotions: [], pnRatio: 0 },
+    ])('stores a pnRatio of $pnRatio as the positive share', async ({ emotions, pnRatio }) => {
+        const res = await adapter().saveEmotionLog({ date: today, emotions });
+
+        expect(res.emotionLog.pnRatio).toBeCloseTo(pnRatio);
     });
 
     it('overwrites the entry for a date rather than adding a second one', async () => {
@@ -156,11 +186,20 @@ describe('emotion logs', () => {
         expect(second.emotionLog._id).toBe(first.emotionLog._id);
     });
 
+    it('writes back an entry it cannot read rather than dropping it', async () => {
+        vault[DB_FILES.emotionLogs] = ['junk', { _id: 'old', date: today }];
+
+        const res = await adapter().saveEmotionLog({ date: today, emotions: [joy] });
+
+        expect(vault[DB_FILES.emotionLogs]).toEqual(['junk', res.emotionLog]);
+        expect(res.emotionLog._id).toBe('old');
+    });
+
     it('filters by date range', async () => {
         vault[DB_FILES.emotionLogs] = [
-            { _id: '1', date: '2025-01-01' },
-            { _id: '2', date: '2025-01-10' },
-            { _id: '3', date: '2025-01-20' },
+            emotionLog('1', '2025-01-01'),
+            emotionLog('2', '2025-01-10'),
+            emotionLog('3', '2025-01-20'),
         ];
 
         const { emotionLogs } = await adapter().getEmotionLogs({ startDate: '2025-01-05', endDate: '2025-01-15' });
@@ -169,9 +208,9 @@ describe('emotion logs', () => {
 
     it('respects a limit', async () => {
         vault[DB_FILES.emotionLogs] = [
-            { _id: '1', date: '2025-01-01' },
-            { _id: '2', date: '2025-01-10' },
-            { _id: '3', date: '2025-01-20' },
+            emotionLog('1', '2025-01-01'),
+            emotionLog('2', '2025-01-10'),
+            emotionLog('3', '2025-01-20'),
         ];
 
         expect((await adapter().getEmotionLogs({ limit: 2 })).emotionLogs).toHaveLength(2);
@@ -181,9 +220,7 @@ describe('emotion logs', () => {
 describe('emotion analytics', () => {
     beforeEach(() => {
         vault[DB_FILES.emotionLogs] = [
-            {
-                _id: '1',
-                date: today,
+            emotionLog('1', today, {
                 positiveCount: 3,
                 negativeCount: 1,
                 pnRatio: 0.75,
@@ -191,15 +228,13 @@ describe('emotion analytics', () => {
                     { name: 'joy', type: 'positive' },
                     { name: 'peace', type: 'positive' },
                 ],
-            },
-            {
-                _id: '2',
-                date: yesterday,
+            }),
+            emotionLog('2', yesterday, {
                 positiveCount: 1,
                 negativeCount: 3,
                 pnRatio: 0.25,
                 emotions: [{ name: 'joy', type: 'positive' }],
-            },
+            }),
         ];
     });
 
@@ -218,7 +253,7 @@ describe('emotion analytics', () => {
     });
 
     it('excludes logs older than the window', async () => {
-        vault[DB_FILES.emotionLogs] = [{ _id: '1', date: '2020-01-01', pnRatio: 1, emotions: [] }];
+        vault[DB_FILES.emotionLogs] = [emotionLog('1', '2020-01-01', { pnRatio: 1 })];
         expect((await adapter().getEmotionAnalytics(30)).totalDays).toBe(0);
     });
 
@@ -259,10 +294,7 @@ describe('eightfold path', () => {
     });
 
     it('filters by date range', async () => {
-        vault[DB_FILES.eightfoldPathLogs] = [
-            { _id: '1', date: '2025-01-01' },
-            { _id: '2', date: '2025-01-20' },
-        ];
+        vault[DB_FILES.eightfoldPathLogs] = [pathLog('1', '2025-01-01'), pathLog('2', '2025-01-20')];
 
         expect((await adapter().getEightfoldPathLogs({ startDate: '2025-01-10' })).pathLogs).toHaveLength(1);
     });

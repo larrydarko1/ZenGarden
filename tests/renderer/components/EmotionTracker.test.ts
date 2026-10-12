@@ -254,8 +254,7 @@ describe('EmotionTracker', () => {
             const wrapper = await openNoteBox();
             const note = wrapper.find('.eightfold-path-note textarea');
 
-            (note.element as HTMLTextAreaElement).value = 'sat with this today';
-            await note.trigger('input');
+            await note.setValue('sat with this today');
 
             expect(pathNotes.value).toEqual({ view: 'sat with this today' });
             wrapper.unmount();

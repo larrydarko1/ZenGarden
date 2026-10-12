@@ -3,6 +3,9 @@ import { describe, it, expect } from 'vitest';
 import EightfoldPathView from '@/renderer/components/emotions/EightfoldPathView.vue';
 import { mountWithI18n, nth } from '@test-utils';
 
+/** The props a test varies; the rest are derived from `followedPaths` so they always agree with it. */
+type ViewOverrides = { loading?: boolean; followedPaths?: string[]; pathNotes?: Record<string, string> };
+
 const paths = ['view', 'intention', 'speech', 'action', 'livelihood', 'effort', 'mindfulness', 'concentration'].map(
     (key) => ({
         key,
@@ -12,8 +15,8 @@ const paths = ['view', 'intention', 'speech', 'action', 'livelihood', 'effort', 
     }),
 );
 
-function mountView(overrides: Record<string, unknown> = {}) {
-    const followedPaths = (overrides['followedPaths'] as string[]) ?? [];
+function mountView(overrides: ViewOverrides = {}) {
+    const followedPaths = overrides.followedPaths ?? [];
     return mountWithI18n(EightfoldPathView, {
         props: {
             loading: false,

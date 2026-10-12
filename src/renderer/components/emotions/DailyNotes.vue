@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
+import IconFileText from '@/renderer/components/icons/IconFileText.vue';
+
 defineProps<{
     dailyNote: string;
     selectedDate: Date;
@@ -13,53 +15,20 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+
+function onNoteInput(event: Event): void {
+    if (event.target instanceof HTMLTextAreaElement) emit('update:dailyNote', event.target.value);
+    emit('note-input');
+}
 </script>
 
 <template>
     <div class="notes-view">
         <div class="notes-content">
             <div class="notes-header">
-                <svg
+                <IconFileText
                     width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round" />
-                    <polyline
-                        points="14 2 14 8 20 8"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round" />
-                    <line
-                        x1="16"
-                        y1="13"
-                        x2="8"
-                        y2="13"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round" />
-                    <line
-                        x1="16"
-                        y1="17"
-                        x2="8"
-                        y2="17"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round" />
-                    <polyline
-                        points="10 9 9 9 8 9"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
+                    height="22" />
                 <h3>{{ t('emotions.dailyNote') }}</h3>
             </div>
             <p class="notes-date-label">{{ formatDate(selectedDate) }}</p>
@@ -69,10 +38,7 @@ const { t } = useI18n();
                 :placeholder="t('emotions.notePlaceholder')"
                 :aria-label="t('emotions.notePlaceholder')"
                 maxlength="2000"
-                @input="
-                    emit('update:dailyNote', ($event.target as HTMLTextAreaElement).value);
-                    emit('note-input');
-                "></textarea>
+                @input="onNoteInput"></textarea>
             <div class="note-footer">
                 <span class="character-count">{{ dailyNote.length }} / 2000</span>
             </div>

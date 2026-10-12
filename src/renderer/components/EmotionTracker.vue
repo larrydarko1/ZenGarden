@@ -5,6 +5,10 @@ import { useI18n } from 'vue-i18n';
 import DailyNotes from '@/renderer/components/emotions/DailyNotes.vue';
 import EightfoldPathView from '@/renderer/components/emotions/EightfoldPathView.vue';
 import EmotionAnalytics from '@/renderer/components/emotions/EmotionAnalytics.vue';
+import IconCheck from '@/renderer/components/icons/IconCheck.vue';
+import IconChevronLeft from '@/renderer/components/icons/IconChevronLeft.vue';
+import IconChevronRight from '@/renderer/components/icons/IconChevronRight.vue';
+import IconClose from '@/renderer/components/icons/IconClose.vue';
 import { useEightfoldPath } from '@/renderer/composables/useEightfoldPath';
 import { useEmotions } from '@/renderer/composables/useEmotions';
 
@@ -102,18 +106,9 @@ onMounted(() => {
                         class="zen-icon-btn inline-date-btn"
                         aria-label="Previous day"
                         @click="changeDate(-1)">
-                        <svg
+                        <IconChevronLeft
                             width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none">
-                            <path
-                                d="M15 18l-6-6 6-6"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
+                            height="14" />
                     </button>
                     <span class="inline-date-text">{{ formatDate(selectedDate) }}</span>
                     <button
@@ -121,35 +116,18 @@ onMounted(() => {
                         :disabled="isToday"
                         aria-label="Next day"
                         @click="changeDate(1)">
-                        <svg
+                        <IconChevronRight
                             width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none">
-                            <path
-                                d="M9 18l6-6-6-6"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
+                            height="14" />
                     </button>
                 </div>
                 <button
                     class="zen-icon-btn inline-close-btn"
                     aria-label="Close"
                     @click="emit('close')">
-                    <svg
+                    <IconClose
                         width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none">
-                        <path
-                            d="M18 6L6 18M6 6l12 12"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round" />
-                    </svg>
+                        height="16" />
                 </button>
             </div>
 
@@ -251,19 +229,10 @@ onMounted(() => {
                 <span
                     v-if="saveStatus === 'saving'"
                     class="save-spinner"></span>
-                <svg
+                <IconCheck
                     v-else
                     width="12"
-                    height="12"
-                    viewBox="0 0 12 12"
-                    fill="none">
-                    <path
-                        d="M2 6l3 3 5-5"
-                        stroke="currentColor"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
+                    height="12" />
                 <span class="save-label">{{
                     saveStatus === 'saving' ? t('emotions.saving') : t('emotions.saved')
                 }}</span>

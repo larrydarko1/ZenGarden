@@ -13,8 +13,10 @@ import fs from 'fs';
 import path from 'path';
 
 import { BrowserWindow, app, dialog } from 'electron';
-import type { IpcMain, OpenDialogOptions } from 'electron';
+import type { OpenDialogOptions } from 'electron';
 
+import { IpcError, ipcFailure } from '@/main/lib/errors';
+import type { IpcMain } from '@/main/lib/ipc';
 import { readJsonFile, writeJsonFile } from '@/main/lib/jsonFile';
 import { log } from '@/main/lib/logger';
 import { type IpcResult, type Settings, LanguageArgSchema, SettingsSchema, ThemeArgSchema } from '@/schemas/storage';
@@ -65,7 +67,7 @@ export function register(ipc: IpcMain): void {
             log.info('Vault opened', { vault: vaultRoot });
             return { success: true, data: vaultRoot };
         } catch (err) {
-            return { success: false, error: (err as Error).message };
+            return ipcFailure('vault vault:choose', err);
         }
     });
 
@@ -81,20 +83,20 @@ export function register(ipc: IpcMain): void {
 
     ipc.handle('settings:updateTheme', (_event, theme: unknown): IpcResult<Settings> => {
         const parsed = ThemeArgSchema.safeParse({ theme });
-        if (!parsed.success) return { success: false, error: 'Invalid theme' };
+        if (!parsed.success) return { success: false, error: 'INVALID_ARGUMENTS' };
         return saveSetting({ theme: parsed.data.theme });
     });
 
     ipc.handle('settings:updateLanguage', (_event, language: unknown): IpcResult<Settings> => {
         const parsed = LanguageArgSchema.safeParse({ language });
-        if (!parsed.success) return { success: false, error: 'Invalid language' };
+        if (!parsed.success) return { success: false, error: 'INVALID_ARGUMENTS' };
         return saveSetting({ language: parsed.data.language });
     });
 }
 
 /** The open vault, or a refusal. Every collection read and write goes through it. */
 export function getVaultRoot(): string {
-    if (vaultRoot === null) throw new Error('No vault is open');
+    if (vaultRoot === null) throw new IpcError('NO_VAULT', 'No vault is open');
     return vaultRoot;
 }
 
@@ -106,7 +108,7 @@ export function getVaultRoot(): string {
  */
 function readSettings(): Settings {
     if (vaultRoot === null) return DEFAULT_SETTINGS;
-    const raw = readJsonFile<unknown>(path.join(vaultRoot, SETTINGS_FILE), {});
+    const raw = readJsonFile(path.join(vaultRoot, SETTINGS_FILE), {});
     const parsed = SettingsSchema.safeParse(raw);
     return parsed.success ? parsed.data : DEFAULT_SETTINGS;
 }
@@ -117,7 +119,7 @@ function saveSetting(change: Partial<Settings>): IpcResult<Settings> {
         writeJsonFile(path.join(getVaultRoot(), SETTINGS_FILE), next);
         return { success: true, data: next };
     } catch (err) {
-        return { success: false, error: (err as Error).message };
+        return ipcFailure('vault saveSetting', err);
     }
 }
 
@@ -128,7 +130,8 @@ function saveSetting(change: Partial<Settings>): IpcResult<Settings> {
  * read against a dead path.
  */
 function restoreVaultRoot(): string | null {
-    const saved = readJsonFile<{ vaultRoot?: unknown }>(STATE_FILE, {}).vaultRoot;
+    const state = readJsonFile(STATE_FILE, {});
+    const saved = typeof state === 'object' && state !== null && 'vaultRoot' in state ? state.vaultRoot : undefined;
     if (typeof saved !== 'string' || saved === '') return null;
 
     const resolved = path.resolve(saved);

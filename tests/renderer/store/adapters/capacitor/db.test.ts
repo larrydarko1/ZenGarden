@@ -11,17 +11,20 @@ import {
     initializeStorage,
 } from '@/renderer/store/adapters/capacitor/db';
 
+/** The options every Filesystem call here takes; the rest of each call's options are not read. */
+type FileOptions = { path: string; directory: string };
+
 vi.mock('@/renderer/utils/logger', () => ({ log: { info: vi.fn(), error: vi.fn() } }));
 
-const mockReadFile = vi.fn();
-const mockWriteFile = vi.fn().mockResolvedValue(undefined);
-const mockMkdir = vi.fn().mockResolvedValue(undefined);
+const mockReadFile = vi.fn<(options: FileOptions) => Promise<{ data: unknown }>>();
+const mockWriteFile = vi.fn<(options: FileOptions) => Promise<void>>().mockResolvedValue(undefined);
+const mockMkdir = vi.fn<(options: FileOptions) => Promise<void>>().mockResolvedValue(undefined);
 
 vi.mock('@capacitor/filesystem', () => ({
     Filesystem: {
-        readFile: (...args: unknown[]) => mockReadFile(...args),
-        writeFile: (...args: unknown[]) => mockWriteFile(...args),
-        mkdir: (...args: unknown[]) => mockMkdir(...args),
+        readFile: (options: FileOptions) => mockReadFile(options),
+        writeFile: (options: FileOptions) => mockWriteFile(options),
+        mkdir: (options: FileOptions) => mockMkdir(options),
     },
     Directory: { Documents: 'DOCUMENTS', Data: 'DATA' },
     Encoding: { UTF8: 'utf8' },
@@ -41,7 +44,7 @@ describe('vault location', () => {
         await writeCollection('meditations.json', []);
 
         [...mockReadFile.mock.calls, ...mockWriteFile.mock.calls].forEach(([call]) => {
-            expect((call as { directory: string }).directory).toBe('DOCUMENTS');
+            expect(call.directory).toBe('DOCUMENTS');
         });
     });
 
@@ -58,7 +61,7 @@ describe('vault location', () => {
 describe('readCollection', () => {
     it('reads and parses a JSON array', async () => {
         mockReadFile.mockResolvedValue({ data: '[{"id": 1}, {"id": 2}]' });
-        expect(await readCollection<{ id: number }>(DB_FILES.meditations)).toEqual([{ id: 1 }, { id: 2 }]);
+        expect(await readCollection(DB_FILES.meditations)).toEqual([{ id: 1 }, { id: 2 }]);
     });
 
     it('reads a missing file as an empty collection', async () => {

@@ -1,15 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import SettingsPopup from '@/renderer/components/SettingsPopup.vue';
+import type * as Store from '@/renderer/store';
 import { mountWithI18n, nth } from '@test-utils';
 
 vi.mock('@/renderer/utils/logger', () => ({
     log: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
 }));
 
-const mockCanChooseVault = vi.fn();
-const mockChooseVault = vi.fn();
-const mockGetVaultPath = vi.fn();
+const mockCanChooseVault = vi.fn<typeof Store.vaultIsPickable>();
+const mockChooseVault = vi.fn<typeof Store.chooseVault>();
+const mockGetVaultPath = vi.fn<typeof Store.findVaultPath>();
 
 vi.mock('@/renderer/store', () => ({
     vaultIsPickable: () => mockCanChooseVault(),

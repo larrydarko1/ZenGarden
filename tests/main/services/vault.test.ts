@@ -1,6 +1,6 @@
-import type { IpcMain } from 'electron';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
+import type { IpcMain } from '@/main/lib/ipc';
 import { readJsonFile, writeJsonFile } from '@/main/lib/jsonFile';
 
 type Handler = (event: unknown, ...args: unknown[]) => unknown;
@@ -34,13 +34,18 @@ vi.mock('@/main/lib/jsonFile', () => ({
     writeJsonFile: vi.fn(),
 }));
 
-vi.mock('@/main/lib/logger', () => ({ log: { info: vi.fn(), error: vi.fn() } }));
+vi.mock('@/main/lib/logger', () => ({ log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
 
 async function loadVault(): Promise<Map<string, Handler>> {
     vi.resetModules();
     const handlers = new Map<string, Handler>();
     const vault = await import('@/main/services/vault');
-    vault.register({ handle: (channel: string, fn: Handler) => handlers.set(channel, fn) } as unknown as IpcMain);
+    const ipc: IpcMain = {
+        handle(channel, fn) {
+            handlers.set(channel, fn);
+        },
+    };
+    vault.register(ipc);
     return handlers;
 }
 
@@ -98,12 +103,12 @@ describe('vault:choose', () => {
         expect(await handlers.get('vault:findPath')!(null)).toEqual({ success: true, data: '/remembered/vault' });
     });
 
-    it('reports a dialog failure rather than throwing across the bridge', async () => {
+    it('reports a dialog failure as a code rather than throwing across the bridge', async () => {
         const { dialog } = await import('electron');
         vi.mocked(dialog.showOpenDialog).mockRejectedValueOnce(new Error('no display'));
         const handlers = await loadVault();
 
-        expect(await handlers.get('vault:choose')!(null)).toEqual({ success: false, error: 'no display' });
+        expect(await handlers.get('vault:choose')!(null)).toEqual({ success: false, error: 'UNKNOWN' });
     });
 });
 
@@ -176,13 +181,13 @@ describe('settings', () => {
     });
 
     it.each([
-        ['settings:updateTheme', 'neon', 'Invalid theme'],
-        ['settings:updateLanguage', 'klingon', 'Invalid language'],
-    ])('refuses %s with an unknown value', async (channel, value, error) => {
+        ['settings:updateTheme', 'neon'],
+        ['settings:updateLanguage', 'klingon'],
+    ])('refuses %s with an unknown value', async (channel, value) => {
         state.savedState = { vaultRoot: '/remembered/vault' };
         const handlers = await loadVault();
 
-        expect(await handlers.get(channel)!(null, value)).toEqual({ success: false, error });
+        expect(await handlers.get(channel)!(null, value)).toEqual({ success: false, error: 'INVALID_ARGUMENTS' });
         expect(writeJsonFile).not.toHaveBeenCalled();
     });
 
@@ -190,7 +195,7 @@ describe('settings', () => {
         const handlers = await loadVault();
         expect(await handlers.get('settings:updateTheme')!(null, 'light')).toEqual({
             success: false,
-            error: 'No vault is open',
+            error: 'NO_VAULT',
         });
     });
 });

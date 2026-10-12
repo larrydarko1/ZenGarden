@@ -1,22 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+import Home from '@/renderer/components/Home.vue';
 import { i18n } from '@/renderer/i18n';
+import type * as Store from '@/renderer/store';
 import { mountWithI18n } from '@test-utils';
 
-const mockUpdateTheme = vi.fn().mockResolvedValue({ message: 'ok', theme: 'light' });
-const mockUpdateLanguage = vi.fn().mockResolvedValue({ message: 'ok', language: 'fr' });
+const mockUpdateTheme = vi.fn<typeof Store.updateTheme>().mockResolvedValue({ theme: 'light', language: 'en' });
+const mockUpdateLanguage = vi.fn<typeof Store.updateLanguage>().mockResolvedValue({ theme: 'dark', language: 'fr' });
 vi.mock('@/renderer/store', () => ({
-    updateTheme: (...args: unknown[]) => mockUpdateTheme(...args),
-    updateLanguage: (...args: unknown[]) => mockUpdateLanguage(...args),
+    updateTheme: (...args: Parameters<typeof Store.updateTheme>) => mockUpdateTheme(...args),
+    updateLanguage: (...args: Parameters<typeof Store.updateLanguage>) => mockUpdateLanguage(...args),
 }));
 
-const mockIsDesktop = vi.fn().mockReturnValue(false);
+const mockIsDesktop = vi.fn<() => boolean>().mockReturnValue(false);
 
 vi.mock('@/renderer/utils/platform', () => ({
     isDesktop: () => mockIsDesktop(),
 }));
 
-const mockLogError = vi.fn();
+const mockLogError = vi.fn<(...args: unknown[]) => void>();
 
 vi.mock('@/renderer/utils/logger', () => ({
     log: { error: (...args: unknown[]) => mockLogError(...args), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
@@ -27,7 +29,8 @@ const HomeStub = { name: 'Home', template: '<div class="home-stub" />' };
 const App = (await import('@/renderer/App.vue')).default;
 
 const mountApp = () => mountWithI18n(App, { global: { stubs: { Home: HomeStub } } });
-const home = (wrapper: ReturnType<typeof mountApp>) => wrapper.findComponent(HomeStub);
+// Found by the real component, so each $emit is checked against the events Home declares.
+const home = (wrapper: ReturnType<typeof mountApp>) => wrapper.findComponent(Home);
 
 beforeEach(() => {
     vi.clearAllMocks();

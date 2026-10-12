@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
+import IconActivity from '@/renderer/components/icons/IconActivity.vue';
+
 type EmotionStat = {
     name: string;
     count: number;
@@ -182,19 +184,9 @@ function barWidth(count: number, stats: EmotionStat[]): string {
         <div
             v-else
             class="empty-analytics">
-            <svg
+            <IconActivity
                 width="64"
-                height="64"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path
-                    d="M3 13h2l2-4 4 8 4-12 2 4h4"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round" />
-            </svg>
+                height="64" />
             <p>{{ t('emotions.noDataYet') }}</p>
             <span>{{ t('emotions.trackEmotionsFirst') }}</span>
         </div>

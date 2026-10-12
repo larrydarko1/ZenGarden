@@ -7,7 +7,7 @@ describe('ZenLavaAnimation', () => {
     it('renders as the root svg itself, with no wrapper element', () => {
         const wrapper = mountWithI18n(ZenLavaAnimation);
 
-        expect(wrapper.element.tagName.toLowerCase()).toBe('svg');
+        expect(wrapper.element).toBeInstanceOf(SVGSVGElement);
         expect(wrapper.classes()).toContain('zen-lava-anim');
         wrapper.unmount();
     });

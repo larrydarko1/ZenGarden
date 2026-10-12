@@ -1,28 +1,35 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ref } from 'vue';
 
+import BottomNav from '@/renderer/components/home/BottomNav.vue';
+import SessionNotes from '@/renderer/components/SessionNotes.vue';
+import SettingsPopup from '@/renderer/components/SettingsPopup.vue';
+import VaultPicker from '@/renderer/components/VaultPicker.vue';
+// Found by the real component, so each $emit is checked against the events it declares.
+import type * as Store from '@/renderer/store';
+import type { Settings } from '@/renderer/store/types';
 import { mountWithI18n, nth } from '@test-utils';
 
-const mockGetMeditations = vi.fn();
-const mockCreateMeditation = vi.fn();
-const mockGetVaultPath = vi.fn();
-const mockGetSettings = vi.fn();
-const mockCloseVault = vi.fn();
-const mockCanChooseVault = vi.fn();
+const mockGetMeditations = vi.fn<typeof Store.getMeditations>();
+const mockCreateMeditation = vi.fn<typeof Store.createMeditation>();
+const mockGetVaultPath = vi.fn<typeof Store.findVaultPath>();
+const mockGetSettings = vi.fn<typeof Store.getSettings>();
+const mockCloseVault = vi.fn<typeof Store.closeVault>();
+const mockCanChooseVault = vi.fn<typeof Store.vaultIsPickable>();
 vi.mock('@/renderer/store', () => ({
     getMeditations: () => mockGetMeditations(),
-    createMeditation: (...args: unknown[]) => mockCreateMeditation(...args),
+    createMeditation: (...args: Parameters<typeof Store.createMeditation>) => mockCreateMeditation(...args),
     findVaultPath: () => mockGetVaultPath(),
     getSettings: () => mockGetSettings(),
     closeVault: () => mockCloseVault(),
     vaultIsPickable: () => mockCanChooseVault(),
 }));
 
-const mockIsDesktop = vi.fn().mockReturnValue(false);
+const mockIsDesktop = vi.fn<() => boolean>().mockReturnValue(false);
 
 vi.mock('@/renderer/utils/platform', () => ({ isDesktop: () => mockIsDesktop() }));
 
-const mockLogError = vi.fn();
+const mockLogError = vi.fn<(...args: unknown[]) => void>();
 
 vi.mock('@/renderer/utils/logger', () => ({
     log: { error: (...args: unknown[]) => mockLogError(...args), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
@@ -74,7 +81,7 @@ vi.mock('@/renderer/composables/useMeditationSession', () => ({
 
 const Home = (await import('@/renderer/components/Home.vue')).default;
 
-const settings = { theme: 'light', language: 'fr' };
+const settings: Settings = { theme: 'light', language: 'fr' };
 
 const stubs = {
     VaultPicker: { name: 'VaultPicker', template: '<div class="vault-picker-stub" />' },
@@ -92,7 +99,7 @@ const mountHome = () => mountWithI18n(Home, { global: { stubs } });
 
 async function mountWithVault() {
     const wrapper = mountHome();
-    wrapper.findComponent(stubs.VaultPicker).vm.$emit('opened', '/vault');
+    wrapper.findComponent(VaultPicker).vm.$emit('opened', '/vault');
     await settle();
     await wrapper.vm.$nextTick();
     return wrapper;
@@ -107,7 +114,10 @@ beforeEach(() => {
     isCustomDuration.value = false;
     mockGetMeditations.mockResolvedValue({ meditations: [] });
     mockGetSettings.mockResolvedValue(settings);
-    mockCreateMeditation.mockResolvedValue({ message: 'ok' });
+    mockCreateMeditation.mockResolvedValue({
+        message: 'ok',
+        meditation: { date: '2026-01-01', duration: 15, notes: '' },
+    });
     mockGetVaultPath.mockResolvedValue(null);
     mockCloseVault.mockResolvedValue(undefined);
     mockCanChooseVault.mockResolvedValue(true);
@@ -185,7 +195,7 @@ describe('Home', () => {
         it('returns to the picker', async () => {
             const wrapper = await mountWithVault();
 
-            wrapper.findComponent(stubs.BottomNav).vm.$emit('close-vault');
+            wrapper.findComponent(BottomNav).vm.$emit('close-vault');
             await settle();
             await wrapper.vm.$nextTick();
 
@@ -197,7 +207,7 @@ describe('Home', () => {
             mockCloseVault.mockRejectedValue(new Error('offline'));
             const wrapper = await mountWithVault();
 
-            wrapper.findComponent(stubs.BottomNav).vm.$emit('close-vault');
+            wrapper.findComponent(BottomNav).vm.$emit('close-vault');
             await settle();
             await wrapper.vm.$nextTick();
 
@@ -209,7 +219,7 @@ describe('Home', () => {
 
     describe('sections', () => {
         async function open(wrapper: Awaited<ReturnType<typeof mountWithVault>>, event: string) {
-            wrapper.findComponent(stubs.BottomNav).vm.$emit(event);
+            wrapper.findComponent(BottomNav).vm.$emit(event);
             await wrapper.vm.$nextTick();
         }
 
@@ -284,8 +294,8 @@ describe('Home', () => {
             const wrapper = await mountWithVault();
 
             await open(wrapper, 'toggle-settings');
-            wrapper.findComponent(stubs.SettingsPopup).vm.$emit('theme-change', 'dark');
-            wrapper.findComponent(stubs.SettingsPopup).vm.$emit('language-change', 'ja');
+            wrapper.findComponent(SettingsPopup).vm.$emit('theme-change', 'dark');
+            wrapper.findComponent(SettingsPopup).vm.$emit('language-change', 'ja');
 
             expect(wrapper.emitted('theme-change')).toEqual([['dark']]);
             expect(wrapper.emitted('language-change')).toEqual([['ja']]);
@@ -419,7 +429,7 @@ describe('Home', () => {
             showNotes.value = true;
             await wrapper.vm.$nextTick();
 
-            wrapper.findComponent(stubs.SessionNotes).vm.$emit('save', 'settled');
+            wrapper.findComponent(SessionNotes).vm.$emit('save', 'settled');
             await settle();
 
             expect(mockCreateMeditation).toHaveBeenCalledWith(expect.any(String), 15, 'settled');
@@ -432,7 +442,7 @@ describe('Home', () => {
             showNotes.value = true;
             await wrapper.vm.$nextTick();
 
-            wrapper.findComponent(stubs.SessionNotes).vm.$emit('skip');
+            wrapper.findComponent(SessionNotes).vm.$emit('skip');
             await settle();
 
             expect(mockCreateMeditation).toHaveBeenCalledWith(expect.any(String), 15, '');
@@ -445,7 +455,7 @@ describe('Home', () => {
             showNotes.value = true;
             await wrapper.vm.$nextTick();
 
-            wrapper.findComponent(stubs.SessionNotes).vm.$emit('save', 'settled');
+            wrapper.findComponent(SessionNotes).vm.$emit('save', 'settled');
             await settle();
             await wrapper.vm.$nextTick();
 

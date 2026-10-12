@@ -8,7 +8,14 @@
  * across a 1920 viewBox — and simply translated left by exactly one period. The
  * seam lands on an identical point of the curve, so the loop is invisible while
  * the geometry never changes, which keeps the whole thing on the compositor.
+ *
+ * The gradient id comes from useId(): a fixed one repeats if two of these ever
+ * render on one page, and the second `url(#…)` would then point at the first.
  */
+import { useId } from 'vue';
+
+const gradientId = `zen-wave-gradient-${useId()}`;
+const gradientFill = `url(#${gradientId})`;
 </script>
 
 <template>
@@ -19,7 +26,7 @@
         aria-hidden="true">
         <defs>
             <linearGradient
-                id="zenWaveGradient"
+                :id="gradientId"
                 x1="0"
                 y1="0"
                 x2="0"
@@ -36,11 +43,11 @@
         </defs>
         <path
             class="wave wave-front"
-            fill="url(#zenWaveGradient)"
+            :fill="gradientFill"
             d="M0,800 Q480,900 960,800 T1920,800 T2880,800 T3840,800 V1080 H0 Z" />
         <path
             class="wave wave-back"
-            fill="url(#zenWaveGradient)"
+            :fill="gradientFill"
             opacity="0.7"
             d="M0,900 Q480,1000 960,900 T1920,900 T2880,900 T3840,900 V1080 H0 Z" />
     </svg>

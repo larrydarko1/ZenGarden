@@ -1,17 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import VaultPicker from '@/renderer/components/VaultPicker.vue';
+import type * as Store from '@/renderer/store';
 import { mountWithI18n } from '@test-utils';
 
-const mockCanChooseVault = vi.fn();
-const mockChooseVault = vi.fn();
+const mockCanChooseVault = vi.fn<typeof Store.vaultIsPickable>();
+const mockChooseVault = vi.fn<typeof Store.chooseVault>();
 
 vi.mock('@/renderer/store', () => ({
     vaultIsPickable: () => mockCanChooseVault(),
     chooseVault: () => mockChooseVault(),
 }));
 
-const mockLogError = vi.fn();
+const mockLogError = vi.fn<(...args: unknown[]) => void>();
 
 vi.mock('@/renderer/utils/logger', () => ({
     log: { error: (...args: unknown[]) => mockLogError(...args), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },

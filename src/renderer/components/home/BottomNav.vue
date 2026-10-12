@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
+import IconCalendar from '@/renderer/components/icons/IconCalendar.vue';
+import IconJournal from '@/renderer/components/icons/IconJournal.vue';
+import IconLogOut from '@/renderer/components/icons/IconLogOut.vue';
+import IconSettings from '@/renderer/components/icons/IconSettings.vue';
+import IconThought from '@/renderer/components/icons/IconThought.vue';
+
 defineProps<{
     journalMode: boolean;
     calendarMode: boolean;
@@ -27,30 +33,9 @@ const { t } = useI18n();
             :class="[{ 'nav-active': journalMode }]"
             aria-label="Track your emotions"
             @click="$emit('toggle-journal')">
-            <svg
+            <IconJournal
                 width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path
-                    d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15Z"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round" />
-                <path
-                    d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round" />
-                <path
-                    d="M8 7h8M8 11h5"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round" />
-            </svg>
+                height="22" />
             <span>{{ t('header.emotions') }}</span>
         </button>
         <button
@@ -58,26 +43,9 @@ const { t } = useI18n();
             :class="[{ 'nav-active': calendarMode }]"
             aria-label="View meditation history"
             @click="$emit('toggle-calendar')">
-            <svg
+            <IconCalendar
                 width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <rect
-                    x="3"
-                    y="4"
-                    width="18"
-                    height="18"
-                    rx="2"
-                    stroke="currentColor"
-                    stroke-width="1.5" />
-                <path
-                    d="M3 10h18M8 2v4M16 2v4"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round" />
-            </svg>
+                height="22" />
             <span>{{ t('header.calendar') }}</span>
         </button>
         <button
@@ -85,16 +53,9 @@ const { t } = useI18n();
             :class="[{ 'nav-active': philosophyMode }]"
             aria-label="About our philosophy"
             @click="$emit('toggle-philosophy')">
-            <svg
+            <IconThought
                 width="22"
-                height="22"
-                viewBox="0 0 96 96"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg">
-                <path
-                    d="M44 9.553c-1.925.812-4.86 3.056-6.523 4.988-2.862 3.327-3.196 3.453-6.299 2.371-7.117-2.481-16.58 2.241-20.581 10.27-4.402 8.833-2.61 17.282 4.996 23.559 4.854 4.006 5.66 4.812 9.666 9.666 5.493 6.656 13.034 8.936 20.741 6.269 2.85-.986 4.266-.939 7.623.253 5.57 1.978 11.336.245 16.708-5.021C72.524 59.759 74.906 58 75.624 58c2.279 0 8.621-6.331 10.511-10.491C91.4 35.919 83.178 22.041 70 20.273c-2.2-.295-4-.926-4-1.402 0-2.12-7.482-8.911-10.848-9.846-4.829-1.341-6.956-1.24-11.152.528m.838 7.973c-1.621.88-3.336 3.21-4.386 5.96-2.008 5.258-1.53 5.046-5.678 2.518-10.81-6.591-23.486 5.211-17.138 15.956 1.765 2.989 6.195 6.04 8.768 6.04A1.6 1.6 0 0 1 28 49.596c0 7.743 11.474 13.045 18.381 8.492 2.83-1.866 2.935-1.866 6 .002 5.341 3.258 11.783 1.708 14.573-3.505C67.715 53.163 68.98 52 69.765 52 74.454 52 80 45.498 80 40c0-7.684-6.192-12.605-14.615-11.615-5.226.614-5.385.56-5.385-1.829 0-8.107-8.042-12.897-15.162-9.03M26 74c-3.585 3.585-1.019 10 4 10 2.576 0 6-3.424 6-6 0-1.1-.9-2.9-2-4s-2.9-2-4-2-2.9.9-4 2m-12.96 7.452c-2.657 3.201 1.245 8.118 4.71 5.936C21.212 85.207 19.979 80 16 80c-.965 0-2.297.653-2.96 1.452"
-                    fill-rule="evenodd" />
-            </svg>
+                height="22" />
             <span>{{ t('header.philosophy') }}</span>
         </button>
         <button
@@ -102,25 +63,9 @@ const { t } = useI18n();
             :class="[{ 'nav-active': settingsMode }]"
             aria-label="Open settings"
             @click="$emit('toggle-settings')">
-            <svg
+            <IconSettings
                 width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <circle
-                    cx="12"
-                    cy="12"
-                    r="3"
-                    stroke="currentColor"
-                    stroke-width="1.5" />
-                <path
-                    d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round" />
-            </svg>
+                height="22" />
             <span>{{ t('header.settings') }}</span>
         </button>
         <button
@@ -128,19 +73,9 @@ const { t } = useI18n();
             class="nav-item nav-close-vault"
             aria-label="Close the current vault"
             @click="$emit('close-vault')">
-            <svg
+            <IconLogOut
                 width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path
-                    d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round" />
-            </svg>
+                height="22" />
             <span>{{ t('vault.close') }}</span>
         </button>
     </nav>

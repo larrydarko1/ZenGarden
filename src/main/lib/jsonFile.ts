@@ -18,10 +18,13 @@ import fs from 'fs';
  */
 const FILE_MODE = 0o600;
 
-/** The parsed contents, or `fallback` when the file is missing or unparseable. */
-export function readJsonFile<T>(filePath: string, fallback: T): T {
+/**
+ * The parsed contents, or `fallback` when the file is missing or unparseable. Unchecked
+ * either way: what the file holds is the caller's to narrow.
+ */
+export function readJsonFile(filePath: string, fallback: unknown): unknown {
     try {
-        return JSON.parse(fs.readFileSync(filePath, 'utf8')) as T;
+        return JSON.parse(fs.readFileSync(filePath, 'utf8'));
     } catch {
         /* absent, unreadable, or half-written — all three mean "nothing usable here" */
         return fallback;

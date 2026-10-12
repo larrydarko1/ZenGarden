@@ -10,6 +10,10 @@ import ZenWindAnimation from '@/renderer/components/animations/ZenWindAnimation.
 import EmotionTracker from '@/renderer/components/EmotionTracker.vue';
 import BottomNav from '@/renderer/components/home/BottomNav.vue';
 import MeditationOverlay from '@/renderer/components/home/MeditationOverlay.vue';
+import IconArrowRight from '@/renderer/components/icons/IconArrowRight.vue';
+import IconBell from '@/renderer/components/icons/IconBell.vue';
+import IconClose from '@/renderer/components/icons/IconClose.vue';
+import IconSpinnerBar from '@/renderer/components/icons/IconSpinnerBar.vue';
 import MeditationCalendar from '@/renderer/components/MeditationCalendar.vue';
 import SessionNotes from '@/renderer/components/SessionNotes.vue';
 import SettingsPopup from '@/renderer/components/SettingsPopup.vue';
@@ -84,8 +88,7 @@ const meditationAnimation = computed(() => ANIMATIONS[meditationAnimationIdx.val
 
 const desktopApp = ref(false);
 
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-const phrases = computed<string[]>(() => i18n.tm('phrases') as string[]);
+const phrases = computed<string[]>(() => i18n.tm('phrases'));
 
 // Seeded by pickPhrase(), declared below — a hoisted function declaration, so
 // it is already defined when this line runs.
@@ -373,26 +376,9 @@ onUnmounted(() => {
                         <span
                             class="zen-loader"
                             :class="[{ dimmed: showBellConfig }]">
-                            <svg
+                            <IconSpinnerBar
                                 width="32"
-                                height="32"
-                                viewBox="0 0 32 32">
-                                <rect
-                                    x="10"
-                                    y="15"
-                                    width="12"
-                                    height="2"
-                                    rx="1"
-                                    fill="var(--text1)">
-                                    <animateTransform
-                                        attributeName="transform"
-                                        type="rotate"
-                                        from="0 16 16"
-                                        to="360 16 16"
-                                        dur="2.5s"
-                                        repeatCount="indefinite" />
-                                </rect>
-                            </svg>
+                                height="32" />
                         </span>
                     </div>
                 </transition>
@@ -434,19 +420,9 @@ onUnmounted(() => {
                             class="custom-ok-btn"
                             aria-label="Confirm custom duration"
                             @click="applyCustomDuration">
-                            <svg
+                            <IconArrowRight
                                 width="12"
-                                height="12"
-                                viewBox="0 0 12 12"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M2 6h8M6 2l4 4-4 4"
-                                    stroke="currentColor"
-                                    stroke-width="1.5"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                            </svg>
+                                height="12" />
                         </button>
                     </div>
                     <button
@@ -454,19 +430,10 @@ onUnmounted(() => {
                         :class="[{ active: bellEnabled }]"
                         :aria-label="'Configure bell settings'"
                         @click="showBellConfig = !showBellConfig">
-                        <svg
+                        <IconBell
                             width="14"
                             height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M12 2C10.9 2 10 2.9 10 4C10 4.6 10.2 5.1 10.6 5.5C8 6.1 6 8.3 6 11V16L4 18V19H20V18L18 16V11C18 8.3 16 6.1 13.4 5.5C13.8 5.1 14 4.6 14 4C14 2.9 13.1 2 12 2ZM10 20C10 21.1 10.9 22 12 22C13.1 22 14 21.1 14 20"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
+                            stroke-width="1.5" />
                     </button>
                     <button
                         class="start-meditation-btn"
@@ -492,18 +459,9 @@ onUnmounted(() => {
                             class="zen-icon-btn is-bare config-close-btn"
                             aria-label="Close bell settings"
                             @click="showBellConfig = false">
-                            <svg
+                            <IconClose
                                 width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M18 6L6 18M6 6l12 12"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round" />
-                            </svg>
+                                height="20" />
                         </button>
                     </div>
                     <div class="config-panel-options">
@@ -643,6 +601,7 @@ onUnmounted(() => {
     display: none;
     align-items: center;
     justify-content: center;
+    color: $text1;
     transition: opacity $duration-mellow $ease-standard;
 
     &.dimmed {

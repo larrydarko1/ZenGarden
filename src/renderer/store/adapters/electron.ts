@@ -110,8 +110,7 @@ function unwrap<T>(result: IpcResult<T>): T {
 }
 
 declare global {
-    // Must be an interface, not a type: this merges with the DOM's own Window declaration.
-    // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+    // eslint-disable-next-line @typescript-eslint/consistent-type-definitions -- only an interface merges with the DOM's own Window declaration
     interface Window {
         electronAPI?: ElectronAPI;
     }

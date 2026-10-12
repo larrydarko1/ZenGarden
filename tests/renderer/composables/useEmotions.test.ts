@@ -2,6 +2,8 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ref } from 'vue';
 
 import { useEmotions } from '@/renderer/composables/useEmotions';
+import type * as Store from '@/renderer/store';
+import type { EmotionAnalytics, EmotionLog } from '@/renderer/store/types';
 import { nth } from '@test-utils';
 
 vi.mock('vue-i18n', () => ({
@@ -10,15 +12,44 @@ vi.mock('vue-i18n', () => ({
     }),
 }));
 
-const mockSaveEmotionLog = vi.fn().mockResolvedValue({ message: 'ok', emotionLog: {} });
-const mockGetEmotionLogs = vi.fn().mockResolvedValue({ emotionLogs: [] });
-const mockGetEmotionAnalytics = vi.fn().mockResolvedValue({ totalDays: 0, topEmotions: [] });
+const mockSaveEmotionLog = vi
+    .fn<typeof Store.saveEmotionLog>()
+    .mockResolvedValue({ message: 'ok', emotionLog: emotionLog() });
+const mockGetEmotionLogs = vi.fn<typeof Store.getEmotionLogs>().mockResolvedValue({ emotionLogs: [] });
+const mockGetEmotionAnalytics = vi.fn<typeof Store.getEmotionAnalytics>().mockResolvedValue(analyticsOf());
 
 vi.mock('@/renderer/store', () => ({
-    saveEmotionLog: (...args: unknown[]) => mockSaveEmotionLog(...args),
-    getEmotionLogs: (...args: unknown[]) => mockGetEmotionLogs(...args),
-    getEmotionAnalytics: (...args: unknown[]) => mockGetEmotionAnalytics(...args),
+    saveEmotionLog: (...args: Parameters<typeof Store.saveEmotionLog>) => mockSaveEmotionLog(...args),
+    getEmotionLogs: (...args: Parameters<typeof Store.getEmotionLogs>) => mockGetEmotionLogs(...args),
+    getEmotionAnalytics: (...args: Parameters<typeof Store.getEmotionAnalytics>) => mockGetEmotionAnalytics(...args),
 }));
+
+function emotionLog(fields: Partial<EmotionLog> = {}): EmotionLog {
+    return {
+        date: '2026-01-01',
+        emotions: [],
+        positiveCount: 0,
+        negativeCount: 0,
+        pnRatio: 0,
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        ...fields,
+    };
+}
+
+function analyticsOf(fields: Partial<EmotionAnalytics> = {}): EmotionAnalytics {
+    return {
+        totalDays: 0,
+        averagePositiveCount: 0,
+        averageNegativeCount: 0,
+        averagePNRatio: 0,
+        emotionDiversity: 0,
+        positiveDays: 0,
+        negativeDays: 0,
+        topEmotions: [],
+        trends: [],
+        ...fields,
+    };
+}
 
 describe('useEmotions', () => {
     const selectedDate = ref(new Date('2025-01-15'));
@@ -179,13 +210,13 @@ describe('useEmotions', () => {
         it('loads emotions from store for selected date', async () => {
             mockGetEmotionLogs.mockResolvedValue({
                 emotionLogs: [
-                    {
+                    emotionLog({
                         emotions: [
                             { name: 'Joy', type: 'positive' },
                             { name: 'Sadness', type: 'negative' },
                         ],
                         note: 'A good day',
-                    },
+                    }),
                 ],
             });
 
@@ -217,14 +248,14 @@ describe('useEmotions', () => {
         });
 
         it('sets loadingEmotions flag during load', async () => {
-            let resolveLoad: (v: unknown) => void;
+            let resolveLoad: (value: { emotionLogs: EmotionLog[] }) => void = () => {};
             mockGetEmotionLogs.mockReturnValue(new Promise((r) => (resolveLoad = r)));
 
             const { loadEmotions, loadingEmotions } = setup();
             const loadPromise = loadEmotions();
             expect(loadingEmotions.value).toBe(true);
 
-            resolveLoad!({ emotionLogs: [] });
+            resolveLoad({ emotionLogs: [] });
             await loadPromise;
             expect(loadingEmotions.value).toBe(false);
         });
@@ -232,7 +263,7 @@ describe('useEmotions', () => {
 
     describe('loadAnalytics', () => {
         it('loads analytics from store', async () => {
-            const mockData = { totalDays: 30, topEmotions: [], averagePerDay: 5, positiveNegativeRatio: '0.60' };
+            const mockData = analyticsOf({ totalDays: 30, averagePNRatio: 0.6 });
             mockGetEmotionAnalytics.mockResolvedValue(mockData);
 
             const { loadAnalytics, analytics } = setup();
@@ -252,14 +283,14 @@ describe('useEmotions', () => {
         });
 
         it('sets loading flag during analytics load', async () => {
-            let resolveLoad: (v: unknown) => void;
+            let resolveLoad: (value: EmotionAnalytics) => void = () => {};
             mockGetEmotionAnalytics.mockReturnValue(new Promise((r) => (resolveLoad = r)));
 
             const { loadAnalytics, loading } = setup();
             const loadPromise = loadAnalytics();
             expect(loading.value).toBe(true);
 
-            resolveLoad!({ totalDays: 0, topEmotions: [] });
+            resolveLoad(analyticsOf());
             await loadPromise;
             expect(loading.value).toBe(false);
         });

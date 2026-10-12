@@ -26,19 +26,22 @@ export const VAULT_DIR = 'ZenGarden';
 
 const STORAGE_DIR = Directory.Documents;
 
-export async function readCollection<T>(filename: string): Promise<T[]> {
+/** Every entry the collection file holds, unchecked: what a rewrite has to put back. */
+export async function readCollection(filename: string): Promise<unknown[]> {
     const parsed = await readJson(filename);
-    return Array.isArray(parsed) ? (parsed as T[]) : [];
+    const entries: unknown[] = Array.isArray(parsed) ? parsed : [];
+    return entries;
 }
 
-export async function writeCollection<T>(filename: string, data: T[]): Promise<void> {
+export async function writeCollection(filename: string, data: unknown[]): Promise<void> {
     await writeJson(filename, data);
 }
 
-export async function readObject<T>(filename: string): Promise<T | null> {
+/** The stored object, unchecked beyond being one: its fields are the caller's to parse. */
+export async function readObject(filename: string): Promise<object | null> {
     const parsed = await readJson(filename);
     if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
-    return parsed as T;
+    return parsed;
 }
 
 export async function writeObject(filename: string, data: unknown): Promise<void> {

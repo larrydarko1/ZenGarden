@@ -16,11 +16,6 @@ import { getVaultRoot } from '@/main/services/vault';
 
 export type CollectionName = 'meditations' | 'emotionLogs' | 'eightfoldPathLogs';
 
-export type RawDoc = {
-    _id?: string;
-    [key: string]: unknown;
-};
-
 const FILE_NAMES: Record<CollectionName, string> = {
     meditations: 'meditations.json',
     emotionLogs: 'emotion_logs.json',
@@ -31,15 +26,16 @@ export function generateId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
-export function readCollection<T>(collection: CollectionName): T[] {
-    const raw = readJsonFile<unknown>(collectionPath(collection), []);
+/** Every entry the collection holds, unchecked: what a rewrite has to put back. */
+export function readCollection(collection: CollectionName): unknown[] {
+    const raw = readJsonFile(collectionPath(collection), []);
     // A collection file that is not a JSON array is unusable, not partially
     // usable: reading it as one would hand every caller a `.map` that throws.
     const parsed = z.array(z.unknown()).safeParse(raw);
-    return parsed.success ? (parsed.data as T[]) : [];
+    return parsed.success ? parsed.data : [];
 }
 
-export function writeCollection<T>(collection: CollectionName, data: T[]): void {
+export function writeCollection(collection: CollectionName, data: unknown[]): void {
     writeJsonFile(collectionPath(collection), data);
 }
 

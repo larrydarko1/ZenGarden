@@ -4,6 +4,7 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ref, nextTick } from 'vue';
 
 import { useEightfoldPath } from '@/renderer/composables/useEightfoldPath';
+import type * as Store from '@/renderer/store';
 
 vi.mock('vue-i18n', () => ({
     useI18n: () => ({
@@ -11,12 +12,12 @@ vi.mock('vue-i18n', () => ({
     }),
 }));
 
-const mockSaveEightfoldPathLog = vi.fn().mockResolvedValue({ message: 'ok' });
-const mockGetEightfoldPathLogs = vi.fn().mockResolvedValue({ pathLogs: [] });
+const mockSaveEightfoldPathLog = vi.fn<typeof Store.saveEightfoldPathLog>();
+const mockGetEightfoldPathLogs = vi.fn<typeof Store.getEightfoldPathLogs>().mockResolvedValue({ pathLogs: [] });
 
 vi.mock('@/renderer/store', () => ({
-    saveEightfoldPathLog: (...args: unknown[]) => mockSaveEightfoldPathLog(...args),
-    getEightfoldPathLogs: (...args: unknown[]) => mockGetEightfoldPathLogs(...args),
+    saveEightfoldPathLog: (...args: Parameters<typeof Store.saveEightfoldPathLog>) => mockSaveEightfoldPathLog(...args),
+    getEightfoldPathLogs: (...args: Parameters<typeof Store.getEightfoldPathLogs>) => mockGetEightfoldPathLogs(...args),
 }));
 describe('useEightfoldPath', () => {
     const selectedDate = ref(new Date('2025-01-15'));
@@ -106,10 +107,14 @@ describe('useEightfoldPath', () => {
             mockGetEightfoldPathLogs.mockResolvedValue({
                 pathLogs: [
                     {
+                        date: '2026-01-01',
                         paths: [
                             { path: 'rightView', note: 'reflected' },
                             { path: 'rightSpeech', note: '' },
                         ],
+                        completedCount: 1,
+                        progressPercentage: 12.5,
+                        updatedAt: '2026-01-01T00:00:00.000Z',
                     },
                 ],
             });
