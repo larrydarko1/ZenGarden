@@ -28,7 +28,7 @@ vi.mock('fs', () => {
 
 vi.mock('@/main/lib/jsonFile', () => ({
     readJsonFile: vi.fn((filePath: string, fallback: unknown) => {
-        if (String(filePath).endsWith('settings.json')) return state.settings ?? fallback;
+        if (filePath.endsWith('settings.json')) return state.settings ?? fallback;
         return state.savedState;
     }),
     writeJsonFile: vi.fn(),

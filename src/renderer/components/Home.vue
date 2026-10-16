@@ -269,7 +269,7 @@ onMounted(async () => {
         const remembered = await findVaultPath();
         // Only if nothing was opened while this was still resolving — otherwise a
         // slow lookup would close a vault the user had already picked by hand.
-        if (vaultPath.value === null) vaultPath.value = remembered;
+        vaultPath.value ??= remembered;
     } catch (error) {
         log.error('Failed to resolve the vault', error);
     }
@@ -310,7 +310,6 @@ onUnmounted(() => {
 
             <SessionNotes
                 v-if="showNotes"
-                :duration="completedMeditationDuration"
                 @save="saveSessionNotes"
                 @skip="skipSessionNotes"
                 @close="skipSessionNotes" />
@@ -347,7 +346,7 @@ onUnmounted(() => {
                         v-if="philosophyMode"
                         class="journal-inline-container"
                         :class="[{ 'has-header': desktopApp }]">
-                        <ZenPhilosophy @close="philosophyMode = false" />
+                        <ZenPhilosophy />
                     </div>
                 </transition>
 
@@ -398,7 +397,7 @@ onUnmounted(() => {
                     <button
                         v-if="!isCustomDuration"
                         class="duration-btn custom-btn"
-                        :aria-label="'Set custom meditation duration'"
+                        aria-label="Set custom meditation duration"
                         @click="enableCustomDuration">
                         ⋯
                     </button>
@@ -428,7 +427,7 @@ onUnmounted(() => {
                     <button
                         class="duration-btn bell-config-btn"
                         :class="[{ active: bellEnabled }]"
-                        :aria-label="'Configure bell settings'"
+                        aria-label="Configure bell settings"
                         @click="showBellConfig = !showBellConfig">
                         <IconBell
                             width="14"

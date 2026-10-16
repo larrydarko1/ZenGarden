@@ -11,7 +11,6 @@ type EightfoldPath = {
 const props = defineProps<{
     loading: boolean;
     paths: EightfoldPath[];
-    followedPaths: string[];
     pathNotes: Record<string, string>;
     completedCount: number;
     progressPercentage: number;

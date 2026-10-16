@@ -52,7 +52,6 @@ const {
 } = useEmotions(selectedDate, activeTab);
 
 const {
-    followedPaths,
     pathNotes,
     loadingPath,
     eightfoldPaths,
@@ -211,7 +210,6 @@ onMounted(() => {
                 v-if="activeTab === 'eightfold'"
                 :loading="loadingPath"
                 :paths="eightfoldPaths"
-                :followed-paths="followedPaths"
                 :path-notes="pathNotes"
                 :completed-count="efCompletedCount"
                 :progress-percentage="efProgressPercentage"

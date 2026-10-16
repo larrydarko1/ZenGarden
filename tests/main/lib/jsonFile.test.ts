@@ -11,7 +11,7 @@ const state = vi.hoisted(() => ({
 vi.mock('fs', () => {
     const api = {
         readFileSync: (filePath: string): string => {
-            const contents = state.files[String(filePath)];
+            const contents = state.files[filePath];
             if (contents === undefined) throw new Error('ENOENT');
             return contents;
         },

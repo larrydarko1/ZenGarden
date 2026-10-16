@@ -2,10 +2,6 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-defineProps<{
-    duration: number;
-}>();
-
 const emit = defineEmits<{
     save: [notes: string];
     skip: [];

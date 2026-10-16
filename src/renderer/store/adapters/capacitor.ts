@@ -196,7 +196,7 @@ export class CapacitorStorageAdapter implements IStorageAdapter {
     async saveEightfoldPathLog(input: EightfoldPathInput): Promise<{ message: string; pathLog: EightfoldPathLog }> {
         await this.ensureInitialized();
 
-        const completedCount = input.paths.filter((p) => p.note !== undefined && p.note.trim() !== '').length;
+        const completedCount = input.paths.filter((p) => p.note.trim() !== '').length;
         const progressPercentage = (completedCount / 8) * 100;
 
         const pathLog = await saveByDate(DB_FILES.eightfoldPathLogs, {

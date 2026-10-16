@@ -22,7 +22,7 @@ import type { ElectronAPI } from '@/schemas/electron';
 import type { IpcResult } from '@/schemas/storage';
 
 export class ElectronStorageAdapter implements IStorageAdapter {
-    private api: ElectronAPI;
+    private readonly api: ElectronAPI;
 
     constructor() {
         if (window.electronAPI === undefined) {

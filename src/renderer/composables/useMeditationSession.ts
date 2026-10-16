@@ -100,9 +100,7 @@ export function useMeditationSession(customInput: CustomInputRef): MeditationSes
     // ── Audio ─────────────────────────────────────────────────────────────────
 
     function playAlert(): void {
-        if (alertAudio.value === null) {
-            alertAudio.value = new Audio('./alert.mp3');
-        }
+        alertAudio.value ??= new Audio('./alert.mp3');
         alertAudio.value.currentTime = 0;
         alertAudio.value.play().catch(() => {
             // Alert audio playback failed silently

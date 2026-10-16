@@ -18,7 +18,7 @@ import type {
     Theme,
 } from '@/renderer/store/types';
 
-export * from '@/renderer/store/types';
+export type * from '@/renderer/store/types';
 
 // Vault operations
 export async function findVaultPath(): Promise<string | null> {
