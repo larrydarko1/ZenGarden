@@ -172,8 +172,8 @@ describe('storage:saveEmotionLog', () => {
 
         await invoke('storage:saveEmotionLog', '2025-01-15', [{ type: 'positive', name: 'joy' }]);
 
-        expect(collections['emotionLogs']?.[0]).toBe('junk');
-        expect(EmotionLogSchema.parse(collections['emotionLogs']?.[1])._id).toBe('old');
+        expect(collections['emotionLogs'][0]).toBe('junk');
+        expect(EmotionLogSchema.parse(collections['emotionLogs'][1])._id).toBe('old');
     });
 });
 

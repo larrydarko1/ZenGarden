@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 
 import SettingsPopup from '@/renderer/components/SettingsPopup.vue';
 import type * as Store from '@/renderer/store';
@@ -29,11 +29,22 @@ async function mountReady(theme: 'light' | 'dark' = 'dark') {
     return wrapper;
 }
 
+// jsdom's location.reload is read-only, so the whole location is swapped for one that only reloads.
+function stubReload(): Mock<() => void> {
+    const reload = vi.fn<() => void>();
+    vi.stubGlobal('location', { reload });
+    return reload;
+}
+
 beforeEach(() => {
     vi.clearAllMocks();
     mockCanChooseVault.mockResolvedValue(true);
     mockGetVaultPath.mockResolvedValue('/home/monk/journal');
     mockChooseVault.mockResolvedValue('/home/monk/other');
+});
+
+afterEach(() => {
+    vi.unstubAllGlobals();
 });
 
 describe('SettingsPopup', () => {
@@ -109,8 +120,7 @@ describe('SettingsPopup', () => {
     });
 
     it('reloads after switching to another vault', async () => {
-        const reload = vi.fn();
-        vi.spyOn(window, 'location', 'get').mockReturnValue({ ...window.location, reload } as Location);
+        const reload = stubReload();
         const wrapper = await mountReady();
 
         await wrapper.find('.vault-switch').trigger('click');
@@ -121,8 +131,7 @@ describe('SettingsPopup', () => {
     });
 
     it('stays put when the picker is cancelled', async () => {
-        const reload = vi.fn();
-        vi.spyOn(window, 'location', 'get').mockReturnValue({ ...window.location, reload } as Location);
+        const reload = stubReload();
         mockChooseVault.mockResolvedValue(null);
         const wrapper = await mountReady();
 
