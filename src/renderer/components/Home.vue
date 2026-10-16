@@ -310,7 +310,6 @@ onUnmounted(() => {
 
             <SessionNotes
                 v-if="showNotes"
-                :duration="completedMeditationDuration"
                 @save="saveSessionNotes"
                 @skip="skipSessionNotes"
                 @close="skipSessionNotes" />
@@ -347,7 +346,7 @@ onUnmounted(() => {
                         v-if="philosophyMode"
                         class="journal-inline-container"
                         :class="[{ 'has-header': desktopApp }]">
-                        <ZenPhilosophy @close="philosophyMode = false" />
+                        <ZenPhilosophy />
                     </div>
                 </transition>
 

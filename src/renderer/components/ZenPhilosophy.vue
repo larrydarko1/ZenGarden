@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-defineEmits<(e: 'close') => void>();
-
 const sections: { titleKey: string; bodyKey: string }[] = [
     {
         titleKey: 'philosophy.practice.title',
