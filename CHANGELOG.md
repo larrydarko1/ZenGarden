@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Formatting and lint rules now come from the shared `@larrydarko/lint-config` package.
+- Android builds no longer need Android Studio: `npm run build:android` builds the debug APK into
+  `dist-android/` with a JDK and the Android SDK command-line tools.
+
+### Removed
+
+- The `cap:open:android` and `cap:run:android` scripts, which depended on Android Studio.
 
 ### Security
 

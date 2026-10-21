@@ -111,7 +111,7 @@ Android has no folder picker that yields a real path, so the vault is fixed ther
 
 - Node.js 24+ (enforced by `engines` in [package.json](package.json))
 - npm >=11
-- **For Android development:** [Android Studio](https://developer.android.com/studio) installed (provides the JDK and Android SDK)
+- **For Android development:** JDK 21 and the Android SDK — see [Mobile Development](#mobile-development). Android Studio is not needed.
 
 ### Setup
 
@@ -147,27 +147,35 @@ This will:
 
 #### Mobile Development
 
-Requires **Android Studio** to be installed at the default location. The npm scripts automatically set `JAVA_HOME` and `ANDROID_HOME` to use Android Studio's bundled JDK and SDK, so no manual environment variable configuration is needed.
+Android builds from the command line with Gradle; Android Studio is not needed. Two things must be installed:
 
-| Variable       | Path (set automatically by the scripts)                       |
-| -------------- | ------------------------------------------------------------- |
-| `JAVA_HOME`    | `/Applications/Android Studio.app/Contents/jbr/Contents/Home` |
-| `ANDROID_HOME` | `~/Library/Android/sdk`                                       |
-
-> **Note:** If Android Studio is installed in a non-default location, or you're on Linux, update the paths in the `cap:run:android` script in [package.json](package.json).
-
-**Quick Start:**
+- **JDK 21.** Gradle uses `JAVA_HOME` if it is set, otherwise the `java` on your `PATH`.
+- **The Android SDK**, found through `ANDROID_HOME`. The command-line tools are enough. On macOS:
 
 ```sh
-# Build and sync to mobile platforms
-npm run build:mobile
-
-# Open in native IDEs
-npm run cap:open:android  # Requires Android Studio
-
-# Build, sync, and run on device/emulator (JAVA_HOME & ANDROID_HOME are set inline)
-npm run cap:run:android
+brew install openjdk@21
+brew install --cask android-commandlinetools
+export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools   # add to your shell profile
+sdkmanager --licenses
 ```
+
+Gradle downloads the SDK platform and build tools it needs on the first build.
+
+```sh
+# Web build → sync into android/ → debug APK
+npm run build:android
+```
+
+The APK lands in `dist-android/`, named with the app version. Copy it to the phone and open
+it to install; the first time, Android asks to allow installs from the app you opened it with.
+
+Debug builds are signed with your machine's debug key (`~/.android/debug.keystore`), so each new
+APK from the same machine installs over the last one and keeps the app's data. An APK built on
+another machine carries a different key: Android refuses to install it as an update, and the app
+must be uninstalled first.
+
+`npm run build:mobile` alone rebuilds the web assets and syncs them into `android/` without running
+Gradle.
 
 ### Testing & Code Quality
 
@@ -257,15 +265,14 @@ cd ZenGarden && npm ci && npm run build:mac
 
 The `.dmg` lands in `dist-electron/`, ad-hoc signed for the machine that built it.
 
-**Android** — needs Android Studio for the JDK and SDK, as under [Mobile Development](#mobile-development):
+**Android** — needs JDK 21 and the Android SDK, as under [Mobile Development](#mobile-development):
 
 ```sh
 git clone https://github.com/larrydarko1/ZenGarden.git
-cd ZenGarden && npm ci && npm run build:mobile
-cd android && ./gradlew assembleDebug
+cd ZenGarden && npm ci && npm run build:android
 ```
 
-The APK lands in `android/app/build/outputs/apk/debug/`. Installing it means allowing your device to
+The APK lands in `dist-android/`. Installing it means allowing your device to
 install from an unknown source, which is the cost of an unsigned build. If you would rather sign it
 with your own key, generate a keystore, wire it into `android/app/build.gradle`, and run
 `./gradlew assembleRelease`.

@@ -69,6 +69,7 @@ const {
     bellSound,
     showBellConfig,
     completedMeditationDuration,
+    completedAt,
     showNotes,
     meditationAnimationIdx,
     selectPresetDuration,
@@ -79,6 +80,7 @@ const {
     selectBellSoundFromDropdown,
     startMeditation: startMeditationSession,
     stopMeditation,
+    restoreSession,
     cleanup: cleanupMeditation,
     formatTime,
 } = useMeditationSession(customInput);
@@ -206,7 +208,11 @@ async function loadSettings(): Promise<void> {
 
 async function saveSessionNotes(notes: string): Promise<void> {
     try {
-        await createMeditation(new Date().toISOString(), Math.round(completedMeditationDuration.value / 60), notes);
+        await createMeditation(
+            new Date(completedAt.value).toISOString(),
+            Math.round(completedMeditationDuration.value / 60),
+            notes,
+        );
         await fetchMeditations();
         showNotes.value = false;
     } catch {
@@ -216,7 +222,11 @@ async function saveSessionNotes(notes: string): Promise<void> {
 
 async function skipSessionNotes(): Promise<void> {
     try {
-        await createMeditation(new Date().toISOString(), Math.round(completedMeditationDuration.value / 60), '');
+        await createMeditation(
+            new Date(completedAt.value).toISOString(),
+            Math.round(completedMeditationDuration.value / 60),
+            '',
+        );
         await fetchMeditations();
         showNotes.value = false;
     } catch {
@@ -277,6 +287,8 @@ onMounted(async () => {
         await loadSettings();
         await fetchMeditations();
     }
+    // Android may have reloaded the app mid-session, e.g. while the screen was locked.
+    await restoreSession(ANIMATIONS.length);
 });
 
 onUnmounted(() => {

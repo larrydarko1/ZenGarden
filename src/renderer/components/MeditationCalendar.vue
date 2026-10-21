@@ -175,6 +175,7 @@ function selectDay(day: CalendarDay): void {
     flex-direction: column;
     gap: $space-5;
     width: 100%;
+    max-width: $size-47;
 }
 
 .calendar-header {
@@ -204,7 +205,6 @@ function selectDay(day: CalendarDay): void {
 .calendar-body {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     gap: $space-4;
     width: 100%;
 }
@@ -298,6 +298,7 @@ function selectDay(day: CalendarDay): void {
     @include scrollbar;
 
     flex: none;
+    box-sizing: border-box;
     width: 100%;
     max-height: $size-41;
     padding: $space-4;
@@ -347,6 +348,7 @@ function selectDay(day: CalendarDay): void {
     color: $text2;
     font-size: $font-size-xs;
     line-height: $line-height-base;
+    overflow-wrap: anywhere;
 
     strong {
         display: block;
@@ -376,6 +378,10 @@ function selectDay(day: CalendarDay): void {
 }
 
 @media (width > #{$breakpoint-xl}) {
+    .calendar-inline {
+        max-width: none;
+    }
+
     .calendar-title {
         font-size: $font-size-xs;
     }
@@ -387,10 +393,13 @@ function selectDay(day: CalendarDay): void {
 
     .calendar-body {
         flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
         gap: $space-6;
     }
 
     .calendar-grid-section {
+        flex: 0 1 $size-47;
         padding: $space-5;
     }
 

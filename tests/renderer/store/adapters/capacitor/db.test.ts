@@ -16,6 +16,14 @@ type FileOptions = { path: string; directory: string };
 
 vi.mock('@/renderer/utils/logger', () => ({ log: { info: vi.fn(), error: vi.fn() } }));
 
+/** How the Android plugin rejects: a code in its OS-PLUG-FILE-XXXX scheme, plus a message. */
+const MISSING_FILE = Object.assign(new Error("'readFile' failed because file does not exist."), {
+    code: 'OS-PLUG-FILE-0008',
+});
+const PERMISSION_DENIED = Object.assign(new Error('Unable to do file operation, user denied permission request.'), {
+    code: 'OS-PLUG-FILE-0007',
+});
+
 const mockReadFile = vi.fn<(options: FileOptions) => Promise<{ data: unknown }>>();
 const mockWriteFile = vi.fn<(options: FileOptions) => Promise<void>>().mockResolvedValue(undefined);
 const mockMkdir = vi.fn<(options: FileOptions) => Promise<void>>().mockResolvedValue(undefined);
@@ -65,18 +73,25 @@ describe('readCollection', () => {
     });
 
     it('reads a missing file as an empty collection', async () => {
-        mockReadFile.mockRejectedValue(new Error('File not found'));
+        mockReadFile.mockRejectedValue(MISSING_FILE);
         expect(await readCollection(DB_FILES.meditations)).toEqual([]);
     });
 
-    it('reads unparseable contents as an empty collection', async () => {
+    // A save reads the collection, appends and writes it back: reading any of these as
+    // empty would overwrite the journal with one entry.
+    it('throws on unparseable contents rather than reading them as empty', async () => {
         mockReadFile.mockResolvedValue({ data: '{not json' });
-        expect(await readCollection(DB_FILES.meditations)).toEqual([]);
+        await expect(readCollection(DB_FILES.meditations)).rejects.toThrow(SyntaxError);
     });
 
-    it('reads non-string data as an empty collection', async () => {
+    it('throws on non-string data', async () => {
         mockReadFile.mockResolvedValue({ data: null });
-        expect(await readCollection(DB_FILES.meditations)).toEqual([]);
+        await expect(readCollection(DB_FILES.meditations)).rejects.toThrow('did not read back as text');
+    });
+
+    it('throws when the file exists but cannot be read', async () => {
+        mockReadFile.mockRejectedValue(PERMISSION_DENIED);
+        await expect(readCollection(DB_FILES.meditations)).rejects.toBe(PERMISSION_DENIED);
     });
 
     it('reads an object as an empty collection', async () => {
@@ -104,8 +119,13 @@ describe('readObject', () => {
     });
 
     it('reads a missing file as null', async () => {
-        mockReadFile.mockRejectedValue(new Error('File not found'));
+        mockReadFile.mockRejectedValue(MISSING_FILE);
         expect(await readObject(DB_FILES.settings)).toBeNull();
+    });
+
+    it('throws on unparseable contents', async () => {
+        mockReadFile.mockResolvedValue({ data: '{"theme":' });
+        await expect(readObject(DB_FILES.settings)).rejects.toThrow(SyntaxError);
     });
 
     it('reads an array as null', async () => {
