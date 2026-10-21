@@ -41,10 +41,12 @@ const showBellConfig = ref(false);
 const bellEnabled = ref(false);
 const isCustomDuration = ref(false);
 const completedMeditationDuration = ref(900);
+const completedAt = ref(Date.UTC(2026, 9, 17, 22, 30));
 
 const mockStartMeditation = vi.fn();
 const mockStopMeditation = vi.fn();
 const mockCleanup = vi.fn();
+const mockRestoreSession = vi.fn(() => Promise.resolve());
 const mockSelectPresetDuration = vi.fn();
 const mockEnableCustomDuration = vi.fn();
 const mockApplyCustomDuration = vi.fn();
@@ -64,6 +66,7 @@ vi.mock('@/renderer/composables/useMeditationSession', () => ({
         bellSound: ref('1'),
         showBellConfig,
         completedMeditationDuration,
+        completedAt,
         showNotes,
         meditationAnimationIdx: ref(0),
         selectPresetDuration: mockSelectPresetDuration,
@@ -74,6 +77,7 @@ vi.mock('@/renderer/composables/useMeditationSession', () => ({
         selectBellSoundFromDropdown: mockSelectBellSoundFromDropdown,
         startMeditation: mockStartMeditation,
         stopMeditation: mockStopMeditation,
+        restoreSession: mockRestoreSession,
         cleanup: mockCleanup,
         formatTime: (seconds: number) => `t:${seconds}`,
     }),
@@ -413,6 +417,12 @@ describe('Home', () => {
     });
 
     describe('session notes', () => {
+        it('picks up a session the app lost while it was in the background', async () => {
+            const wrapper = await mountWithVault();
+            expect(mockRestoreSession).toHaveBeenCalledOnce();
+            wrapper.unmount();
+        });
+
         it('appears only after a session finishes', async () => {
             const wrapper = await mountWithVault();
             expect(wrapper.find('.session-notes-stub').exists()).toBe(false);
@@ -432,7 +442,8 @@ describe('Home', () => {
             wrapper.findComponent(SessionNotes).vm.$emit('save', 'settled');
             await settle();
 
-            expect(mockCreateMeditation).toHaveBeenCalledWith(expect.any(String), 15, 'settled');
+            // Filed under when the session ended, which may be long before the notes are written
+            expect(mockCreateMeditation).toHaveBeenCalledWith('2026-10-17T22:30:00.000Z', 15, 'settled');
             expect(showNotes.value).toBe(false);
             wrapper.unmount();
         });

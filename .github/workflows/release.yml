@@ -132,14 +132,14 @@ jobs:
                       cd ZenGarden && npm ci
 
                       npm run build:mac                            # .dmg  → dist-electron/
-                      npm run build:mobile && cd android \
-                          && ./gradlew assembleDebug               # .apk  → app/build/outputs/apk/debug/
+                      npm run build:android                        # .apk  → dist-android/
                       ```
 
-                      The Android build needs Android Studio for its JDK and SDK, and the resulting APK is
-                      unsigned — your device will ask you to allow installing from an unknown source. Both
-                      are untested by the maintainer; bug reports from self-built platforms are welcome but
-                      are fixed on a best-effort basis. See the README for the longer version.
+                      The Android build needs JDK 21 and the Android SDK (Android Studio is not required),
+                      and the resulting APK is signed only with your machine's debug key — your device will
+                      ask you to allow installing from an unknown source. Both are untested by the
+                      maintainer; bug reports from self-built platforms are welcome but are fixed on a
+                      best-effort basis. See the README for the longer version.
 
     # ── Installers ────────────────────────────────────────
     # Linux is the only platform this project distributes binaries for. The macOS and
@@ -149,7 +149,7 @@ jobs:
     # was a worse experience than no download; without a signing key the only Android
     # option is an unsigned debug APK, which installs only once the user has allowed
     # unknown sources. Both build targets are still in the repo — `npm run build:mac`,
-    # and `npm run build:mobile` then `./gradlew assembleDebug` — so anyone can build
+    # and `npm run build:android` — so anyone can build
     # their own. They are just not something CI publishes. The release body above tells
     # readers exactly that, so a missing download reads as a decision, not an outage.
     build:

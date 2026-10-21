@@ -26,7 +26,10 @@ export const VAULT_DIR = 'ZenGarden';
 
 const STORAGE_DIR = Directory.Documents;
 
-/** Every entry the collection file holds, unchecked: what a rewrite has to put back. */
+/**
+ * Every entry the collection file holds, unchecked: what a rewrite has to put back.
+ * Throws when the file exists but is unreadable — see readJson.
+ */
 export async function readCollection(filename: string): Promise<unknown[]> {
     const parsed = await readJson(filename);
     const entries: unknown[] = Array.isArray(parsed) ? parsed : [];
@@ -66,19 +69,37 @@ export async function initializeStorage(): Promise<void> {
     }
 }
 
+/**
+ * The parsed file, or null when it does not exist yet. A file that exists but cannot be read
+ * or parsed throws instead: every write here is read-modify-write, so reading it as empty
+ * would have the next save replace the whole collection with a single entry.
+ */
 async function readJson(filename: string): Promise<unknown> {
+    let data: unknown;
     try {
-        const result = await Filesystem.readFile({
+        ({ data } = await Filesystem.readFile({
             path: `${VAULT_DIR}/${filename}`,
             directory: STORAGE_DIR,
             encoding: Encoding.UTF8,
-        });
-        if (typeof result.data !== 'string') return null;
-        return JSON.parse(result.data);
-    } catch {
-        /* absent or unreadable — the caller treats both as "nothing stored yet" */
-        return null;
+        }));
+    } catch (error) {
+        if (isMissingFile(error)) return null;
+        throw error;
     }
+    if (typeof data !== 'string') throw new Error(`${filename} did not read back as text`);
+    return JSON.parse(data);
+}
+
+/**
+ * True only when `error` says the file is not there. Anything else — a permission refusal,
+ * an I/O failure — leaves a file that may hold the journal, and must not read as empty.
+ */
+function isMissingFile(error: unknown): boolean {
+    if (!(error instanceof Error)) return false;
+    // Android and iOS share the OS-PLUG-FILE-XXXX scheme; 0008 is "does not exist".
+    if ('code' in error) return error.code === 'OS-PLUG-FILE-0008';
+    // The web implementation throws an uncoded Error, so its exact message is all there is.
+    return error.message === 'File does not exist.';
 }
 
 async function writeJson(filename: string, data: unknown): Promise<void> {

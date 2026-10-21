@@ -4,4 +4,9 @@
     <string name="title_activity_main">ZenGarden</string>
     <string name="package_name">com.zengarden.app</string>
     <string name="custom_url_scheme">com.zengarden.app</string>
+    <string name="meditation_channel_name">Meditation session</string>
+    <string name="meditation_notification_title">Meditating</string>
+    <string name="meditation_end_channel_name">Session complete</string>
+    <string name="meditation_end_title">Session complete</string>
+    <string name="meditation_end_text">How was your meditation?</string>
 </resources>
