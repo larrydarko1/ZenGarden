@@ -86,7 +86,7 @@ describe('readCollection', () => {
 
     it('throws on non-string data', async () => {
         mockReadFile.mockResolvedValue({ data: null });
-        await expect(readCollection(DB_FILES.meditations)).rejects.toThrow(SyntaxError);
+        await expect(readCollection(DB_FILES.meditations)).rejects.toThrow('did not read back as text');
     });
 
     it('throws when the file exists but cannot be read', async () => {
