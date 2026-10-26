@@ -362,7 +362,7 @@ src/
     │   ├── platform.ts          → Runtime platform detection
     │   └── logger.ts            → Renderer-side logging
     └── locales/                 → 8 language bundles (en, es, it, fr, de, pt, zh, ja)
-tests/                           → Mirrors src/ — 36 test files, 454 tests
+tests/                           → Mirrors src/ — 39 test files, 491 tests
 ```
 
 ## Architecture
