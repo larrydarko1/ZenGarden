@@ -29,6 +29,7 @@
         "vite.config.ts",
         "capacitor.config.ts",
         "vitest.config.ts",
+        "larry.config.ts",
         "vitest.setup.ts",
         "src/main/**/*.ts",
         "src/preload/**/*.ts"
