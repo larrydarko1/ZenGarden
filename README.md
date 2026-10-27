@@ -201,30 +201,30 @@ npm run format
 
 Tests live in the `tests/` directory and mirror the `src/` structure.
 
-Beyond the standard lint/format/test steps, the repo enforces its own conventions through a set of
-check scripts under [scripts/check/](scripts/check/), each a thin wrapper over a gate from
-[@larrydarko/lint-config](https://www.npmjs.com/package/@larrydarko/lint-config) that holds only this
-repo's answers. `npm run ci:check` runs the whole gate locally —
+Beyond the standard lint/format/test steps, the repo enforces its own conventions through the gates
+of [@larrydarko/lint-config](https://www.npmjs.com/package/@larrydarko/lint-config).
+[larry.config.ts](larry.config.ts) holds only this repo's answers; `npm run check` runs every gate and
+`npx larry check i18n` runs the ones named. `npm run ci:check` runs the whole gate locally —
 the same list, in the same order, that [CI](.github/workflows/ci.yml) runs on every push and pull request:
 
-| Script            | Enforces                                                                        |
-| ----------------- | ------------------------------------------------------------------------------- |
-| `audit:check`     | No high-severity vulnerabilities in production dependencies                     |
-| `pkg:check`       | `package.json` field order, metadata, and script conventions                    |
-| `pipeline:check`  | The CI workflow and `ci:check` do not drift apart                               |
-| `code:check`      | General code-style rules not covered by ESLint                                  |
-| `declorder:check` | Declaration order within modules                                                |
-| `html:check`      | Template/HTML standards                                                         |
-| `scss:check`      | SCSS structure, token usage, and nesting depth                                  |
-| `refactor:check`  | No deferral markers (`TODO`, `FIXME`, …) left in code; they belong in `todo.md` |
-| `ipc:check`       | Every IPC channel is declared, typed, and validated on both ends                |
-| `security:check`  | Electron process model, navigation containment, permission handlers, HTML sinks |
-| `error:check`     | Error-handling conventions                                                      |
-| `dup:check`       | Copy-paste duplication ([jscpd](https://github.com/kucherenko/jscpd))           |
-| `dead:check`      | Unused files, exports, and dependencies ([knip](https://knip.dev))              |
-| `i18n:check`      | Every user-facing string is translated across all 8 locales                     |
-| `tsconfig:check`  | Compiler flags stay at the standard; no Node types in the renderer              |
-| `test:check`      | Test-suite structure and coverage conventions                                   |
+| Gate                      | Enforces                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------- |
+| `audit`                   | No high-severity vulnerabilities in production dependencies                     |
+| `package-json`            | `package.json` field order, metadata, and script conventions                    |
+| `pipeline`                | The CI workflow and `ci:check` do not drift apart                               |
+| `code-style`              | General code-style rules not covered by ESLint                                  |
+| `declaration-order`       | Declaration order within modules                                                |
+| `html-standards`          | Template/HTML standards                                                         |
+| `scss-standards`          | SCSS structure, token usage, and nesting depth                                  |
+| `refactoring`             | No deferral markers (`TODO`, `FIXME`, …) left in code; they belong in `todo.md` |
+| `ipc-standards`           | Every IPC channel is declared, typed, and validated on both ends                |
+| `electron-security`       | Electron process model, navigation containment, permission handlers, HTML sinks |
+| `error-handling/electron` | Error-handling conventions                                                      |
+| `duplication`             | Copy-paste duplication ([jscpd](https://github.com/kucherenko/jscpd))           |
+| `dead-code`               | Unused files, exports, and dependencies ([knip](https://knip.dev))              |
+| `i18n`                    | Every user-facing string is translated across all 8 locales                     |
+| `tsconfigs`               | Compiler flags stay at the standard; no Node types in the renderer              |
+| `testing`                 | Test-suite structure and coverage conventions                                   |
 
 ### Building Desktop Apps
 
@@ -362,8 +362,7 @@ src/
     │   ├── platform.ts          → Runtime platform detection
     │   └── logger.ts            → Renderer-side logging
     └── locales/                 → 8 language bundles (en, es, it, fr, de, pt, zh, ja)
-scripts/check/                   → Repo convention checks run by `npm run ci:check` (wrappers over the shared gates)
-tests/                           → Mirrors src/ — 36 test files, 454 tests
+tests/                           → Mirrors src/ — 39 test files, 491 tests
 ```
 
 ## Architecture
