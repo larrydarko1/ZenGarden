@@ -295,6 +295,10 @@ After building:
 3. Follow installation prompts
 4. Launch "ZenGarden" from your applications menu
 
+## Releases
+
+ZenGarden gets a feature release four times a year, on the second Tuesday of March, June, September and December. A bug that loses data, opens a security hole, crashes ZenGarden, stops it opening or saving, or breaks a common task with no workaround is fixed within 7 days of being confirmed, in a release of its own. What the next release contains is listed under `[Unreleased]` in [CHANGELOG.md](CHANGELOG.md).
+
 ## Distribution
 
 To share the app with others:
