@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The `cap:open:android` and `cap:run:android` scripts, which depended on Android Studio.
 
+### Fixed
+
+- Two release runs can no longer overlap, so a release's installers always come from the commit its tag points at.
+
 ### Security
 
 - Updated dependencies.
