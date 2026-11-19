@@ -23,9 +23,7 @@ describe('ZenWindAnimation', () => {
         const wrapper = mountWithI18n(ZenWindAnimation);
 
         expect(wrapper.find('linearGradient#zenWindGradient').exists()).toBe(true);
-        for (const gust of wrapper.findAll('rect')) {
-            expect(gust.attributes('fill')).toBe('url(#zenWindGradient)');
-        }
+        for (const gust of wrapper.findAll('rect')) expect(gust.attributes('fill')).toBe('url(#zenWindGradient)');
         wrapper.unmount();
     });
 

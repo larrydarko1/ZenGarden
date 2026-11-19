@@ -127,9 +127,7 @@ function pickPhrase(): string {
 
 function setRandomPhrase(): void {
     let next = pickPhrase();
-    while (next === currentPhrase.value && phrases.value.length > 1) {
-        next = pickPhrase();
-    }
+    while (next === currentPhrase.value && phrases.value.length > 1) next = pickPhrase();
     currentPhrase.value = next;
 }
 

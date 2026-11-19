@@ -178,11 +178,8 @@ export function useMeditationSession(customInput: CustomInputRef): MeditationSes
 
     function tick(): void {
         meditationSeconds.value = remainingSeconds();
-        if (meditationSeconds.value > 0) {
-            checkBell();
-        } else {
-            finishMeditation();
-        }
+        if (meditationSeconds.value > 0) checkBell();
+        else finishMeditation();
     }
 
     function onVisibilityChange(): void {

@@ -26,9 +26,7 @@ describe('ZenWavesAnimation', () => {
 
         const gradientId = wrapper.find('linearGradient').attributes('id') ?? '';
         expect(gradientId).not.toBe('');
-        for (const wave of wrapper.findAll('path.wave')) {
-            expect(wave.attributes('fill')).toBe(`url(#${gradientId})`);
-        }
+        for (const wave of wrapper.findAll('path.wave')) expect(wave.attributes('fill')).toBe(`url(#${gradientId})`);
         wrapper.unmount();
     });
 

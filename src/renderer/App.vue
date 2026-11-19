@@ -29,15 +29,11 @@ function isLanguage(value: string): value is Language {
 }
 
 function applyVaultTheme(theme: string): void {
-    if (isThemeId(theme)) {
-        currentTheme.value = theme;
-    }
+    if (isThemeId(theme)) currentTheme.value = theme;
 }
 
 function applyVaultLanguage(language: string): void {
-    if (isLanguage(language)) {
-        locale.value = language;
-    }
+    if (isLanguage(language)) locale.value = language;
 }
 
 async function setTheme(theme: string): Promise<void> {

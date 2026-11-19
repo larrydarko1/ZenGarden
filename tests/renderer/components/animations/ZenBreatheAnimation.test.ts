@@ -23,9 +23,7 @@ describe('ZenBreatheAnimation', () => {
         const wrapper = mountWithI18n(ZenBreatheAnimation);
 
         expect(wrapper.find('radialGradient#petalGradient').exists()).toBe(true);
-        for (const petal of wrapper.findAll('ellipse')) {
-            expect(petal.attributes('fill')).toBe('url(#petalGradient)');
-        }
+        for (const petal of wrapper.findAll('ellipse')) expect(petal.attributes('fill')).toBe('url(#petalGradient)');
         wrapper.unmount();
     });
 

@@ -69,9 +69,7 @@ function getDaysInMonth(year: number, month: number): CalendarDay[] {
             completedMap[getLocalDateKey(date)] = true;
         }
     }
-    for (let i = 0; i < offset; i++) {
-        days.push({ date: null });
-    }
+    for (let i = 0; i < offset; i++) days.push({ date: null });
     for (let dayNumber = 1; dayNumber <= lastDay.getDate(); dayNumber++) {
         const date = new Date(year, month, dayNumber);
         days.push({
