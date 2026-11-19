@@ -9,7 +9,7 @@ import { defineConfig } from '@larrydarko/lint-config/config';
  * regrow to the old number.
  */
 const LENGTH_BASELINE: Record<string, number> = {
-    'src/renderer/components/Home.vue': 519,
+    'src/renderer/components/Home.vue': 486,
 };
 
 export default defineConfig({
