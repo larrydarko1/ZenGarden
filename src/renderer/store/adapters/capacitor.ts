@@ -254,11 +254,8 @@ async function saveByDate<T extends { date: string }>(filename: string, doc: T):
     const index = entries.findIndex((entry) => DatedEntrySchema.safeParse(entry).data?.date === doc.date);
     const saved = { _id: DatedEntrySchema.safeParse(entries[index]).data?._id ?? generateObjectId(), ...doc };
 
-    if (index >= 0) {
-        entries[index] = saved;
-    } else {
-        entries.push(saved);
-    }
+    if (index >= 0) entries[index] = saved;
+    else entries.push(saved);
     await writeCollection(filename, entries);
     return saved;
 }
@@ -275,9 +272,7 @@ function applyDateRange<T extends { date: string }>(logs: T[], query?: DateRange
         const endDate = query.endDate;
         filtered = filtered.filter((log) => log.date <= endDate);
     }
-    if (query?.limit !== undefined && query.limit > 0) {
-        filtered = filtered.slice(-query.limit);
-    }
+    if (query?.limit !== undefined && query.limit > 0) filtered = filtered.slice(-query.limit);
 
     return filtered;
 }

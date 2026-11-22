@@ -179,11 +179,8 @@ function saveByDate<T extends { date: string }>(collection: CollectionName, doc:
     const index = entries.findIndex((entry) => DatedEntrySchema.safeParse(entry).data?.date === doc.date);
     const saved = { _id: DatedEntrySchema.safeParse(entries[index]).data?._id ?? generateId(), ...doc };
 
-    if (index >= 0) {
-        entries[index] = saved;
-    } else {
-        entries.push(saved);
-    }
+    if (index >= 0) entries[index] = saved;
+    else entries.push(saved);
     writeCollection(collection, entries);
     return saved;
 }

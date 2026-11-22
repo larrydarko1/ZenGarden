@@ -9,7 +9,7 @@ import { defineConfig } from '@larrydarko/lint-config/config';
  * regrow to the old number.
  */
 const LENGTH_BASELINE: Record<string, number> = {
-    'src/renderer/components/Home.vue': 519,
+    'src/renderer/components/Home.vue': 486,
 };
 
 export default defineConfig({
@@ -123,7 +123,7 @@ export default defineConfig({
         'pipeline': {},
         // Markers match uppercase only, which matters here: the gate reads the locale files, and the
         // Spanish and Portuguese word for "all" is the first marker in lowercase.
-        'refactoring': {},
+        'refactoring': { claudeCode: true },
         // `index.scss` is the entry, imported once by main.ts. `_variables.scss` is injected into every SFC
         // style block, each its own Sass compilation, so anything reachable from it that emits ships once per
         // component; the mixins live there because a mixin emits nothing until included. Two Vite configs,

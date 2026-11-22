@@ -12,9 +12,7 @@ let instance: IStorageAdapter | null = null;
 
 /** Returns the adapter for the current platform, instantiating and caching it on first call. */
 export async function getAdapter(): Promise<IStorageAdapter> {
-    if (instance !== null) {
-        return instance;
-    }
+    if (instance !== null) return instance;
 
     // Try Electron first (desktop app)
     try {

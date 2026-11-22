@@ -63,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Analytics tallies are keyed by a `Map` instead of an object literal.
 
-## 1.3.0 - 2026-08-26
+## [1.3.0] - 2026-08-26
 
 Never published as a release; its changes shipped in 2.0.0.
 
@@ -107,9 +107,10 @@ Never published as a release; its changes shipped in 2.0.0.
 
 - Updated dependencies.
 
-## 1.1.0 – 1.1.8 - 2026-02-04 to 2026-02-24
+## [1.1.8] - 2026-02-24
 
-Before 1.1.9, the version was bumped on almost every commit, so earlier versions are grouped by minor version.
+1.1.0 to 1.1.8, released from 2026-02-04 to 2026-02-24. Before 1.1.9, the version was bumped on almost every
+commit, so these releases are written as one, and each line names the version it came in.
 
 ### Added
 
@@ -131,7 +132,9 @@ Before 1.1.9, the version was bumped on almost every commit, so earlier versions
 
 - Meditations with blank notes were not saved (1.1.3).
 
-## 1.0.0 – 1.0.9 - 2026-01-22 to 2026-01-29
+## [1.0.9] - 2026-01-29
+
+1.0.0 to 1.0.9, released from 2026-01-22 to 2026-01-29, written as one in the same way.
 
 ### Added
 
@@ -163,3 +166,4 @@ Before 1.1.9, the version was bumped on almost every commit, so earlier versions
 [2.0.0]: https://github.com/larrydarko1/zengarden/compare/v1.2.0...v2.0.0
 [1.2.0]: https://github.com/larrydarko1/zengarden/compare/v1.1.9...v1.2.0
 [1.1.9]: https://github.com/larrydarko1/zengarden/compare/v1.1.8...v1.1.9
+[1.1.8]: https://github.com/larrydarko1/zengarden/releases/tag/v1.1.8

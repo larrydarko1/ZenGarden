@@ -74,9 +74,7 @@ function changeDate(delta: number): void {
     newDate.setHours(0, 0, 0, 0);
     const todayDate = new Date();
     todayDate.setHours(0, 0, 0, 0);
-    if (newDate.getTime() <= todayDate.getTime()) {
-        selectedDate.value = newDate;
-    }
+    if (newDate.getTime() <= todayDate.getTime()) selectedDate.value = newDate;
 }
 
 // Orchestration
