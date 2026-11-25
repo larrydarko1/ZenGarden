@@ -95,6 +95,15 @@
         "linux"
     ],
     "private": true,
+    "browserslist": [
+        "chrome >= 136",
+        "edge >= 136",
+        "firefox >= 134",
+        "safari >= 26",
+        "ios_saf >= 26",
+        "and_chr >= 136",
+        "and_ff >= 134"
+    ],
     "build": {
         "appId": "com.zengarden.app",
         "productName": "ZenGarden",
