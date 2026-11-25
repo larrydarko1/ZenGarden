@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Android builds no longer need Android Studio: `npm run build:android` builds the debug APK into
   `dist-android/` with a JDK and the Android SDK command-line tools.
 - Desktop builds now run on Electron 45, and the toolchain moved to Vite 8, Vitest 5 and electron-vite 6.
+- The Android app is built for Android System WebView 136 or newer, the first that runs all of ES2025.
 
 ### Removed
 

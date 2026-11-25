@@ -65,7 +65,7 @@
         "zod": "^4.6.7"
     },
     "devDependencies": {
-        "@larrydarko/lint-config": "^0.2.0",
+        "@larrydarko/lint-config": "^0.3.0",
         "@types/node": "^24.19.2",
         "@vitejs/plugin-vue": "^6.0.10",
         "@vitest/coverage-v8": "^5.0.5",
@@ -95,6 +95,15 @@
         "linux"
     ],
     "private": true,
+    "browserslist": [
+        "chrome >= 136",
+        "edge >= 136",
+        "firefox >= 134",
+        "safari >= 26",
+        "ios_saf >= 26",
+        "and_chr >= 136",
+        "and_ff >= 134"
+    ],
     "build": {
         "appId": "com.zengarden.app",
         "productName": "ZenGarden",

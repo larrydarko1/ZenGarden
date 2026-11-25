@@ -36,6 +36,7 @@ export default defineConfig({
     root: resolve(__dirname, 'src/renderer'),
     publicDir: resolve(__dirname, 'public'),
     build: {
+        target: 'es2025', // The ES year; the browsers are in package.json's browserslist
         // Capacitor reads from the webDir defined in capacitor.config.ts (dist/)
         outDir: resolve(__dirname, 'dist'),
         emptyOutDir: true,
